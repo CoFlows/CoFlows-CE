@@ -1524,12 +1524,15 @@ if not '" + path + "' in sys.path:
 
                 let compiled_net_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".cs") || name.EndsWith(".fs") || name.EndsWith(".vb")) && x.ToLower().Contains("namespace")) //Compiled
                 let scripted_net_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".cs") || name.EndsWith(".fs") || name.EndsWith(".vb")) && (x.ToLower().Contains("namespace") |> not)) //Script
-                
-                let compiled_java_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(jvFlag) || name.EndsWith(".java")) && x.ToLower().Contains("package")) //Compiled
-                let scripted_java_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(jvFlag) || name.EndsWith(".java")) && (x.ToLower().Contains("package") |> not)) //Script
 
-                let compiled_scala_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(scFlag) || name.EndsWith(".scala")) && x.ToLower().Contains("package")) //Compiled
-                let scripted_scala_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(scFlag) || name.EndsWith(".scala")) && (x.ToLower().Contains("package") |> not)) //Script
+                let compiled_jvm_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".java") || name.EndsWith(".scala")) && x.ToLower().Contains("package")) //Compiled
+                let scripted_jvm_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".java") || name.EndsWith(".scala")) && (x.ToLower().Contains("package") |> not)) //Script
+
+                // let compiled_java_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(jvFlag) || name.EndsWith(".java")) && x.ToLower().Contains("package")) //Compiled
+                // let scripted_java_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(jvFlag) || name.EndsWith(".java")) && (x.ToLower().Contains("package") |> not)) //Script
+
+                // let compiled_scala_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(scFlag) || name.EndsWith(".scala")) && x.ToLower().Contains("package")) //Compiled
+                // let scripted_scala_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(scFlag) || name.EndsWith(".scala")) && (x.ToLower().Contains("package") |> not)) //Script
 
                 let python_code = codes |> List.filter(fun (name, x) -> x.StartsWith("import clr") || x.StartsWith(pyFlag) || name.EndsWith(".py")) //is Python
                 let js_code = codes |> List.filter(fun (name, x) -> x.StartsWith(jsFlag) || name.EndsWith(".js")) //is Javascript
@@ -1571,16 +1574,20 @@ if not '" + path + "' in sys.path:
                         
                     )
 
-                if compiled_java_code |> List.isEmpty |> not then 
+                if compiled_jvm_code |> List.isEmpty |> not then 
                     let orderedProject = 
                         let mutable counter = 0
                         let mutable lastFlag = ""
-                        compiled_java_code
+                        compiled_jvm_code
                         |> List.mapi(fun i (name, code) -> 
-                            let jPath = if "/" |> name.Contains then name.Substring(0, name.LastIndexOf("/")) else ""
-                            let flag = jPath
+                            let flag =
+                                match code with
+                                | x when x.StartsWith(jvFlag) || name.EndsWith(".java") -> jvFlag
+                                | x when x.StartsWith(scFlag) || name.EndsWith(".scala") -> scFlag
+                                | _ -> jvFlag
+
                             if flag <> lastFlag then counter <- counter + 1
-                            lastFlag <- jPath
+                            lastFlag <- flag
                             (name, code, counter)
                             )
                         |> List.groupBy(fun (name, code, counter) -> counter)
@@ -1588,37 +1595,17 @@ if not '" + path + "' in sys.path:
                         
 
                     orderedProject
-                    |> List.iter(fun (g, compiled_java_code) ->
+                    |> List.iter(fun (g, compiled_jvm_code) ->
 
-                        let javaFiles = compiled_java_code |> List.filter(fun (name, x) -> x.StartsWith(jvFlag) || name.EndsWith(".java"))
-                        if javaFiles |> List.isEmpty |> not then 
-                            try javaFiles |> compileJava with | _ -> 0 |> ignore
+                        let jvFiles = compiled_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(jvFlag) || name.EndsWith(".java"))
+                        if jvFiles |> List.isEmpty |> not then 
+                            try jvFiles |> compileJava with | _ -> 0 |> ignore
+
+                        let scFiles = compiled_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(scFlag) || name.EndsWith(".scala"))
+                        if scFiles |> List.isEmpty |> not then 
+                            try scFiles |> compileScala with | _ -> 0 |> ignore
                     )
 
-                if compiled_scala_code |> List.isEmpty |> not then 
-                    let orderedProject = 
-                        let mutable counter = 0
-                        let mutable lastFlag = ""
-                        compiled_scala_code
-                        |> List.mapi(fun i (name, code) -> 
-                            let jPath = if "/" |> name.Contains then name.Substring(0, name.LastIndexOf("/")) else ""
-                            let flag = jPath
-                            if flag <> lastFlag then counter <- counter + 1
-                            lastFlag <- jPath
-                            (name, code, counter)
-                            )
-                        |> List.groupBy(fun (name, code, counter) -> counter)
-                        |> List.map(fun (g, files) -> (g, files |> List.map(fun (name, code, counter) -> (name, code))))
-                        
-
-                    orderedProject
-                    |> List.iter(fun (g, compiled_java_code) ->
-
-                        let scalaFiles = compiled_scala_code |> List.filter(fun (name, x) -> x.StartsWith(scFlag) || name.EndsWith(".scala"))
-                        if scalaFiles |> List.isEmpty |> not then 
-                            try scalaFiles |> compileScala with | _ -> 0 |> ignore
-                    )
-                
                 if scripted_net_code |> List.isEmpty |> not then 
                     let csFiles = scripted_net_code |> List.filter(fun (name, x) -> x.StartsWith(csFlag) || name.EndsWith(".cs"))
                     if csFiles |> List.isEmpty |> not then csFiles |> compileCS
@@ -1629,11 +1616,12 @@ if not '" + path + "' in sys.path:
                     let fsFiles = scripted_net_code |> List.filter(fun (name, x) -> x.StartsWith(fsFlag) || name.EndsWith(".fs"))
                     if fsFiles |> List.isEmpty |> not then fsFiles |> compileFS
 
-                if scripted_java_code |> List.isEmpty |> not then 
-                    if scripted_java_code |> List.isEmpty |> not then scripted_java_code |> compileJava
+                if scripted_jvm_code |> List.isEmpty |> not then 
+                    let jvFiles = scripted_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(jvFlag) || name.EndsWith(".java"))
+                    if jvFiles |> List.isEmpty |> not then jvFiles |> compileJava
 
-                if scripted_scala_code |> List.isEmpty |> not then 
-                    if scripted_scala_code |> List.isEmpty |> not then scripted_scala_code |> compileScala
+                    let scFiles = scripted_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(scFlag) || name.EndsWith(".scala"))
+                    if scFiles |> List.isEmpty |> not then scFiles |> compileScala
 
                 if python_code |> List.isEmpty |> not then python_code |> runPython 
 

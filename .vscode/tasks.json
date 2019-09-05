@@ -3,64 +3,17 @@
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
-        {
-            "label": "pack core",            
-            "command": "dotnet pack QuantApp.Core/QuantApp.Core.csproj",
-            "type": "shell",
-            "group": "build",
-            //"dependsOn": "clean console",
-            "presentation": {
-                "reveal": "silent"
-            },
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "push core",            
-            "command": "dotnet nuget push QuantApp.Core/bin/Debug/QuantApp.Core.1.0.3-alpha.nupkg -k oy2m66w72wgaer663vkag3253kg7hx3u5llyg5ipdnue3a -s https://api.nuget.org/v3/index.json",
-            "type": "shell",
-            "group": "build",
-            //"dependsOn": "clean console",
-            "presentation": {
-                "reveal": "silent"
-            },
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "clean console",
-            "command": "dotnet clean Console/Console.fsproj",
-            "type": "shell",
-            "group": "build",
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build console",            
-            "command": "dotnet build /p:OS=win Console/Console.fsproj",
-            "type": "shell",
-            "group": "build",
-            //"dependsOn": "clean console",
-            "presentation": {
-                "reveal": "silent"
-            },
-            "problemMatcher": "$msCompile"
-        },
+        
         {
             "label": "clean server",
-            "command": "dotnet clean ./QuantApp.Platform.sln",
+            "command": "dotnet clean ./CoFlows.CE.sln",
             "type": "shell",
             "group": "build",
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build worker",            
-            "command": "dotnet build /p:OS=win ./QuantApp.Platform.sln",
-            "type": "shell",
-            "group": "build",
-            //"dependsOn": "clean server",
             "problemMatcher": "$msCompile"
         },
         {
             "label": "build server",            
-            "command": "dotnet build /p:OS=win ./QuantApp.Platform.sln",
+            "command": "dotnet build ./CoFlows.CE.sln",
             "type": "shell",
             "group": "build",
             //"dependsOn": "clean server",
@@ -68,51 +21,11 @@
         },
         {
             "label": "publish server",            
-            "command": "dotnet publish -c Release -f netcoreapp2.2 -o obj/Core/publish /p:OS=win ./QuantApp.Platform.sln",
+            "command": "dotnet publish -c Release -f netcoreapp2.2 -o obj/Core/publish ./CoFlows.CE.sln",
             "type": "shell",
             "group": "build",
             //"dependsOn": "clean server",
             "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build docker",            
-            "command": "dotnet build -f netcoreapp2.2 QuantApp.Platform.Docker.sln",
-            "type": "shell",
-            "group": "build",
-            "dependsOn": "clean server",
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build freepoint - trading",            
-            "command": "dotnet msbuild /p:OS=win ./Freepoint.Trading/Freepoint.Trading.fsproj",
-            "type": "shell",
-            "group": "build",
-            //"dependsOn": "clean server",
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "publish freepoint - trading",            
-            "command": "dotnet publish /p:OS=win -c Release -f net461 -o obj/Core/publish  ./Freepoint.Trading/Freepoint.Trading.fsproj",
-            "type": "shell",
-            "group": "build",
-            //"dependsOn": "clean server",
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build freepoint - analytics",            
-            "command": "dotnet msbuild /p:OS=win ./Freepoint.Analytics/Freepoint.Analytics.fsproj",
-            "type": "shell",
-            "group": "build",
-            //"dependsOn": "clean server",
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "publish freepoint - analytics",            
-            "command": "dotnet publish /p:OS=win -c Release -f netcoreapp2.2 -o obj/Core/publish ./Freepoint.Analytics/Freepoint.Analytics.fsproj",
-            "type": "shell",
-            "group": "build",
-            //"dependsOn": "clean server",
-            "problemMatcher": "$msCompile"
-        },
+        }
     ]
 }

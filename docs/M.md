@@ -1,11 +1,9 @@
 M Set
 ===
 
-The **M** set is a NoSQL database in the **QuantApp.Kernel** environment. **M** can handle any object serialisable into JSON and ensures the objects in the set are replicated across all it's subscribers.
+The **M** set is a persistent and distributed list in the **QuantApp.Kernel** environment. **M** can handle any object serialisable into JSON and ensures the objects in the set are replicated across all it's subscribers.
 
-Data can be queried through LINQ like predicats. A few examples follow:
-
-NOTE: JAVA ENTRY IN BASE
+Data can be queried through LINQ like predicates. A few examples follow:
 
 ## C# Example
     using QuantApp.Kernel;

@@ -12,53 +12,6 @@
             "cwd": "${workspaceRoot}/QuantApp.Server/",
             "stopAtEntry": false,
             "console": "internalConsole"
-        },
-        {
-            "name": ".NET Core Launch (worker)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build worker",
-            "program": "${workspaceRoot}/QuantApp.Worker/bin/Debug/netcoreapp2.2/QuantApp.Worker.dll",
-            "args": ["work"],
-            "cwd": "${workspaceRoot}/QuantApp.Worker/",
-            "stopAtEntry": false,
-            "console": "internalConsole"
-        },
-        {
-            
-            "name": ".NET Launch (console)",
-            "type": "clr",
-            "request": "launch",
-            "preLaunchTask": "build console",
-            "program": "${workspaceRoot}/Console/bin/Debug/net461/win7-x64/Console.exe",
-            "args": [],
-            "cwd": "${workspaceRoot}",
-            "stopAtEntry": false,
-            "console": "internalConsole"
-        },
-        {
-            
-            "name": ".NET Launch (Freepoint - Trading)",
-            "type": "clr",
-            "request": "launch",
-            "preLaunchTask": "build server",
-            "program": "${workspaceRoot}/Freepoint.Trading/bin/Debug/net461/win7-x64/Freepoint.Trading.exe",
-            "args": [],
-            "cwd": "${workspaceRoot}",
-            "stopAtEntry": false,
-            "console": "internalConsole"
-        },
-        {
-            
-            "name": ".NET Launch (Freepoint - Analytics)",
-            "type": "clr",
-            "request": "launch",
-            "preLaunchTask": "build server",
-            "program": "${workspaceRoot}/Freepoint.Analytics/bin/Debug/net461/win7-x64/Freepoint.Analytics.exe",
-            "args": [],
-            "cwd": "${workspaceRoot}",
-            "stopAtEntry": false,
-            "console": "internalConsole"
         }
     ],
     "compounds": []

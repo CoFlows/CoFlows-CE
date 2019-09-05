@@ -2,7 +2,7 @@ Java Agent
 ===
 This is a generic example of Java agent following the generic structure within **CoFlows**.
 
-Note: The Java <-> CoreCLR interop is achieved through **QuantApp.Kernel/JVM**.
+Note: The Java <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](https://github.com/QuantApp/CoFlows-CE/tree/master/QuantApp.Kernel/JVM "QAJVM").
 
     import app.quant.clr.*;
 

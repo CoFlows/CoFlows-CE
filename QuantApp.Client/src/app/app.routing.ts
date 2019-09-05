@@ -18,15 +18,6 @@ export const AppRoutes: Routes = [{
         path: 'workspaces',
         loadChildren: './workspaces/workspaces.module#WorkspacesModule'
       }
-      // ,
-      // {
-      //   path: 'trader',
-      //   loadChildren: './trader/trader.module#TraderModule'
-      // }, 
-      // {
-      //   path: 'development',
-      //   loadChildren: './development/development.module#DevelopmentModule'
-      // }
 ]
 }, {
   path: '',
@@ -38,10 +29,6 @@ export const AppRoutes: Routes = [{
     path: 'error',
     loadChildren: './error/error.module#ErrorModule'
   }
-  // , {
-  //   path: 'landing',
-  //   loadChildren: './landing/landing.module#LandingModule'
-  // }
 ]
 }, {
   path: '**',

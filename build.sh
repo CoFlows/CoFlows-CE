@@ -1,7 +1,7 @@
 cd QuantApp.Client
-# # npm install
-# # npm install -g @angular/cli
-# ng build --prod --aot
+npm install
+npm install -g @angular/cli
+ng build --prod --aot
 
 cd ../
 
@@ -14,4 +14,4 @@ cd QuantApp.Server
 
 docker build -t coflows/ce .
 docker tag coflows/ce quantapp/coflows:ce
-# docker push quantapp/coflows:ce
+docker push quantapp/coflows:ce

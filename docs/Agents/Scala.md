@@ -2,7 +2,7 @@ Scala Agent
 ===
 This is a generic example of Scala agent following the generic structure within **CoFlows**.
 
-Note: The Scala <-> CoreCLR interop is achieved through **QuantApp.Kernel/JVM**.
+Note: The Scala <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](https://github.com/QuantApp/CoFlows-CE/tree/master/QuantApp.Kernel/JVM "QAJVM").
 
     import scala.collection._
 

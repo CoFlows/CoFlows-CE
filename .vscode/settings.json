@@ -8,6 +8,4 @@
         "**/.settings": true,
         "**/.factorypath": true
     },
-    // "python.pythonPath": "C:\\Users\\arturo\\OneDrive\\Master\\QuantApp\\Core.Net\\QuantApp.Platform\\QuantApp.Core\\bin\\Debug\\net461\\python.exe"
-    // "python.pythonPath": "C:\\ProgramData\\Anaconda3\\python.exe"
 }
