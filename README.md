@@ -43,7 +43,7 @@ The link between the **JVM** and **CLR** is achieved through the [QuantApp.Kerne
 
 Javascript interpretation is achieved using the great [Jint](https://github.com/sebastienros/jint "Jint") library.
 
-For further details please read [Polyglot](Polyglot/General.md "Polyglot")
+For further details please read [Polyglot](docs/Polyglot/General.md "Polyglot")
 
 ## Setup  
 Install the docker cli tools for Linux containers. Pull the docker public quantapp/coflows:ce image.
