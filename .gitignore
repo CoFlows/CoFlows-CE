@@ -1,10 +1,12 @@
 .vs/
 .ionide/
 
+QuantApp.Kernel/.gitignore
 QuantApp.Kernel/.git/
 QuantApp.Kernel/bin/
 QuantApp.Kernel/obj/
 
+QuantApp.Engine/.gitignore
 QuantApp.Engine/.git/
 QuantApp.Engine/bin/
 QuantApp.Engine/obj/
