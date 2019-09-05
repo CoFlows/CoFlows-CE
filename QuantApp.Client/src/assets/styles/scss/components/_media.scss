@@ -1,0 +1,200 @@
+.media-grid,
+.media-tile {
+  list-style: none;
+  text-align: center;
+  figure {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    cursor: pointer;
+    background: $brand-dark;
+    text-align: left;
+    @if $enable-rounded {
+      border-radius: $border-radius;
+    } @else {
+      border-radius: 0;
+    }
+  }
+  figure img {
+    position: relative;
+    display: block;
+    max-width: 100%;
+    opacity: 0.8;
+  }
+}
+
+.media-grid {
+  text-align: center;
+  figure {
+    text-align: center;
+  }
+
+  figure figcaption {
+    color: #fff;
+    text-transform: uppercase;
+    backface-visibility: hidden;
+    padding: $spacer;
+  }
+
+  figure figcaption::before,
+  figure figcaption::after {
+    pointer-events: none;
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    border-style: solid;
+    border-color: $brand-dark;
+    content: '';
+    transition: transform $transition-duration;
+  }
+
+  figure figcaption::before {
+    right: 0;
+    bottom: 0;
+    border-width: 0 45px 40px 0;
+    transform: translate3d(45px,40px,0);
+  }
+
+  figure figcaption::after {
+    top: 0;
+    left: 0;
+    border-width: 15px 0 0 15px;
+    transform: translate3d(-15px,-15px,0);
+  }
+
+  figure figcaption,
+  figure figcaption > a {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  figure figcaption > a {
+    z-index: 1000;
+    text-indent: 200%;
+    white-space: nowrap;
+    font-size: 0;
+    opacity: 0;
+  }
+
+  figure .media-title {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 0.4em 10px;
+    width: 50%;
+    transition: transform $transition-duration;
+    transform: translate3d(100%,0,0);
+  }
+
+  figure .media-title,
+  figure p {
+    margin: 0;
+  }
+
+  figure p {
+    float: right;
+    clear: both;
+    text-align: left;
+    text-transform: none;
+    font-size: 1rem;
+  }
+
+  figure img,
+  figure p a {
+    transition: opacity $transition-duration, transform $transition-duration;
+  }
+
+  figure img {
+    opacity: 0.85;
+  }
+
+  figure p a {
+    display: block;
+    margin-bottom: $spacer;
+    color: #fff;
+    opacity: 0;
+    transform: translate3d(90px,0,0);
+  }
+
+  figure:hover figcaption::before,
+  figure:hover figcaption::after {
+    transform: translate3d(0,0,0);
+  }
+
+  figure:hover img {
+    opacity: 0.6;
+  }
+
+  figure:hover .media-title,
+  figure:hover p a {
+    transform: translate3d(0,0,0);
+  }
+
+  figure:hover p a {
+    opacity: 1;
+  }
+
+  figure:hover p a:first-child {
+    transition-delay: 0.025s;
+  }
+
+  figure:hover p a:nth-child(2) {
+    transition-delay: 0.05s;
+  }
+
+  figure:hover p a:nth-child(3) {
+    transition-delay: 0.075s;
+  }
+
+  figure:hover p a:nth-child(4) {
+    transition-delay: 0.1s;
+  }
+}
+
+.media-tile {
+  figcaption {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    color: #fff;
+    background: rgba(0,0,0,.38);
+    overflow: hidden;
+    padding: $spacer;
+    position: absolute;
+    left: 0;
+    right: 0;
+    .media-title,
+    .media-subtitle {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+  }
+  &.media-tile-footer figcaption {
+    bottom: 0;
+    @if $enable-rounded {
+      border-bottom-left-radius: $border-radius;
+      border-bottom-right-radius: $border-radius;
+    } @else {
+      border-radius: 0;
+    }
+  }
+  &.media-tile-header figcaption {
+    top: 0;
+    @if $enable-rounded {
+      border-top-left-radius: $border-radius;
+      border-top-right-radius: $border-radius;
+    } @else {
+      border-radius: 0;
+    }
+  }
+}

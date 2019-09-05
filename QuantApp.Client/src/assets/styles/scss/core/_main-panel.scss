@@ -1,0 +1,62 @@
+/* $main-panel
+ ------------------------------------------*/
+.ng-sidebar__content {
+  min-height: 100%;
+  overflow: hidden!important;
+  box-sizing: border-box;
+  display: flex!important;
+  flex-direction: column;
+  flex: 1;
+  .app-inner {
+    flex-direction: column;
+    display: flex;
+    -webkit-box-flex: 1;
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+  }
+  .main-content {
+    height: 100%;
+    box-sizing: border-box;
+    display: flex!important;
+    flex-direction: column;
+    flex: 1;
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overflow-y: overlay;
+    -webkit-overflow-scrolling: touch;
+    .ng-sidebar {
+      position: absolute!important;
+    }
+    > router-outlet + * {
+      position: relative;
+      box-sizing: border-box;
+      padding: $spacer;
+      margin: 0;
+      display: block;
+      flex: 1 0 auto;
+    }
+  }
+}
+@include media-breakpoint-up(lg) {
+  .app:not(.mode-slide) {
+    transform: none!important;
+  }
+  .mode-slide {
+    overflow: scroll!important;
+  }
+  .mode-slide > .ng-sidebar__content {
+    overflow: visible!important;
+  }
+  .mode-push .app-inner {
+    margin-left: $sidebar-width!important;
+  }
+  .mode-dock .app-inner {
+    margin-left: $sidebar-small-menu-width!important;
+  }
+  .mode-over .app-inner,
+  .app:not(.sidebar-opened) .app-inner {
+    margin-left: 0!important;
+  }
+}

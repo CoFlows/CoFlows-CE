@@ -1,0 +1,7 @@
+{
+    "argv": [
+     "/App/lab", "{connection_file}"
+    ],
+    "display_name": "CoFlows",
+    "language": "python"
+   }

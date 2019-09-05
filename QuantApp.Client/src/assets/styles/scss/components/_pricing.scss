@@ -1,0 +1,119 @@
+@import "../mixins/material-palette";
+@import "../variables";
+@import "../../../../../node_modules/bootstrap/scss/functions";
+@import "../../../../../node_modules/bootstrap/scss/variables";
+
+.pricing {
+  padding-top: $spacer;
+  padding-bottom: $spacer;
+  text-align: center;
+  .card {
+    border: 1px solid theme-colors("primary");
+    margin-left: -1px;
+  }
+  &.card-group .card + .card {
+    margin-left: -1px;
+    border-left: 1px solid theme-colors("primary");
+  }
+  .pricing-plan {
+    text-align: center;
+    overflow: hidden;
+    cursor: default;
+  }
+  .plan-price {
+    font-size: 2.5rem;
+    font-weight: 900;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .plan-price-symbol {
+    font-size: 1rem;
+    vertical-align: super;
+  }
+  .plan-price-period {
+    font-size: 0.8125rem;
+    display: inline-block;
+    padding: 0;
+    opacity: .7;
+  }
+  .plan-title {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    overflow: hidden;
+    margin-bottom: $spacer;
+    white-space: nowrap;
+    text-transform: uppercase;
+    text-overflow: ellipsis;
+  }
+  .plan-features {
+    line-height: 2.5;
+    margin: 0;
+    padding: $spacer;
+    list-style: none;
+    li {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.switch {
+  display: inline-block;
+  height: 24px;
+  line-height: 24px;
+  white-space: nowrap;
+  user-select: none;
+  .slide-toggle-bar {
+    display: inline-block;
+    margin-right: 8px;
+    margin-left: 0;
+    position: relative;
+    top: 5px;
+    width: 36px;
+    height: 14px;
+    border-radius: 8px;
+  }
+  input {
+    position: absolute;
+    left: -99999px;
+  }
+  input + span {
+    position: relative;
+    display: block;
+    width: 36px;
+    height: 14px;
+    border-radius: 8px;
+    border: none;
+    background-color: #B2B2B2;
+    background-color: rgba(0, 0, 0, 0.26);
+    transition: background-color linear .08s;
+  }
+  input + span:before {
+    content: '';
+    display: inline-block;
+  }
+  input + span:after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.4), 0px 0px 0px -1px rgba(0, 0, 0, 0.5);
+    background-color: #FAFAFA;
+    border: none;
+    transition: transform linear .08s, background-color linear .08s;
+  }
+
+  input:checked + span {
+    background-color: rgba(255,193,7,.5);
+  }
+  input:checked + span:after {
+    background-color: #ffc107;
+    transform: translate3d(18px, 0, 0);
+    box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.4), 0px 0px 0px -1px rgba(0, 147, 133, 0.5);
+  }
+}

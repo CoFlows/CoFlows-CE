@@ -1,0 +1,159 @@
+.card {
+  margin-bottom: $spacer;
+  &.card-widget {
+    height: auto;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    flex-direction: row;
+    max-width: 100%;
+    padding: $spacer;
+    p {
+      margin: 0;
+      line-height: 1;
+    }
+  }
+  .card-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    font-family: $font-family-headers;
+    text-transform: uppercase;
+    letter-spacing: 0.02rem;
+    font-size: 13px;
+    background: transparent;
+    color: $black;
+    @if $enable-rounded {
+      border-top-left-radius: $border-radius;
+      border-top-right-radius: $border-radius;
+    } @else {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+    &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      height: 1px;
+      left: 15px;
+      right: 15px;
+      bottom: 0;
+      border-bottom: 1px solid rgba($black,.05);
+    }
+    &.no-shadow::after {
+      border-bottom: 0;
+    }
+    .card-header-text {
+      .card-title {
+        line-height: 1;
+        font-size: 13px;
+        font-weight: 400;
+      }
+      .card-subtitle {
+        line-height: 1;
+        font-size: 12px;
+        text-transform: initial;
+        font-weight: 300;
+      }
+    }
+    .card-controls {
+      line-height: 1;
+      right: $spacer;
+      a {
+        position: relative;
+        font-size: rem;
+        display: inline-block;
+        margin-left: .625rem;
+        color: inherit;
+        i:before {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+  &[class^="card-"] .card-header,
+  &[class*=" card-"] .card-header,
+  &[class^="bg-"] .card-header,
+  &[class*=" bg-"] .card-header {
+    color: inherit;
+  }
+  .card-avatar {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    font-size: 40px;
+    line-height: 40px;
+    margin-right: $spacer;
+    &.widget-icon {
+      font-size: 1rem;
+    }
+  }
+  .card-tab > .nav-tabs {
+    padding: 1rem 1rem 0;
+  }
+  .card-body > *:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* $widget icon
+ ------------------------------------------*/
+.widget-icon {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 20px;
+  text-align: center;
+  &::before {
+    line-height: 40px;
+  }
+}
+.widget-bg-icon {
+  position: absolute;
+  right: 15px;
+  top: 0;
+  line-height: 80px;
+  font-size: 60px;
+}
+
+//Card color variant fix
+//
+// Background variations
+//
+
+.card.card-primary {
+  //@include card-variant($brand-primary, $brand-primary);
+}
+.card.card-success {
+  //@include card-variant($brand-success, $brand-success);
+}
+.card.card-info {
+  //@include card-variant($brand-info, $brand-info);
+}
+.card.card-warning {
+  //@include card-variant($brand-warning, $brand-warning);
+}
+.card.card-danger {
+  //@include card-variant($brand-danger, $brand-danger);
+}
+
+// Remove all backgrounds
+.card.card-outline-primary {
+  //@include card-outline-variant($btn-primary-bg);
+}
+.card.card-outline-secondary {
+  //@include card-outline-variant($btn-secondary-border);
+}
+.card.card-outline-info {
+  //@include card-outline-variant($btn-info-bg);
+}
+.card.card-outline-success {
+  //@include card-outline-variant($btn-success-bg);
+}
+.card.card-outline-warning {
+  //@include card-outline-variant($btn-warning-bg);
+}
+.card.card-outline-danger {
+  //@include card-outline-variant($btn-danger-bg);
+}

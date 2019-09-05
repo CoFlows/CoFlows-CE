@@ -1,0 +1,24 @@
+@import "../mixins/material-palette";
+@import "../variables";
+@import "../../../../../node_modules/bootstrap/scss/functions";
+@import "../../../../../node_modules/bootstrap/scss/variables";
+
+.my-drop-zone {
+  min-height: 1.5rem;
+  margin-bottom: $spacer;
+  padding: $spacer;
+  border: dashed 1px;
+  @if $enable-rounded {
+    border-radius: $border-radius;
+  } @else {
+    border-radius: 0;
+  }
+}
+
+.nv-file-over {
+  border-color: theme-color("danger");
+}
+
+.another-file-over-class {
+  border-color: theme-color("success");
+}

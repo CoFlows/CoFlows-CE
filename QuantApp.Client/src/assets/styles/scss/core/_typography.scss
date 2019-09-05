@@ -1,0 +1,74 @@
+/* $typography
+ ------------------------------------------*/
+ a {
+  text-decoration: none;
+  @include hover-focus {
+    cursor: pointer;
+    text-decoration: none;
+    outline: 0;
+  }
+}
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: $font-family-headers;
+  font-weight: 600;
+  letter-spacing: 0.02rem;
+}
+.blockquote {
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.8;
+  opacity: .7;
+  border-left: 0;
+  &::before {
+    font-size: 2rem;
+    position: relative;
+    top: .5rem;
+    display: inline-block;
+    padding-right: .625rem;
+    content: "\201C";
+    font-weight: bold;
+    font-family: Georgia, serif;
+  }
+  cite {
+    font-size: 1rem;
+    display: block;
+  }
+}
+.ff-sans {
+  font-family: $font-family-sans-serif;
+}
+.ff-serif {
+  font-family: $font-family-serif;
+}
+.ff-headers {
+  font-family: $font-family-headers;
+}
+.fw-300 {
+  font-weight: 300;
+}
+.fw-400 {
+  font-weight: 400;
+}
+.fw-500 {
+  font-weight: 500;
+}
+.fw-600 {
+  font-weight: 600;
+}
+.fw-900 {
+  font-weight: 900;
+}
+.no-bg {
+  background-color: transparent!important;
+}
+.text-color {
+  color: $body-color;
+}
+.shadow {
+  box-shadow: 0 0 5px rgba(0, 0, 0, .2);
+}
+
+.no-shadow {
+  box-shadow: none;
+}

@@ -1,0 +1,101 @@
+{
+  "HOME": "Home",
+
+  "EMAIL": "Email",
+
+  "COMPONENTS": "Components",
+    "ACCORDION": "Accordion",
+    "ALERT": "Alert",
+    "BUTTONS": "Buttons",
+    "SBUTTONS": "Social Buttons",
+    "CAROUSEL": "Carousel",
+    "COLLAPSE": "Collapse",
+    "DATEPICKER": "Datepicker",
+    "DROPDOWN": "Dropdown",
+    "MODAL": "Modal",
+    "PAGINATION": "Pagination",
+    "POPOVER": "Popover",
+    "PROGRESS": "Progress Bars",
+    "RATING": "Rating",
+    "TABS": "Tabs",
+    "TIMEPICKER": "Timepicker",
+    "TOOLTIP": "Tooltip",
+    "TYPEAHEAD": "typeahead",
+    "SPINNERS": "Spinners",
+
+  "ICONS": "Icons",
+    "LINEA": "Linea",
+    "FONTAWESOME": "FontAwesome",
+    "SLI": "Simple Line Icons",
+
+  "TASKBOARD": "Taskboard",
+  
+  "CARDS": "Cards",
+    "BASIC": "Basic",
+    "PORTLETS": "Portlets",
+    "DRAGGABLE": "Draggable",
+
+  "FORMS": "Forms",
+    "MASKS": "Masks",
+    "EDITOR": "Editor",
+    "VALIDATION": "Validation",
+    "UPLOAD": "Upload",
+    "TREE": "Tree",
+
+  "TABLES": "Tables",
+    "RESPONSIVE": "Responsive",
+
+  "DATATABLES": "Datatables",
+    "FULLSCREEN": "Fullscreen",
+    "EDITING": "Editing",
+    "FILTER": "Filter",
+    "PAGING": "Paging",
+    "PINNING": "Pinning",
+    "SELECTION": "Selection",
+    "SORTING": "Sorting",
+
+  "CHARTS": "Charts",
+    "BAR": "Bar",
+    "PIE": "Pie",
+    "LINE": "Line",
+    "MISC": "Misc",
+
+  "MAPS": "Maps",
+    "GOOGLE": "Google",
+
+  "PAGES": "Pages",
+    "INVOICE": "Invoice",
+    "FORUM": "Forum",
+    "TIMELINE": "Timeline",
+    "ACTIVITY": "Activity",
+    "PRICING": "Pricing",
+    "BLANK": "Blank",
+
+  "LANDING": "Landing",
+
+  "AUTHENTICATION": "Authentication",
+    "SIGNIN": "Signin",
+    "SIGNUP": "Signup",
+    "FORGOT": "Forgot",
+    "LOCKSCREEN": "Lockscreen",
+  
+  "ERROR": "Error",
+    "404": "404",
+    "500": "500",
+    "503": "503",
+
+  "CALENDAR": "Calendar",
+
+  "MEDIA": "Media",
+    "GRID": "Grid",
+    "TILE": "Tile",
+    "LIST": "List",
+
+  "WIDGETS": "Widgets",
+
+  "SOCIAL": "Social",
+
+  "DOCS": "Docs",
+
+  "MENU": "Menu"
+}

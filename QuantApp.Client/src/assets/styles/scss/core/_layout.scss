@@ -1,0 +1,46 @@
+/* $layout
+ ------------------------------------------*/
+
+/*Heights*/
+.min-height-100 {
+  min-height: 100%;
+}
+.page-height {
+  height: calc(100vh - #{$header-height})!important;
+}
+
+/*Scroll*/
+.scroll-y {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/*Hide footer*/
+.no-footer .main-footer {
+  display: none;
+  visibility: hidden;
+}
+
+/* Boxed layout*/
+.app.mode-boxed {
+  overflow: hidden;
+  margin-right: auto;
+  margin-left: auto;
+  @include make-container-max-widths();  
+}
+
+/* Boxed layout*/
+.map-header .ng-sidebar__content > .main-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: transparent!important;
+  box-shadow: none!important;
+  .nav-link,
+  .navbar-heading {
+    color: rgba(0, 0, 0, 1)!important;
+    text-shadow: 0px 0px 1px rgb(255, 255, 255);
+  }
+}

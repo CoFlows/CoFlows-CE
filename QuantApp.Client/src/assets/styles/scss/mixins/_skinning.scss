@@ -1,0 +1,557 @@
+@mixin theme($background, $foreground) {
+  background-color: map-get($background, background);
+  color: map-get($foreground, base);
+
+  .bg-body {
+    background-color: map-get($background, background);
+  }
+
+  //Typography
+  .text-color {
+    color: map-get($foreground, base);
+  }
+  .text-muted {
+    color: map-get($foreground, muted-text) !important;
+  }
+  code, kbd {
+    color: map-get($foreground, base);
+    background-color: map-get($background, hover);
+  }
+  pre {
+    color: map-get($foreground, base);
+  }
+
+  //Card
+  .card,
+  .list-group-item,
+  ngb-accordion > .card > .card-body {
+    background-color: map-get($background, card);
+  }
+  .card .card-header {
+    color: map-get($foreground, base);
+  }
+  .card-header::after {
+    border-bottom-color: map-get($foreground, divider);
+  }
+  .card-subtitle {
+    color: map-get($foreground, muted-text);
+  }
+
+  //Button
+  .btn-secondary {
+    @include button-variant(map-get($background, secondary-button), map-get($foreground, base));
+    border-color:  map-get($foreground, divider);
+  }
+  .btn-outline-secondary {
+    @include button-outline-variant(map-get($foreground, divider));
+  }
+
+  //Pagination
+  .page-link {
+    color: map-get($foreground, base);
+    background-color: map-get($background, secondary-button);
+    border-color: map-get($foreground, divider);
+  }
+
+  //Datepicker
+  .ngb-dp-header {
+    background-color: map-get($background, card);
+  }
+
+  //Progress
+  .progress {
+    background-color: map-get($foreground, divider);
+  }
+
+  //Tabs
+  .nav-tabs {
+    border-bottom-color: map-get($foreground, divider);
+    .nav-link {
+      @include hover-focus {
+        border-color: map-get($foreground, divider);
+      }
+    }
+  }
+  .card .nav-tabs .nav-link.active, .card .nav-tabs .nav-item.show .nav-link {
+    color: map-get($foreground, base);
+    background-color: map-get($background, card);
+    border-color: map-get($foreground, divider) map-get($foreground, divider) map-get($background, card);
+  }
+
+  //Modal
+  .modal-content {
+    background-color: map-get($background, modal);
+    border-color: map-get($foreground, divider);
+  }
+  .modal-header {
+    border-bottom-color: map-get($foreground, divider);
+  }
+  .modal-footer {
+    border-top-color: map-get($foreground, divider);
+  }
+
+  //Forms
+  .form-control {
+    color: map-get($foreground, base);
+    background-color: map-get($background, hover);
+    border-color: map-get($foreground, divider);
+    @include form-control-focus();
+    &::placeholder {
+      color: map-get($foreground, muted-text);
+    }
+    &:disabled,
+    &[readonly] {
+      background-color: map-get($background, hover);
+    }
+  }
+
+  select.form-control {
+    &:focus::-ms-value {
+      color: map-get($foreground, base);
+      background-color: map-get($background, hover);
+    }
+  }
+
+  .form-check {
+    &.disabled {
+      .form-check-label {
+        color: map-get($foreground, muted-text);
+      }
+    }
+  }
+
+  @include form-validation-state("valid", $form-feedback-valid-color);
+  @include form-validation-state("invalid", $form-feedback-invalid-color);
+
+  //Table
+  .table {
+    th,
+    td {
+      border-top-color: map-get($foreground, divider);
+    }
+    thead th {
+      border-bottom-color: map-get($foreground, divider);
+    }
+    tbody + tbody {
+      border-top-color: map-get($foreground, divider);
+    }
+    .table {
+      background-color: map-get($background, background);
+    }
+  }
+
+  .table-bordered {
+    border-color: map-get($foreground, divider);
+    th,
+    td {
+      border-color: map-get($foreground, divider);
+    }
+  }
+
+  .table-striped {
+    tbody tr:nth-of-type(odd) {
+      background-color: map-get($background, hover-o);
+    }
+  }
+
+  .table-hover {
+    tbody tr {
+      @include hover {
+        background-color: map-get($background, hover);
+      }
+    }
+  }
+
+  @include media-breakpoint-down(md) {
+    .no-more-tables tr {
+      border-color: map-get($foreground, divider);
+    }
+    .no-more-tables td {
+      border-bottom-color: map-get($foreground, divider);
+    }
+  }
+
+  //Header theme
+  .ng-sidebar__content .main-header {
+    @include header-variant(map-get($background, header), map-get($foreground, header), map-get($foreground, header-hover));
+  }
+  .hamburger-icon {
+    &:before,
+    &:after,
+    span {
+      background-color: map-get($foreground, base);
+    }
+  }
+  .nav-divider {
+    background: map-get($foreground, divider);
+  }
+
+  //Content sidebar
+  .ng-sidebar__content .ng-sidebar {
+    background-color: transparent;
+  }
+
+  //Sidebar theme
+  .sidebar-panel.ng-sidebar {
+    @include sidebar-variant(map-get($background, sidebar), map-get($foreground, sidebar), map-get($foreground, sidebar-hover), map-get($background, brand), map-get($foreground, brand));
+  }
+
+  //Accordion
+  ngb-accordion > .card {
+    background-color: transparent;
+    .card-header {
+      background-color: map-get($background, card);
+    }
+  }
+
+  //Activity stream
+  .activity-stream {
+    &::before {
+      background-color: map-get($foreground, divider);
+    }
+  }
+
+  //Timeline
+  .timeline {
+    &::before {
+      background: map-get($foreground, divider);
+    }
+    .timeline-icon {
+      &::after {
+        background: map-get($background, card);
+      }
+    }
+    .timeline-content > .card::before {
+      border-color: transparent map-get($background, card) transparent transparent!important;
+    }
+    .timeline-content > .card::after {
+      border-color: transparent map-get($background, card) transparent transparent!important;
+    }
+  }
+  @include media-breakpoint-up(lg) {
+    .timeline:not(.stacked) {
+      .timeline-card:nth-child(even) .timeline-content > .card::before {
+        border-color: transparent transparent transparent map-get($background, card)!important;
+      }
+      .timeline-card:nth-child(even) .timeline-content > .card::after {
+        border-color: transparent transparent transparent map-get($background, card)!important;
+      }
+    }
+  }
+
+  //Taskboard
+  .taskboard .taskboard-task {
+    background: map-get($background, card)!important;
+  }
+  .taskboard .taskboard-header {
+    color: map-get($foreground, base)!important;
+  }
+
+  //email
+  .email-panel .list-group-item a {
+    color: map-get($foreground, base)!important;
+  }
+  .email-panel .list-group-item.selected a {
+    color: $body-color!important;
+  }
+
+  //Calendar
+  .cal-day-view {
+    .cal-hour-rows {
+      border-color: map-get($foreground, divider);
+    }
+
+    .cal-hour:nth-child(odd) {
+      background-color: map-get($foreground, disabled);
+    }
+
+    .cal-hour:not(:last-child) .cal-hour-segment,
+    .cal-hour:last-child :not(:last-child) .cal-hour-segment {
+      border-color: map-get($foreground, divider);
+    }
+
+    .cal-hour-segment:hover {
+      background-color: map-get($background, hover);
+    }
+  }
+
+  .cal-month-view {
+    .cal-cell-row:hover {
+      background-color: map-get($background, hover);
+    }
+
+    .cal-cell-row .cal-cell:hover,
+    .cal-cell.cal-has-events.cal-open {
+      background-color: map-get($background, hover-o);
+    }
+
+    .cal-days {
+      border-color: map-get($foreground, divider);
+    }
+
+    .cal-day-cell:not(:last-child) {
+      border-color: map-get($foreground, divider);
+    }
+
+    .cal-days .cal-cell-row {
+      border-color: map-get($foreground, divider);
+    }
+  }
+
+  .cal-week-view {
+    .cal-day-headers {
+      border-color: map-get($foreground, divider);
+    }
+
+    .cal-day-headers .cal-header:not(:last-child) {
+      border-color: map-get($foreground, divider);
+    }
+
+    .cal-day-headers .cal-header:hover {
+      background-color: map-get($background, hover);
+    }
+  }
+
+  //Datatable
+  .ngx-datatable {
+    background-color: map-get($background, card);
+    &.striped {
+      .datatable-row-odd {
+        background: map-get($background, hover-o);
+      }
+    }
+
+    &.single-selection,
+    &.multi-selection {
+      .datatable-body-row {
+        &.active,
+        &.active .datatable-row-group {
+          background: map-get($background, selected-cell);
+        }
+
+        &.active:hover,
+        &.active:hover .datatable-row-group {
+          background-color: map-get($background, hover);
+        }
+
+        &.active:focus,
+        &.active:focus .datatable-row-group {
+          background-color: map-get($background, hover);
+        }
+      }
+    }
+
+    &:not(.cell-selection) {
+      .datatable-body-row {
+        &:hover,
+        &:hover .datatable-row-group {
+          background: transparent;
+        }
+
+        &:focus,
+        &:focus .datatable-row-group {
+          background-color: map-get($background, hover);
+        }
+      }
+    }
+
+    &.cell-selection {
+      .datatable-body-cell {
+        &:hover,
+        &:hover .datatable-row-group {
+          background: map-get($background, hover);
+        }
+
+        &:focus,
+        &:focus .datatable-row-group {
+          background-color: map-get($background, hover);
+        }
+
+        &.active,
+        &.active .datatable-row-group {
+          background-color: map-get($background, selected-cell);
+        }
+
+        &.active:hover,
+        &.active:hover .datatable-row-group {
+          background-color: map-get($background, selected-cell);
+        }
+
+        &.active:focus,
+        &.active:focus .datatable-row-group {
+          background-color: map-get($background, selected-cell);
+        }
+      }
+    }
+
+    .datatable-header .datatable-row-left, .datatable-body .datatable-row-left,
+    .datatable-header .datatable-row-right, .datatable-body .datatable-row-right {
+      background-color: map-get($background, card);
+    }
+
+    /**
+     * Header Styles
+     */
+    .datatable-header {
+      border-bottom-color: map-get($foreground, divider);
+
+      .datatable-header-cell {
+        color: map-get($foreground, base);
+      }
+
+      .resize-handle {
+        border-right-color: map-get($foreground, divider);
+      }
+    }
+
+    /**
+     * Footer Styles
+     */
+    .datatable-footer {
+      border-top-color: map-get($foreground, divider);
+    }
+  }
+
+  //Form Upload
+  .my-drop-zone {
+    border-color: map-get($foreground, divider)!important;
+  }
+
+  //Editor
+  .ql-toolbar.ql-snow,
+  .ql-container.ql-snow {
+    border-color: map-get($foreground, divider);
+  }
+  .ql-snow .ql-picker .ql-picker-label {
+    color: map-get($foreground, base);
+  }
+  .ql-snow .ql-stroke {
+    stroke: map-get($foreground, base);
+  }
+  .ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill {
+    fill: map-get($foreground, base);
+  }
+
+  //Charts
+  .ngx-charts {
+    text {
+      fill: map-get($foreground, base);
+    }
+
+    .tooltip-anchor {
+      //fill: map-get($background, chart-tooltip);
+    }
+
+    .gridline-path {
+      stroke: map-get($foreground, chart-grid);
+    }
+
+    .grid-panel {
+      &.odd {
+        rect {
+          fill: map-get($background, hover);
+        }
+      }
+    }
+
+    .force-directed-graph {
+      .edge {
+        //stroke: $color-bg-light;
+      }
+    }
+
+    .gauge {
+      .background-arc{
+        path {
+          fill: map-get($foreground, divider);
+        }
+      }
+
+      .gauge-tick {
+        path {
+          stroke: map-get($foreground, divider);
+        }
+        text {
+          fill: map-get($foreground, base);
+        }
+      }
+    }
+
+    .linear-gauge {
+      .background-bar {
+        path {
+          fill: map-get($foreground, divider);
+        }
+      }
+
+      .units {
+        fill: map-get($foreground, base);
+      }
+    }
+
+    .timeline {
+      .brush-background {
+        fill: map-get($foreground, divider);
+      }
+
+      .brush {
+        .selection {
+          fill: map-get($foreground, divider);
+          stroke: #aaa;
+        }
+      }
+    }
+
+    .number-card .number-card-label {
+      font-size: 0.8rem;
+      color: map-get($foreground, base);
+    }
+  }
+}
+
+// Sidebar skin generator
+@mixin sidebar-variant($background, $color, $hover-active-color, $brand-background, $brand-color) {
+  background-color: $background;
+  .hamburger-icon {
+    &:before,
+    &:after,
+    span {
+      background-color: $brand-color;
+    }
+  }
+  .navigation-link {
+    color: $color;
+    @include hover-focus {
+      color: $hover-active-color;
+    }
+  }
+  .navigation-item.open > a {
+    color: $hover-active-color;
+  }
+}
+
+// Header skin generator
+@mixin header-variant($background, $color, $hover-active-color) {
+  background-color: $background;
+  .nav-link .badge {
+    border: 2px solid $background;
+  }
+  .hamburger-icon {
+    &:before,
+    &:after,
+    span {
+      background-color: $color;
+    }
+  }
+  .nav-link,
+  .navbar-heading {
+    color: $color;
+    @include hover-focus {
+      color: $hover-active-color;
+    }
+  }
+  .dropdown.show > .nav-link {
+    background: #fff;
+    color: $body-color;
+  }
+}

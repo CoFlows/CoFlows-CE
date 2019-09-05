@@ -1,0 +1,166 @@
+@import "../mixins/material-palette";
+@import "../variables";
+@import "../../../../../node_modules/bootstrap/scss/functions";
+@import "../../../../../node_modules/bootstrap/scss/variables";
+@import "../../../../../node_modules/bootstrap/scss/mixins";
+
+.timeline {
+  position: relative;
+  margin: ($spacer/3);
+  padding: 0;
+  list-style: none;
+  &::before {
+    position: absolute;
+    top: 6px;
+    width: 4px;
+    height: 100%;
+    content: '';
+    background: $card-border-color;
+    left: 4px;
+  }
+  .timeline-icon {
+    position: absolute;
+    top: 15px;
+    width: 12px;
+    height: 12px;
+    text-align: center;
+    left: 0;
+    border-radius: 50%;
+    &::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+    }
+  }
+  .timeline-card {
+    position: relative;
+    margin: 40px 0;
+    @include clearfix();
+    &:first-child .timeline-icon {
+      top: 0;
+    }
+    &:last-child .timeline-icon {
+      top: 0;
+    }
+  }
+  .timeline-card:first-child {
+    margin-top: 0;
+  }
+  .timeline-content {
+    position: relative;
+    margin-left: 30px;
+    @include clearfix();
+    > .card {
+      float: left;
+      display: inline-block;
+      margin: 0;
+    }
+  }
+  .timeline-content .timeline-date {
+    display: inline-block;
+    padding: 4px 0 10px;
+    @include media-breakpoint-up(lg) {
+      position: absolute;
+      top: 7px;
+      width: 100%;
+      left: 112%;
+    }
+    @include media-breakpoint-down(md) {
+      position: relative;
+      top: 0;
+      width: 100%;
+      left: auto;
+    }
+  }
+  .timeline-content > .card::before {
+    position: absolute;
+    top: 11px;
+    width: 0;
+    height: 0;
+    content: ' ';
+    pointer-events: none;
+    border-width: 10px;
+    border-style: solid;
+    right: 100%;
+    border-color: transparent white transparent transparent;
+  }
+  .timeline-content > .card::after {
+    position: absolute;
+    top: 12px;
+    width: 0;
+    height: 0;
+    content: ' ';
+    pointer-events: none;
+    border-width: 9px;
+    border-style: solid;
+    right: 100%;
+    border-color: transparent white transparent transparent;
+  }
+  &:not(.stacked) {
+    @include media-breakpoint-up(lg) {
+      &::before {
+        left: 50%;
+        margin-left: -2px;
+      }
+      .timeline-card:nth-child(odd) .timeline-content {
+        float: right;
+      }
+      .timeline-card:nth-child(even) .timeline-content {
+        float: left;
+      }
+      .timeline-card:nth-child(even) .timeline-content > .card {
+        float: right;
+      }
+      .timeline-card:nth-child(even) .timeline-content > .card::before {
+        position: absolute;
+        right: auto;
+        left: 100%;
+        border-color: transparent transparent transparent white;
+      }
+      .timeline-card:nth-child(even) .timeline-content > .card::after {
+        position: absolute;
+        right: auto;
+        left: 100%;
+        border-color: transparent transparent transparent white;
+      }
+      .timeline-card:nth-child(odd) .timeline-content .timeline-date {
+        right: 112%;
+        left: auto;
+        text-align: right;
+      }
+      .timeline-card:first-child {
+        margin-top: 0;
+      }
+      .timeline-card.timeline-button {
+        text-align: center;
+      }
+      .timeline-icon {
+        left: 50%;
+        margin-left: -6px;
+      }
+      .timeline-content {
+        width: 47%;
+        margin-left: 0;
+      }
+    }
+  }
+  &.stacked {
+    @include media-breakpoint-up(lg) {
+      .timeline-content > .card {
+        margin-bottom: 0;
+      }
+      .timeline-date {
+        position: relative;
+        top: 0;
+        width: 100%;
+        left: auto;
+      }
+    }
+  }
+}
+

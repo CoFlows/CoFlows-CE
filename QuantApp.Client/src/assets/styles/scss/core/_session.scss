@@ -1,0 +1,27 @@
+.bg-cover {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.bg-1 {
+  background-image: url('../../assets/images/unsplash/bg1.jpg');
+}
+.bg-2 {
+  background-image: url('../../assets/images/unsplash/bg2.jpg');
+}
+.bg-3 {
+  background-image: url('../../assets/images/unsplash/bg3.jpg');
+}
+
+.lockcode {
+  display: block;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.error-number {
+  font-family: $font-family-headers;
+  font-size: 60px;
+  line-height: 1;
+}

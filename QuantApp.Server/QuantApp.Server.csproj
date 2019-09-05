@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.2</TargetFrameworks>
+    <UserSecretsId>aspnet-QuantApp.Server-2AA057A6-1CB4-4720-BB1F-099CC90AA338</UserSecretsId>    
+    <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <DefaultItemExcludes>Client\**;ref\**</DefaultItemExcludes>    
+    <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
+
+    <NoWarn>CS1998;CS0168;CS0105;CS0162;CS0105;CS4014</NoWarn>  
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants Condition=" !Exists('$(OS)')">NETSTANDARD;MONO_LINUX;TRACE;DEBUG;PYTHON3;PYTHON37;UCS4;PYTHON_WITH_PYMALLOC</DefineConstants>
+    <DefineConstants Condition=" '$(OS)' == 'osx' ">NETSTANDARD;MONO_OSX;TRACE;DEBUG;PYTHON3;PYTHON37;UCS4;PYTHON_WITH_PYMALLOC</DefineConstants>    
+    <DefineConstants Condition=" '$(OS)' == 'win' ">NETSTANDARD;TRACE;DEBUG;PYTHON3;PYTHON36;UCS2</DefineConstants>    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="ref\**\*.dll" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Folder Include="wwwroot\" CopyToPublishDirectory="Always" />
+    <Content Include="ipykernel_launcher.py" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="lab" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="coflows" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="kernel.jupyter" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="create.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+  </ItemGroup>
+
+  <ItemGroup>    
+    <PackageReference Include="KubernetesClient" Version="1.3.7-g7c9cc88d38" />
+    <PackageReference Include="Sendgrid" Version="9.9.0" />
+    <PackageReference Include="Stripe.net" Version="11.6.1" />    
+
+    <PackageReference Include="Microsoft.AspNetCore.All"/>
+    <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.2.0"/> 
+
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3"/>        
+    
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.4" />    
+  </ItemGroup>
+  <ItemGroup>
+
+    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.csproj" />
+    <ProjectReference Include="..\QuantApp.Engine\QuantApp.Engine.fsproj" />
+  </ItemGroup>  
+</Project>

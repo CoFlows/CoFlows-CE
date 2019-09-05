@@ -1,0 +1,50 @@
+/* $NgSidebar
+ ------------------------------------------*/
+.ng-sidebar__backdrop {
+  opacity: .6!important;
+}
+@media screen and (-ms-high-contrast:active) {
+  .ng-sidebar__backdrop {
+    opacity: .5!important
+  }
+}
+
+ng-sidebar-container {
+  position: relative;
+  transform: translate3d(0, 0, 0);
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  display: block;
+  overflow: hidden
+}
+
+ng-sidebar .ng-sidebar {
+  position: relative;
+  transform: translate3d(0, 0, 0);
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  outline: 0;
+  box-sizing: border-box;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.ng-sidenav.ng-sidenav--closed {
+  visibility: hidden
+}
+
+.ng-sidenav.ng-sidenav--opened, .ng-sidenav.ng-sidenav--opening {
+  transform: translate3d(0, 0, 0)
+}
+
+.ng-sidebar__content {
+  position: relative;
+  display: block;
+  height: 100%;
+  overflow: auto;
+}
+.app > .ng-sidebar__content {
+  padding: 0!important;
+}

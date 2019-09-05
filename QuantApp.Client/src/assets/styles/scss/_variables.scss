@@ -1,0 +1,94 @@
+// Custom Variables
+//
+$transition-duration: 200ms !default;
+
+$sidebar-width: 15rem !default;
+$sidebar-small-menu-width: 5rem !default;
+
+$header-height: 3.5rem !default;
+$header-footer-height: ($header-height * 2) !default;
+
+$brand-dark: rgba(51, 51, 51, 1.00) !default;
+
+$font-weight-base: 400 !default;
+$font-weight-medium: 500 !default;
+$font-weight-bold: 600 !default;
+
+// Bootstrap Variables
+//
+
+$white:  #fff !default;
+$black:  #000 !default;
+$red:    #d9534f !default;
+$orange: #f0ad4e !default;
+$yellow: #ffd500 !default;
+$green:  #5cb85c !default;
+$blue:   #0275d8 !default;
+$teal:   #5bc0de !default;
+$pink:   #ff5b77 !default;
+$purple: #613d7c !default;
+
+$gray-dark:                 #292b2c !default;
+$gray:                      #464a4c !default;
+$gray-light:                #636c72 !default;
+$gray-lighter:              #eceeef !default;
+$gray-lightest:             #f7f7f9 !default;
+
+
+$theme-colors: (
+  primary: map_get($mat-indigo, A700),
+  secondary: #ffffff,
+  success: map_get($mat-green, A700),
+  info: map_get($mat-light-blue, A700),
+  warning: map_get($mat-yellow, A700),
+  danger: map_get($mat-red, A700),
+  light: #f8f9fa,
+  dark: #343a40
+) !default;
+
+$enable-rounded:            true !default;
+$enable-shadows:            false !default;
+$enable-gradients:          false !default;
+$enable-transitions:        true !default;
+$enable-hover-media-query:  false !default;
+$enable-grid-classes:       true !default;
+$enable-print-styles:       true !default;
+
+$body-bg:       #f5f5f5 !default;
+$body-color:    rgba(0,0,0,0.87) !default;
+$inverse-bg:    $gray-dark !default;
+$inverse-color: $gray-lighter !default;
+
+$link-hover-decoration: none !default;
+
+$grid-gutter-width:     15px !default;
+
+$font-family-sans-serif: 'Arimo', Helvetica, sans-serif !default;
+$font-family-headers:    'Montserrat', Helvetica, sans-serif !default;
+$font-family-serif:      'Playfair Display', 'Abril Fatface', Georgia, "Times New Roman", Times, serif !default;
+$font-family-monospace:  'Space Mono', Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !default;
+$font-family-base:       $font-family-sans-serif !default;
+
+$font-size-base: .875rem !default;
+$font-size-lg:   1.25rem !default;
+$font-size-sm:   .875rem !default;
+$font-size-xs:   .75rem !default;
+
+$border-radius:          .125rem !default;
+$border-radius-lg:       .25rem !default;
+$border-radius-sm:       .0625rem !default;
+
+$card-spacer-y:            1rem !default;
+$card-border-width:        0 !default;
+$card-border-color:        rgba($black,.06) !default;
+$card-cap-bg:              white !default;
+
+
+$btn-padding-x:                  1.5rem !default;
+$btn-padding-y:                  0.532rem !default;
+
+$btn-padding-x-sm:               1.5rem !default;
+$btn-padding-y-sm:               0.282rem !default;
+
+$btn-padding-x-lg:               1.5rem !default;
+$btn-padding-y-lg:               1.032rem !default;
