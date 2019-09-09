@@ -22,7 +22,7 @@ import collection.JavaConverters._
 class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[String, Any] {
   lazy val fields = mutable.Map.empty[String, Any]
 
-  val runtime = CLRRuntime.GetClass("JVM.Runtime")
+  val runtime = CLRRuntime.GetClass("QuantApp.Kernel.JVM.Runtime")
   val sig = runtime.Invoke("Signature", clrObject).asInstanceOf[Array[String]]
   sig.foreach(signature => {
     

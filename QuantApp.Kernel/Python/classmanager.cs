@@ -47,7 +47,11 @@ namespace Python.Runtime
                 return cb;
             }
             cb = CreateClass(type);
-            cache.Add(type, cb);
+
+            // Don't cache Dynamic Types in order to create new types for each instance - Arturo Rodriguez
+            if(type != typeof(QuantApp.Kernel.JVM.JVMObject) && type != typeof(System.Dynamic.DynamicMetaObject))
+                cache.Add(type, cb);
+                
             // Initialize the object later, as this might call this GetClass method
             // recursively (for example when a nested class inherits its declaring class...)
             InitClassBase(type, cb);

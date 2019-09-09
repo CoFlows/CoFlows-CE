@@ -32,6 +32,7 @@ class clrproperty(object):
     """
 
     def __init__(self, type_, fget=None, fset=None):
+        print("----------CLR PYTHON CLRPROPERTY: " + str(return_type) + " " + str(clrname))
         self.__name__ = getattr(fget, "__name__", None)
         self._clr_property_type_ = type_
         self.fget = fget
@@ -78,6 +79,7 @@ class clrmethod(object):
     """
 
     def __init__(self, return_type, arg_types, clrname=None, func=None):
+        print("----------CLR PYTHON CLRMETHOD: " + str(return_type) + " " + str(clrname))
         self.__name__ = getattr(func, "__name__", None)
         self._clr_return_type_ = return_type
         self._clr_arg_types_ = arg_types
@@ -92,3 +94,48 @@ class clrmethod(object):
 
     def __get__(self, instance, owner):
         return self.__func.__get__(instance, owner)
+
+
+
+def createJVM(jvmobj):
+    type_original = type(jvmobj)
+    
+    class MethodWrapper:
+        def __init__(self, jvmobj, name, func):
+            self.jvmobj = jvmobj
+            self.name = name
+            self.func = func
+
+        def call(self, *args):
+            return self.jvmobj.InvokeMember(self.name, [item for item in args])
+        
+    class PropertyWrapper:
+        def __init__(self, jvmobj, name, func):
+            self.jvmobj = jvmobj
+            self.name = name
+            self.func = func
+
+        def get(self, args):
+            return self.jvmobj.TryGetMember(self.name)
+        
+        def set(self, owner, value):
+            self.jvmobj.TrySetMember(self.name, value)
+    
+    mems = jvmobj.Members
+    for m in mems:
+        name = m.Key[:m.Key.index('-')]
+        setattr(jvmobj, name, MethodWrapper(jvmobj, name, jvmobj).call)
+    
+    props = jvmobj.Properties
+    for p in props:
+        name = p.Key
+        
+        getFunc = PropertyWrapper(jvmobj, name, jvmobj).get
+        setFunc = PropertyWrapper(jvmobj, name, jvmobj).set
+        pp = property(fget=getFunc, fset=setFunc)
+        
+        setattr(type(jvmobj), name, pp)
+
+    return jvmobj
+        
+

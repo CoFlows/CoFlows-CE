@@ -16,7 +16,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
-namespace JVM
+namespace QuantApp.Kernel.JVM
 {
     public interface IJVMTuple
     {

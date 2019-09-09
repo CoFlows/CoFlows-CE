@@ -28,7 +28,7 @@ open Jint.Native
 open QuantApp.Kernel
 
 open Python.Runtime
-open JVM
+open QuantApp.Kernel.JVM
 
 open System
 
@@ -108,25 +108,25 @@ type JsWrapper =
 
 module Code =
     let setPythonOut = 
-        @"import sys
-from System import Console
-class output(object):
-    def write(self, msg):
-        Console.Write(msg)
-    def writelines(self, msgs):
-        for msg in msgs:
-            Console.Write(msg)
-    def flush(self):
-        pass
-    def close(self):
-        pass
-sys.stdout = sys.stderr = output()"
+        "import sys\n" +
+        "from System import Console\n" +
+        "class output(object):\n" +
+        "   def write(self, msg):\n" +
+        "       Console.Write(msg)\n" +
+        "   def writelines(self, msgs):\n" +
+        "       for msg in msgs:\n" +
+        "           Console.Write(msg)\n" +
+        "   def flush(self):\n" +
+        "       pass\n" +
+        "   def close(self):\n" +
+        "       pass\n" +
+        "sys.stdout = sys.stderr = output()"
 
     let setPythonImportPath (path : string) = 
         let path = path.Replace("\\", "\\\\")
-        @"import sys
-if not '" + path + "' in sys.path:
-    sys.path.append('" + path + "')"
+        "import sys\n" +
+        "if not '" + path + "' in sys.path:\n" +
+        "   sys.path.append('" + path + "')"
 
     let GetMd5Hash (code: string) = 
         let md5 = MD5.Create()
@@ -306,11 +306,17 @@ if not '" + path + "' in sys.path:
 
     let InstallPip (packageName : string) : unit =
         using (Py.GIL()) (fun _ -> 
-            let code = "import subprocess; subprocess.check_call(['pip', 'install', '--target=/App/mnt/pip/', '" + packageName + "'])"
-            Console.Write("Installing pip: " + packageName + " " + code + " ")
-            PythonEngine.Exec(code)
-            Console.WriteLine("done.")
-            )
+
+            setPythonOut |> PythonEngine.RunSimpleString
+            let code = 
+                "import subprocess \n" +
+                "try:\n" +
+                "   import " + packageName + "\n" +
+                "   print('Pip package: " + packageName + " exists.')\n" +
+                "except: \n" +
+                "   print('Installing Pip package: " + packageName + "...')\n" +
+                "   subprocess.check_call(['pip', 'install', '--target=/App/mnt/pip/', '" + packageName + "'])"
+            code |> PythonEngine.Exec)
 
     let InitializeCodeTypes(types : Type[]) =
 
@@ -346,7 +352,7 @@ if not '" + path + "' in sys.path:
         |> Seq.iter(fun an -> 
             let name = an.ToString()
             
-            if name.Contains("QuantApp.Utils.Framework") |> not then
+            if "QuantApp.Utils.Framework" |> name.Contains |> not then
 
                 let asm = System.Reflection.Assembly.Load(name)
                 let types =
@@ -359,29 +365,29 @@ if not '" + path + "' in sys.path:
                 |> Seq.iter(fun t -> 
                     let name = t.ToString()
                     
-                    if not(sys_names.ContainsKey(name)) then
+                    if name |> sys_names.ContainsKey |> not then
                         sys_names.Add(name, 0)
-                        if not(M._systemAssemblies.ContainsKey(name)) then
-                            M._systemAssemblies.TryAdd(name, asm) |> ignore
+                        if name |> M._systemAssemblies.ContainsKey |> not then
+                            (name, asm) |> M._systemAssemblies.TryAdd |> ignore
                     ))
 
         try
-            let fsi = System.Reflection.Assembly.Load("FSI-ASSEMBLY")
-            let fsi = if fsi |> isNull then System.Reflection.Assembly.Load("fsiAnyCpu") else fsi
+            let fsi = "FSI-ASSEMBLY" |> System.Reflection.Assembly.Load
+            let fsi = if fsi |> isNull then "fsiAnyCpu" |> System.Reflection.Assembly.Load else fsi
 
-            if not(isNull(fsi)) then
+            if fsi |> isNull |> not then
                 fsi.GetTypes()
                 |> Seq.iter(fun t -> 
                     let name = 
                         let n = t.ToString()
-                        if n.StartsWith("FSI_") then
-                            n.Substring(n.IndexOf(".") + 1)
+                        if "FSI_" |> n.StartsWith then
+                            n.IndexOf(".") + 1 |> n.Substring
                         else
                             n
 
-                    if not(M._systemAssemblies.ContainsKey(name)) then
-                            M._systemAssemblies.TryAdd(name, fsi) |> ignore
-                            M._systemAssemblyNames.TryAdd(name, t.ToString()) |> ignore
+                    if name |> M._systemAssemblies.ContainsKey |> not then
+                            (name, fsi) |> M._systemAssemblies.TryAdd |> ignore
+                            (name, t.ToString()) |> M._systemAssemblyNames.TryAdd |> ignore
                     else
                         M._systemAssemblies.[name] <- fsi
                         M._systemAssemblyNames.[name] <- t.ToString()
@@ -788,7 +794,7 @@ if not '" + path + "' in sys.path:
 
                                                 let pyFile = pathTemp + name
 
-                                                Console.WriteLine("Python Compile: " + name + " " + pathTemp)
+                                                "Python Compile: " + name + " " + pathTemp |> Console.WriteLine
                                                 File.WriteAllText(pyFile, code)
 
                                                 let name = name.Replace(".py", "")
@@ -934,8 +940,6 @@ if not '" + path + "' in sys.path:
 
                                                     let obje = cls |> obje_func(func, n.ToString())
 
-                                                    // let obje_str = if obje |> isNull then "NULL" else obje.ToString()
-
                                                     if obje |> isNull |> not then
                                                         let pair = (n.ToString(), obje)
                                                         pair |> resdb.Add
@@ -989,6 +993,8 @@ if not '" + path + "' in sys.path:
 
                                         typeof<QuantApp.Kernel.M>
                                         typeof<QuantApp.Engine.F>
+
+                                        typeof<JVM.Runtime>
 
                                         typeof<Jint.Engine>
                                     ]
@@ -1154,7 +1160,6 @@ if not '" + path + "' in sys.path:
                             "JVM Engine not started: " + JVM.Runtime.Loaded.ToString() |> Console.WriteLine
                         else
                             "JVM Engine started" |> Console.WriteLine
-
 
                 let compileJava (codes : (string * string) list) =                    
                     initJVM()
@@ -1528,14 +1533,8 @@ if not '" + path + "' in sys.path:
                 let compiled_jvm_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".java") || name.EndsWith(".scala")) && x.ToLower().Contains("package")) //Compiled
                 let scripted_jvm_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".java") || name.EndsWith(".scala")) && (x.ToLower().Contains("package") |> not)) //Script
 
-                // let compiled_java_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(jvFlag) || name.EndsWith(".java")) && x.ToLower().Contains("package")) //Compiled
-                // let scripted_java_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(jvFlag) || name.EndsWith(".java")) && (x.ToLower().Contains("package") |> not)) //Script
-
-                // let compiled_scala_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(scFlag) || name.EndsWith(".scala")) && x.ToLower().Contains("package")) //Compiled
-                // let scripted_scala_code = codes |> List.filter(fun (name, x) -> (x.StartsWith(scFlag) || name.EndsWith(".scala")) && (x.ToLower().Contains("package") |> not)) //Script
-
-                let python_code = codes |> List.filter(fun (name, x) -> x.StartsWith("import clr") || x.StartsWith(pyFlag) || name.EndsWith(".py")) //is Python
-                let js_code = codes |> List.filter(fun (name, x) -> x.StartsWith(jsFlag) || name.EndsWith(".js")) //is Javascript
+                let python_code = codes |> List.filter(fun (name, x) -> name.EndsWith(".py")) //is Python
+                let js_code = codes |> List.filter(fun (name, x) -> name.EndsWith(".js")) //is Javascript
 
 
                 if compiled_net_code |> List.isEmpty |> not then 
@@ -2066,11 +2065,15 @@ if not '" + path + "' in sys.path:
                 work_books.Save()
                 ws
 
-            let wsp = M.Base(ws.ID)
+            let wsp = ws.ID |> M.Base
             wsp.[fun _ -> true] |> Seq.iter(wsp.Remove)
             ws |> wsp.Add |> ignore
 
             wsp.Save()
+
+        else
+            "Build result: " |> Console.WriteLine
+            build |> Console.WriteLine
 
         build
 
@@ -2152,8 +2155,6 @@ if not '" + path + "' in sys.path:
     let ProcessPackageWorkspace (wsp : WorkSpace) : PKG =
         
         let pkg_id = wsp.ID
-
-        // wsp.Code |> Utils.RegisterCode(false, false)
 
         let queries =
             let work_books = M.Base(pkg_id + "--Workbook")

@@ -14,7 +14,7 @@ using System.Reflection;
 
 using Newtonsoft.Json;
 
-namespace JVM
+namespace QuantApp.Kernel.JVM
 {
     [JsonConverter(typeof(JVMConverter))]
     public class JVMObject : DynamicObject
@@ -245,10 +245,76 @@ namespace JVM
 
         public bool TrySetMember(string name, object value)
         {
-            string signature = name;
-            Delegate fun = value as Delegate;
-            Members[signature] = fun;
-            return true;
+            if(value is Delegate)
+            {
+                string signature = name;
+                Delegate fun = value as Delegate;
+                Members[signature] = fun;
+                return true;
+            }
+            else
+            {
+                if (Properties.ContainsKey(name))
+                {
+                    Tuple<string, object, Runtime.wrapSetProperty> funcs = (Tuple<string, object, Runtime.wrapSetProperty>)Properties[name];
+                    string ttype = funcs.Item1;
+
+                    switch (ttype)
+                    {
+                        case "bool":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToBoolean(value));
+                            break;
+
+                        case "byte":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToByte(value));
+                            break;
+                        
+                        case "char":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToChar(value));
+                            break;
+
+                        case "short":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToInt16(value));
+                            break;
+                        
+                        case "int":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToInt32(value));
+                            break;
+
+                        case "long":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToInt64(value));
+                            break;
+                        
+                        case "float":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToDecimal(value));
+                            break;
+
+                        case "double":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToDouble(value));
+                            break;
+
+                        case "string":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToString(value));
+                            break;
+
+                        case "object":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(value);
+                            break;
+
+                        case "array":
+                            ((Runtime.wrapSetProperty)funcs.Item3)((object[])value);
+                            break;
+
+                        default:
+                            ((Runtime.wrapSetProperty)funcs.Item3)(value);
+                            break;
+                    
+                    }
+                    return true;
+            
+                }
+            }
+            return false;
         }
 
         public bool TrySetField(string name, object value)
@@ -467,25 +533,29 @@ namespace JVM
             get
             {
                 object result = null;
-                if (GetProperty(Instance, key, out result))
-                    return result;
-                else
-                    return null;
+                // if (GetProperty(Instance, key, out result))
+                //     return result;
+                // else
+                //     return null;
+                Console.WriteLine("--------------JVMObject TRY GET MEMBER: " + key);
+                return TryGetMember(key);
             }
             set
             {
-                if (Properties.ContainsKey(key))
-                {
-                    Properties[key] = value;
-                    return;
-                }
+                Console.WriteLine("--------------JVMObject TRY SET MEMBER: " + key);
+                TrySetMember(key, value);
+                // if (Properties.ContainsKey(key))
+                // {
+                //     Properties[key] = value;
+                //     return;
+                // }
 
-                // check instance for existance of type first
-                var miArray = InstanceType.GetMember(key, BindingFlags.Public | BindingFlags.GetProperty);
-                if (miArray != null && miArray.Length > 0)
-                    SetProperty(Instance, key, value);
-                else
-                    Properties[key] = value;
+                // // check instance for existance of type first
+                // var miArray = InstanceType.GetMember(key, BindingFlags.Public | BindingFlags.GetProperty);
+                // if (miArray != null && miArray.Length > 0)
+                //     SetProperty(Instance, key, value);
+                // else
+                //     Properties[key] = value;
             }
         }
     }

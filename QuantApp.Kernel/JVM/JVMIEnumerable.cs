@@ -10,7 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace JVM
+namespace QuantApp.Kernel.JVM
 {
     
     public class JVMIEnumerable : JVMObject, IEnumerable<object>

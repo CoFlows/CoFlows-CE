@@ -27,7 +27,7 @@ using QuantApp.Engine;
 using QuantApp.Server.Utils;
 
 using Python.Runtime;
-using JVM;
+using QuantApp.Kernel.JVM;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -257,11 +257,6 @@ namespace QuantApp.Server
                 Console.WriteLine("Local deployment");
 
                 var pkg = Code.ProcessPackageFile(workspace_name);
-                
-                // var ws = QuantApp.Kernel.M.Base(pkg.ID);
-                // var wsp = ws[x => true].FirstOrDefault() as WorkSpace;
-                // pkg = Code.ProcessPackageWorkspace(wsp);
-
                 Code.ProcessPackageJSON(pkg);
                 SetDefaultWorkSpaces(new string[]{ pkg.ID });
 
@@ -297,6 +292,7 @@ namespace QuantApp.Server
         {
             Console.WriteLine("Exit");
             _closing.Set();
+            Environment.Exit(0);
         }
 
         private static void Databases(string sqliteFile)
@@ -355,52 +351,32 @@ namespace QuantApp.Server
                     {
                         QuantApp.Engine.Utils.ActiveWorkSpaceList.Add(wsp);
                         _wspServicedList.Add(id);
-                        // Code.InstallNuGets(wsp.NuGets);
-                        // Code.InstallPips(wsp.Pips);
-                        // Code.InstallJars(wsp.Jars);
-                        
 
                         foreach(var fid in wsp.Functions)
                         {
                             var f = F.Find(fid).Value;
                             f.Start();
                         }
+                    
+                        var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/App/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
+                        
+                        
+                        var th = new System.Threading.Thread(() => {
+                            using (Py.GIL())
+                            {
+                                Console.WriteLine("Starting Jupyter...");
+                                Console.WriteLine(code);
+                                PythonEngine.Exec(code);
+                            }
+                        });
+                        th.Start();
                     }
                     else
-                        Console.WriteLine("Default workspace is null: " + id);
-
-
-                    var pkg = QuantApp.Engine.Code.ProcessPackageWorkspace(wsp);
-
-                    var bytes = QuantApp.Engine.Code.ProcessPackageToZIP(pkg);
-
-                    var archive = new ZipArchive(new MemoryStream(bytes));
-                    
-                    foreach(var entry in archive.Entries)
                     {
-                        var entryStream = entry.Open();
-                        var streamReader = new StreamReader(entryStream);
-                        var content = streamReader.ReadToEnd();
-                        var filePath = "/Workspace/" + entry.FullName;
-
-                        System.IO.FileInfo file = new System.IO.FileInfo(filePath);
-                        file.Directory.Create(); // If the directory already exists, this method does nothing.
-                        System.IO.File.WriteAllText(file.FullName, content);
+                        Console.WriteLine("Default workspace is null: " + id);
+                        Environment.Exit(-1);
                     }
 
-                    // var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/App/mnt/Apps', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
-                    var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/App/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
-                    
-                    
-                    var th = new System.Threading.Thread(() => {
-                        using (Py.GIL())
-                        {
-                            Console.WriteLine("Starting Jupyter...");
-                            Console.WriteLine(code);
-                            PythonEngine.Exec(code);
-                        }
-                    });
-                    th.Start();
                 }
                 catch(Exception e)
                 {

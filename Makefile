@@ -10,7 +10,6 @@ java:
 	
 c:
 	cp ./QuantApp.Kernel/JVM/JNIWrapper.cpp ./QuantApp.Server/obj/Docker/publish/
-
 	cp ./QuantApp.Kernel/JVM/app_quant_clr_CLRRuntime.h ./QuantApp.Server/obj/Docker/publish/
 	
 # scala:

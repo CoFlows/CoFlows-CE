@@ -9,7 +9,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace JVM
+namespace QuantApp.Kernel.JVM
 {
     public class JVMICollection : JVMObject, ICollection<object>
     {

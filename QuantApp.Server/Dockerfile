@@ -10,7 +10,7 @@ RUN apt-get update --fix-missing && \
     apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 libglib2.0-dev
 
 RUN apt-get install -y build-essential checkinstall
-RUN apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev
+RUN apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev liblzma-dev
 RUN ln -s /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so
 
 RUN apt-get install -y libomp-dev
@@ -75,10 +75,10 @@ ENV SPARK_HOME /usr/share/spark
 
 RUN \
     cd "/tmp" && \
-    wget "https://www-eu.apache.org/dist/spark/spark-2.4.3/spark-2.4.3-bin-hadoop2.7.tgz" && \
-    tar xzf "spark-2.4.3-bin-hadoop2.7.tgz" && \
+    wget "https://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz" && \
+    tar xzf "spark-2.4.4-bin-hadoop2.7.tgz" && \
     mkdir "${SPARK_HOME}" && \
-    mv "/tmp/spark-2.4.3-bin-hadoop2.7"/* "${SPARK_HOME}" && \
+    mv "/tmp/spark-2.4.4-bin-hadoop2.7"/* "${SPARK_HOME}" && \
     ln -s "${SPARK_HOME}/bin/"* "/usr/bin/" && \
     rm -rf "/tmp/"*
 

@@ -35,6 +35,7 @@ namespace Python.Runtime
 
         internal void AddMethod(MethodBase m)
         {
+
             list.Add(m);
         }
 
@@ -330,6 +331,7 @@ namespace Python.Runtime
                     // XXX maybe better to do this before all the other rigmarole.
                     if (co == null)
                     {
+                        Console.WriteLine("----ERROR: " + inst + " IS NULL");
                         return null;
                     }
                     target = co.inst;
@@ -679,6 +681,13 @@ namespace Python.Runtime
                 }
 
                 return t;
+            }
+
+            
+            if(mi.ReturnType == typeof(QuantApp.Kernel.JVM.JVMObject))
+            {
+                dynamic pymodule = Py.Import("clr");
+                result = pymodule.createJVM(result);
             }
 
             return Converter.ToPython(result, mi.ReturnType);

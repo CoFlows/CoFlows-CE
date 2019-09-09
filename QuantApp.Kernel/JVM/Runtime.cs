@@ -20,7 +20,7 @@ using Python.Runtime;
 
 using Dynamitey;
 
-namespace JVM
+namespace QuantApp.Kernel.JVM
 {
     public class Runtime
     {
@@ -4199,4 +4199,9 @@ namespace JVM
             return type == typeof (T[]);
         }
     } 
+}
+
+namespace JVM
+{
+    public class Runtime : QuantApp.Kernel.JVM.Runtime {}
 }

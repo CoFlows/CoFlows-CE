@@ -9,7 +9,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace JVM
+namespace QuantApp.Kernel.JVM
 {
     class JVMConverter : JsonConverter
     {

@@ -104,7 +104,7 @@ public class CLRRuntime
 
     public static Object Python(Function<Object[], Object> func)
     {
-        CLRObject runtime = CLRRuntime.GetClass("JVM.Runtime");
+        CLRObject runtime = CLRRuntime.GetClass("QuantApp.Kernel.JVM.Runtime");
         return runtime.Invoke("Python", CreateDelegate("System.Func`2[System.Object[], System.Object]", func));
     }
 

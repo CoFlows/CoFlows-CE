@@ -44,8 +44,12 @@ namespace Python.Runtime
             {
                 return handle;
             }
+            
             handle = CreateType(type);
-            cache[type] = handle;
+            
+            // Don't cache Dynamic Types in order to create new types for each instance - Arturo Rodriguez
+            if(type != typeof(QuantApp.Kernel.JVM.JVMObject) && type != typeof(System.Dynamic.DynamicObject))
+                cache[type] = handle;
             return handle;
         }
 
@@ -64,7 +68,10 @@ namespace Python.Runtime
                 return handle;
             }
             handle = CreateType(obj, type);
-            cache[type] = handle;
+
+            // Don't cache Dynamic Types in order to create new types for each instance - Arturo Rodriguez
+            if(type != typeof(QuantApp.Kernel.JVM.JVMObject) && type != typeof(System.Dynamic.DynamicObject))
+                cache[type] = handle;
             return handle;
         }
 
@@ -79,7 +86,14 @@ namespace Python.Runtime
         /// </summary>
         internal static IntPtr CreateType(Type impl)
         {
-            IntPtr type = AllocateTypeObject(impl.Name);
+            string name = impl.Name;
+
+            // Create new names per instance for Dynamic Objects - Arturo Rodriguez
+            if(impl == typeof(QuantApp.Kernel.JVM.JVMObject) || impl == typeof(System.Dynamic.DynamicObject))
+                name += System.Guid.NewGuid().ToString().Replace("-", "_");
+            
+            
+            IntPtr type = AllocateTypeObject(name);
             int ob_size = ObjectOffset.Size(type);
 
             // Set tp_basicsize to the size of our managed instance objects.
@@ -110,6 +124,7 @@ namespace Python.Runtime
         {
             // Cleanup the type name to get rid of funny nested type names.
             string name = "CLR." + clrType.FullName;
+
             int i = name.LastIndexOf('+');
             if (i > -1)
             {
@@ -120,6 +135,10 @@ namespace Python.Runtime
             {
                 name = name.Substring(i + 1);
             }
+
+            // Create new names per instance for Dynamic Objects - Arturo Rodriguez
+            if(clrType == typeof(QuantApp.Kernel.JVM.JVMObject) || clrType == typeof(System.Dynamic.DynamicObject))
+                name += System.Guid.NewGuid().ToString().Replace("-", "_");
 
             IntPtr base_ = IntPtr.Zero;
             int ob_size = ObjectOffset.Size(Runtime.PyTypeType);
