@@ -170,6 +170,7 @@ type F =
                                         .Replace("jsWrapper.SetJob(","jsWrapper.SetJob(\"" + this.ID + "-\" + ")
                                         .Replace("jsWrapper.SetBody(","jsWrapper.SetBody(\"" + this.ID + "-\" + ")
                                         .Replace("$WID$", this.WorkspaceID)
+                                        .Replace("$ID$", this.ID)
                                 )
                             )
                             |> Utils.RegisterCode(false, true)
@@ -1060,7 +1061,7 @@ type F =
 
         let wid = 
             if pkg.WorkspaceID.IsNone then
-                "$CoFlowsID"
+                "$WID$"
             else
                 pkg.WorkspaceID.Value
 
@@ -1088,6 +1089,7 @@ type F =
                                 .Replace("jsWrapper.SetJob(","jsWrapper.SetJob(\"" + uid + "-\" + ")
                                 .Replace("jsWrapper.SetBody(","jsWrapper.SetBody(\"" + uid + "-\" + ")
                                 .Replace("$WID$", wid)
+                                .Replace("$ID$", uid)
                         ))
                     |> Utils.RegisterCode(false, true)
                 elif pkg.Code.IsSome then
@@ -1106,6 +1108,7 @@ type F =
                                 .Replace("jsWrapper.SetJob(","jsWrapper.SetJob(\"" + uid + "-\" + ")
                                 .Replace("jsWrapper.SetBody(","jsWrapper.SetBody(\"" + uid + "-\" + ")
                                 .Replace("$WID$", wid)
+                                .Replace("$ID$", uid)
                         ))
                     |> Utils.RegisterCode(false, true)
                 else

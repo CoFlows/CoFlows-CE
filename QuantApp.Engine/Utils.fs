@@ -185,9 +185,16 @@ module Utils =
         if _executeCodeFunction |> isNull then
             _executeCodeFunction <- func
 
-    let SetFunction(name : string) (func: obj) =
+    let SetFunction(name : string, func: obj) =
         if M._dic.ContainsKey(name) then
             M._dic.[name] <- func
+        else
+            M._dic.TryAdd(name, func) |> ignore
+        name
+
+    let PipeFunction (name : string) (func: obj) =
+        if M._dic.ContainsKey(name) then
+            M._dic.[name] <-  func
         else
             M._dic.TryAdd(name, func) |> ignore
         name
