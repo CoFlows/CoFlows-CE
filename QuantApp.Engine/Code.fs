@@ -84,16 +84,16 @@ type JsWrapper =
             )
 
     member this.SetLoad (name, jsFunc) =
-        Utils.SetFunction(name, QuantApp.Engine.Load(fun data -> this.Wrapper jsFunc data |> ignore))
+        Utils.SetFunction name (QuantApp.Engine.Load(fun data -> this.Wrapper jsFunc data |> ignore))
 
     member this.SetCallback(name, jsFunc) =
-        Utils.SetFunction(name, QuantApp.Kernel.MCallback(fun id data -> this.Wrapper jsFunc [|(id :> obj); data|] |> ignore))
+        Utils.SetFunction name (QuantApp.Kernel.MCallback(fun id data -> this.Wrapper jsFunc [|(id :> obj); data|] |> ignore))
 
     member this.SetBody(name, jsFunc) =
-        Utils.SetFunction(name, QuantApp.Engine.Body(fun data -> this.Wrapper jsFunc [|data|]))
+        Utils.SetFunction name (QuantApp.Engine.Body(fun data -> this.Wrapper jsFunc [|data|]))
 
     member this.SetJob(name, jsFunc) =
-        Utils.SetFunction(name, QuantApp.Engine.Job(fun date data -> this.Wrapper jsFunc [|(date :> obj); data|] |> ignore))
+        Utils.SetFunction name (QuantApp.Engine.Job(fun date data -> this.Wrapper jsFunc [|(date :> obj); data|] |> ignore))
 
 
     member this.Predicate(jsFunc) =

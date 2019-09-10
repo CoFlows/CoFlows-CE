@@ -150,23 +150,7 @@ type F =
                         ()
                     with _ ->
 
-                        let code =
-                            // if this._workspaceID |> isNull |> not then
-                            //     let m = M.Base(this._workspaceID)
-                            //     let res = m.[fun x -> true]
-                            //     if res |> Seq.isEmpty |> not then
-                                
-                            //         let workSpace = res |> Seq.head :?> WorkSpace
-
-                            //         if workSpace.Code |> List.isEmpty |> not then
-                            //             value |> List.append(workSpace.Code)
-                            //         else
-                            //             value
-                            //     else
-                            //         value
-                            // else
-                                value
-
+                        let code = value
                         if Utils.CompileAll || Utils.ActiveWorkSpaceList |> Seq.filter(fun x -> x.ID = this.WorkspaceID) |> Seq.isEmpty |> not then
                             
                             code 
@@ -908,7 +892,6 @@ type F =
                         if not(String.IsNullOrWhiteSpace(pkg.WorkspaceID)) then
                             this._workspaceID <- pkg.WorkspaceID
 
-                        // this.ScriptCode <- pkg.Code |> Seq.filter(fun (name, code) -> not(String.IsNullOrWhiteSpace(code))) |> Seq.toList
                         this.ScriptCode <- 
                             pkg.Code 
                             |> Seq.map(fun (name, code) -> (name, code.Replace("$WID$", pkg.WorkspaceID))) 
