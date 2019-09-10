@@ -130,7 +130,7 @@ type ExecuteCodeResult =
 type BuildCode = delegate of (string * string) list -> string
 type RegisterCode = delegate of bool * bool * (string * string) list -> string
 type ExecuteCode = delegate of (string * string) list -> ExecuteCodeResult
-type ExecuteCodeFunction = delegate of (string * string) list * string * obj[] -> ExecuteCodeResult
+type ExecuteCodeFunction = delegate of bool * (string * string) list * string * obj[] -> ExecuteCodeResult
 
 type WorkSpace =
     {
@@ -210,14 +210,14 @@ module Utils =
         else
             { Result = [("",null)]; Compilation = null }
 
-    let ExecuteCodeFunction(code : (string * string) seq, name : string, parameters : obj[]) =
+    let ExecuteCodeFunction(saveDisk : bool, code : (string * string) seq, name : string, parameters : obj[]) =
         if _executeCodeFunction |> isNull |> not then
-            _executeCodeFunction.Invoke(code |> Seq.toList, name, parameters)
+            _executeCodeFunction.Invoke(saveDisk, code |> Seq.toList, name, parameters)
         else
             { Result = [("",null)]; Compilation = null }
 
     let CreatePKG(code : (string * string) seq, name: string, parameters : obj[]) : FPKG * ((string * string) seq) = 
-        (snd(ExecuteCodeFunction(code, name, parameters).Result.[0]) :?> FPKG), code
+        (snd(ExecuteCodeFunction(false, code, name, parameters).Result.[0]) :?> FPKG), code
 
 
     let GetFunction(name : string) =

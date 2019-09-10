@@ -504,6 +504,7 @@ namespace QuantApp.Server.Controllers
                 //     codes.Add(c);
                 
                 if(!string.IsNullOrEmpty(data.Code.Name))
+                    // codes.Add(new Tuple<string, string>(data.Code.Name, data.Code.Code.Replace(data.Code.WorkspaceID, "$WID$")));
                     codes.Add(new Tuple<string, string>(data.Code.Name, data.Code.Code));
                 else
                 {
@@ -517,7 +518,7 @@ namespace QuantApp.Server.Controllers
                     }
                 }
 
-                var result = QuantApp.Engine.Utils.ExecuteCodeFunction(codes, data.Function.Name, data.Function.Parameters);
+                var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, data.Function.Name, data.Function.Parameters);
 
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
 
@@ -587,7 +588,7 @@ namespace QuantApp.Server.Controllers
                     codes.Add(new Tuple<string, string>(wb.Name, wb.Code));
 
 
-                    var execution = QuantApp.Engine.Utils.ExecuteCodeFunction(codes, name, p.Length == 0 ? null : p);
+                    var execution = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, name, p.Length == 0 ? null : p);
                     
                     var execution_result = execution.Result;
                     if(execution_result.Length == 0)
@@ -646,8 +647,8 @@ namespace QuantApp.Server.Controllers
             var data_old = Code.ProcessPackageFromGit(bytes);
 
             var data = branch == "master" ? data_old : new PKG(
-                data_old.ID + "-" + branch,
-                data_old.Name + "-" + branch,
+                data_old.ID.EndsWith("-" + branch) ? data_old.ID : data_old.ID + "-" + branch,
+                data_old.Name.EndsWith("-" + branch) ? data_old.Name : data_old.Name + "-" + branch,
                 data_old.Base,
                 data_old.Agents,
                 data_old.Queries,

@@ -185,6 +185,7 @@ type F =
                                         .Replace("jsWrapper.SetCallback(","jsWrapper.SetCallback(\"" + this.ID + "-\" + ")
                                         .Replace("jsWrapper.SetJob(","jsWrapper.SetJob(\"" + this.ID + "-\" + ")
                                         .Replace("jsWrapper.SetBody(","jsWrapper.SetBody(\"" + this.ID + "-\" + ")
+                                        .Replace("$WID$", this.WorkspaceID)
                                 )
                             )
                             |> Utils.RegisterCode(false, true)
@@ -198,7 +199,7 @@ type F =
                             { 
                                 ID = this.ID
                                 WorkspaceID = this._workspaceID
-                                Code = this._scriptCode
+                                Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                                 Name = this._name
                                 Description = this._description
                                 MID = this._mid
@@ -220,7 +221,7 @@ type F =
                         if res.Count = 0 then pkg |> m.Add |> ignore else m.Exchange(res.[0], pkg)
                         m.Save()
                     else
-                        this._scriptCode <- value
+                        this._scriptCode <- value |> List.map(fun (name, code) -> (name, code.Replace("$WID$", this._workspaceID)))
                     )
 
 
@@ -240,7 +241,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -282,7 +283,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -323,7 +324,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -363,7 +364,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -404,7 +405,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -443,7 +444,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -476,7 +477,7 @@ type F =
             { 
                 ID = this.ID
                 WorkspaceID = this._workspaceID
-                Code = this._scriptCode
+                Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                 Name = this._name
                 Description = this._description
                 MID = this._mid
@@ -530,7 +531,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -585,7 +586,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -638,7 +639,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -686,7 +687,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -734,7 +735,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -782,7 +783,7 @@ type F =
                         { 
                             ID = this.ID
                             WorkspaceID = this._workspaceID
-                            Code = this._scriptCode
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -907,7 +908,12 @@ type F =
                         if not(String.IsNullOrWhiteSpace(pkg.WorkspaceID)) then
                             this._workspaceID <- pkg.WorkspaceID
 
-                        this.ScriptCode <- pkg.Code |> Seq.filter(fun (name, code) -> not(String.IsNullOrWhiteSpace(code))) |> Seq.toList
+                        // this.ScriptCode <- pkg.Code |> Seq.filter(fun (name, code) -> not(String.IsNullOrWhiteSpace(code))) |> Seq.toList
+                        this.ScriptCode <- 
+                            pkg.Code 
+                            |> Seq.map(fun (name, code) -> (name, code.Replace("$WID$", pkg.WorkspaceID))) 
+                            |> Seq.filter(fun (name, code) -> code |> String.IsNullOrWhiteSpace |> not) 
+                            |> Seq.toList
 
                         if not(String.IsNullOrWhiteSpace(pkg.MID)) then
                             this._mid <- pkg.MID
@@ -1069,6 +1075,14 @@ type F =
             else
                 pkg.ID.Value
 
+        let wid = 
+            if pkg.WorkspaceID.IsNone then
+                "$CoFlowsID"
+            else
+                pkg.WorkspaceID.Value
+
+
+
         let result =
             try
                 let fsi = System.Reflection.Assembly.Load("FSI-ASSEMBLY")
@@ -1090,6 +1104,7 @@ type F =
                                 .Replace("jsWrapper.SetCallback(","jsWrapper.SetCallback(\"" + uid + "-\" + ")
                                 .Replace("jsWrapper.SetJob(","jsWrapper.SetJob(\"" + uid + "-\" + ")
                                 .Replace("jsWrapper.SetBody(","jsWrapper.SetBody(\"" + uid + "-\" + ")
+                                .Replace("$WID$", wid)
                         ))
                     |> Utils.RegisterCode(false, true)
                 elif pkg.Code.IsSome then
@@ -1107,6 +1122,7 @@ type F =
                                 .Replace("jsWrapper.SetCallback(","jsWrapper.SetCallback(\"" + uid + "-\" + ")
                                 .Replace("jsWrapper.SetJob(","jsWrapper.SetJob(\"" + uid + "-\" + ")
                                 .Replace("jsWrapper.SetBody(","jsWrapper.SetBody(\"" + uid + "-\" + ")
+                                .Replace("$WID$", wid)
                         ))
                     |> Utils.RegisterCode(false, true)
                 else

@@ -354,7 +354,9 @@ namespace QuantApp.Server
 
                         foreach(var fid in wsp.Functions)
                         {
-                            var f = F.Find(fid).Value;
+                            var cfid = fid.Replace("$WID$",id);
+
+                            var f = F.Find(cfid).Value;
                             f.Start();
                         }
                     
@@ -405,7 +407,9 @@ namespace QuantApp.Server
                 _wspServicedList.RemoveAll(x => x == id);
                 foreach(var fid in wsp.Functions)
                 {
-                    var f = F.Find(fid).Value;
+                    var cfid = fid.Replace("$WID$",id);
+
+                    var f = F.Find(cfid).Value;
                     f.Stop();
                 }
 

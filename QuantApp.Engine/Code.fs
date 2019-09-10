@@ -1645,8 +1645,8 @@ module Code =
             ((codes_all, null, null) |> compileExecute(saveDisk, execute)).Compilation))
         Utils.SetExecuteCode(ExecuteCode(fun codes_all -> 
             (codes_all, null, null) |> compileExecute(true, true)))
-        Utils.SetExecuteCodeFunction(ExecuteCodeFunction(fun codes name parameters -> 
-            (codes, name, parameters) |> compileExecute(true, true)))
+        Utils.SetExecuteCodeFunction(ExecuteCodeFunction(fun saveDisk codes name parameters -> 
+            (codes, name, parameters) |> compileExecute(false, true)))
     let InitializeCode() = InitializeCodeTypes([||])
     
     let InstallNuGets (nugets : seq<NuGetPackage>) : unit =
@@ -1719,7 +1719,7 @@ module Code =
                             with
                             | _ -> entry.Name, entry.Content
 
-                    { entry with Name = name; Content = content.Replace("$WID", pkg_id) }
+                    { entry with Name = name; Content = content }
                 )
 
             let agents_content = 
@@ -1744,7 +1744,7 @@ module Code =
                             with
                             | _ -> entry.Name, entry.Content, exe
                     
-                    { entry with Name = name; Content = content.Replace("$WID", pkg_id); Exe = exe }
+                    { entry with Name = name; Content = content.Replace("$WID$", pkg_id); Exe = exe }
                 )
 
             let queries_content = 
@@ -1768,7 +1768,7 @@ module Code =
                             with
                             | _ -> entry.Name, entry.Content
 
-                    { entry with Name = name; Content = content.Replace("$WID", pkg_id) }
+                    { entry with Name = name; Content = content.Replace("$WID$", pkg_id) }
                 )
 
             let bins_content = 
@@ -1834,7 +1834,7 @@ module Code =
                 pkg.Base 
                 |> Seq.map(fun entry -> 
                     let content = pkg_dict.["Base/" + entry.Name]
-                    { entry with Content = content.Replace("$WID", pkg_id) }
+                    { entry with Content = content }
                 )
 
             let agents_content = 
@@ -1842,7 +1842,7 @@ module Code =
                 |> Seq.map(fun entry -> 
                     let content = pkg_dict.["Agents/" + entry.Name]
                         
-                    { entry with Content = content.Replace("$WID", pkg_id) }
+                    { entry with Content = content }
                 )
 
             let queries_content = 
@@ -1850,7 +1850,7 @@ module Code =
                 |> Seq.map(fun entry -> 
                     let content = pkg_dict.["Queries/" + entry.Name]
                         
-                    { entry with Content = content.Replace("$WID", pkg_id) }
+                    { entry with Content = content }
                 )
 
             let bins_content = 
@@ -1920,8 +1920,7 @@ module Code =
 
         let buildAgents =
             if buildBase |> String.IsNullOrEmpty then
-                pkg_content.Agents |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content)
-                // |> List.append(pkg_content.Base |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content))
+                pkg_content.Agents |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content.Replace("$WID$", pkg_content.ID))
                 |> Utils.RegisterCode(false, false)
             else
                 "Agents not compiled"
@@ -1929,7 +1928,6 @@ module Code =
         let buildQueries =
             if buildAgents |> String.IsNullOrEmpty then
                 pkg_content.Queries |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content)
-                // |> List.append(pkg_content.Base |> Seq.toList|> List.map(fun entry -> entry.Name, entry.Content))
                 |> Utils.BuildCode
             else
                 "Queries not compiled"
@@ -1976,8 +1974,7 @@ module Code =
 
         let buildAgents =
             if buildBase |> String.IsNullOrEmpty then
-                pkg_content.Agents |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content)
-                |> List.append(pkg_content.Base |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content))
+                pkg_content.Agents |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content.Replace("$WID$", pkg_content.ID))
                 |> Utils.BuildCode
             else
                 "Agents not compiled"
@@ -1985,7 +1982,6 @@ module Code =
         let buildQueries =
             if buildAgents |> String.IsNullOrEmpty then
                 pkg_content.Queries |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content)
-                |> List.append(pkg_content.Base |> Seq.toList|> List.map(fun entry -> entry.Name, entry.Content))
                 |> Utils.BuildCode
             else
                 "Queries not compiled"
@@ -2013,12 +2009,15 @@ module Code =
                             pkg_content.Agents
                             |> Seq.toList
                             |> List.map(fun entry -> 
-                                F.CreatePKG(Utils.CreatePKG(
+                                let fpkg, code = 
+                                    Utils.CreatePKG(
                                     [
-                                        (entry.Name, entry.Content)
-                                    ], //|> List.append(pkg_content.Base |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content)),
-                                    entry.Exe, 
-                                    [||]))
+                                        (entry.Name, entry.Content.Replace("$WID$", pkg_content.ID))
+                                        // (entry.Name, entry.Content)
+                                    ],
+                                    entry.Exe, [||])
+                                let fpkg = { fpkg with ID = fpkg.ID.Replace("$WID$", pkg_id); WorkspaceID = fpkg.WorkspaceID.Replace("$WID$", pkg_id) }
+                                F.CreatePKG(fpkg, code)
                                     )
                             |> List.map(fun (f, _)  -> f.ID)
 
@@ -2037,7 +2036,7 @@ module Code =
                         Container = pkg_content.Container
                     }
 
-                let work_books = M.Base(pkg_id + "--Workbook")
+                let work_books = pkg_id + "--Workbook" |> M.Base
                 pkg_content.Queries
                 |> Seq.toList
                 |> List.iter(fun entry ->
