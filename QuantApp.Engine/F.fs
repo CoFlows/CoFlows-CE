@@ -161,10 +161,10 @@ type F =
                                         .Replace(".Invoke(\"SetFunction\",",".Invoke(\"SetFunction\",\"" + this.ID + "-\" + ")
 
                                         //Js
-                                        .Replace("jsWrapper.SetLoad(","jsWrapper.SetLoad(\"" + this.ID + "-\" + ")
-                                        .Replace("jsWrapper.SetCallback(","jsWrapper.SetCallback(\"" + this.ID + "-\" + ")
-                                        .Replace("jsWrapper.SetJob(","jsWrapper.SetJob(\"" + this.ID + "-\" + ")
-                                        .Replace("jsWrapper.SetBody(","jsWrapper.SetBody(\"" + this.ID + "-\" + ")
+                                        .Replace("jsWrapper.Load(","jsWrapper.Load(\"" + this.ID + "-\" + ")
+                                        .Replace("jsWrapper.Callback(","jsWrapper.Callback(\"" + this.ID + "-\" + ")
+                                        .Replace("jsWrapper.Job(","jsWrapper.Job(\"" + this.ID + "-\" + ")
+                                        .Replace("jsWrapper.Body(","jsWrapper.Body(\"" + this.ID + "-\" + ")
                                         .Replace("$WID$", this.WorkspaceID)
                                         .Replace("$ID$", this.ID)
                                 )
@@ -1080,10 +1080,10 @@ type F =
                                 //Java
                                 .Replace(".Invoke(\"SetFunction\",",".Invoke(\"SetFunction\",\"" + uid + "-\" + ")
                                 //Js
-                                .Replace("jsWrapper.SetLoad(","jsWrapper.SetLoad(\"" + uid + "-\" + ")
-                                .Replace("jsWrapper.SetCallback(","jsWrapper.SetCallback(\"" + uid + "-\" + ")
-                                .Replace("jsWrapper.SetJob(","jsWrapper.SetJob(\"" + uid + "-\" + ")
-                                .Replace("jsWrapper.SetBody(","jsWrapper.SetBody(\"" + uid + "-\" + ")
+                                .Replace("jsWrapper.Load(","jsWrapper.Load(\"" + uid + "-\" + ")
+                                .Replace("jsWrapper.Callback(","jsWrapper.Callback(\"" + uid + "-\" + ")
+                                .Replace("jsWrapper.Job(","jsWrapper.Job(\"" + uid + "-\" + ")
+                                .Replace("jsWrapper.Body(","jsWrapper.Body(\"" + uid + "-\" + ")
                                 .Replace("$WID$", wid)
                                 .Replace("$ID$", uid)
                         ))
@@ -1099,10 +1099,10 @@ type F =
                                 //Java
                                 .Replace(".Invoke(\"SetFunction\",",".Invoke(\"SetFunction\",\"" + uid + "-\" + ")
                                 //Js
-                                .Replace("jsWrapper.SetLoad(","jsWrapper.SetLoad(\"" + uid + "-\" + ")
-                                .Replace("jsWrapper.SetCallback(","jsWrapper.SetCallback(\"" + uid + "-\" + ")
-                                .Replace("jsWrapper.SetJob(","jsWrapper.SetJob(\"" + uid + "-\" + ")
-                                .Replace("jsWrapper.SetBody(","jsWrapper.SetBody(\"" + uid + "-\" + ")
+                                .Replace("jsWrapper.Load(","jsWrapper.SetLoad(\"" + uid + "-\" + ")
+                                .Replace("jsWrapper.Callback(","jsWrapper.Callback(\"" + uid + "-\" + ")
+                                .Replace("jsWrapper.Job(","jsWrapper.Job(\"" + uid + "-\" + ")
+                                .Replace("jsWrapper.Body(","jsWrapper.Body(\"" + uid + "-\" + ")
                                 .Replace("$WID$", wid)
                                 .Replace("$ID$", uid)
                         ))

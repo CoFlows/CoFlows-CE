@@ -247,4 +247,4 @@ module Utils =
     let Load (name : string) func = Load(func) |> PipeFunction(name)
     let Body (name : string) func = Body(func) |> PipeFunction(name)
     let Job (name : string) func = Job(func) |> PipeFunction(name)
-    let MCallback (name : string) func = MCallback(func) |> PipeFunction(name)
+    let Callback (name : string) func = MCallback(func) |> PipeFunction(name)
