@@ -1,11 +1,12 @@
 # CoFlows Community Edition
 
-**CoFlows Community Edition** is a polyglot compute engine that simplifies the development, hosting and deployment of powerful data-centric worflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **no boiler plate code** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and javascript. Furthermore, functions written in any of these languages can call each other within the same process with full interop.
+**CoFlows Community Edition** is a polyglot compute engine that simplifies the development, hosting and deployment of powerful data-centric worflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and javascript. Furthermore, functions written in any of these languages can call each other within the same process with full interop.
 
-Our **Community Edition** is a version of a commercial version that we have used in various Data science projects including:
+Our **Community Edition** is a version of our commercial codebase that we have used in various Data science projects including:
 * Algorithmic Trading
 * Vessel tracking and commodity trade flow projections
 * Macro-economic risk management
+* Global equity selection strategy simulations
 * Healthcare cost and clinical segmentation analysis on national data
 
 For more information visit https://www.quant.app
@@ -14,14 +15,14 @@ This edition will be tightly coupled with the **CoFlows Cloud** making it much e
 
 **CoFlows'** polyglot functionality allows developers to build complex workflows leveraging off great open-source libraries written in various languages. The wealth of distributed computing libraries of Java / Scala together with Python's data science tools are all available in order to use the right tool for the right purpose in the same process!
 
-Furthermore, our aim with **CoFlows** is to offer simplicity for **Data Scientists** in order to quickly build self-contained projects while leveraging off popular tools. To this end, once a developer pulls the **CoFlows** image a range of tools are at their disposal as first class citizens of the **CoFlows** ecosystem:
+Furthermore, our aim with **CoFlows** is to offer simplicity for **Data Scientists** to quickly build self-contained projects while leveraging off popular tools. To this end, once a developer pulls the **CoFlows** image a range of tools are at their disposal as first class citizens of the **CoFlows** ecosystem:
 * DotNet Core 2.2
 * Python 3.7.4
 * Java 1.8
 * Scala 2.11.8
 * JupyterLab
 
-... and yes, it is a big image using 1.9Gb of space.
+... and yes, it is a big image taking 900Mb to download and 1.9Gb of space during runtime.
 
 Projects in **CoFlows** are called Workspaces. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workspace depends on. For further information please read [Workspace](docs/Workspace.md "Workspace").
 
