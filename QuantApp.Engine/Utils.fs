@@ -153,6 +153,11 @@ type WorkSpace =
     }
 
 
+type Load = delegate of obj[] -> unit
+type Body = delegate of obj -> obj
+type Job = delegate of DateTime * string -> unit
+
+
 /// <summary>
 /// Utility module with a set of functions used by all strategies in this namespace
 /// </summary>
@@ -192,7 +197,7 @@ module Utils =
             M._dic.TryAdd(name, func) |> ignore
         name
 
-    let PipeFunction (name : string) (func: obj) =
+    let PipeFunction (name : string) (func : obj) =
         if M._dic.ContainsKey(name) then
             M._dic.[name] <-  func
         else
@@ -224,7 +229,12 @@ module Utils =
             { Result = [("",null)]; Compilation = null }
 
     let CreatePKG(code : (string * string) seq, name: string, parameters : obj[]) : FPKG * ((string * string) seq) = 
-        (snd(ExecuteCodeFunction(false, code, name, parameters).Result.[0]) :?> FPKG), code
+        let text, res = ExecuteCodeFunction(false, code, name, parameters).Result.[0]
+        if res :? string then
+            res |> Console.WriteLine
+            raise(Exception(res.ToString()))
+        else
+            (res :?> FPKG), code
 
 
     let GetFunction(name : string) =
@@ -233,3 +243,8 @@ module Utils =
 
         else
             M._dic.[name]
+
+    let Load (name : string) func = Load(func) |> PipeFunction(name)
+    let Body (name : string) func = Body(func) |> PipeFunction(name)
+    let Job (name : string) func = Job(func) |> PipeFunction(name)
+    let MCallback (name : string) func = MCallback(func) |> PipeFunction(name)

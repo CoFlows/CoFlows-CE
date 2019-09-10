@@ -31,10 +31,6 @@ type public F_v01 =
         Job : string option
     }
 
-type Load = delegate of obj[] -> unit
-type Body = delegate of obj -> obj
-type Job = delegate of DateTime * string -> unit
-
 type FMeta =
     {
         ID : string
