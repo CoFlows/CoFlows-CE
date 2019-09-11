@@ -31,6 +31,13 @@ public class CLRRuntime
         System.loadLibrary("JNIWrapper");
     }
 
+    public static String GetError(Exception ex)
+    {
+        StringWriter errors = new StringWriter();
+        ex.printStackTrace(new PrintWriter(errors));
+        return errors.toString();
+    }
+
     public static CLRObject CreateInstance(String classname, Object... args)
     {
         int len = args.length;
@@ -108,9 +115,9 @@ public class CLRRuntime
         return runtime.Invoke("Python", CreateDelegate("System.Func`2[System.Object[], System.Object]", func));
     }
 
-    public static Object PyImport(String name)
+    public static CLRObject PyImport(String name)
     {
-        return CLRRuntime.GetClass("Python.Runtime.Py").Invoke("Import", name);
+        return (CLRObject)CLRRuntime.GetClass("Python.Runtime.Py").Invoke("Import", name);
     }
 
     public static Object InvokeDelegate(CLRObject clrFunc, Object[] args)

@@ -1316,13 +1316,26 @@ module Code =
                                                                     idx <- idx + 1
                                                                     p :> obj)
                                                 
-                                                let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
+                                                try
+                                                    let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
 
-                                                let pair = (funcName, value)
-                                                pair |> resdb.Add
+                                                    if value |> isNull |> not then
+                                                        let pair = (funcName, value)
+                                                        pair |> resdb.Add
+                                                with
+                                                | ex -> 
+                                                    let message = ex.ToString()
+                                            
+                                                    if "Runtime Method not found" |> message.Contains |> not then
+                                                        let pair = (funcName, message :> obj)
+                                                        pair |> resdb.Add
                                         with
                                         | ex -> 
-                                            sbuilder.AppendLine(ex.ToString()) |> ignore
+                                            let message = ex.ToString()
+                                            
+                                            if "Runtime Method not found" |> message.Contains |> not then
+                                                message |> sbuilder.AppendLine |> ignore
+                                                "--------------------------" |> sbuilder.AppendLine |> ignore
                                         )
 
 
@@ -1336,10 +1349,13 @@ module Code =
                                                 pair |> resdb.Add
                                             with
                                             | ex -> 
-                                                sbuilder.AppendLine(ex.ToString()) |> ignore
+                                                let message = ex.ToString()
+                                                if "Runtime Method not found" |> message.Contains |> not then 
+                                                    let pair = (key, message :> obj)
+                                                    pair |> resdb.Add
                                         )
                                 with
-                                | ex -> 0 |> ignore
+                                | _ -> ()
                             )
                         with
                         | ex -> 
@@ -1439,87 +1455,106 @@ module Code =
                                 try
                                     let className = x |> Path.GetFileNameWithoutExtension
                                     let jobj = Runtime.CreateInstancePath(className, path)
-
-                                    jobj.Members.Keys
-                                    |> Seq.iter(fun key -> 
-                                        try
-                                            let func = jobj.Members.[key]
-                                            let funcName = key.Substring(0, key.IndexOf("-"))
-                                            let argSignature = key.Substring(key.IndexOf("-") + 1)
-                                            
-                                            
-                                            if (if functionName |> isNull then ("-" |> key.EndsWith) else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
-
-                                                let parameters =
-                                                    if parameters |> isNull then 
-                                                        [||] 
-                                                    else
-                                                        let mutable idx = 0
-                                                        parameters 
-                                                        |> Array.mapi(fun i p -> 
-                                                            if argSignature.Length = 0 || (argSignature.Length <= idx && argSignature.Length <> 0) then
-                                                                p :> obj
-                                                            else
-                                                                let p = p.ToString()
-                                                                if argSignature.[idx] = 'L' then
-                                                                    idx <- idx + argSignature.IndexOf(";") + 1
-                                                                    p :> obj
-                                                                elif argSignature.[idx] = 'Z' then
-                                                                    idx <- idx + 1
-                                                                    System.Boolean.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'B' then
-                                                                    idx <- idx + 1
-                                                                    System.Byte.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'C' then
-                                                                    idx <- idx + 1
-                                                                    System.Char.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'S' then
-                                                                    idx <- idx + 1
-                                                                    System.Int16.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'I' then
-                                                                    idx <- idx + 1
-                                                                    System.Int32.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'J' then
-                                                                    idx <- idx + 1
-                                                                    System.Int64.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'F' then
-                                                                    idx <- idx + 1
-                                                                    System.Decimal.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'D' then
-                                                                    idx <- idx + 1
-                                                                    System.Double.Parse(p) :> obj
-
-                                                                else
-                                                                    idx <- idx + 1
-                                                                    p :> obj)
-                                                
-                                                let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
-
-                                                let pair = (funcName, value)
-                                                pair |> resdb.Add
-                                        with
-                                        | ex -> ex.ToString() |> sbuilder.AppendLine |> ignore
-                                        )
-
-
-                                    jobj.Properties.Keys
-                                    |> Seq.iter(fun key -> 
-                                        if (if functionName |> isNull then true else functionName = key) then
+                                    if jobj |> isNull |> not then
+                                        jobj.Members.Keys
+                                        |> Seq.iter(fun key -> 
                                             try
-                                                let prop = jobj.TryGetMember(key)
+                                                let func = jobj.Members.[key]
+                                                let funcName = key.Substring(0, key.IndexOf("-"))
+                                                let argSignature = key.Substring(key.IndexOf("-") + 1)
                                                 
-                                                let pair = (key, prop)
-                                                pair |> resdb.Add
+                                                
+                                                if (if functionName |> isNull then ("-" |> key.EndsWith) else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
+                                                    let parameters =
+                                                        if parameters |> isNull then 
+                                                            [||] 
+                                                        else
+                                                            let mutable idx = 0
+                                                            parameters 
+                                                            |> Array.mapi(fun i p -> 
+                                                                if argSignature.Length = 0 || (argSignature.Length <= idx && argSignature.Length <> 0) then
+                                                                    p :> obj
+                                                                else
+                                                                    let p = p.ToString()
+                                                                    if argSignature.[idx] = 'L' then
+                                                                        idx <- idx + argSignature.IndexOf(";") + 1
+                                                                        p :> obj
+                                                                    elif argSignature.[idx] = 'Z' then
+                                                                        idx <- idx + 1
+                                                                        System.Boolean.Parse(p) :> obj
+
+                                                                    elif argSignature.[idx] = 'B' then
+                                                                        idx <- idx + 1
+                                                                        System.Byte.Parse(p) :> obj
+
+                                                                    elif argSignature.[idx] = 'C' then
+                                                                        idx <- idx + 1
+                                                                        System.Char.Parse(p) :> obj
+
+                                                                    elif argSignature.[idx] = 'S' then
+                                                                        idx <- idx + 1
+                                                                        System.Int16.Parse(p) :> obj
+
+                                                                    elif argSignature.[idx] = 'I' then
+                                                                        idx <- idx + 1
+                                                                        System.Int32.Parse(p) :> obj
+
+                                                                    elif argSignature.[idx] = 'J' then
+                                                                        idx <- idx + 1
+                                                                        System.Int64.Parse(p) :> obj
+
+                                                                    elif argSignature.[idx] = 'F' then
+                                                                        idx <- idx + 1
+                                                                        System.Decimal.Parse(p) :> obj
+
+                                                                    elif argSignature.[idx] = 'D' then
+                                                                        idx <- idx + 1
+                                                                        System.Double.Parse(p) :> obj
+
+                                                                    else
+                                                                        idx <- idx + 1
+                                                                        p :> obj)
+                                                    
+                                                    try
+                                                        let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
+
+                                                        if value |> isNull |> not then
+                                                            let pair = (funcName, value)
+                                                            pair |> resdb.Add
+                                                    with
+                                                    | ex -> 
+                                                        let message = ex.ToString()
+                                                
+                                                        if "Runtime Method not found" |> message.Contains |> not then
+                                                            let pair = (funcName, message :> obj)
+                                                            pair |> resdb.Add
+                                                            
                                             with
-                                            | ex -> ex.ToString() |> sbuilder.AppendLine |> ignore
-                                        )
+                                            | ex -> 
+                                                let message = ex.ToString()
+                                                
+                                                if "Runtime Method not found" |> message.Contains |> not then
+                                                    message |> sbuilder.AppendLine |> ignore
+                                                    "--------------------------" |> sbuilder.AppendLine |> ignore
+                                            )
+
+
+                                        jobj.Properties.Keys
+                                        |> Seq.iter(fun key -> 
+                                            if (if functionName |> isNull then true else functionName = key) then
+                                                try
+                                                    let prop = jobj.TryGetMember(key)
+                                                    
+                                                    let pair = (key, prop)
+                                                    pair |> resdb.Add
+                                                with
+                                                | ex -> 
+                                                    let message = ex.ToString()
+                                                    if "Runtime Method not found" |> message.Contains |> not then 
+                                                        let pair = (key, message :> obj)
+                                                        pair |> resdb.Add
+                                                    
+                                            )
                                 with
                                 | _ -> ()
                             )
@@ -1646,7 +1681,7 @@ module Code =
         Utils.SetExecuteCode(ExecuteCode(fun codes_all -> 
             (codes_all, null, null) |> compileExecute(true, true)))
         Utils.SetExecuteCodeFunction(ExecuteCodeFunction(fun saveDisk codes name parameters -> 
-            (codes, name, parameters) |> compileExecute(false, true)))
+            (codes, name, parameters) |> compileExecute(saveDisk, true)))
     let InitializeCode() = InitializeCodeTypes([||])
     
     let InstallNuGets (nugets : seq<NuGetPackage>) : unit =

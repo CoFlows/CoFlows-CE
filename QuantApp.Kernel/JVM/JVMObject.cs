@@ -375,10 +375,13 @@ namespace QuantApp.Kernel.JVM
             if(Members.ContainsKey(signature))
             {
                 if(args.Length > 0)
+                {
                     return Members[signature].DynamicInvoke((object)args);
-                
+                }
                 else
+                {
                     return Members[signature].DynamicInvoke((object)null);
+                }
             }
             return null;
         }
@@ -493,8 +496,6 @@ namespace QuantApp.Kernel.JVM
             var miArray = InstanceType.GetMember(name,
                                     BindingFlags.InvokeMethod |
                                     BindingFlags.Public | BindingFlags.Instance);
-
-            
 
             if (miArray != null && miArray.Length > 0)
             {

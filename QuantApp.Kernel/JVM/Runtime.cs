@@ -64,7 +64,7 @@ namespace QuantApp.Kernel.JVM
         [DllImport(InvokerDll)] private unsafe static extern void FreeJavaVMInitArgs( void* pArgs );
 
         [DllImport(InvokerDll)] private unsafe static extern int  FindClass( void* pEnv, String sClass, void** ppClass);
-        [DllImport(InvokerDll)] private unsafe static extern string  GetClassName(void* pEnv, void* entity);
+        
 
         [DllImport(InvokerDll)] private unsafe static extern int NewObjectP(void*  pEnv, void* sType, String szArgs, int len, void** pArgs , void** ppObj);
         [DllImport(InvokerDll)] private unsafe static extern int NewObject(void*  pEnv, String sType, String szArgs, int len, void** pArgs , void** ppObj);
@@ -97,71 +97,72 @@ namespace QuantApp.Kernel.JVM
         [DllImport(InvokerDll)] private unsafe static extern int SetObjectField(void* pEnv, void* pClass, void* pMid, void* pObject);
 
 
-        [DllImport(InvokerDll)] private unsafe static extern int CallStaticIntMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern int CallIntMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern int GetStaticIntField(void* pEnv, void* pClass, void* pMid);
-        [DllImport(InvokerDll)] private unsafe static extern int GetIntField(void* pEnv, void* pClass, void* pMid);
+        [DllImport(InvokerDll)] private unsafe static extern int CallStaticIntMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs, int* res);
+        [DllImport(InvokerDll)] private unsafe static extern int CallIntMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs, int* res);
+        [DllImport(InvokerDll)] private unsafe static extern int GetStaticIntField(void* pEnv, void* pClass, void* pMid, int* res);
+        [DllImport(InvokerDll)] private unsafe static extern int GetIntField(void* pEnv, void* pClass, void* pMid, int* res);
         [DllImport(InvokerDll)] private unsafe static extern int SetStaticIntField(void* pEnv, void* pClass, void* pMid, int val);
         [DllImport(InvokerDll)] private unsafe static extern int SetIntField(void* pEnv, void* pClass, void* pMid, int val);
         
         
-        [DllImport(InvokerDll)] private unsafe static extern long CallStaticLongMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern long CallLongMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        
-        [DllImport(InvokerDll)] private unsafe static extern long GetStaticLongField(void* pEnv, void* pClass, void* pMid);
-        [DllImport(InvokerDll)] private unsafe static extern long GetLongField(void* pEnv, void* pClass, void* pMid);
+        [DllImport(InvokerDll)] private unsafe static extern int CallStaticLongMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs, long* res);
+        [DllImport(InvokerDll)] private unsafe static extern int CallLongMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs, long* res);
+        [DllImport(InvokerDll)] private unsafe static extern int GetStaticLongField(void* pEnv, void* pClass, void* pMid, long* res);
+        [DllImport(InvokerDll)] private unsafe static extern int GetLongField(void* pEnv, void* pClass, void* pMid, long* res);
         [DllImport(InvokerDll)] private unsafe static extern int SetStaticLongField(void* pEnv, void* pClass, void* pMid, long val);
         [DllImport(InvokerDll)] private unsafe static extern int SetLongField(void* pEnv, void* pClass, void* pMid, long val);
         
-        [DllImport(InvokerDll)] private unsafe static extern float CallStaticFloatMethod(void* pEnv, void* pClass, void* pMid, int len,  void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern float CallFloatMethod(void* pEnv, void* pClass, void* pMid, int len,  void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern float GetStaticFloatField(void* pEnv, void* pClass, void* pMid);
-        [DllImport(InvokerDll)] private unsafe static extern float GetFloatField(void* pEnv, void* pClass, void* pMid);
+        [DllImport(InvokerDll)] private unsafe static extern int CallStaticFloatMethod(void* pEnv, void* pClass, void* pMid, int len,  void** pArgs, float* val);
+        [DllImport(InvokerDll)] private unsafe static extern int CallFloatMethod(void* pEnv, void* pClass, void* pMid, int len,  void** pArgs, float* val);
+        [DllImport(InvokerDll)] private unsafe static extern int GetStaticFloatField(void* pEnv, void* pClass, void* pMid, float* val);
+        [DllImport(InvokerDll)] private unsafe static extern int GetFloatField(void* pEnv, void* pClass, void* pMid, float* val);
         [DllImport(InvokerDll)] private unsafe static extern int SetStaticFloatField(void* pEnv, void* pClass, void* pMid, float val);
         [DllImport(InvokerDll)] private unsafe static extern int SetFloatField(void* pEnv, void* pClass, void* pMid, float val);
 
-        [DllImport(InvokerDll)] private unsafe static extern double CallStaticDoubleMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern double CallDoubleMethod( void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern double GetStaticDoubleField(void* pEnv, void* pClass, void* pMid);
-        [DllImport(InvokerDll)] private unsafe static extern double GetDoubleField( void* pEnv, void* pClass, void* pMid);
+        [DllImport(InvokerDll)] private unsafe static extern int CallStaticDoubleMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs, double* res);
+        [DllImport(InvokerDll)] private unsafe static extern int CallDoubleMethod( void* pEnv, void* pClass, void* pMid, int len, void** pArgs, double* res);
+        [DllImport(InvokerDll)] private unsafe static extern int GetStaticDoubleField(void* pEnv, void* pClass, void* pMid, double* res);
+        [DllImport(InvokerDll)] private unsafe static extern int GetDoubleField( void* pEnv, void* pClass, void* pMid, double* res);
         [DllImport(InvokerDll)] private unsafe static extern int SetStaticDoubleField(void* pEnv, void* pClass, void* pMid, double val);
         [DllImport(InvokerDll)] private unsafe static extern int SetDoubleField(void* pEnv, void* pClass, void* pMid, double val);
 
 
-        [DllImport(InvokerDll)] private unsafe static extern bool CallStaticBooleanMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern bool CallBooleanMethod( void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern bool GetStaticBooleanField(void* pEnv, void* pClass, void* pMid);
-        [DllImport(InvokerDll)] private unsafe static extern bool GetBooleanField( void* pEnv, void* pClass, void* pMid);
+        [DllImport(InvokerDll)] private unsafe static extern int CallStaticBooleanMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs, bool* val);
+        [DllImport(InvokerDll)] private unsafe static extern int CallBooleanMethod( void* pEnv, void* pClass, void* pMid, int len, void** pArgs, bool* val);
+        [DllImport(InvokerDll)] private unsafe static extern int GetStaticBooleanField(void* pEnv, void* pClass, void* pMid, bool* val);
+        [DllImport(InvokerDll)] private unsafe static extern int GetBooleanField( void* pEnv, void* pClass, void* pMid, bool* val);
         [DllImport(InvokerDll)] private unsafe static extern int SetStaticBooleanField(void* pEnv, void* pClass, void* pMid, bool val);
         [DllImport(InvokerDll)] private unsafe static extern int SetBooleanField(void* pEnv, void* pClass, void* pMid, bool val);
 
         
-        [DllImport(InvokerDll)] private unsafe static extern byte CallStaticByteMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern byte CallByteMethod( void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern byte GetStaticByteField(void* pEnv, void* pClass, void* pMid);
-        [DllImport(InvokerDll)] private unsafe static extern byte GetByteField( void* pEnv, void* pClass, void* pMid);
+        [DllImport(InvokerDll)] private unsafe static extern int CallStaticByteMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs, byte* val);
+        [DllImport(InvokerDll)] private unsafe static extern int CallByteMethod( void* pEnv, void* pClass, void* pMid, int len, void** pArgs, byte* val);
+        [DllImport(InvokerDll)] private unsafe static extern int GetStaticByteField(void* pEnv, void* pClass, void* pMid, byte* val);
+        [DllImport(InvokerDll)] private unsafe static extern int GetByteField( void* pEnv, void* pClass, void* pMid, byte* val);
         [DllImport(InvokerDll)] private unsafe static extern int SetStaticByteField(void* pEnv, void* pClass, void* pMid, byte val);
         [DllImport(InvokerDll)] private unsafe static extern int SetByteField(void* pEnv, void* pClass, void* pMid, byte val);
 
 
-        [DllImport(InvokerDll)] private unsafe static extern char CallStaticCharMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern char CallCharMethod( void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern char GetStaticCharField(void* pEnv, void* pClass, void* pMid);
-        [DllImport(InvokerDll)] private unsafe static extern char GetCharField( void* pEnv, void* pClass, void* pMid);
+        [DllImport(InvokerDll)] private unsafe static extern int CallStaticCharMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs, char* val);
+        [DllImport(InvokerDll)] private unsafe static extern int CallCharMethod( void* pEnv, void* pClass, void* pMid, int len, void** pArgs, char* val);
+        [DllImport(InvokerDll)] private unsafe static extern int GetStaticCharField(void* pEnv, void* pClass, void* pMid, char* val);
+        [DllImport(InvokerDll)] private unsafe static extern int GetCharField( void* pEnv, void* pClass, void* pMid, char* val);
         [DllImport(InvokerDll)] private unsafe static extern int SetStaticCharField(void* pEnv, void* pClass, void* pMid, char val);
         [DllImport(InvokerDll)] private unsafe static extern int SetCharField(void* pEnv, void* pClass, void* pMid, char val);
 
 
-        [DllImport(InvokerDll)] private unsafe static extern short CallStaticShortMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern short CallShortMethod( void* pEnv, void* pClass, void* pMid, int len, void** pArgs);
-        [DllImport(InvokerDll)] private unsafe static extern short GetStaticShortField(void* pEnv, void* pClass, void* pMid);
-        [DllImport(InvokerDll)] private unsafe static extern short GetShortField( void* pEnv, void* pClass, void* pMid);
+        [DllImport(InvokerDll)] private unsafe static extern int CallStaticShortMethod(void* pEnv, void* pClass, void* pMid, int len, void** pArgs, short* val);
+        [DllImport(InvokerDll)] private unsafe static extern int CallShortMethod( void* pEnv, void* pClass, void* pMid, int len, void** pArgs, short* val);
+        [DllImport(InvokerDll)] private unsafe static extern int GetStaticShortField(void* pEnv, void* pClass, void* pMid, short* val);
+        [DllImport(InvokerDll)] private unsafe static extern int GetShortField( void* pEnv, void* pClass, void* pMid, short* val);
         [DllImport(InvokerDll)] private unsafe static extern int SetStaticShortField(void* pEnv, void* pClass, void* pMid, short val);
         [DllImport(InvokerDll)] private unsafe static extern int SetShortField(void* pEnv, void* pClass, void* pMid, short val);
 
 
         [DllImport(InvokerDll)] private unsafe static extern void* GetJavaString( void* pEnv, string str );
         [DllImport(InvokerDll)] private unsafe static extern string GetNetString( void* pEnv, void* jstr );
+
+        [DllImport(InvokerDll)] private unsafe static extern string GetException( void* pEnv );
 
 
         [DllImport(InvokerDll)] private unsafe static extern int NewObjectArrayP( void*  pEnv, int nDimension, void* pClass, void** ppArray );
@@ -302,13 +303,24 @@ namespace QuantApp.Kernel.JVM
                 ct = asm.GetType(classname);
             }
 
-            foreach(AssemblyName assemblyName in System.Reflection.Assembly.GetEntryAssembly().GetReferencedAssemblies())
-            {
-                asm = System.Reflection.Assembly.Load(assemblyName);
-                ct = asm.GetType(classname);
-                if(ct != null)
-                    break;
-            }
+            
+            if(ct == null)
+                foreach(Assembly assembly in M._compiledAssemblies.Values)
+                {
+                    asm = assembly;
+                    ct = asm.GetType(classname);
+                    if(ct != null)
+                        break;
+                }
+
+            if(ct == null)
+                foreach(AssemblyName assemblyName in System.Reflection.Assembly.GetEntryAssembly().GetReferencedAssemblies())
+                {
+                    asm = System.Reflection.Assembly.Load(assemblyName);
+                    ct = asm.GetType(classname);
+                    if(ct != null)
+                        break;
+                }
 
             if(ct == null)
                 foreach(AssemblyName assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
@@ -362,6 +374,9 @@ namespace QuantApp.Kernel.JVM
         
         private static unsafe void* Java_app_quant_clr_CLRRuntime_nativeInvoke(int hashCode, string funcname, int len, void** args)
         {
+            void*  pEnv;// = (void*)EnvPtr;
+            if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
+            
             object[] classes_obj = getJavaArray(new IntPtr(args), "[Ljava/lang/Object;");
 
             try
@@ -381,7 +396,6 @@ namespace QuantApp.Kernel.JVM
                     }
                     else if(obj is DynamicObject)
                     {
-
                         var res = Dynamic.InvokeMember(obj,funcname,classes_obj);
                         
                         if(res == null)
@@ -391,7 +405,6 @@ namespace QuantApp.Kernel.JVM
                     }
                     else
                     {
-                        
                         MethodInfo method = obj.GetType().GetMethod(funcname);
 
                         object res = method.Invoke(obj, classes_obj);
@@ -405,7 +418,6 @@ namespace QuantApp.Kernel.JVM
             }
             catch(Exception e)
             {
-                Console.WriteLine("Java_app_quant_clr_CLRRuntime_nativeInvoke: " + hashCode + " " + funcname + " " + len + " " + classes_obj);
                 Console.WriteLine(e);
             }
 
@@ -431,7 +443,8 @@ namespace QuantApp.Kernel.JVM
                 void** ar_newInstance = stackalloc void*[args_object.Length];
                 getJavaParameters(ref ar_newInstance, args_object);
                 void* pObj;
-                int ro = NewObject( pEnv, "app/quant/clr/CLRObject", "(Ljava/lang/String;I)V", args_object.Length, ar_newInstance, &pObj );
+                if(NewObject( pEnv, "app/quant/clr/CLRObject", "(Ljava/lang/String;I)V", args_object.Length, ar_newInstance, &pObj ) != 0)
+                    throw new Exception(GetException(pEnv));
 
                 DB.TryAdd(hashCode, del);
 
@@ -449,12 +462,13 @@ namespace QuantApp.Kernel.JVM
 
         public static unsafe object InvokeFunc(int hashCode, object[] args)
         {
+            void*  pEnv;
+            if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
+            
             void** pAr_len = stackalloc void*[args == null ? 1 : 2];
             object[] pAr_len_data = args == null ? new object[]{ hashCode } : new object[]{ hashCode, args };
             getJavaParameters(ref pAr_len, pAr_len_data);
 
-            void*  pEnv;
-            if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
             void*  pNetBridgeClass;
             if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0)
             {
@@ -479,7 +493,10 @@ namespace QuantApp.Kernel.JVM
                                     
                                     
                                     void** pAr_boolean = stackalloc void*[1];
-                                    return CallBooleanMethod( pEnv, pGetCLRObject, pInvokeMethod_boolean, 1, pAr_boolean);
+                                    bool res_bool;
+                                    if(CallBooleanMethod( pEnv, pGetCLRObject, pInvokeMethod_boolean, 1, pAr_boolean, &res_bool) != 0)
+                                        throw new Exception(GetException(pEnv));
+                                    return res_bool;
 
                                 case "java.lang.Byte":
                                     void*  pInvokeMethod_byte;
@@ -487,7 +504,10 @@ namespace QuantApp.Kernel.JVM
                                     
                                     
                                     void** pAr_byte = stackalloc void*[1];
-                                    return CallByteMethod( pEnv, pGetCLRObject, pInvokeMethod_byte, 1, pAr_byte);
+                                    byte res_byte;
+                                    if(CallByteMethod( pEnv, pGetCLRObject, pInvokeMethod_byte, 1, pAr_byte, &res_byte) != 0)
+                                        throw new Exception(GetException(pEnv));
+                                    return res_byte;
 
                                 case "java.lang.Character":
                                     void*  pInvokeMethod_char;
@@ -495,7 +515,10 @@ namespace QuantApp.Kernel.JVM
                                     
                                     
                                     void** pAr_char = stackalloc void*[1];
-                                    return CallCharMethod( pEnv, pGetCLRObject, pInvokeMethod_char, 1, pAr_char);
+                                    char _res;
+                                    if(CallCharMethod( pEnv, pGetCLRObject, pInvokeMethod_char, 1, pAr_char, &_res) != 0)
+                                        throw new Exception(GetException(pEnv));
+                                    return _res;
 
                                 case "java.lang.Short":
                                     void*  pInvokeMethod_short;
@@ -503,7 +526,10 @@ namespace QuantApp.Kernel.JVM
                                     
                                     
                                     void** pAr_short = stackalloc void*[1];
-                                    return CallShortMethod( pEnv, pGetCLRObject, pInvokeMethod_short, 1, pAr_short);
+                                    short res_short;
+                                    if(CallShortMethod( pEnv, pGetCLRObject, pInvokeMethod_short, 1, pAr_short, &res_short) != 0)
+                                        throw new Exception(GetException(pEnv));
+                                    return res_short;
 
                                 case "java.lang.Integer":
                                     void*  pInvokeMethod_int;
@@ -511,7 +537,10 @@ namespace QuantApp.Kernel.JVM
                                     
                                     
                                     void** pAr_int = stackalloc void*[1];
-                                    return CallIntMethod( pEnv, pGetCLRObject, pInvokeMethod_int, 1, pAr_int);
+                                    int res_int;
+                                    if(CallIntMethod( pEnv, pGetCLRObject, pInvokeMethod_int, 1, pAr_int, &res_int) != 0)
+                                        throw new Exception(GetException(pEnv));
+                                    return res_int;
 
                                 case "java.lang.Long":
                                     void*  pInvokeMethod_long;
@@ -519,7 +548,10 @@ namespace QuantApp.Kernel.JVM
                                     
                                     
                                     void** pAr_long = stackalloc void*[1];
-                                    return CallLongMethod( pEnv, pGetCLRObject, pInvokeMethod_long, 1, pAr_long);
+                                    long res_long;
+                                    if(CallLongMethod( pEnv, pGetCLRObject, pInvokeMethod_long, 1, pAr_long, &res_long) != 0)
+                                        throw new Exception(GetException(pEnv));
+                                    return res_long;
 
 
                                 case "java.lang.Float":
@@ -528,7 +560,10 @@ namespace QuantApp.Kernel.JVM
                                     
                                     
                                     void** pAr_float = stackalloc void*[1];
-                                    return CallFloatMethod( pEnv, pGetCLRObject, pInvokeMethod_float, 1, pAr_float);
+                                    float res_float;
+                                    if(CallFloatMethod( pEnv, pGetCLRObject, pInvokeMethod_float, 1, pAr_float, &res_float) != 0)
+                                        throw new Exception(GetException(pEnv));
+                                    return res_float;
 
                                 case "java.lang.Double":
                                     void*  pInvokeMethod_double;
@@ -536,7 +571,11 @@ namespace QuantApp.Kernel.JVM
                                     
                                     
                                     void** pAr_double = stackalloc void*[1];
-                                    return CallDoubleMethod( pEnv, pGetCLRObject, pInvokeMethod_double, 1, pAr_double);
+                                    // return CallDoubleMethod( pEnv, pGetCLRObject, pInvokeMethod_double, 1, pAr_double);
+                                    double res_double;
+                                    if(CallDoubleMethod( pEnv, pGetCLRObject, pInvokeMethod_double, 1, pAr_double, &res_double) != 0)
+                                        throw new Exception(GetException(pEnv));
+                                    return res_double;
 
 
                                 case "java.lang.String":
@@ -592,6 +631,13 @@ namespace QuantApp.Kernel.JVM
 
         private static unsafe void* getObjectPointer(object res)
         {
+            if(res == null)
+                return IntPtr.Zero.ToPointer();
+            
+            void*  pEnv;
+            if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
+            
+
             if(res is PyObject)
             {
                 var pres = res as PyObject;
@@ -621,8 +667,6 @@ namespace QuantApp.Kernel.JVM
             }
 
 
-            void*  pEnv;
-            if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
             Type type = res == null ? null : res.GetType();
 
             
@@ -633,56 +677,56 @@ namespace QuantApp.Kernel.JVM
                     if(NewBooleanObject(pEnv, (bool)res, &res_bool) == 0)
                         return res_bool;
                     else
-                        throw new Exception("New primitive creation error");
+                        throw new Exception(GetException(pEnv));
                     
                 case TypeCode.Byte:
                     void* res_byte;
                     if(NewByteObject(pEnv, (byte)res, &res_byte) == 0)
                         return res_byte;
                     else
-                        throw new Exception("New primitive creation error");
+                        throw new Exception(GetException(pEnv));
 
                 case TypeCode.Char:
                     void* res_char;
                     if(NewCharacterObject(pEnv, (char)res, &res_char) == 0)
                         return res_char;
                     else
-                        throw new Exception("New primitive creation error");
+                        throw new Exception(GetException(pEnv));
 
                 case TypeCode.Int16:
                     void* res_short;
                     if(NewShortObject(pEnv, (short)res, &res_short) == 0)
                         return res_short;
                     else
-                        throw new Exception("New primitive creation error");
+                        throw new Exception(GetException(pEnv));
 
                 case TypeCode.Int32: 
                     void* res_int;
                     if(NewIntegerObject(pEnv, (int)res, &res_int) == 0)
                         return res_int;
                     else
-                        throw new Exception("New primitive creation error");
+                        throw new Exception(GetException(pEnv));
 
                 case TypeCode.Int64:
                     void* res_long;
                     if(NewLongObject(pEnv, (long)res, &res_long) == 0)
                         return res_long;
                     else
-                        throw new Exception("New primitive creation error");
+                        throw new Exception(GetException(pEnv));
 
                 case TypeCode.Single:
                     void* res_float;
                     if(NewFloatObject(pEnv, (float)res, &res_float) == 0)
                         return res_float;
                     else
-                        throw new Exception("New primitive creation error");
+                        throw new Exception(GetException(pEnv));
 
                 case TypeCode.Double:
                     void* res_double;
                     if(NewDoubleObject(pEnv, (double)res, &res_double) == 0)
                         return res_double;
                     else
-                        throw new Exception("New primitive creation error");
+                        throw new Exception(GetException(pEnv));
 
                 case TypeCode.String:
                     void* string_arg = GetJavaString(pEnv, (string)res);
@@ -719,13 +763,13 @@ namespace QuantApp.Kernel.JVM
                                 if(CallStaticObjectMethod( pEnv, pNetBridgeClass, pGetCLRObjectMethod, &pGetCLRObject, 1, pAr_len) == 0)
                                     return pGetCLRObject;
                                 else
-                                    throw new Exception("GetObjectPointer: CallStaticObjectMethod error");
+                                    throw new Exception(GetException(pEnv));
                             }
                             else
-                                throw new Exception("GetObjectPointer: GetCLRObject get method error");
+                                throw new Exception(GetException(pEnv));
                         }
                         else
-                            throw new Exception("GetObjectPointer: get class CLRRuntime error");
+                            throw new Exception(GetException(pEnv));
                     }
 
                     else if(res is IJVMTuple)
@@ -776,10 +820,10 @@ namespace QuantApp.Kernel.JVM
                                 return pObj;
                             }
                             else
-                                throw new Exception("GetObjectPointer: new instance error");
+                                throw new Exception(GetException(pEnv));
                         }
                         else
-                            throw new Exception("GetObjectPointer: get class error");
+                            throw new Exception(GetException(pEnv));
                     }
 
                     else if(res is IEnumerator<object>)
@@ -802,10 +846,10 @@ namespace QuantApp.Kernel.JVM
                                 return pObj;
                             }
                             else
-                                throw new Exception("GetObjectPointer: new instance error");
+                                throw new Exception(GetException(pEnv));
                         }
                         else
-                            throw new Exception("GetObjectPointer: get class error");
+                            throw new Exception(GetException(pEnv));
                     }
 
                     else
@@ -828,10 +872,10 @@ namespace QuantApp.Kernel.JVM
                                 return pObj;
                             }
                             else
-                                throw new Exception("GetObjectPointer: new instance error");
+                                throw new Exception(GetException(pEnv));
                         }
                         else
-                            throw new Exception("GetObjectPointer: get class error");
+                            throw new Exception(GetException(pEnv));
                     }
                         
 
@@ -929,6 +973,9 @@ namespace QuantApp.Kernel.JVM
         {
             if(DB.ContainsKey(hashCode))
             {
+                void*  pEnv;
+                if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
+            
                 object obj = DB[hashCode];
                 if(obj == null)
                     return null;
@@ -1238,42 +1285,42 @@ namespace QuantApp.Kernel.JVM
                 {
                     case "Z":
                         if(NewBooleanArray( pEnv, arrLength, &pJArray ) != 0)
-                            throw new Exception("error creating new primitive array");
+                            throw new Exception(GetException(pEnv));
                         break;
 
                     case "B":
                         if(NewByteArray( pEnv, arrLength, &pJArray ) != 0)
-                            throw new Exception("error creating new primitive array");
+                            throw new Exception(GetException(pEnv));
                         break;
 
                     case "C":
                         if(NewCharArray( pEnv, arrLength, &pJArray ) != 0)
-                            throw new Exception("error creating new primitive array");
+                            throw new Exception(GetException(pEnv));
                         break;
 
                     case "S":
                         if(NewShortArray( pEnv, arrLength, &pJArray ) != 0)
-                            throw new Exception("error creating new primitive array");
+                            throw new Exception(GetException(pEnv));
                         break;
 
                     case "I":
                         if(NewIntArray( pEnv, arrLength, &pJArray ) != 0)
-                            throw new Exception("error creating new primitive array");
+                            throw new Exception(GetException(pEnv));
                         break;
 
                     case "J":
                         if(NewLongArray( pEnv, arrLength, &pJArray ) != 0)
-                            throw new Exception("error creating new primitive array");
+                            throw new Exception(GetException(pEnv));
                         break;
 
                     case "F":
                         if(NewFloatArray( pEnv, arrLength, &pJArray ) != 0)
-                            throw new Exception("error creating new primitive array");
+                            throw new Exception(GetException(pEnv));
                         break;
 
                     case "D":
                         if(NewDoubleArray( pEnv, arrLength, &pJArray ) != 0)
-                            throw new Exception("error creating new primitive array");
+                            throw new Exception(GetException(pEnv));
                         break;
 
                     default:
@@ -1287,7 +1334,7 @@ namespace QuantApp.Kernel.JVM
 
 
                         if(NewObjectArray( pEnv, arrLength, cls, &pJArray ) != 0)
-                            throw new Exception("error creating object array");
+                            throw new Exception(GetException(pEnv));
                         break;
                 }
 
@@ -1339,7 +1386,8 @@ namespace QuantApp.Kernel.JVM
                                 else
                                 {
                                     void* pObjBool;
-                                    NewBooleanObject(pEnv, (bool)sub_element, &pObjBool);
+                                    if(NewBooleanObject(pEnv, (bool)sub_element, &pObjBool) != 0)
+                                        throw new Exception(GetException(pEnv));
                                     SetObjectArrayElement(pEnv, pJArray, ii, pObjBool);
                                 }
 
@@ -1351,7 +1399,8 @@ namespace QuantApp.Kernel.JVM
                                 else
                                 {
                                     void* pObjB;
-                                    NewByteObject(pEnv, (byte)sub_element, &pObjB);
+                                    if(NewByteObject(pEnv, (byte)sub_element, &pObjB) != 0)
+                                        throw new Exception(GetException(pEnv));
                                     SetObjectArrayElement(pEnv, pJArray, ii, pObjB);
                                 }
                                 break;
@@ -1362,7 +1411,8 @@ namespace QuantApp.Kernel.JVM
                                 else
                                 {
                                     void* pObjC;
-                                    NewCharacterObject(pEnv, (char)sub_element, &pObjC);
+                                    if(NewCharacterObject(pEnv, (char)sub_element, &pObjC) != 0)
+                                        throw new Exception(GetException(pEnv));
                                     SetObjectArrayElement(pEnv, pJArray, ii, pObjC);
                                 }
                                 break;
@@ -1373,7 +1423,8 @@ namespace QuantApp.Kernel.JVM
                                 else
                                 {
                                     void* pObjS;
-                                    NewShortObject(pEnv, (short)sub_element, &pObjS);
+                                    if(NewShortObject(pEnv, (short)sub_element, &pObjS) != 0)
+                                        throw new Exception(GetException(pEnv));
                                     SetObjectArrayElement(pEnv, pJArray, ii, pObjS);
                                 }
                                 break;
@@ -1384,7 +1435,8 @@ namespace QuantApp.Kernel.JVM
                                 else
                                 {
                                     void* pObjI;
-                                    NewIntegerObject(pEnv, (int)sub_element, &pObjI);
+                                    if(NewIntegerObject(pEnv, (int)sub_element, &pObjI) != 0)
+                                        throw new Exception(GetException(pEnv));
                                     SetObjectArrayElement(pEnv, pJArray, ii, pObjI);
                                 }
                                 break;
@@ -1395,7 +1447,8 @@ namespace QuantApp.Kernel.JVM
                                 else
                                 {
                                     void* pObjL;
-                                    NewLongObject(pEnv, (long)sub_element, &pObjL);
+                                    if(NewLongObject(pEnv, (long)sub_element, &pObjL) != 0)
+                                        throw new Exception(GetException(pEnv));
                                     SetObjectArrayElement(pEnv, pJArray, ii, pObjL);
                                 }
                                 break;
@@ -1406,7 +1459,8 @@ namespace QuantApp.Kernel.JVM
                                 else
                                 {
                                     void* pObjF;
-                                    NewFloatObject(pEnv, (float)sub_element, &pObjF);
+                                    if(NewFloatObject(pEnv, (float)sub_element, &pObjF) != 0)
+                                        throw new Exception(GetException(pEnv));
                                     SetObjectArrayElement(pEnv, pJArray, ii, pObjF);
                                 }
                                 break;
@@ -1417,7 +1471,8 @@ namespace QuantApp.Kernel.JVM
                                 else
                                 {
                                     void* pObjD;
-                                    NewDoubleObject(pEnv, (double)sub_element, &pObjD);
+                                    if(NewDoubleObject(pEnv, (double)sub_element, &pObjD) != 0)
+                                        throw new Exception(GetException(pEnv));
                                     SetObjectArrayElement(pEnv, pJArray, ii, pObjD);
                                 }
                                 break;
@@ -1446,7 +1501,8 @@ namespace QuantApp.Kernel.JVM
                                     void* ptr_res = (void *)(sub_element.GetHashCode());
 
                                     void*  pGetCLRObjectMethod;
-                                    GetStaticMethodID( pEnv, pNetBridgeClass, "GetCLRObject", "(I)Lapp/quant/clr/CLRObject;", &pGetCLRObjectMethod );
+                                    if(GetStaticMethodID( pEnv, pNetBridgeClass, "GetCLRObject", "(I)Lapp/quant/clr/CLRObject;", &pGetCLRObjectMethod ) != 0)
+                                        throw new Exception(GetException(pEnv));
 
                                     void** pAr_len = stackalloc void*[1];
                                     object[] pAr_len_data = new object[]{ sub_element.GetHashCode() };
@@ -1508,10 +1564,10 @@ namespace QuantApp.Kernel.JVM
                                             //return pObj;
                                         }
                                         else
-                                            throw new Exception("GetObjectPointer: new instance error");
+                                            throw new Exception(GetException(pEnv));
                                     }
                                     else
-                                        throw new Exception("GetObjectPointer: get class error");
+                                        throw new Exception(GetException(pEnv));
                                 }
 
                                 else if(res is IEnumerator<object>)
@@ -1535,10 +1591,10 @@ namespace QuantApp.Kernel.JVM
                                             SetObjectArrayElement(pEnv, pJArray, ii, pObj);
                                         }
                                         else
-                                            throw new Exception("GetObjectPointer: new instance error");
+                                            throw new Exception(GetException(pEnv));
                                     }
                                     else
-                                        throw new Exception("GetObjectPointer: get class error");
+                                        throw new Exception(GetException(pEnv));
                                 }
 
                                 else
@@ -1562,10 +1618,10 @@ namespace QuantApp.Kernel.JVM
                                             DB.TryAdd(sub_element.GetHashCode(), sub_element);
                                         }
                                         else
-                                            throw new Exception("GetObjectPointer: new instance error");
+                                            throw new Exception(GetException(pEnv));
                                     }
                                     else
-                                        throw new Exception("GetObjectPointer: get class error");
+                                        throw new Exception(GetException(pEnv));
                                 }
                                 break;
                         }
@@ -1579,7 +1635,7 @@ namespace QuantApp.Kernel.JVM
             
             }
             else
-                throw new Exception("get CLRRuntime class error");
+                throw new Exception(GetException(pEnv));
         }
 
         private unsafe static object[] getJavaArray(IntPtr ObjectPtr, string returnSignature)//, IntPtr pNetBridgeClassPtr, IntPtr ArrayClassesMethodPtr)
@@ -1590,7 +1646,8 @@ namespace QuantApp.Kernel.JVM
             FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass);
 
             void*  pArrayClassesMethod;
-            GetStaticMethodID( pEnv, pNetBridgeClass, "ArrayClasses", "([Ljava/lang/Object;)[Ljava/lang/String;", &pArrayClassesMethod );
+            if(GetStaticMethodID( pEnv, pNetBridgeClass, "ArrayClasses", "([Ljava/lang/Object;)[Ljava/lang/String;", &pArrayClassesMethod ) != 0)
+                throw new Exception(GetException(pEnv));
 
             IntPtr pNetBridgeClassPtr = new IntPtr(pNetBridgeClass);
             IntPtr ArrayClassesMethodPtr = new IntPtr(pArrayClassesMethod);
@@ -1980,13 +2037,18 @@ namespace QuantApp.Kernel.JVM
                 
                 void*  pMethodSigHashCode;
                 if(GetMethodID( pEnv, pObj, "hashCode", "()I", &pMethodSigHashCode ) == 0)
-                    return CallIntMethod( pEnv, pObj, pMethodSigHashCode, 0, sig_hash_ar_call);
+                {
+                    int res;
+                    if(CallIntMethod( pEnv, pObj, pMethodSigHashCode, 0, sig_hash_ar_call, &res) != 0)
+                        throw new Exception(GetException(pEnv));
+                    return res;
+                }
                 else
                     throw new Exception("get hashCode method error");
                 
             }
             else
-                throw new Exception("Attach thread error");
+                throw new Exception(GetException(pEnv));
         }
 
         private unsafe static bool isIterable(void* pObj)
@@ -2005,16 +2067,22 @@ namespace QuantApp.Kernel.JVM
                     
                     void*  pMethodSigHashCode;
                     if(GetStaticMethodID( pEnv, pNetBridgeClass, "isIterable", "(Ljava/lang/Object;)Z", &pMethodSigHashCode ) == 0)
-                        return CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs);
+                    {
+                        bool _res;
+                        if(CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs, &_res) != 0)
+                            throw new Exception(GetException(pEnv));
+
+                        return _res;
+                    }
                     else
-                        throw new Exception("get isIterable method error");
+                        throw new Exception(GetException(pEnv));
                 }
                 else
-                    throw new Exception("isIterable get class error");
+                    throw new Exception(GetException(pEnv));
                 
             }
             else
-                throw new Exception("Attach thread error");
+                throw new Exception(GetException(pEnv));
         }
 
         private unsafe static bool isMap(void* pObj)
@@ -2033,16 +2101,21 @@ namespace QuantApp.Kernel.JVM
                     
                     void*  pMethodSigHashCode;
                     if(GetStaticMethodID( pEnv, pNetBridgeClass, "isMap", "(Ljava/lang/Object;)Z", &pMethodSigHashCode ) == 0)
-                        return CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs);
+                    {
+                        bool _res;
+                        if(CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs, &_res) != 0)
+                            throw new Exception(GetException(pEnv));
+                        return _res;
+                    }
                     else
-                        throw new Exception("get isMap method error");
+                        throw new Exception(GetException(pEnv));
                 }
                 else
-                    throw new Exception("isMap get class error");
+                    throw new Exception(GetException(pEnv));
                 
             }
             else
-                throw new Exception("Attach thread error");
+                throw new Exception(GetException(pEnv));
         }
 
         private unsafe static bool isCollection(void* pObj)
@@ -2061,16 +2134,21 @@ namespace QuantApp.Kernel.JVM
                     
                     void*  pMethodSigHashCode;
                     if(GetStaticMethodID( pEnv, pNetBridgeClass, "isCollection", "(Ljava/lang/Object;)Z", &pMethodSigHashCode ) == 0)
-                        return CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs);
+                    {
+                        bool _res;
+                        if(CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs, &_res) != 0)
+                            throw new Exception(GetException(pEnv));
+                        return _res;
+                    }
                     else
-                        throw new Exception("get isCollection method error");
+                        throw new Exception(GetException(pEnv));
                 }
                 else
-                    throw new Exception("isCollection get class error");
+                    throw new Exception(GetException(pEnv));
                 
             }
             else
-                throw new Exception("Attach thread error");
+                throw new Exception(GetException(pEnv));
         }
 
         private unsafe static int getClass(void* pObj, ref void* pClass)
@@ -2137,13 +2215,16 @@ namespace QuantApp.Kernel.JVM
                     object[] pAr_len_data = new object[]{ sig_arr };
                     getJavaParameters(ref pAr_len, pAr_len_data);
 
-                    return CallStaticIntMethod( pEnv, pArrayClass, pArrayLengthMethod, 1, pAr_len);
+                    int _res;
+                    if(CallStaticIntMethod( pEnv, pArrayClass, pArrayLengthMethod, 1, pAr_len, &_res) != 0)
+                        throw new Exception(GetException(pEnv));
+                    return _res;
                 }
                 else
-                    throw new Exception("getLength get method error");
+                    throw new Exception(GetException(pEnv));
             }
             else
-                throw new Exception("get Array class error");
+                throw new Exception(GetException(pEnv));
         }
         
         public unsafe static void SetClassPath(string[] paths)
@@ -2236,9 +2317,13 @@ namespace QuantApp.Kernel.JVM
                     getJavaParameters(ref pAr_len, pAr_len_data);
 
                     void*  pGetJVMObject;
-                    CallStaticObjectMethod( pEnv, pNetBridgeClass, pGetJVMObjectMethod, &pGetJVMObject, 1, pAr_len);
-                    
-                    return pGetJVMObject;
+                    if(CallStaticObjectMethod( pEnv, pNetBridgeClass, pGetJVMObjectMethod, &pGetJVMObject, 1, pAr_len) == 0)
+                        return pGetJVMObject;
+                    else
+                    {
+                        Console.WriteLine("GetObject error in CallStaticObjectMethod");
+                        return IntPtr.Zero.ToPointer();
+                    }
                 }
                 else
                     Console.WriteLine("GetObject method not found");
@@ -2261,20 +2346,28 @@ namespace QuantApp.Kernel.JVM
                         if(GetMethodID( _pEnv, pObjResult, "booleanValue", "()Z", &pInvokeMethod_boolean ) == 0)
                         {
                             void** pAr_boolean = stackalloc void*[1];
-                            return CallBooleanMethod( _pEnv, pObjResult, pInvokeMethod_boolean, 1, pAr_boolean);
+                            {
+                                bool _res;
+                                if(CallBooleanMethod( _pEnv, pObjResult, pInvokeMethod_boolean, 1, pAr_boolean, &_res) != 0)
+                                    throw new Exception(GetException(_pEnv));
+                                return _res;
+                            }
                         }
                         else
-                            throw new Exception("Error in booleanValue of object result");
+                            throw new Exception(GetException(_pEnv));
 
                     case "java.lang.Byte":
                         void*  pInvokeMethod_byte;
                         if(GetMethodID( _pEnv, pObjResult, "byteValue", "()B", &pInvokeMethod_byte ) == 0)
                         {
                             void** pAr_byte = stackalloc void*[1];
-                            return CallByteMethod( _pEnv, pObjResult, pInvokeMethod_byte, 1, pAr_byte);
+                            byte _res;
+                            if(CallByteMethod( _pEnv, pObjResult, pInvokeMethod_byte, 1, pAr_byte, &_res) != 0)
+                                throw new Exception(GetException(_pEnv));
+                            return _res;
                         }
                         else
-                            throw new Exception("Error in byteValue of object result");
+                            throw new Exception(GetException(_pEnv));
                     
 
                     case "java.lang.Character":
@@ -2282,10 +2375,13 @@ namespace QuantApp.Kernel.JVM
                         if(GetMethodID( _pEnv, pObjResult, "charValue", "()C", &pInvokeMethod_char ) == 0)
                         {
                             void** pAr_char = stackalloc void*[1];
-                            return CallCharMethod( _pEnv, pObjResult, pInvokeMethod_char, 1, pAr_char);
+                            char res_char;
+                            if(CallCharMethod( _pEnv, pObjResult, pInvokeMethod_char, 1, pAr_char, &res_char) != 0)
+                                throw new Exception(GetException(_pEnv));
+                            return res_char;
                         }
                         else
-                            throw new Exception("Error in charValue of object result");
+                            throw new Exception(GetException(_pEnv));
 
                     case "java.lang.Short":
                         void*  pInvokeMethod_short;
@@ -2293,10 +2389,13 @@ namespace QuantApp.Kernel.JVM
                         if(GetMethodID( _pEnv, pObjResult, "shortValue", "()S", &pInvokeMethod_short ) == 0)
                         {
                             void** pAr_short = stackalloc void*[1];
-                            return CallShortMethod( _pEnv, pObjResult, pInvokeMethod_short, 1, pAr_short);
+                            short _res;
+                            if(CallShortMethod( _pEnv, pObjResult, pInvokeMethod_short, 1, pAr_short, &_res) != 0)
+                                throw new Exception(GetException(_pEnv));
+                            return _res;
                         }
                         else
-                            throw new Exception("Error in shortValue of object result");
+                            throw new Exception(GetException(_pEnv));
 
 
                     case "java.lang.Integer":
@@ -2304,30 +2403,42 @@ namespace QuantApp.Kernel.JVM
                         if(GetMethodID( _pEnv, pObjResult, "intValue", "()I", &pInvokeMethod_int ) == 0)
                         {
                             void** pAr_int = stackalloc void*[1];
-                            return CallIntMethod( _pEnv, pObjResult, pInvokeMethod_int, 1, pAr_int);
+                            int res;
+                            if(CallIntMethod( _pEnv, pObjResult, pInvokeMethod_int, 1, pAr_int, &res) != 0)
+                                throw new Exception(GetException(_pEnv));
+                            return res;
+                            
                         }
                         else
-                            throw new Exception("Error in intValue of object result");
+                            throw new Exception(GetException(_pEnv));
 
                     case "java.lang.Long":
                         void*  pInvokeMethod_long;
                         if(GetMethodID( _pEnv, pObjResult, "longValue", "()J", &pInvokeMethod_long ) == 0)
                         {
                             void** pAr_long = stackalloc void*[1];
-                            return CallLongMethod( _pEnv, pObjResult, pInvokeMethod_long, 1, pAr_long);
+                            
+                            long res;
+                            if(CallLongMethod( _pEnv, pObjResult, pInvokeMethod_long, 1, pAr_long, &res) != 0)
+                                throw new Exception(GetException(_pEnv));
+                            return res;
+                            
                         }
                         else
-                            throw new Exception("Error in longValue of object result");
+                            throw new Exception(GetException(_pEnv));
 
                     case "java.lang.Float":
                         void*  pInvokeMethod_float;
                         if(GetMethodID( _pEnv, pObjResult, "floatValue", "()F", &pInvokeMethod_float ) == 0)
                         {
                             void** pAr_float = stackalloc void*[1];
-                            return CallFloatMethod( _pEnv, pObjResult, pInvokeMethod_float, 1, pAr_float);
+                            float _res;
+                            if(CallFloatMethod( _pEnv, pObjResult, pInvokeMethod_float, 1, pAr_float, &_res) != 0)
+                                throw new Exception(GetException(_pEnv));
+                            return _res;
                         }
                         else
-                            throw new Exception("Error in floatValue of object result");
+                            throw new Exception(GetException(_pEnv));
 
 
                     case "java.lang.Double":
@@ -2335,10 +2446,14 @@ namespace QuantApp.Kernel.JVM
                         if(GetMethodID( _pEnv, pObjResult, "doubleValue", "()D", &pInvokeMethod_double ) == 0)
                         {
                             void** pAr_double = stackalloc void*[1];
-                            return CallDoubleMethod( _pEnv, pObjResult, pInvokeMethod_double, 1, pAr_double);
+                            // return CallDoubleMethod( _pEnv, pObjResult, pInvokeMethod_double, 1, pAr_double);
+                            double res;
+                            if(CallDoubleMethod( _pEnv, pObjResult, pInvokeMethod_double, 1, pAr_double, &res) != 0)
+                                throw new Exception(GetException(_pEnv));
+                            return res;
                         }
                         else
-                            throw new Exception("Error in doubleValue of object result");
+                            throw new Exception(GetException(_pEnv));
 
                     case "java.lang.String":
                         return GetNetString(_pEnv, pObjResult);
@@ -2408,7 +2523,7 @@ namespace QuantApp.Kernel.JVM
                 }
             }
             else
-                throw new Exception("Runtime Result class not found: " + cls);
+                throw new Exception(GetException(_pEnv));
 
         }
         
@@ -2453,752 +2568,191 @@ namespace QuantApp.Kernel.JVM
             
             try
             {
-            if(Loaded)
-            {
-                void*  pEnv;
-                if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
-                
-                if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
+                if(Loaded)
                 {
-                    if(GetStaticMethodID( pEnv, pNetBridgeClass, "ArrayClasses", "([Ljava/lang/Object;)[Ljava/lang/String;", &pArrayClassesMethod ) == 0)
+                    void*  pEnv;
+                    if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
+                    
+                    if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
                     {
-                        // Find the main method
-                        if( GetStaticMethodID( pEnv, pNetBridgeClass, "Signatures", "(Ljava/lang/String;)[Ljava/lang/String;", &pSignaturesMethod ) == 0 )
+                        if(GetStaticMethodID( pEnv, pNetBridgeClass, "ArrayClasses", "([Ljava/lang/Object;)[Ljava/lang/String;", &pArrayClassesMethod ) == 0)
                         {
-                            void*  pClass = pClass = IntPtr.Zero.ToPointer();
-
-                            int classFound = -1;
-
-                            if(classFound != 0)
+                            // Find the main method
+                            if( GetStaticMethodID( pEnv, pNetBridgeClass, "Signatures", "(Ljava/lang/String;)[Ljava/lang/String;", &pSignaturesMethod ) == 0 )
                             {
-                                void*  pLoadClassMethod; // The executed method struct
-                                
-                                if( GetStaticMethodID( pEnv, pNetBridgeClass, "LoadClass", "([Ljava/lang/String;)Ljava/lang/Class;", &pLoadClassMethod ) == 0 )
+                                void*  pClass = pClass = IntPtr.Zero.ToPointer();
+
+                                int classFound = -1;
+
+                                if(classFound != 0)
                                 {
-                                    void** pArg_lcs = stackalloc void*[1];
-                                    object[] ar_data = new object[]{ path == null ? new string[]{ sClass } : new string[]{ sClass, path } };
-                                    getJavaParameters(ref pArg_lcs, ar_data);
+                                    void*  pLoadClassMethod; // The executed method struct
                                     
-                                    classFound = CallStaticObjectMethod( pEnv, pNetBridgeClass, pLoadClassMethod, &pClass, 1, pArg_lcs);
-                                }
-                                else
-                                {
-                                    Console.WriteLine("NetCore: LoadClass not found");
-                                    classFound = -1;
-                                    pClass = IntPtr.Zero.ToPointer();
-                                }
-                            }
-
-
-                            //LoadClass
-                            if(classFound == 0 )
-                            {
-                                void** pArg_sig = stackalloc void*[1];
-                                object[] ar_data = new object[]{ sClass };
-                                getJavaParameters(ref pArg_sig, ar_data);
-                                void* rArr;
-                                
-                                int res = CallStaticObjectMethod( pEnv, pNetBridgeClass, pSignaturesMethod, &rArr, 1, pArg_sig);
-
-                                if(res == 0)
-                                {
-                                    int sig_hashID = getHashCode(rArr);
-
-                                    JVMObject sig_arr = new JVMObject(new IntPtr(rArr), sig_hashID, "[Ljava/lang/String;");
-
-
-                                    int rArrLen = getArrayLength(sig_arr);
-
-                                    var signatures = new List<string>();
-                                    for(int i = 0; i < rArrLen; i++)
+                                    if( GetStaticMethodID( pEnv, pNetBridgeClass, "LoadClass", "([Ljava/lang/String;)Ljava/lang/Class;", &pLoadClassMethod ) == 0 )
                                     {
-                                        void* pElement;
-                                        GetObjectArrayElement(pEnv, rArr, i, &pElement);
-                                        string signature = GetNetString(pEnv, pElement);
-                                        signatures.Add(signature);
-                                    }
-
-                                    void* pObj;
-                                    IntPtr ObjectPtr;
-
-                                    if(objPtr == IntPtr.Zero)
-                                    {
-                                        if(args == null || args.Length == 0)
-                                        {
-                                            void** ar_newInstance = stackalloc void*[1];
-                                            if(NewObjectP( pEnv, pClass, "()V", 0, ar_newInstance, &pObj ) != 0)
-                                            {
-                                                Console.WriteLine("Error instantiating object (): " + sClass);
-                                                throw new Exception("Error instantiating object (): " + sClass);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            void** ar_newInstance = stackalloc void*[args.Length];
-                                            object[] args_object = new object[args.Length];
-                                            string argSig = "";
-                                            for(int i = 0; i < args.Length; i++)
-                                            {
-                                                argSig += TransformType(args[i]);
-                                                args_object[i] = args[i];
-                                            }
-
-                                            getJavaParameters(ref ar_newInstance, args_object);
-                                            
-                                            if(NewObjectP( pEnv, pClass, "(" + argSig + ")V", args.Length, ar_newInstance, &pObj ) != 0)
-                                                throw new Exception("Error instantiating object (...): " + sClass);
-                                        }
-                                        ObjectPtr = new IntPtr(pObj);
+                                        void** pArg_lcs = stackalloc void*[1];
+                                        object[] ar_data = new object[]{ path == null ? new string[]{ sClass } : new string[]{ sClass, path } };
+                                        getJavaParameters(ref pArg_lcs, ar_data);
+                                        
+                                        classFound = CallStaticObjectMethod( pEnv, pNetBridgeClass, pLoadClassMethod, &pClass, 1, pArg_lcs);
                                     }
                                     else
-                                        ObjectPtr = objPtr;
-
-
-                                    int hashID = getHashCode(ObjectPtr.ToPointer());
-
-                                    dynamic expandoObject = new JVMObject(ObjectPtr, hashID, sClass);
-
-                                    if(isMap(ObjectPtr.ToPointer()))
-                                        expandoObject = new JVMIDictionary(expandoObject);
-
-                                    else if(isCollection(ObjectPtr.ToPointer()))
-                                        expandoObject = new JVMICollection(expandoObject);
-
-                                    else if(isIterable(ObjectPtr.ToPointer()))
-                                        expandoObject = new JVMIEnumerable(expandoObject);
-
-                                    JVMObject.DB[expandoObject.JavaHashCode] = expandoObject;
-                                    
-                                    foreach(var signature in signatures)
                                     {
-                                        if(signature.StartsWith("F/") || signature.StartsWith("S-F/"))
+                                        Console.WriteLine("NetCore: LoadClass not found");
+                                        classFound = -1;
+                                        pClass = IntPtr.Zero.ToPointer();
+                                    }
+                                }
+
+
+                                //LoadClass
+                                if(classFound == 0 )
+                                {
+                                    void** pArg_sig = stackalloc void*[1];
+                                    object[] ar_data = new object[]{ sClass };
+                                    getJavaParameters(ref pArg_sig, ar_data);
+                                    void* rArr;
+                                    
+                                    int res = CallStaticObjectMethod( pEnv, pNetBridgeClass, pSignaturesMethod, &rArr, 1, pArg_sig);
+
+                                    if(res == 0)
+                                    {
+                                        int sig_hashID = getHashCode(rArr);
+
+                                        JVMObject sig_arr = new JVMObject(new IntPtr(rArr), sig_hashID, "[Ljava/lang/String;");
+
+
+                                        int rArrLen = getArrayLength(sig_arr);
+
+                                        var signatures = new List<string>();
+                                        for(int i = 0; i < rArrLen; i++)
                                         {
-                                            bool isStatic = signature.StartsWith("S-");
-                                            string name = signature.Replace("F/","").Replace("S-","");
-                                            name = name.Substring(0, name.IndexOf("-"));
-                                            string returnSignature = signature.Substring(signature.LastIndexOf("-") + 1);
+                                            void* pElement;
+                                            GetObjectArrayElement(pEnv, rArr, i, &pElement);
+                                            string signature = GetNetString(pEnv, pElement);
+                                            signatures.Add(signature);
+                                        }
 
-                                            switch (returnSignature)
+                                        void* pObj;
+                                        IntPtr ObjectPtr;
+
+                                        if(objPtr == IntPtr.Zero)
+                                        {
+                                            if(args == null || args.Length == 0)
                                             {
-                                                case "Z": //Boolean
-                                                    expandoObject.TrySetField(name, 
-                                                        new Tuple<string, object, wrapSetProperty>(
-                                                            "bool",
-                                                            (wrapGetProperty<bool>)(() => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                return GetStaticBooleanField( _pEnv, _pClass, pField);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            return GetBooleanField( _pEnv, _pObj, pField);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            }),
-                                                            (wrapSetProperty)((val) => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                SetStaticBooleanField( _pEnv, _pClass, pField, (bool) val);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            SetBooleanField( _pEnv, _pObj, pField, (bool) val);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            })
-                                                        ));
-                                                    break;
-                                                case "B": //Byte
-                                                    expandoObject.TrySetField(name, 
-                                                        new Tuple<string, object, wrapSetProperty>(
-                                                            "byte",
-                                                            (wrapGetProperty<byte>)(() => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                return GetStaticByteField( _pEnv, _pClass, pField);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            return GetByteField( _pEnv, _pObj, pField);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            }),
-                                                            (wrapSetProperty)((val) => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                SetStaticByteField( _pEnv, _pClass, pField, (byte) val);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            SetByteField( _pEnv, _pObj, pField, (byte) val);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            })
-                                                        ));
-                                                    break;
-                                            
-                                                case "C": //Char
-                                                    expandoObject.TrySetField(name, 
-                                                        new Tuple<string, object, wrapSetProperty>(
-                                                            "char",
-                                                            (wrapGetProperty<char>)(() => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                return GetStaticCharField( _pEnv, _pClass, pField);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            return GetCharField( _pEnv, _pObj, pField);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            }),
-                                                            (wrapSetProperty)((val) => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                SetStaticCharField( _pEnv, _pClass, pField, (char) val);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            SetCharField( _pEnv, _pObj, pField, (char) val);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            })
-                                                        ));
-                                                    break;
-                                                
-                                                case "S": //Short
-                                                    expandoObject.TrySetField(name, 
-                                                        new Tuple<string, object, wrapSetProperty>(
-                                                            "short",
-                                                            (wrapGetProperty<short>)(() => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                return GetStaticShortField( _pEnv, _pClass, pField);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            return GetShortField( _pEnv, _pObj, pField);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            }),
-                                                            (wrapSetProperty)((val) => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                SetStaticShortField( _pEnv, _pClass, pField, (short) val);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            SetShortField( _pEnv, _pObj, pField, (short) val);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            })
-                                                        ));
-                                                    break;
-                                                
-                                                case "I": //Int
-                                                    expandoObject.TrySetField(name, 
-                                                        new Tuple<string, object, wrapSetProperty>(
-                                                            "int",
-                                                            (wrapGetProperty<int>)(() => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                return GetStaticIntField( _pEnv, _pClass, pField);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            return GetIntField( _pEnv, _pObj, pField);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            }),
-                                                            (wrapSetProperty)((val) => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj,  ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                SetStaticIntField( _pEnv, _pClass, pField, (int) val);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            SetIntField( _pEnv, _pObj, pField, (int) val);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            })
-                                                        ));
-                                                    break;
-                                                
-                                                case "J": //Long
-                                                    expandoObject.TrySetField(name, 
-                                                        new Tuple<string, object, wrapSetProperty>(
-                                                            "long",
-                                                            (wrapGetProperty<long>)(() => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj,  ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                return GetStaticLongField( _pEnv, _pClass, pField);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            return GetLongField( _pEnv, _pObj, pField);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            }),
-                                                            (wrapSetProperty)((val) => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj,  ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                SetStaticLongField( _pEnv, _pClass, pField, (long) val);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            SetLongField( _pEnv, _pObj, pField, (long) val);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            })
-                                                        ));
-                                                    break;
-                                                
-                                                case "F": //Float
-                                                    expandoObject.TrySetField(name, 
-                                                        new Tuple<string, object, wrapSetProperty>(
-                                                            "float",
-                                                            (wrapGetProperty<float>)(() => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj,  ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                return GetStaticFloatField( _pEnv, _pClass, pField);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            return GetFloatField( _pEnv, _pObj, pField);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            }),
-                                                            (wrapSetProperty)((val) => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj,  ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                SetStaticFloatField( _pEnv, _pClass, pField, (float) val);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            SetFloatField( _pEnv, _pObj, pField, (float) val);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            })
-                                                        ));
-                                                    break;
-                                                
-                                                case "D": //Double
-                                                    expandoObject.TrySetField(name, 
-                                                        new Tuple<string, object, wrapSetProperty>(
-                                                            "double",
-                                                            (wrapGetProperty<double>)(() => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj,  ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                return GetStaticDoubleField( _pEnv, _pClass, pField);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            return GetDoubleField( _pEnv, _pObj, pField);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            }),
-                                                            (wrapSetProperty)((val) => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj,  ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                SetStaticDoubleField( _pEnv, _pClass, pField, (double) val);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            SetDoubleField( _pEnv, _pObj, pField, (double) val);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            })
-                                                        ));
-                                                    break;
-                                                
-                                                case "Ljava/lang/String;": //String
-
-                                                    expandoObject.TrySetField(name, 
-                                                        new Tuple<string, object, wrapSetProperty>(
-                                                            "string",
-                                                            (wrapGetProperty<string>)(() => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* pObjResult;
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                if(GetStaticObjectField( _pEnv, _pClass, pField, &pObjResult) == 0)
-                                                                                    return GetNetString(_pEnv, pObjResult);
-                                                                                else
-                                                                                    throw new Exception("Runtime Calling Field not error: " + name);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        void* pObjResult;
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            if(GetObjectField( _pEnv, _pObj, pField, &pObjResult) == 0)
-                                                                                return GetNetString(_pEnv, pObjResult);
-                                                                            else
-                                                                                throw new Exception("Runtime Calling Field not error: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            }),
-                                                            (wrapSetProperty)((val) => {
-                                                                void*  _pEnv;
-                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                void* _pObj = GetJVMObject(hashID);
-                                                                if(_pObj != IntPtr.Zero.ToPointer())
-                                                                {
-                                                                    void* jstring = GetJavaString(_pEnv, (string)val);
-                                                                    void*  pField;
-                                                                    if(isStatic) 
-                                                                    { 
-                                                                        void* _pClass = IntPtr.Zero.ToPointer();
-                                                                        if(getClass(_pObj, ref _pClass) == 0)
-                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                SetStaticObjectField( _pEnv, _pClass, pField, jstring);
-                                                                            else
-                                                                                throw new Exception("Runtime Static Field not found: " + name);
-                                                                        else
-                                                                            throw new Exception("Runtime Class not found: " + name);
-                                                                    } 
-                                                                    else  
-                                                                    { 
-                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                            SetObjectField( _pEnv, _pObj, pField, jstring);
-                                                                        else
-                                                                            throw new Exception("Runtime Field not found: " + name);
-                                                                    }
-                                                                }
-                                                                else
-                                                                    throw new Exception("Runtime Object not found: " + name);
-                                                            })
-                                                        ));
-                                                    break;
-
-                                                default:
+                                                void** ar_newInstance = stackalloc void*[1];
+                                                if(NewObjectP( pEnv, pClass, "()V", 0, ar_newInstance, &pObj ) != 0)
+                                                {
+                                                    var exm = GetException(pEnv);
+                                                    Console.WriteLine("Error instantiating object (): " + sClass + " " + exm);
                                                     
-                                                    if(returnSignature.StartsWith("["))
-                                                    {
+                                                    throw new Exception(exm);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                void** ar_newInstance = stackalloc void*[args.Length];
+                                                object[] args_object = new object[args.Length];
+                                                string argSig = "";
+                                                for(int i = 0; i < args.Length; i++)
+                                                {
+                                                    argSig += TransformType(args[i]);
+                                                    args_object[i] = args[i];
+                                                }
+
+                                                getJavaParameters(ref ar_newInstance, args_object);
+                                                
+                                                if(NewObjectP( pEnv, pClass, "(" + argSig + ")V", args.Length, ar_newInstance, &pObj ) != 0)
+                                                    throw new Exception(GetException(pEnv));
+                                            }
+                                            ObjectPtr = new IntPtr(pObj);
+                                        }
+                                        else
+                                            ObjectPtr = objPtr;
+
+
+                                        int hashID = getHashCode(ObjectPtr.ToPointer());
+
+                                        dynamic expandoObject = new JVMObject(ObjectPtr, hashID, sClass);
+
+                                        if(isMap(ObjectPtr.ToPointer()))
+                                            expandoObject = new JVMIDictionary(expandoObject);
+
+                                        else if(isCollection(ObjectPtr.ToPointer()))
+                                            expandoObject = new JVMICollection(expandoObject);
+
+                                        else if(isIterable(ObjectPtr.ToPointer()))
+                                            expandoObject = new JVMIEnumerable(expandoObject);
+
+                                        JVMObject.DB[expandoObject.JavaHashCode] = expandoObject;
+                                        
+                                        foreach(var signature in signatures)
+                                        {
+                                            if(signature.StartsWith("F/") || signature.StartsWith("S-F/"))
+                                            {
+                                                bool isStatic = signature.StartsWith("S-");
+                                                string name = signature.Replace("F/","").Replace("S-","");
+                                                name = name.Substring(0, name.IndexOf("-"));
+                                                string returnSignature = signature.Substring(signature.LastIndexOf("-") + 1);
+
+                                                switch (returnSignature)
+                                                {
+                                                    case "Z": //Boolean
                                                         expandoObject.TrySetField(name, 
                                                             new Tuple<string, object, wrapSetProperty>(
-                                                                "array",
-                                                                (wrapGetProperty<object[]>)(() => {
-                                                                    void*  _pEnv;// = (void*)EnvPtr;
+                                                                "bool",
+                                                                (wrapGetProperty<bool>)(() => {
+                                                                    void*  _pEnv;
                                                                     if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
                                                                     void* _pObj = GetJVMObject(hashID);
                                                                     if(_pObj != IntPtr.Zero.ToPointer())
                                                                     {
                                                                         void*  pField;
                                                                         if(isStatic) 
                                                                         { 
-                                                                            void* pObjResult;
                                                                             void* _pClass = IntPtr.Zero.ToPointer();
-                                                                            if(getClass(_pObj,  ref _pClass) == 0)
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                    if(GetStaticObjectField( _pEnv, _pClass, pField, &pObjResult) == 0)
-                                                                                        return getJavaArray(new IntPtr(pObjResult), returnSignature);
-                                                                                    else
-                                                                                        throw new Exception("Runtime Calling Field not error: " + name);
+                                                                                {
+                                                                                    bool _res;
+                                                                                    if(GetStaticBooleanField( _pEnv, _pClass, pField, &_res) != 0)
+                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                    return _res;
+                                                                                }
+                                                                                else
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                            {
+                                                                                bool _res;
+                                                                                if(GetBooleanField( _pEnv, _pObj, pField, &_res) != 0)
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                return _res;
+                                                                            }
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                }),
+                                                                (wrapSetProperty)((val) => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                    SetStaticBooleanField( _pEnv, _pClass, pField, (bool) val);
                                                                                 else
                                                                                     throw new Exception("Runtime Static Field not found: " + name);
                                                                             else
@@ -3206,263 +2760,549 @@ namespace QuantApp.Kernel.JVM
                                                                         } 
                                                                         else  
                                                                         { 
-                                                                            void* pObjResult;
                                                                             if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                if(GetObjectField( _pEnv, _pObj, pField, &pObjResult) == 0)
-                                                                                    return getJavaArray(new IntPtr(pObjResult), returnSignature);
-                                                                                else
-                                                                                    throw new Exception("Runtime Calling Field not error: " + name);
+                                                                                SetBooleanField( _pEnv, _pObj, pField, (bool) val);
                                                                             else
                                                                                 throw new Exception("Runtime Field not found: " + name);
                                                                         }
                                                                     }
                                                                     else
                                                                         throw new Exception("Runtime Object not found: " + name);
-
-                                                                    
-                                                                }),
-                                                                (wrapSetProperty)((val) => {
-                                                                    
-                                                                    string typename = val.GetType().ToString();
+                                                                })
+                                                            ));
+                                                        break;
+                                                    case "B": //Byte
+                                                        expandoObject.TrySetField(name, 
+                                                            new Tuple<string, object, wrapSetProperty>(
+                                                                "byte",
+                                                                (wrapGetProperty<byte>)(() => {
                                                                     void*  _pEnv;
                                                                     if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
                                                                     void* _pObj = GetJVMObject(hashID);
                                                                     if(_pObj != IntPtr.Zero.ToPointer())
                                                                     {
                                                                         void*  pField;
-                                                                        switch(typename)
-                                                                        {
-                                                                            case "System.Boolean[]":
-                                                                                JVMObject vobj_bool = getJavaArray((bool[])val);
-                                                                                if(isStatic) 
-                                                                                { 
-                                                                                    void* _pClass = IntPtr.Zero.ToPointer();
-                                                                                    if(getClass(_pObj,  ref _pClass) == 0)
-                                                                                        if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                            SetStaticObjectField( _pEnv, _pClass, pField, vobj_bool.Pointer.ToPointer());
-                                                                                        else
-                                                                                            throw new Exception("Runtime Static Field not found: " + name);
-                                                                                    else
-                                                                                        throw new Exception("Runtime Class not found: " + name);
-                                                                                } 
-                                                                                else  
-                                                                                { 
-                                                                                    if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                        SetObjectField( _pEnv, _pObj, pField, vobj_bool.Pointer.ToPointer());
-                                                                                    else
-                                                                                        throw new Exception("Runtime Field not found: " + name);
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                {
+                                                                                    byte _res;
+                                                                                    if(GetStaticByteField( _pEnv, _pClass, pField, &_res) != 0)
+                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                    return _res;
                                                                                 }
-                                                                                
-                                                                                
-                                                                                break;
+                                                                                else
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                            {
+                                                                                byte _res;
+                                                                                if(GetByteField( _pEnv, _pObj, pField, &_res) != 0)
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                return _res;
 
-                                                                            case "System.Byte[]":
-                                                                                bool[] byte_arr = (bool[])val;
-                                                                                
-                                                                                JVMObject vobj_byte = getJavaArray((byte[])val);
-                                                                                if(isStatic) 
-                                                                                { 
-                                                                                    void* _pClass = IntPtr.Zero.ToPointer();
-                                                                                    if(getClass(_pObj,  ref _pClass) == 0)
-                                                                                        if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                            SetStaticObjectField( _pEnv, _pClass, pField, vobj_byte.Pointer.ToPointer());
-                                                                                        else
-                                                                                            throw new Exception("Runtime Static Field not found: " + name);
-                                                                                    else
-                                                                                        throw new Exception("Runtime Class not found: " + name);
-                                                                                } 
-                                                                                else  
-                                                                                { 
-                                                                                    if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                        SetObjectField( _pEnv, _pObj, pField, vobj_byte.Pointer.ToPointer());
-                                                                                    else
-                                                                                        throw new Exception("Runtime Field not found: " + name);
-                                                                                }
-                                                                                
-                                                                                break;
-                                                                                
-                                                                            case "System.Char[]":
-                                                                                JVMObject vobj_char = getJavaArray((char[])val);
-                                                                                if(isStatic) 
-                                                                                { 
-                                                                                    void* _pClass = IntPtr.Zero.ToPointer();
-                                                                                    if(getClass(_pObj,  ref _pClass) == 0)
-                                                                                        if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                            SetStaticObjectField( _pEnv, _pClass, pField, vobj_char.Pointer.ToPointer());
-                                                                                        else
-                                                                                            throw new Exception("Runtime Static Field not found: " + name);
-                                                                                    else
-                                                                                        throw new Exception("Runtime Class not found: " + name);
-                                                                                } 
-                                                                                else  
-                                                                                { 
-                                                                                    if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                        SetObjectField( _pEnv, _pObj, pField, vobj_char.Pointer.ToPointer());
-                                                                                    else
-                                                                                        throw new Exception("Runtime Field not found: " + name);
-                                                                                }
-                                                                                
-                                                                                break;
-
-                                                                            case "System.Short[]":
-                                                                                
-                                                                                JVMObject vobj_short = getJavaArray((short[])val);
-                                                                                if(isStatic) 
-                                                                                { 
-                                                                                    void* _pClass = IntPtr.Zero.ToPointer();
-                                                                                    if(getClass(_pObj,  ref _pClass) == 0)
-                                                                                        if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                            SetStaticObjectField( _pEnv, _pClass, pField, vobj_short.Pointer.ToPointer());
-                                                                                        else
-                                                                                            throw new Exception("Runtime Static Field not found: " + name);
-                                                                                    else
-                                                                                        throw new Exception("Runtime Class not found: " + name);
-                                                                                } 
-                                                                                else  
-                                                                                { 
-                                                                                    if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                        SetObjectField( _pEnv, _pObj, pField, vobj_short.Pointer.ToPointer());
-                                                                                    else
-                                                                                        throw new Exception("Runtime Field not found: " + name);
-                                                                                }
-                                                                                
-                                                                                break;
-
-                                                                            case "System.Int32[]":
-                                                                                
-                                                                                JVMObject vobj_int = getJavaArray((int[])val);
-                                                                                if(isStatic) 
-                                                                                { 
-                                                                                    void* _pClass = IntPtr.Zero.ToPointer();
-                                                                                    if(getClass(_pObj,  ref _pClass) == 0)
-                                                                                        if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                            SetStaticObjectField( _pEnv, _pClass, pField, vobj_int.Pointer.ToPointer());
-                                                                                        else
-                                                                                            throw new Exception("Runtime Static Field not found: " + name);
-                                                                                    else
-                                                                                        throw new Exception("Runtime Class not found: " + name);
-                                                                                } 
-                                                                                else  
-                                                                                { 
-                                                                                    if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                        SetObjectField( _pEnv, _pObj, pField, vobj_int.Pointer.ToPointer());
-                                                                                    else
-                                                                                        throw new Exception("Runtime Field not found: " + name);
-                                                                                }
-                                                                                
-                                                                                break;
-
-                                                                            case "System.Int64[]":
-                                                                                
-                                                                                JVMObject vobj_long = getJavaArray((long[])val);
-                                                                                if(isStatic) 
-                                                                                { 
-                                                                                    void* _pClass = IntPtr.Zero.ToPointer();
-                                                                                    if(getClass(_pObj,  ref _pClass) == 0)
-                                                                                        if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                            SetStaticObjectField( _pEnv, _pClass, pField, vobj_long.Pointer.ToPointer());
-                                                                                        else
-                                                                                            throw new Exception("Runtime Static Field not found: " + name);
-                                                                                    else
-                                                                                        throw new Exception("Runtime Class not found: " + name);
-                                                                                } 
-                                                                                else  
-                                                                                { 
-                                                                                    if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                        SetObjectField( _pEnv, _pObj, pField, vobj_long.Pointer.ToPointer());
-                                                                                    else
-                                                                                        throw new Exception("Runtime Field not found: " + name);
-                                                                                }
-                                                                                
-                                                                                break;
-
-                                                                            case "System.Float[]":
-                                                                                
-                                                                                JVMObject vobj_float = getJavaArray((float[])val);
-                                                                                if(isStatic) 
-                                                                                { 
-                                                                                    void* _pClass = IntPtr.Zero.ToPointer();
-                                                                                    if(getClass(_pObj,  ref _pClass) == 0)
-                                                                                        if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                            SetStaticObjectField( _pEnv, _pClass, pField, vobj_float.Pointer.ToPointer());
-                                                                                        else
-                                                                                            throw new Exception("Runtime Static Field not found: " + name);
-                                                                                    else
-                                                                                        throw new Exception("Runtime Class not found: " + name);
-                                                                                } 
-                                                                                else  
-                                                                                { 
-                                                                                    if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                        SetObjectField( _pEnv, _pObj, pField, vobj_float.Pointer.ToPointer());
-                                                                                    else
-                                                                                        throw new Exception("Runtime Field not found: " + name);
-                                                                                }
-                                                                                
-                                                                                break;
-
-
-                                                                            case "System.Double[]":
-                                                                                
-                                                                                JVMObject vobj_double = getJavaArray((double[])val);
-                                                                                if(isStatic) 
-                                                                                { 
-                                                                                    void* _pClass = IntPtr.Zero.ToPointer();
-                                                                                    if(getClass(_pObj,  ref _pClass) == 0)
-                                                                                        if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                            SetStaticObjectField( _pEnv, _pClass, pField, vobj_double.Pointer.ToPointer());
-                                                                                        else
-                                                                                            throw new Exception("Runtime Static Field not found: " + name);
-                                                                                    else
-                                                                                        throw new Exception("Runtime Class not found: " + name);
-                                                                                } 
-                                                                                else  
-                                                                                { 
-                                                                                    if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                        SetObjectField( _pEnv, _pObj, pField, vobj_double.Pointer.ToPointer());
-                                                                                    else
-                                                                                        throw new Exception("Runtime Field not found: " + name);
-                                                                                }
-                                                                                
-                                                                                break;
-
-                                                                            default:
-                                                                           
-                                                                                JVMObject vobj_obj = getJavaArray((object[])val);
-                                                                                if(isStatic) 
-                                                                                { 
-                                                                                    void* _pClass = IntPtr.Zero.ToPointer();
-                                                                                    if(getClass(_pObj,  ref _pClass) == 0)
-                                                                                        if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                            SetStaticObjectField( _pEnv, _pClass, pField, vobj_obj.Pointer.ToPointer());
-                                                                                        else
-                                                                                            throw new Exception("Runtime Static Field not found: " + name);
-                                                                                    else
-                                                                                        throw new Exception("Runtime Class not found: " + name);
-
-                                                                                } 
-                                                                                else  
-                                                                                { 
-                                                                                    if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                        SetObjectField( _pEnv, _pObj, pField, vobj_obj.Pointer.ToPointer());
-                                                                                    else
-                                                                                        throw new Exception("Runtime Field not found: " + name);
-                                                                                }
-                                                                                
-                                                                                break;
+                                                                            }
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
                                                                         }
-                                                                        
+                                                                    }
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                }),
+                                                                (wrapSetProperty)((val) => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                    SetStaticByteField( _pEnv, _pClass, pField, (byte) val);
+                                                                                else
+                                                                                    throw new Exception("Runtime Static Field not found: " + name);
+                                                                            else
+                                                                                throw new Exception("Runtime Class not found: " + name);
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                SetByteField( _pEnv, _pObj, pField, (byte) val);
+                                                                            else
+                                                                                throw new Exception("Runtime Field not found: " + name);
+                                                                        }
                                                                     }
                                                                     else
                                                                         throw new Exception("Runtime Object not found: " + name);
-                                                                    })
-                                                        ));
-                                                    }
-                                                    else
-                                                    {
+                                                                })
+                                                            ));
+                                                        break;
+                                                
+                                                    case "C": //Char
                                                         expandoObject.TrySetField(name, 
                                                             new Tuple<string, object, wrapSetProperty>(
-                                                                "object",
-                                                                (wrapGetProperty<object>)(() => {
+                                                                "char",
+                                                                (wrapGetProperty<char>)(() => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                {
+                                                                                    char _res;
+                                                                                    if(GetStaticCharField( _pEnv, _pClass, pField, &_res) != 0)
+                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                    return _res;
+                                                                                }
+                                                                                else
+                                                                                    throw new Exception("Runtime Static Field not found: " + name);
+                                                                            else
+                                                                                throw new Exception("Runtime Class not found: " + name);
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                            {
+                                                                                char _res;
+                                                                                if(GetCharField( _pEnv, _pObj, pField, &_res) != 0)
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                return _res;
+                                                                            }
+                                                                            else
+                                                                                throw new Exception("Runtime Field not found: " + name);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                }),
+                                                                (wrapSetProperty)((val) => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                    SetStaticCharField( _pEnv, _pClass, pField, (char) val);
+                                                                                else
+                                                                                    throw new Exception("Runtime Static Field not found: " + name);
+                                                                            else
+                                                                                throw new Exception("Runtime Class not found: " + name);
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                SetCharField( _pEnv, _pObj, pField, (char) val);
+                                                                            else
+                                                                                throw new Exception("Runtime Field not found: " + name);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                })
+                                                            ));
+                                                        break;
+                                                    
+                                                    case "S": //Short
+                                                        expandoObject.TrySetField(name, 
+                                                            new Tuple<string, object, wrapSetProperty>(
+                                                                "short",
+                                                                (wrapGetProperty<short>)(() => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                {
+                                                                                    short _res;
+                                                                                    if(GetStaticShortField( _pEnv, _pClass, pField, &_res) != 0)
+                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                    return _res;
+                                                                                }
+                                                                                else
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                            {
+                                                                                short _res;
+                                                                                if(GetShortField( _pEnv, _pObj, pField, &_res) != 0)
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                return _res;
+                                                                            }
+                                                                            else
+                                                                                throw new Exception("Runtime Field not found: " + name);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                }),
+                                                                (wrapSetProperty)((val) => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                    SetStaticShortField( _pEnv, _pClass, pField, (short) val);
+                                                                                else
+                                                                                    throw new Exception("Runtime Static Field not found: " + name);
+                                                                            else
+                                                                                throw new Exception("Runtime Class not found: " + name);
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                SetShortField( _pEnv, _pObj, pField, (short) val);
+                                                                            else
+                                                                                throw new Exception("Runtime Field not found: " + name);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                })
+                                                            ));
+                                                        break;
+                                                    
+                                                    case "I": //Int
+                                                        expandoObject.TrySetField(name, 
+                                                            new Tuple<string, object, wrapSetProperty>(
+                                                                "int",
+                                                                (wrapGetProperty<int>)(() => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                {
+                                                                                    int _res;
+                                                                                    if(GetStaticIntField( _pEnv, _pClass, pField, &_res) != 0)
+                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                    return _res;
+                                                                                }
+                                                                                else
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                            {
+                                                                                int _res;
+                                                                                if(GetIntField( _pEnv, _pObj, pField, &_res) != 0)
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                return _res;
+                                                                            }
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                }),
+                                                                (wrapSetProperty)((val) => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                    SetStaticIntField( _pEnv, _pClass, pField, (int) val);
+                                                                                else
+                                                                                    throw new Exception("Runtime Static Field not found: " + name);
+                                                                            else
+                                                                                throw new Exception("Runtime Class not found: " + name);
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                SetIntField( _pEnv, _pObj, pField, (int) val);
+                                                                            else
+                                                                                throw new Exception("Runtime Field not found: " + name);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                })
+                                                            ));
+                                                        break;
+                                                    
+                                                    case "J": //Long
+                                                        expandoObject.TrySetField(name, 
+                                                            new Tuple<string, object, wrapSetProperty>(
+                                                                "long",
+                                                                (wrapGetProperty<long>)(() => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                {
+                                                                                    long _res;
+                                                                                    if(GetStaticLongField( _pEnv, _pClass, pField, &_res) != 0)
+                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                    return _res;
+                                                                                }
+                                                                                else
+                                                                                    throw new Exception("Runtime Static Field not found: " + name);
+                                                                            else
+                                                                                throw new Exception("Runtime Class not found: " + name);
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                            {
+                                                                                long _res;
+                                                                                if(GetLongField( _pEnv, _pObj, pField, &_res) != 0)
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                return _res;
+                                                                            }
+                                                                            else
+                                                                                throw new Exception("Runtime Field not found: " + name);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                }),
+                                                                (wrapSetProperty)((val) => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                    SetStaticLongField( _pEnv, _pClass, pField, (long) val);
+                                                                                else
+                                                                                    throw new Exception("Runtime Static Field not found: " + name);
+                                                                            else
+                                                                                throw new Exception("Runtime Class not found: " + name);
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                SetLongField( _pEnv, _pObj, pField, (long) val);
+                                                                            else
+                                                                                throw new Exception("Runtime Field not found: " + name);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                })
+                                                            ));
+                                                        break;
+                                                    
+                                                    case "F": //Float
+                                                        expandoObject.TrySetField(name, 
+                                                            new Tuple<string, object, wrapSetProperty>(
+                                                                "float",
+                                                                (wrapGetProperty<float>)(() => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                {
+                                                                                    float _res;
+                                                                                    if(GetStaticFloatField( _pEnv, _pClass, pField, &_res) != 0)
+                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                    return _res;
+                                                                                }
+                                                                                else
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                            {
+                                                                                float _res;
+                                                                                if(GetFloatField( _pEnv, _pObj, pField, &_res) != 0)
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                return _res;
+                                                                            }
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                }),
+                                                                (wrapSetProperty)((val) => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                    SetStaticFloatField( _pEnv, _pClass, pField, (float) val);
+                                                                                else
+                                                                                    throw new Exception("Runtime Static Field not found: " + name);
+                                                                            else
+                                                                                throw new Exception("Runtime Class not found: " + name);
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                SetFloatField( _pEnv, _pObj, pField, (float) val);
+                                                                            else
+                                                                                throw new Exception("Runtime Field not found: " + name);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                })
+                                                            ));
+                                                        break;
+                                                    
+                                                    case "D": //Double
+                                                        expandoObject.TrySetField(name, 
+                                                            new Tuple<string, object, wrapSetProperty>(
+                                                                "double",
+                                                                (wrapGetProperty<double>)(() => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                {
+                                                                                    double _res;
+                                                                                    if(GetStaticDoubleField( _pEnv, _pClass, pField, &_res) != 0)
+                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                    return _res;
+                                                                                }
+                                                                                else
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                            {
+                                                                                double _res;
+                                                                                if(GetDoubleField( _pEnv, _pObj, pField, &_res) != 0)
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                return _res;
+                                                                            }
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                }),
+                                                                (wrapSetProperty)((val) => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                    SetStaticDoubleField( _pEnv, _pClass, pField, (double) val);
+                                                                                else
+                                                                                    throw new Exception("Runtime Static Field not found: " + name);
+                                                                            else
+                                                                                throw new Exception("Runtime Class not found: " + name);
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                SetDoubleField( _pEnv, _pObj, pField, (double) val);
+                                                                            else
+                                                                                throw new Exception("Runtime Field not found: " + name);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Object not found: " + name);
+                                                                })
+                                                            ));
+                                                        break;
+                                                    
+                                                    case "Ljava/lang/String;": //String
+
+                                                        expandoObject.TrySetField(name, 
+                                                            new Tuple<string, object, wrapSetProperty>(
+                                                                "string",
+                                                                (wrapGetProperty<string>)(() => {
                                                                     void*  _pEnv;
                                                                     if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
                                                                     void* _pObj = GetJVMObject(hashID);
@@ -3473,10 +3313,399 @@ namespace QuantApp.Kernel.JVM
                                                                         { 
                                                                             void* pObjResult;
                                                                             void* _pClass = IntPtr.Zero.ToPointer();
-                                                                            if(getClass(_pObj,  ref _pClass) == 0)
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
                                                                                     if(GetStaticObjectField( _pEnv, _pClass, pField, &pObjResult) == 0)
+                                                                                        return GetNetString(_pEnv, pObjResult);
+                                                                                    else
+                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                else
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            void* pObjResult;
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                if(GetObjectField( _pEnv, _pObj, pField, &pObjResult) == 0)
+                                                                                    return GetNetString(_pEnv, pObjResult);
+                                                                                else
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                }),
+                                                                (wrapSetProperty)((val) => {
+                                                                    void*  _pEnv;
+                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                    void* _pObj = GetJVMObject(hashID);
+                                                                    if(_pObj != IntPtr.Zero.ToPointer())
+                                                                    {
+                                                                        void* jstring = GetJavaString(_pEnv, (string)val);
+                                                                        void*  pField;
+                                                                        if(isStatic) 
+                                                                        { 
+                                                                            void* _pClass = IntPtr.Zero.ToPointer();
+                                                                            if(getClass(_pObj, ref _pClass) == 0)
+                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                    SetStaticObjectField( _pEnv, _pClass, pField, jstring);
+                                                                                else
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        } 
+                                                                        else  
+                                                                        { 
+                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                SetObjectField( _pEnv, _pObj, pField, jstring);
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                })
+                                                            ));
+                                                        break;
+
+                                                    default:
+                                                        
+                                                        if(returnSignature.StartsWith("["))
+                                                        {
+                                                            expandoObject.TrySetField(name, 
+                                                                new Tuple<string, object, wrapSetProperty>(
+                                                                    "array",
+                                                                    (wrapGetProperty<object[]>)(() => {
+                                                                        void*  _pEnv;// = (void*)EnvPtr;
+                                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+                                                                        void* _pObj = GetJVMObject(hashID);
+                                                                        if(_pObj != IntPtr.Zero.ToPointer())
+                                                                        {
+                                                                            void*  pField;
+                                                                            if(isStatic) 
+                                                                            { 
+                                                                                void* pObjResult;
+                                                                                void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                    if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                        if(GetStaticObjectField( _pEnv, _pClass, pField, &pObjResult) == 0)
+                                                                                            return getJavaArray(new IntPtr(pObjResult), returnSignature);
+                                                                                        else
+                                                                                            throw new Exception("Runtime Calling Field not error: " + name);
+                                                                                    else
+                                                                                        throw new Exception("Runtime Static Field not found: " + name);
+                                                                                else
+                                                                                    throw new Exception("Runtime Class not found: " + name);
+                                                                            } 
+                                                                            else  
+                                                                            { 
+                                                                                void* pObjResult;
+                                                                                if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                    if(GetObjectField( _pEnv, _pObj, pField, &pObjResult) == 0)
+                                                                                        return getJavaArray(new IntPtr(pObjResult), returnSignature);
+                                                                                    else
+                                                                                        throw new Exception("Runtime Calling Field not error: " + name);
+                                                                                else
+                                                                                    throw new Exception("Runtime Field not found: " + name);
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                            throw new Exception("Runtime Object not found: " + name);
+
+                                                                        
+                                                                    }),
+                                                                    (wrapSetProperty)((val) => {
+                                                                        
+                                                                        string typename = val.GetType().ToString();
+                                                                        void*  _pEnv;
+                                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                        void* _pObj = GetJVMObject(hashID);
+                                                                        if(_pObj != IntPtr.Zero.ToPointer())
+                                                                        {
+                                                                            void*  pField;
+                                                                            switch(typename)
+                                                                            {
+                                                                                case "System.Boolean[]":
+                                                                                    JVMObject vobj_bool = getJavaArray((bool[])val);
+                                                                                    if(isStatic) 
+                                                                                    { 
+                                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                                SetStaticObjectField( _pEnv, _pClass, pField, vobj_bool.Pointer.ToPointer());
+                                                                                            else
+                                                                                                throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        else
+                                                                                            throw new Exception("Runtime Class not found: " + name);
+                                                                                    } 
+                                                                                    else  
+                                                                                    { 
+                                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                            SetObjectField( _pEnv, _pObj, pField, vobj_bool.Pointer.ToPointer());
+                                                                                        else
+                                                                                            throw new Exception("Runtime Field not found: " + name);
+                                                                                    }
+                                                                                    
+                                                                                    
+                                                                                    break;
+
+                                                                                case "System.Byte[]":
+                                                                                    bool[] byte_arr = (bool[])val;
+                                                                                    
+                                                                                    JVMObject vobj_byte = getJavaArray((byte[])val);
+                                                                                    if(isStatic) 
+                                                                                    { 
+                                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                                SetStaticObjectField( _pEnv, _pClass, pField, vobj_byte.Pointer.ToPointer());
+                                                                                            else
+                                                                                                throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        else
+                                                                                            throw new Exception("Runtime Class not found: " + name);
+                                                                                    } 
+                                                                                    else  
+                                                                                    { 
+                                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                            SetObjectField( _pEnv, _pObj, pField, vobj_byte.Pointer.ToPointer());
+                                                                                        else
+                                                                                            throw new Exception("Runtime Field not found: " + name);
+                                                                                    }
+                                                                                    
+                                                                                    break;
+                                                                                    
+                                                                                case "System.Char[]":
+                                                                                    JVMObject vobj_char = getJavaArray((char[])val);
+                                                                                    if(isStatic) 
+                                                                                    { 
+                                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                                SetStaticObjectField( _pEnv, _pClass, pField, vobj_char.Pointer.ToPointer());
+                                                                                            else
+                                                                                                throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        else
+                                                                                            throw new Exception("Runtime Class not found: " + name);
+                                                                                    } 
+                                                                                    else  
+                                                                                    { 
+                                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                            SetObjectField( _pEnv, _pObj, pField, vobj_char.Pointer.ToPointer());
+                                                                                        else
+                                                                                            throw new Exception("Runtime Field not found: " + name);
+                                                                                    }
+                                                                                    
+                                                                                    break;
+
+                                                                                case "System.Short[]":
+                                                                                    
+                                                                                    JVMObject vobj_short = getJavaArray((short[])val);
+                                                                                    if(isStatic) 
+                                                                                    { 
+                                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                                SetStaticObjectField( _pEnv, _pClass, pField, vobj_short.Pointer.ToPointer());
+                                                                                            else
+                                                                                                throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        else
+                                                                                            throw new Exception("Runtime Class not found: " + name);
+                                                                                    } 
+                                                                                    else  
+                                                                                    { 
+                                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                            SetObjectField( _pEnv, _pObj, pField, vobj_short.Pointer.ToPointer());
+                                                                                        else
+                                                                                            throw new Exception("Runtime Field not found: " + name);
+                                                                                    }
+                                                                                    
+                                                                                    break;
+
+                                                                                case "System.Int32[]":
+                                                                                    
+                                                                                    JVMObject vobj_int = getJavaArray((int[])val);
+                                                                                    if(isStatic) 
+                                                                                    { 
+                                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                                SetStaticObjectField( _pEnv, _pClass, pField, vobj_int.Pointer.ToPointer());
+                                                                                            else
+                                                                                                throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        else
+                                                                                            throw new Exception("Runtime Class not found: " + name);
+                                                                                    } 
+                                                                                    else  
+                                                                                    { 
+                                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                            SetObjectField( _pEnv, _pObj, pField, vobj_int.Pointer.ToPointer());
+                                                                                        else
+                                                                                            throw new Exception("Runtime Field not found: " + name);
+                                                                                    }
+                                                                                    
+                                                                                    break;
+
+                                                                                case "System.Int64[]":
+                                                                                    
+                                                                                    JVMObject vobj_long = getJavaArray((long[])val);
+                                                                                    if(isStatic) 
+                                                                                    { 
+                                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                                SetStaticObjectField( _pEnv, _pClass, pField, vobj_long.Pointer.ToPointer());
+                                                                                            else
+                                                                                                throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        else
+                                                                                            throw new Exception("Runtime Class not found: " + name);
+                                                                                    } 
+                                                                                    else  
+                                                                                    { 
+                                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                            SetObjectField( _pEnv, _pObj, pField, vobj_long.Pointer.ToPointer());
+                                                                                        else
+                                                                                            throw new Exception("Runtime Field not found: " + name);
+                                                                                    }
+                                                                                    
+                                                                                    break;
+
+                                                                                case "System.Float[]":
+                                                                                    
+                                                                                    JVMObject vobj_float = getJavaArray((float[])val);
+                                                                                    if(isStatic) 
+                                                                                    { 
+                                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                                SetStaticObjectField( _pEnv, _pClass, pField, vobj_float.Pointer.ToPointer());
+                                                                                            else
+                                                                                                throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        else
+                                                                                            throw new Exception("Runtime Class not found: " + name);
+                                                                                    } 
+                                                                                    else  
+                                                                                    { 
+                                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                            SetObjectField( _pEnv, _pObj, pField, vobj_float.Pointer.ToPointer());
+                                                                                        else
+                                                                                            throw new Exception("Runtime Field not found: " + name);
+                                                                                    }
+                                                                                    
+                                                                                    break;
+
+
+                                                                                case "System.Double[]":
+                                                                                    
+                                                                                    JVMObject vobj_double = getJavaArray((double[])val);
+                                                                                    if(isStatic) 
+                                                                                    { 
+                                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                                SetStaticObjectField( _pEnv, _pClass, pField, vobj_double.Pointer.ToPointer());
+                                                                                            else
+                                                                                                throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        else
+                                                                                            throw new Exception("Runtime Class not found: " + name);
+                                                                                    } 
+                                                                                    else  
+                                                                                    { 
+                                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                            SetObjectField( _pEnv, _pObj, pField, vobj_double.Pointer.ToPointer());
+                                                                                        else
+                                                                                            throw new Exception("Runtime Field not found: " + name);
+                                                                                    }
+                                                                                    
+                                                                                    break;
+
+                                                                                default:
+                                                                            
+                                                                                    JVMObject vobj_obj = getJavaArray((object[])val);
+                                                                                    if(isStatic) 
+                                                                                    { 
+                                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                            if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                                SetStaticObjectField( _pEnv, _pClass, pField, vobj_obj.Pointer.ToPointer());
+                                                                                            else
+                                                                                                throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        else
+                                                                                            throw new Exception("Runtime Class not found: " + name);
+
+                                                                                    } 
+                                                                                    else  
+                                                                                    { 
+                                                                                        if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                            SetObjectField( _pEnv, _pObj, pField, vobj_obj.Pointer.ToPointer());
+                                                                                        else
+                                                                                            throw new Exception("Runtime Field not found: " + name);
+                                                                                    }
+                                                                                    
+                                                                                    break;
+                                                                            }
+                                                                            
+                                                                        }
+                                                                        else
+                                                                            throw new Exception("Runtime Object not found: " + name);
+                                                                        })
+                                                            ));
+                                                        }
+                                                        else
+                                                        {
+                                                            expandoObject.TrySetField(name, 
+                                                                new Tuple<string, object, wrapSetProperty>(
+                                                                    "object",
+                                                                    (wrapGetProperty<object>)(() => {
+                                                                        void*  _pEnv;
+                                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                        void* _pObj = GetJVMObject(hashID);
+                                                                        if(_pObj != IntPtr.Zero.ToPointer())
+                                                                        {
+                                                                            void*  pField;
+                                                                            if(isStatic) 
+                                                                            { 
+                                                                                void* pObjResult;
+                                                                                void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                    if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                        if(GetStaticObjectField( _pEnv, _pClass, pField, &pObjResult) == 0)
+                                                                                        {
+                                                                                            IntPtr returnPtr = new IntPtr(pObjResult);
+
+                                                                                            int hashID_res = getHashCode(pObjResult);
+
+                                                                                            if(JVMObject.DB.ContainsKey(hashID_res))
+                                                                                                return JVMObject.DB[hashID_res];
+
+                                                                                            else if(DB.ContainsKey(hashID_res))
+                                                                                                return (JVMObject)DB[hashID_res];
+                                                                                            else
+                                                                                            {
+                                                                                                string cls = returnSignature.StartsWith("L") && returnSignature.EndsWith(";") ? returnSignature.Substring(1).Replace(";","").Replace("/",".") : returnSignature;
+
+                                                                                                return getObject(_pEnv, cls, pObjResult);
+                                                                                            }
+                                                                                        }
+                                                                                        else
+                                                                                            throw new Exception("Runtime Calling Field not error: " + name);
+                                                                                    else
+                                                                                        throw new Exception("Runtime Static Field not found: " + name);
+                                                                                else
+                                                                                    throw new Exception("Runtime Class not found: " + name);
+                                                                                
+                                                                            } 
+                                                                            else  
+                                                                            { 
+                                                                                void* pObjResult;
+                                                                                if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                    if(GetObjectField( _pEnv, _pObj, pField, &pObjResult) == 0)
                                                                                     {
+                                                                                        Console.WriteLine("CALLING FIELD");
                                                                                         IntPtr returnPtr = new IntPtr(pObjResult);
 
                                                                                         int hashID_res = getHashCode(pObjResult);
@@ -3488,555 +3717,82 @@ namespace QuantApp.Kernel.JVM
                                                                                             return (JVMObject)DB[hashID_res];
                                                                                         else
                                                                                         {
-                                                                                            string cls = returnSignature.StartsWith("L") && returnSignature.EndsWith(";") ? returnSignature.Substring(1).Replace(";","").Replace("/",".") : returnSignature;
-
-                                                                                            return getObject(_pEnv, cls, pObjResult);
+                                                                                            string cls = returnSignature.StartsWith("L") && returnSignature.EndsWith(";")? returnSignature.Substring(1).Replace(";","") : returnSignature;
+                                                                                            return CreateInstancePtr(cls, null, returnPtr, null );
                                                                                         }
                                                                                     }
+
                                                                                     else
                                                                                         throw new Exception("Runtime Calling Field not error: " + name);
                                                                                 else
-                                                                                    throw new Exception("Runtime Static Field not found: " + name);
-                                                                            else
-                                                                                throw new Exception("Runtime Class not found: " + name);
-                                                                            
-                                                                        } 
-                                                                        else  
-                                                                        { 
-                                                                            void* pObjResult;
-                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                if(GetObjectField( _pEnv, _pObj, pField, &pObjResult) == 0)
-                                                                                {
-                                                                                    Console.WriteLine("CALLING FIELD");
-                                                                                    IntPtr returnPtr = new IntPtr(pObjResult);
-
-                                                                                    int hashID_res = getHashCode(pObjResult);
-
-                                                                                    if(JVMObject.DB.ContainsKey(hashID_res))
-                                                                                        return JVMObject.DB[hashID_res];
-
-                                                                                    else if(DB.ContainsKey(hashID_res))
-                                                                                        return (JVMObject)DB[hashID_res];
+                                                                                    throw new Exception("Runtime Field not found: " + name);
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                            throw new Exception("Runtime Object not found: " + name);
+                                                                    }),
+                                                                    (wrapSetProperty)((val) => {
+                                                                        void*  _pEnv;
+                                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                                        void* _pObj = GetJVMObject(hashID);
+                                                                        if(_pObj != IntPtr.Zero.ToPointer())
+                                                                        {
+                                                                            JVMObject vobj = (JVMObject)val;
+                                                                            void*  pField;
+                                                                            if(isStatic) 
+                                                                            { 
+                                                                                void* _pClass = IntPtr.Zero.ToPointer();
+                                                                                if(getClass(_pObj,  ref _pClass) == 0)
+                                                                                    if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
+                                                                                        SetStaticObjectField( _pEnv, _pClass, pField, vobj.Pointer.ToPointer());
                                                                                     else
-                                                                                    {
-                                                                                        string cls = returnSignature.StartsWith("L") && returnSignature.EndsWith(";")? returnSignature.Substring(1).Replace(";","") : returnSignature;
-                                                                                        return CreateInstancePtr(cls, null, returnPtr, null );
-                                                                                    }
-                                                                                }
+                                                                                        throw new Exception("Runtime Static Field not found: " + name);
+                                                                                else
+                                                                                    throw new Exception("Runtime Class not found: " + name);
+                                                                            } 
+                                                                            else  
+                                                                            { 
+                                                                                if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
+                                                                                    SetObjectField( _pEnv, _pObj, pField, vobj.Pointer.ToPointer());
+                                                                                else
+                                                                                    throw new Exception("Runtime Field not found: " + name);
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                            throw new Exception("Runtime Object not found: " + name);
+                                                                    })
+                                                                ));
+                                                        }
+                                                        break;
+                                                        
+                                                }
 
-                                                                                else
-                                                                                    throw new Exception("Runtime Calling Field not error: " + name);
-                                                                            else
-                                                                                throw new Exception("Runtime Field not found: " + name);
-                                                                        }
-                                                                    }
-                                                                    else
-                                                                        throw new Exception("Runtime Object not found: " + name);
-                                                                }),
-                                                                (wrapSetProperty)((val) => {
-                                                                    void*  _pEnv;
-                                                                    if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-                                                                    void* _pObj = GetJVMObject(hashID);
-                                                                    if(_pObj != IntPtr.Zero.ToPointer())
-                                                                    {
-                                                                        JVMObject vobj = (JVMObject)val;
-                                                                        void*  pField;
-                                                                        if(isStatic) 
-                                                                        { 
-                                                                            void* _pClass = IntPtr.Zero.ToPointer();
-                                                                            if(getClass(_pObj,  ref _pClass) == 0)
-                                                                                if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                    SetStaticObjectField( _pEnv, _pClass, pField, vobj.Pointer.ToPointer());
-                                                                                else
-                                                                                    throw new Exception("Runtime Static Field not found: " + name);
-                                                                            else
-                                                                                throw new Exception("Runtime Class not found: " + name);
-                                                                        } 
-                                                                        else  
-                                                                        { 
-                                                                            if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                SetObjectField( _pEnv, _pObj, pField, vobj.Pointer.ToPointer());
-                                                                            else
-                                                                                throw new Exception("Runtime Field not found: " + name);
-                                                                        }
-                                                                    }
-                                                                    else
-                                                                        throw new Exception("Runtime Object not found: " + name);
-                                                                })
-                                                            ));
-                                                    }
-                                                    break;
-                                                    
                                             }
 
-                                        }
-
-                                        else if(signature.StartsWith("M/") || signature.StartsWith("S-M/"))
-                                        {
-                                            bool isStatic = signature.StartsWith("S-");
-                                            string name = signature.Replace("M/","").Replace("S-","");
-                                            name = name.Substring(0, name.IndexOf("("));
-                                            string argsSignature = signature.Substring(signature.IndexOf("(") + 1, signature.LastIndexOf(")") - 1 - signature.IndexOf("("));
-                                            string returnSignature = signature.Substring(signature.IndexOf(")") + 1);
-
-                                            string preArgsSignature = argsSignature;
-                                            argsSignature = "-" + argsSignature;
-                                            
-                                            switch (returnSignature)
+                                            else if(signature.StartsWith("M/") || signature.StartsWith("S-M/"))
                                             {
-                                                case "Z": //Boolean                                                    
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapFunction<bool>)((call_args) => {
-                                                        void*  _pEnv;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+                                                bool isStatic = signature.StartsWith("S-");
+                                                string name = signature.Replace("M/","").Replace("S-","");
+                                                name = name.Substring(0, name.IndexOf("("));
+                                                string argsSignature = signature.Substring(signature.IndexOf("(") + 1, signature.LastIndexOf(")") - 1 - signature.IndexOf("("));
+                                                string returnSignature = signature.Substring(signature.IndexOf(")") + 1);
 
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != IntPtr.Zero.ToPointer())
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        return CallStaticBooleanMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    return CallBooleanMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
-                                                case "B": //Byte
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapFunction<byte>)((call_args) => {
-                                                        
-                                                        void*  _pEnv;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-                                                        
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != IntPtr.Zero.ToPointer())
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        return CallStaticByteMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    return CallByteMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
-                                            
-                                                case "C": //Char
-                                                    
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapFunction<char>)((call_args) => {
-                                                        
-                                                        void*  _pEnv;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-                                                        
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != IntPtr.Zero.ToPointer())
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        return CallStaticCharMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    return CallCharMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
+                                                string preArgsSignature = argsSignature;
+                                                argsSignature = "-" + argsSignature;
                                                 
-                                                case "S": //Short
-                                                    
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapFunction<short>)((call_args) => {
-                                                        
-                                                        void*  _pEnv;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-                                                        
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != IntPtr.Zero.ToPointer())
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        return CallStaticShortMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    return CallShortMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
-                                                
-                                                case "I": //Int
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapFunction<int>)((call_args) => {
-                                                        void*  _pEnv;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-                                                        
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != IntPtr.Zero.ToPointer())
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        return CallStaticIntMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    return CallIntMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
-                                                
-                                                case "J": //Long
-                                                    
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapFunction<long>)((call_args) => {
-                                                        void*  _pEnv;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != IntPtr.Zero.ToPointer())
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        return CallStaticLongMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    return CallLongMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
-                                                
-                                                case "F": //Float
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapFunction<float>)((call_args) => {
-                                                        
-                                                        void*  _pEnv;// = (void*)EnvPtr;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != IntPtr.Zero.ToPointer())
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        return CallStaticFloatMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    return CallFloatMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
-                                                
-                                                case "D": //Double
-                                                    
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapFunction<double>)((call_args) => {
-                                                        void*  _pEnv;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-                                                        
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != IntPtr.Zero.ToPointer())
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        return CallStaticDoubleMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    return CallDoubleMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
-                                                
-                                                case "V": //Void
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapAction)((call_args) => {
-                                                        
-                                                        void*  _pEnv;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-                                                        // Console.WriteLine("CALLING VOID: " + );
-
-
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-                                                        
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != IntPtr.Zero.ToPointer())
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        CallStaticVoidMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    CallVoidMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
-                                                
-                                                case "Ljava/lang/String;": //String
-                                                    
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapFunction<string>)((call_args) => {
-                                                        
-                                                        void*  _pEnv;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-                                                        
-                                                        void* pObjResult = IntPtr.Zero.ToPointer();
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != pObjResult)
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    CallObjectMethod( _pEnv, _pObj, pMethod, &pObjResult, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-
-                                                            return GetNetString(_pEnv, pObjResult);
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
-
-                                                case "Ljava/time/LocalDateTime;": //String
-                                                    
-                                                    expandoObject.TrySetMember(name + argsSignature, (wrapFunction<DateTime>)((call_args) => {
-
-                                                        void*  _pEnv;
-                                                        if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-
-                                                        int call_len = call_args == null ? 0 : call_args.Length;
-                                                        void** ar_call = stackalloc void*[call_len];
-                                                        getJavaParameters(ref ar_call, call_args);
-                                                        
-                                                        void* pObjResult = IntPtr.Zero.ToPointer();
-                                                        void* _pObj = GetJVMObject(hashID);
-                                                        if(_pObj != pObjResult)
-                                                        {
-                                                            void* pMethod;
-                                                            if(isStatic) 
-                                                            { 
-                                                                void* _pClass = IntPtr.Zero.ToPointer();
-                                                                if(getClass(_pObj,  ref _pClass) == 0)
-                                                                    if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                else
-                                                                    throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            } 
-                                                            else  
-                                                            { 
-                                                                if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                    CallObjectMethod( _pEnv, _pObj, pMethod, &pObjResult, call_len, ar_call);
-                                                                else
-                                                                    throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                            }
-                                                        
-                                                            return GetNetDateTime(_pEnv, pObjResult);
-                                                        }
-                                                        else
-                                                            throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                    }));
-                                                    break;
-
-                                                default:
-                                                    
-                                                    if(returnSignature.StartsWith("["))
-                                                    {
-                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<object[]>)((call_args)  => {
+                                                switch (returnSignature)
+                                                {
+                                                    case "Z": //Boolean                                                    
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<bool>)((call_args) => {
                                                             void*  _pEnv;
                                                             if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
 
                                                             int call_len = call_args == null ? 0 : call_args.Length;
                                                             void** ar_call = stackalloc void*[call_len];
                                                             getJavaParameters(ref ar_call, call_args);
 
-
-                                                            void* pObjResult = IntPtr.Zero.ToPointer();
                                                             void* _pObj = GetJVMObject(hashID);
-                                                            if(_pObj != pObjResult)
+                                                            if(_pObj != IntPtr.Zero.ToPointer())
                                                             {
                                                                 void* pMethod;
                                                                 if(isStatic) 
@@ -4044,136 +3800,669 @@ namespace QuantApp.Kernel.JVM
                                                                     void* _pClass = IntPtr.Zero.ToPointer();
                                                                     if(getClass(_pObj,  ref _pClass) == 0)
                                                                         if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                            CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call);
+                                                                        {
+                                                                            bool _res;
+                                                                            if(CallStaticBooleanMethod( _pEnv, _pClass, pMethod, call_len, ar_call, &_res) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                            return _res;
+                                                                        }
                                                                         else
-                                                                            throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                                            throw new Exception(GetException(_pEnv));
                                                                     else
-                                                                        throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                                        throw new Exception(GetException(_pEnv));
                                                                 } 
                                                                 else  
                                                                 { 
                                                                     if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        CallObjectMethod( _pEnv, _pObj, pMethod, &pObjResult, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                }
-
-                                                                IntPtr ptr = new IntPtr(pObjResult);
-
-                                                                if(ptr == IntPtr.Zero)
-                                                                    return null;
-                                                            
-                                                                return getJavaArray(ptr, returnSignature);
-                                                            }
-                                                            else
-                                                                throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                        }));
-                                                    }
-                                                    else
-                                                    {
-                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<object>)((call_args)  => {
-                                                            
-                                                            void*  _pEnv;
-                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
-
-
-                                                            int call_len = call_args == null ? 0 : call_args.Length;
-                                                            void** ar_call = stackalloc void*[call_len];
-                                                            getJavaParameters(ref ar_call, call_args);
-
-                                                            void* pObjResult = IntPtr.Zero.ToPointer();
-                                                            void* _pObj = GetJVMObject(hashID);
-                                                            if(_pObj != pObjResult)
-                                                            {
-                                                                void* pMethod;
-                                                                if(isStatic) 
-                                                                { 
-                                                                    void* _pClass = IntPtr.Zero.ToPointer();
-                                                                    if(getClass(_pObj,  ref _pClass) == 0)
-                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                            CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call);
-                                                                        else
-                                                                            throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                    else
-                                                                        throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                } 
-                                                                else  
-                                                                { 
-                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        CallObjectMethod( _pEnv, _pObj, pMethod, &pObjResult, call_len, ar_call);
-                                                                    else
-                                                                        throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
-                                                                }
-                                                                
-                                                                IntPtr returnPtr = new IntPtr(pObjResult);
-
-                                                                if(returnPtr == IntPtr.Zero)
-                                                                    return null;
-
-                                                                int hashID_res = getHashCode(pObjResult);
-
-                                                                
-                                                                if(JVMDelegate.DB.ContainsKey(hashID_res))
-                                                                    return JVMDelegate.DB[hashID_res];
-
-
-                                                                else if(Runtime.DB.ContainsKey(hashID_res))
-                                                                {
-                                                                    // Console.WriteLine("Runtime Exists: " + hashID_res);
-                                                                    return Runtime.DB[hashID_res];
-                                                                }
-
-                                                                
-                                                                else if(JVMObject.DB.ContainsKey(hashID_res))
-                                                                {
-                                                                    // Console.WriteLine("JVMObject Exists: " + hashID_res);
-
-                                                                    if(JVMObject.DB[hashID_res] is JVMTuple)
                                                                     {
-                                                                        JVMTuple jobj = JVMObject.DB[hashID_res] as JVMTuple;
-                                                                        return jobj.jVMTuple;
+                                                                        bool _res;
+                                                                        if(CallBooleanMethod( _pEnv, _pObj, pMethod, call_len, ar_call, &_res) != 0)
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                        return _res;
                                                                     }
-                                                                    return JVMObject.DB[hashID_res];
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
                                                                 }
+                                                            }
+                                                            else
+                                                                throw new Exception(GetException(_pEnv));
+                                                        }));
+                                                        break;
+                                                    case "B": //Byte
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<byte>)((call_args) => {
+                                                            
+                                                            void*  _pEnv;
+                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
 
-                                                                else
-                                                                {
-                                                                    string cls = returnSignature.StartsWith("L") && returnSignature.EndsWith(";") ? returnSignature.Substring(1).Replace(";","").Replace("/",".") : returnSignature;
 
-                                                                    return getObject(_pEnv, cls, pObjResult);
+                                                            int call_len = call_args == null ? 0 : call_args.Length;
+                                                            void** ar_call = stackalloc void*[call_len];
+                                                            getJavaParameters(ref ar_call, call_args);
+                                                            
+                                                            void* _pObj = GetJVMObject(hashID);
+                                                            if(_pObj != IntPtr.Zero.ToPointer())
+                                                            {
+                                                                void* pMethod;
+                                                                if(isStatic) 
+                                                                { 
+                                                                    void* _pClass = IntPtr.Zero.ToPointer();
+                                                                    if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        {
+                                                                            byte _res;
+                                                                            if(CallStaticByteMethod( _pEnv, _pClass, pMethod, call_len, ar_call, &_res) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                            return _res;
+                                                                        }
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                } 
+                                                                else  
+                                                                { 
+                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                    {
+                                                                        byte _res;
+                                                                        if(CallByteMethod( _pEnv, _pObj, pMethod, call_len, ar_call, &_res) != 0)
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                        return _res;
+                                                                    }
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                }
+                                                            }
+                                                            else
+                                                                throw new Exception(GetException(_pEnv));
+                                                        }));
+                                                        break;
+                                                
+                                                    case "C": //Char
+                                                        
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<char>)((call_args) => {
+                                                            
+                                                            void*  _pEnv;
+                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+
+                                                            int call_len = call_args == null ? 0 : call_args.Length;
+                                                            void** ar_call = stackalloc void*[call_len];
+                                                            getJavaParameters(ref ar_call, call_args);
+                                                            
+                                                            void* _pObj = GetJVMObject(hashID);
+                                                            if(_pObj != IntPtr.Zero.ToPointer())
+                                                            {
+                                                                void* pMethod;
+                                                                if(isStatic) 
+                                                                { 
+                                                                    void* _pClass = IntPtr.Zero.ToPointer();
+                                                                    if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        {
+                                                                            char _res;
+                                                                            if(CallStaticCharMethod( _pEnv, _pClass, pMethod, call_len, ar_call, &_res) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                            return _res;
+                                                                        }
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                } 
+                                                                else  
+                                                                { 
+                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                    {
+                                                                        char _res;
+                                                                        if(CallCharMethod( _pEnv, _pObj, pMethod, call_len, ar_call, &_res) != 0)
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                        return _res;
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
                                                                 }
                                                             }
                                                             else
                                                                 throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
                                                         }));
-                                                    }
+                                                        break;
+                                                    
+                                                    case "S": //Short
+                                                        
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<short>)((call_args) => {
+                                                            
+                                                            void*  _pEnv;
+                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
 
-                                                    break;
+
+                                                            int call_len = call_args == null ? 0 : call_args.Length;
+                                                            void** ar_call = stackalloc void*[call_len];
+                                                            getJavaParameters(ref ar_call, call_args);
+                                                            
+                                                            void* _pObj = GetJVMObject(hashID);
+                                                            if(_pObj != IntPtr.Zero.ToPointer())
+                                                            {
+                                                                void* pMethod;
+                                                                if(isStatic) 
+                                                                { 
+                                                                    void* _pClass = IntPtr.Zero.ToPointer();
+                                                                    if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        {
+                                                                            short _res;
+                                                                            if(CallStaticShortMethod( _pEnv, _pClass, pMethod, call_len, ar_call, &_res) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                            return _res;
+                                                                        }
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                } 
+                                                                else  
+                                                                { 
+                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                    {
+                                                                        short _res;
+                                                                        if(CallShortMethod( _pEnv, _pObj, pMethod, call_len, ar_call, &_res) != 0)
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                        return _res;
+                                                                    }
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                }
+                                                            }
+                                                            else
+                                                                throw new Exception(GetException(_pEnv));
+                                                        }));
+                                                        break;
+                                                    
+                                                    case "I": //Int
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<int>)((call_args) => {
+                                                            void*  _pEnv;
+                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+                                                            int call_len = call_args == null ? 0 : call_args.Length;
+                                                            void** ar_call = stackalloc void*[call_len];
+                                                            getJavaParameters(ref ar_call, call_args);
+                                                            
+                                                            void* _pObj = GetJVMObject(hashID);
+                                                            if(_pObj != IntPtr.Zero.ToPointer())
+                                                            {
+                                                                void* pMethod;
+                                                                if(isStatic) 
+                                                                { 
+                                                                    void* _pClass = IntPtr.Zero.ToPointer();
+                                                                    if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        {
+                                                                            int _res;
+                                                                            if(CallStaticIntMethod( _pEnv, _pClass, pMethod, call_len, ar_call, &_res) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                            return _res;
+                                                                        }
+                                                                        else
+                                                                            throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                                    else
+                                                                        throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                                } 
+                                                                else  
+                                                                { 
+                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                    {
+                                                                        int _res;
+                                                                        if(CallIntMethod( _pEnv, _pObj, pMethod, call_len, ar_call, &_res) != 0)
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                        return _res;
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                                }
+                                                            }
+                                                            else
+                                                                throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                        }));
+                                                        break;
+                                                    
+                                                    case "J": //Long
+                                                        
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<long>)((call_args) => {
+                                                            void*  _pEnv;
+                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+
+                                                            int call_len = call_args == null ? 0 : call_args.Length;
+                                                            void** ar_call = stackalloc void*[call_len];
+                                                            getJavaParameters(ref ar_call, call_args);
+
+                                                            void* _pObj = GetJVMObject(hashID);
+                                                            if(_pObj != IntPtr.Zero.ToPointer())
+                                                            {
+                                                                void* pMethod;
+                                                                if(isStatic) 
+                                                                { 
+                                                                    void* _pClass = IntPtr.Zero.ToPointer();
+                                                                    if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        {
+                                                                            long _res;
+                                                                            if(CallStaticLongMethod( _pEnv, _pClass, pMethod, call_len, ar_call, &_res) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                            return _res;
+                                                                        }
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                } 
+                                                                else  
+                                                                { 
+                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                    {
+                                                                        long _res;
+                                                                        if(CallLongMethod( _pEnv, _pObj, pMethod, call_len, ar_call, &_res) != 0)
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                        return _res;
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                                }
+                                                            }
+                                                            else
+                                                                throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                        }));
+                                                        break;
+                                                    
+                                                    case "F": //Float
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<float>)((call_args) => {
+                                                            
+                                                            void*  _pEnv;// = (void*)EnvPtr;
+                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+
+                                                            int call_len = call_args == null ? 0 : call_args.Length;
+                                                            void** ar_call = stackalloc void*[call_len];
+                                                            getJavaParameters(ref ar_call, call_args);
+
+                                                            void* _pObj = GetJVMObject(hashID);
+                                                            if(_pObj != IntPtr.Zero.ToPointer())
+                                                            {
+                                                                void* pMethod;
+                                                                if(isStatic) 
+                                                                { 
+                                                                    void* _pClass = IntPtr.Zero.ToPointer();
+                                                                    if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        {
+                                                                            float _res;
+                                                                            if(CallStaticFloatMethod( _pEnv, _pClass, pMethod, call_len, ar_call, &_res) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                            return _res;
+                                                                        }
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                } 
+                                                                else  
+                                                                { 
+                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                    {
+                                                                        float _res;
+                                                                        if(CallFloatMethod( _pEnv, _pObj, pMethod, call_len, ar_call, &_res) != 0)
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                        return _res;
+
+                                                                    }
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                }
+                                                            }
+                                                            else
+                                                                throw new Exception(GetException(_pEnv));
+                                                        }));
+                                                        break;
+                                                    
+                                                    case "D": //Double
+                                                        
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<double>)((call_args) => {
+                                                            void*  _pEnv;
+                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+
+                                                            int call_len = call_args == null ? 0 : call_args.Length;
+                                                            void** ar_call = stackalloc void*[call_len];
+                                                            getJavaParameters(ref ar_call, call_args);
+                                                            
+                                                            void* _pObj = GetJVMObject(hashID);
+                                                            if(_pObj != IntPtr.Zero.ToPointer())
+                                                            {
+                                                                void* pMethod;
+                                                                if(isStatic) 
+                                                                { 
+                                                                    void* _pClass = IntPtr.Zero.ToPointer();
+                                                                    if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        {
+                                                                            double _res;
+                                                                            if(CallStaticDoubleMethod( _pEnv, _pClass, pMethod, call_len, ar_call, &_res) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                            return _res;
+                                                                        }
+                                                                        else
+                                                                            throw new Exception("Runtime Static Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                                    else
+                                                                        throw new Exception("Runtime Class not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                                } 
+                                                                else  
+                                                                { 
+                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                    {
+                                                                        double _res;
+                                                                        if(CallDoubleMethod( _pEnv, _pObj, pMethod, call_len, ar_call, &_res) != 0)
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                        return _res;
+                                                                    }
+                                                                    else
+                                                                        throw new Exception("Runtime Method not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                                }
+                                                            }
+                                                            else
+                                                                throw new Exception("Runtime Object not found: " + name + "(" + preArgsSignature + ")" + returnSignature );
+                                                        }));
+                                                        break;
+                                                    
+                                                    case "V": //Void
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapAction)((call_args) => {
+                                                            
+                                                            void*  _pEnv;
+                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+                                                            // Console.WriteLine("CALLING VOID: " + );
+
+
+                                                            int call_len = call_args == null ? 0 : call_args.Length;
+                                                            void** ar_call = stackalloc void*[call_len];
+                                                            getJavaParameters(ref ar_call, call_args);
+                                                            
+                                                            void* _pObj = GetJVMObject(hashID);
+                                                            if(_pObj != IntPtr.Zero.ToPointer())
+                                                            {
+                                                                void* pMethod;
+                                                                if(isStatic) 
+                                                                { 
+                                                                    void* _pClass = IntPtr.Zero.ToPointer();
+                                                                    if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                            CallStaticVoidMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                } 
+                                                                else  
+                                                                { 
+                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        CallVoidMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                }
+                                                            }
+                                                            else
+                                                                throw new Exception(GetException(_pEnv));
+                                                        }));
+                                                        break;
+                                                    
+                                                    case "Ljava/lang/String;": //String
+                                                        
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<string>)((call_args) => {
+                                                            
+                                                            void*  _pEnv;
+                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+
+                                                            int call_len = call_args == null ? 0 : call_args.Length;
+                                                            void** ar_call = stackalloc void*[call_len];
+                                                            getJavaParameters(ref ar_call, call_args);
+                                                            
+                                                            void* pObjResult = IntPtr.Zero.ToPointer();
+                                                            void* _pObj = GetJVMObject(hashID);
+                                                            if(_pObj != pObjResult)
+                                                            {
+                                                                void* pMethod;
+                                                                if(isStatic) 
+                                                                { 
+                                                                    void* _pClass = IntPtr.Zero.ToPointer();
+                                                                    if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        {
+                                                                            if(CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        }
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                } 
+                                                                else  
+                                                                { 
+                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                    {
+                                                                        if(CallObjectMethod( _pEnv, _pObj, pMethod, &pObjResult, call_len, ar_call) != 0)
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    }
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                }
+
+                                                                return GetNetString(_pEnv, pObjResult);
+                                                            }
+                                                            else
+                                                                throw new Exception(GetException(_pEnv));
+                                                        }));
+                                                        break;
+
+                                                    case "Ljava/time/LocalDateTime;": //String
+                                                        
+                                                        expandoObject.TrySetMember(name + argsSignature, (wrapFunction<DateTime>)((call_args) => {
+
+                                                            void*  _pEnv;
+                                                            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+
+                                                            int call_len = call_args == null ? 0 : call_args.Length;
+                                                            void** ar_call = stackalloc void*[call_len];
+                                                            getJavaParameters(ref ar_call, call_args);
+                                                            
+                                                            void* pObjResult = IntPtr.Zero.ToPointer();
+                                                            void* _pObj = GetJVMObject(hashID);
+                                                            if(_pObj != pObjResult)
+                                                            {
+                                                                void* pMethod;
+                                                                if(isStatic) 
+                                                                { 
+                                                                    void* _pClass = IntPtr.Zero.ToPointer();
+                                                                    if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                            if(CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                } 
+                                                                else  
+                                                                { 
+                                                                    if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        if(CallObjectMethod( _pEnv, _pObj, pMethod, &pObjResult, call_len, ar_call) != 0)
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    else
+                                                                        throw new Exception(GetException(_pEnv));
+                                                                }
+                                                            
+                                                                return GetNetDateTime(_pEnv, pObjResult);
+                                                            }
+                                                            else
+                                                                throw new Exception(GetException(_pEnv));
+                                                        }));
+                                                        break;
+
+                                                    default:
+                                                        
+                                                        if(returnSignature.StartsWith("["))
+                                                        {
+                                                            expandoObject.TrySetMember(name + argsSignature, (wrapFunction<object[]>)((call_args)  => {
+                                                                void*  _pEnv;
+                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+
+                                                                int call_len = call_args == null ? 0 : call_args.Length;
+                                                                void** ar_call = stackalloc void*[call_len];
+                                                                getJavaParameters(ref ar_call, call_args);
+
+
+                                                                void* pObjResult = IntPtr.Zero.ToPointer();
+                                                                void* _pObj = GetJVMObject(hashID);
+                                                                if(_pObj != pObjResult)
+                                                                {
+                                                                    void* pMethod;
+                                                                    if(isStatic) 
+                                                                    { 
+                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                            if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                                if(CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call) != 0)
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    } 
+                                                                    else  
+                                                                    { 
+                                                                        if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                            if(CallObjectMethod( _pEnv, _pObj, pMethod, &pObjResult, call_len, ar_call) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    }
+
+                                                                    IntPtr ptr = new IntPtr(pObjResult);
+
+                                                                    if(ptr == IntPtr.Zero)
+                                                                        return null;
+                                                                
+                                                                    return getJavaArray(ptr, returnSignature);
+                                                                }
+                                                                else
+                                                                    throw new Exception(GetException(_pEnv));
+                                                            }));
+                                                        }
+                                                        else
+                                                        {
+                                                            expandoObject.TrySetMember(name + argsSignature, (wrapFunction<object>)((call_args)  => {
+                                                                
+                                                                void*  _pEnv;
+                                                                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+
+
+                                                                int call_len = call_args == null ? 0 : call_args.Length;
+                                                                void** ar_call = stackalloc void*[call_len];
+                                                                getJavaParameters(ref ar_call, call_args);
+
+                                                                void* pObjResult = IntPtr.Zero.ToPointer();
+                                                                void* _pObj = GetJVMObject(hashID);
+                                                                if(_pObj != pObjResult)
+                                                                {
+                                                                    void* pMethod;
+                                                                    if(isStatic) 
+                                                                    { 
+                                                                        void* _pClass = IntPtr.Zero.ToPointer();
+                                                                        if(getClass(_pObj,  ref _pClass) == 0)
+                                                                            if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                                CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call);
+                                                                            else
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    } 
+                                                                    else  
+                                                                    { 
+                                                                        if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                            CallObjectMethod( _pEnv, _pObj, pMethod, &pObjResult, call_len, ar_call);
+                                                                        else
+                                                                            throw new Exception(GetException(_pEnv));
+                                                                    }
+                                                                    
+                                                                    IntPtr returnPtr = new IntPtr(pObjResult);
+
+                                                                    if(returnPtr == IntPtr.Zero)
+                                                                        return null;
+
+                                                                    int hashID_res = getHashCode(pObjResult);
+
+                                                                    
+                                                                    if(JVMDelegate.DB.ContainsKey(hashID_res))
+                                                                        return JVMDelegate.DB[hashID_res];
+
+
+                                                                    else if(Runtime.DB.ContainsKey(hashID_res))
+                                                                    {
+                                                                        // Console.WriteLine("Runtime Exists: " + hashID_res);
+                                                                        return Runtime.DB[hashID_res];
+                                                                    }
+
+                                                                    
+                                                                    else if(JVMObject.DB.ContainsKey(hashID_res))
+                                                                    {
+                                                                        // Console.WriteLine("JVMObject Exists: " + hashID_res);
+
+                                                                        if(JVMObject.DB[hashID_res] is JVMTuple)
+                                                                        {
+                                                                            JVMTuple jobj = JVMObject.DB[hashID_res] as JVMTuple;
+                                                                            return jobj.jVMTuple;
+                                                                        }
+                                                                        return JVMObject.DB[hashID_res];
+                                                                    }
+
+                                                                    else
+                                                                    {
+                                                                        string cls = returnSignature.StartsWith("L") && returnSignature.EndsWith(";") ? returnSignature.Substring(1).Replace(";","").Replace("/",".") : returnSignature;
+
+                                                                        return getObject(_pEnv, cls, pObjResult);
+                                                                    }
+                                                                }
+                                                                else
+                                                                    throw new Exception(GetException(_pEnv));
+                                                            }));
+                                                        }
+
+                                                        break;
+                                                }
+                                            
                                             }
-                                        
                                         }
-                                    }
 
-                                    return expandoObject;
+                                        return expandoObject;
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
                                 }
                                 else
-                                    throw new Exception("Error Executing signature: " + sClass);
+                                    throw new Exception(GetException(pEnv));
                             }
-                            else
-                                throw new Exception("CLASS NOT FOUND: " + sClass);
+                            else 
+                                throw new Exception(GetException(pEnv));
                         }
                         else 
-                            throw new Exception("can not find method Signatures: " + sClass);
+                            throw new Exception(GetException(pEnv));
                     }
                     else 
-                        throw new Exception("ArrayClasses get method error");
+                        throw new Exception(GetException(pEnv));
                 }
                 else 
-                    throw new Exception("CLRRuntime class not found error");
-            }
-            else 
-                throw new Exception("JVM Engine not loaded");
-            }
+                    throw new Exception("JVM Engine not loaded");
+                }
             catch(Exception e)
             {
                 Console.WriteLine(e);

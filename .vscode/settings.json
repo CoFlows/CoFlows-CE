@@ -8,4 +8,8 @@
         "**/.settings": true,
         "**/.factorypath": true
     },
+    "files.associations": {
+        "*.ipynb": "python",
+        "exception": "cpp"
+    },
 }

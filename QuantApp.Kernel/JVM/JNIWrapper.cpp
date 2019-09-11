@@ -83,7 +83,7 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         if(*pClass != NULL)
@@ -124,7 +124,7 @@ extern "C" {
     {
         jmethodID methodID = pEnv->GetMethodID(cls, "<init>", szArgs);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -136,7 +136,7 @@ extern "C" {
         
         *pobj = pEnv->NewObjectA(cls, methodID, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             free(args);
             return -1;
         }
@@ -154,7 +154,7 @@ extern "C" {
         jclass cls = pEnv->FindClass( szType );
         jmethodID methodID = pEnv->GetMethodID(cls, "<init>", szArgs);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -166,7 +166,7 @@ extern "C" {
         
         *pobj = pEnv->NewObjectA(cls, methodID, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             free(args);
             return -1;
         }
@@ -184,13 +184,13 @@ extern "C" {
     {
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Boolean" ), "<init>", "(Z)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Boolean" ), methodID, val);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -205,14 +205,14 @@ extern "C" {
     {
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Byte" ), "<init>", "(B)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Byte" ), methodID, val);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -227,14 +227,14 @@ extern "C" {
     {
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Character" ), "<init>", "(C)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Character" ), methodID, val);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -249,14 +249,14 @@ extern "C" {
     {
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Short" ), "<init>", "(S)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Short" ), methodID, val);
         
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -271,14 +271,14 @@ extern "C" {
     {
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Integer" ), "<init>", "(I)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Integer" ), methodID, val);
         
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -293,14 +293,14 @@ extern "C" {
     {
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Long" ), "<init>", "(J)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Long" ), methodID, val);
         
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -315,14 +315,14 @@ extern "C" {
     {
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Float" ), "<init>", "(F)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Float" ), methodID, val);
         
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -339,13 +339,13 @@ extern "C" {
     {
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Double" ), "<init>", "(D)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Double" ), methodID, val);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -365,7 +365,7 @@ extern "C" {
         *pMid = pEnv->GetStaticMethodID( pClass, szName, szArgs);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -383,7 +383,7 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -399,7 +399,7 @@ extern "C" {
         *pFid = pEnv->GetStaticFieldID( pClass, szName, sig);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -413,7 +413,7 @@ extern "C" {
     {
         jclass cls = pEnv->GetObjectClass(pObj);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -421,7 +421,7 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -443,7 +443,7 @@ extern "C" {
         pEnv->CallStaticVoidMethodA( pClass, pMid, (const jvalue*)args);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             free(args);
             return -1;
         }
@@ -462,7 +462,7 @@ extern "C" {
         pEnv->CallVoidMethodA( pClass, pMid, (const jvalue*)args);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -480,7 +480,7 @@ extern "C" {
         jmethodID pMid = pEnv->GetMethodID(_cls, "getClass", "()Ljava/lang/Class;");
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
 
             free(args);
             return -1;
@@ -488,21 +488,21 @@ extern "C" {
         jobject jcls = pEnv->CallObjectMethodA(_cls, pMid, (const jvalue*)args);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             free(args);
             return -1;
         }
 
         jclass __cls = pEnv->GetObjectClass(jcls);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             free(args);
             return -1;
         }
 
         jmethodID pMid2 = pEnv->GetMethodID(__cls, "getName", "()Ljava/lang/String;");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             free(args);
             return -1;
         }
@@ -511,7 +511,7 @@ extern "C" {
 
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             free(args);
             return -1;
         }
@@ -532,7 +532,7 @@ extern "C" {
         jobject val = pEnv->CallStaticObjectMethodA( pClass, pMid, (const jvalue*)args);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             free(args);
             return -1;
         }
@@ -551,7 +551,7 @@ extern "C" {
 
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             free(args);
             return -1;
         }
@@ -567,7 +567,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         
@@ -581,7 +581,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         
@@ -595,7 +595,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -607,65 +607,66 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            // //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
     }
 
     //int
-    int CallStaticIntMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs)
+    int CallStaticIntMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, int* res)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        int res = pEnv->CallStaticIntMethodA(pClass, pMid, (const jvalue*)args);
+        *res = pEnv->CallStaticIntMethodA(pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
+            return -1;
         }
         free(args);
-        return res;
+        return 0;
 
     }
 
-    int CallIntMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs)
+    int CallIntMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, int* res)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        int res = pEnv->CallIntMethodA( pObject, pMid, (const jvalue*)args);
+        *res = pEnv->CallIntMethodA( pObject, pMid, (const jvalue*)args);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return -666;
+            return -1;
         }
         free(args);
-        return res;
+        return 0;
     }
 
-    int GetStaticIntField(JNIEnv* pEnv, jclass pClass, jfieldID pMid)
+    int GetStaticIntField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, int* res)
     {
-        int res = pEnv->GetStaticIntField(pClass, pMid);
+        *res = pEnv->GetStaticIntField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
-        return res;
+        return 0;
     }
 
-    int GetIntField(JNIEnv* pEnv, jobject pObject, jfieldID pMid)
+    int GetIntField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, int* res)
     {
-        int res = pEnv->GetIntField(pObject, pMid);
+        *res = pEnv->GetIntField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
-        return res;
+        return 0;
     }
 
     int SetStaticIntField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, int val)
@@ -675,7 +676,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -687,7 +688,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -695,60 +696,60 @@ extern "C" {
 
 
     //long
-    long CallStaticLongMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs)
+    int CallStaticLongMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, long* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        long val = pEnv->CallStaticLongMethodA( pClass, pMid, (const jvalue*)args);
+        *val = pEnv->CallStaticLongMethodA( pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return -666;
+            return -1;
         }
         free(args);
-        return val;
+        return 0;
     }
 
-    long CallLongMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs)
+    int CallLongMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, long* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        long val = pEnv->CallLongMethodA(pObject, pMid, (const jvalue*)args);
+        *val = pEnv->CallLongMethodA(pObject, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return -666;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    long GetStaticLongField(JNIEnv* pEnv, jclass pClass, jfieldID pMid)
+    int GetStaticLongField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, long* val)
     {
-        long val = pEnv->GetStaticLongField(pClass, pMid);
+        *val = pEnv->GetStaticLongField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
-            return -666;
+            //pEnv->ExceptionDescribe();
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    long GetLongField(JNIEnv* pEnv, jobject pObject, jfieldID pMid)
+    int GetLongField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, long* val)
     {
-        long val = pEnv->GetLongField(pObject, pMid);
+        *val = pEnv->GetLongField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
-            return -666;
+            //pEnv->ExceptionDescribe();
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
     int SetStaticLongField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, long val)
@@ -757,7 +758,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -769,55 +770,65 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
     }
 
     //float
-    float CallStaticFloatMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs)
+    int CallStaticFloatMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, float* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        float val = pEnv->CallStaticFloatMethodA( pClass, pMid, (const jvalue*)args);
+        *val = pEnv->CallStaticFloatMethodA( pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return -666;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    float CallFloatMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs)
+    int CallFloatMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, float* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        float val = pEnv->CallFloatMethodA(pObject, pMid, (const jvalue*)args);
+        // float val = pEnv->CallFloatMethodA(pObject, pMid, (const jvalue*)args);
+        *val = pEnv->CallFloatMethodA(pObject, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return -666;
+            // return -666;
+            return -1;
         }
 
-        return val;
+        // return val;
+        return 0;
     }
 
-    float GetStaticFloatField(JNIEnv* pEnv, jclass pClass, jfieldID pMid)
+    int GetStaticFloatField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, float *val)
     {
-        return pEnv->GetStaticFloatField(pClass, pMid);
+        *val = pEnv->GetStaticFloatField(pClass, pMid);
+        if(pEnv->ExceptionCheck() == JNI_TRUE)
+            return -1;
+        return 0;
     }
 
-    float GetFloatField(JNIEnv* pEnv, jobject pObject, jfieldID pMid)
+    int GetFloatField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, float *val)
     {
-        return pEnv->GetFloatField(pObject, pMid);
+
+        *val = pEnv->GetFloatField(pObject, pMid);
+        if(pEnv->ExceptionCheck() == JNI_TRUE)
+            return -11;
+        return 0;
     }
 
     int SetStaticFloatField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, float val)
@@ -827,7 +838,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -840,67 +851,65 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
     }
 
     //double
-    float CallStaticDoubleMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs)
+    int CallStaticDoubleMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, double* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        float val = pEnv->CallStaticDoubleMethodA(pClass, pMid, (const jvalue*)args);
+        *val = pEnv->CallStaticDoubleMethodA(pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
             free(args);
-            return -666;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    double CallDoubleMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs)
+    int CallDoubleMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, double* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        float val = pEnv->CallDoubleMethodA( pObject, pMid, (const jvalue*)args);
+        *val = pEnv->CallDoubleMethodA( pObject, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
             free(args);
-            return -666;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    double GetStaticDoubleField(JNIEnv* pEnv, jclass pClass, jfieldID pMid)
+    int GetStaticDoubleField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, double* val)
     {
-        double val = pEnv->GetStaticDoubleField(pClass, pMid);
+        *val = pEnv->GetStaticDoubleField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
-            return -666;
+            //pEnv->ExceptionDescribe();
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    double GetDoubleField(JNIEnv* pEnv, jobject pObject, jfieldID pMid)
+    int GetDoubleField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, double* val)
     {
-        double val = pEnv->GetDoubleField(pObject, pMid);
+        *val = pEnv->GetDoubleField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
-            return -666;
+            //pEnv->ExceptionDescribe();
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
     int SetStaticDoubleField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, double val)
@@ -910,7 +919,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -923,68 +932,68 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
     }
 
     //bool
-    bool CallStaticBooleanMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs)
+    int CallStaticBooleanMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, bool* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        bool val = pEnv->CallStaticBooleanMethodA( pClass, pMid, (const jvalue*)args);
+        *val = pEnv->CallStaticBooleanMethodA( pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return false;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    bool CallBooleanMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs)
+    int CallBooleanMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, bool* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        bool val = pEnv->CallBooleanMethodA( pObject, pMid, (const jvalue*)args);
+        *val = pEnv->CallBooleanMethodA( pObject, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return false;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    bool GetStaticBooleanField(JNIEnv* pEnv, jclass pClass, jfieldID pMid)
+    int GetStaticBooleanField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, bool* val)
     {
-        bool val = pEnv->GetStaticBooleanField(pClass, pMid);
+        *val = pEnv->GetStaticBooleanField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
-            return false;
+            //pEnv->ExceptionDescribe();
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    bool GetBooleanField(JNIEnv* pEnv, jobject pObject, jfieldID pMid)
+    int GetBooleanField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, bool* val)
     {
-        bool val = pEnv->GetBooleanField(pObject, pMid);
+        *val = pEnv->GetBooleanField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             
-            return false;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
     int SetStaticBooleanField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, bool val)
@@ -994,7 +1003,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -1007,67 +1016,67 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
     }
 
     //byte
-    jbyte CallStaticByteMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs)
+    int CallStaticByteMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, jbyte* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        jbyte val = pEnv->CallStaticByteMethodA( pClass, pMid, (const jvalue*)args);
+        *val = pEnv->CallStaticByteMethodA( pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return (jbyte)-1;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    jbyte CallByteMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs)
+    int CallByteMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, jbyte* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        jbyte val = pEnv->CallByteMethodA( pObject, pMid, (const jvalue*)args);
+        *val = pEnv->CallByteMethodA( pObject, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return (jbyte)-1;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    jbyte GetStaticByteField(JNIEnv* pEnv, jclass pClass, jfieldID pMid)
+    int GetStaticByteField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, jbyte* val)
     {
-        jbyte val = pEnv->GetStaticByteField(pClass, pMid);
+        *val = pEnv->GetStaticByteField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
-            return (jbyte)-1;
+            //pEnv->ExceptionDescribe();
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    jbyte GetByteField(JNIEnv* pEnv, jobject pObject, jfieldID pMid)
+    int GetByteField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, jbyte* val)
     {
-        jbyte val = pEnv->GetByteField(pObject, pMid);
+        *val = pEnv->GetByteField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
-            return (jbyte)-1;
+            //pEnv->ExceptionDescribe();
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
     int SetStaticByteField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, jbyte val)
@@ -1076,7 +1085,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -1088,69 +1097,69 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
     }
 
     //char
-    char CallStaticCharMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs)
+    int CallStaticCharMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, char* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        char val = pEnv->CallStaticCharMethodA( pClass, pMid, (const jvalue*)args);
+        *val = pEnv->CallStaticCharMethodA( pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return (char)-1;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    char CallCharMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs)
+    int CallCharMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, char* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
             
-        char val = pEnv->CallCharMethodA( pObject, pMid, (const jvalue*)args);
+        *val = pEnv->CallCharMethodA( pObject, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return (char)-1;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    char GetStaticCharField(JNIEnv* pEnv, jclass pClass, jfieldID pMid)
+    int GetStaticCharField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, char* val)
     {
-        char val = pEnv->GetStaticCharField(pClass, pMid);
+        *val = pEnv->GetStaticCharField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             
-            return (char)-1;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    char GetCharField(JNIEnv* pEnv, jobject pObject, jfieldID pMid)
+    int GetCharField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, char* val)
     {
-        char val = pEnv->GetCharField(pObject, pMid);
+        *val = pEnv->GetCharField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             
-            return (char)-1;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
     int SetStaticCharField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, char val)
@@ -1160,7 +1169,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -1173,7 +1182,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -1181,60 +1190,60 @@ extern "C" {
 
 
     //short
-    short CallStaticShortMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs)
+    int CallStaticShortMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, short* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        short val = pEnv->CallStaticShortMethodA( pClass, pMid, (const jvalue*)args);
+        *val = pEnv->CallStaticShortMethodA( pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return -666;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    short CallShortMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs)
+    int CallShortMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, short* val)
     {
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
             args[i] = pArgs[i];
 
-        short val = pEnv->CallShortMethodA( pObject, pMid, (const jvalue*)args);
+        *val = pEnv->CallShortMethodA( pObject, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             free(args);
-            return -666;
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    short GetStaticShortField(JNIEnv* pEnv, jclass pClass, jfieldID pMid)
+    int GetStaticShortField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, short* val)
     {
-        short val = pEnv->GetStaticShortField(pClass, pMid);
+        *val = pEnv->GetStaticShortField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
-            return -666;
+            //pEnv->ExceptionDescribe();
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
-    short GetShortField(JNIEnv* pEnv, jobject pObject, jfieldID pMid)
+    int GetShortField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, short* val)
     {
-        short val = pEnv->GetShortField(pObject, pMid);
+        *val = pEnv->GetShortField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
-            return -666;
+            //pEnv->ExceptionDescribe();
+            return -1;
         }
 
-        return val;
+        return 0;
     }
 
     int SetStaticShortField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, short val)
@@ -1243,7 +1252,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -1256,7 +1265,7 @@ extern "C" {
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return 0;
@@ -1278,8 +1287,46 @@ extern "C" {
         
         const char* res = pEnv->GetStringUTFChars(jString, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return "";
+        }
+        return res;
+    }
+
+    const char* GetException(JNIEnv* pEnv)
+    {
+        jthrowable exception = pEnv->ExceptionOccurred();
+        pEnv->ExceptionClear();
+
+        jclass clr_runtime_class = pEnv->FindClass("app/quant/clr/CLRRuntime");
+        jmethodID mid_clr_getError =
+            pEnv->GetStaticMethodID(clr_runtime_class,
+                            "GetError",
+                            "(Ljava/lang/Exception;)Ljava/lang/String;");
+
+        int len = 1;
+        void** args = (void**)malloc(sizeof(void *) * len);
+
+        for(int i = 0; i < len; i++)
+            args[i] = exception;
+
+        jstring jString = (jstring)pEnv->CallStaticObjectMethodA( clr_runtime_class, mid_clr_getError, (const jvalue*)args);
+
+        if( pEnv->ExceptionCheck() == JNI_TRUE )
+        {
+            //pEnv->ExceptionDescribe();
+            // free(args);
+            return "error when getting error !";
+        }
+        
+        if(jString == (jstring)0){
+            return "error when getting error !!";
+        }
+        
+        const char* res = pEnv->GetStringUTFChars(jString, 0);
+        if(pEnv->ExceptionCheck() == JNI_TRUE){
+            //pEnv->ExceptionDescribe();
+            return "error when getting error !!!";
         }
         return res;
     }
@@ -1291,7 +1338,7 @@ extern "C" {
         *pArray = pEnv->NewObjectArray( nDimension, cls, NULL);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -1307,7 +1354,7 @@ extern "C" {
         *pArray = pEnv->NewObjectArray( nDimension, pEnv->FindClass( szType ), NULL);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -1323,7 +1370,7 @@ extern "C" {
         pEnv->SetObjectArrayElement(pArray, index, value);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         else
@@ -1335,7 +1382,7 @@ extern "C" {
         jobject val = pEnv->GetObjectArrayElement(pArray, index);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         else
@@ -1349,7 +1396,7 @@ extern "C" {
         *pArray = pEnv->NewIntArray(nDimension);
         
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         if( pArray != NULL )
@@ -1365,7 +1412,7 @@ extern "C" {
         pEnv->SetIntArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         else
@@ -1385,7 +1432,7 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -1402,7 +1449,7 @@ extern "C" {
         pEnv->SetLongArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         else
@@ -1413,7 +1460,7 @@ extern "C" {
     {
         jlong *val = pEnv->GetLongArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -666;
         }
         return val[index];
@@ -1426,7 +1473,7 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -1443,7 +1490,7 @@ extern "C" {
         pEnv->SetFloatArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         else
@@ -1454,7 +1501,7 @@ extern "C" {
     {
         float *val = pEnv->GetFloatArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -666;
         }
         return val[index];
@@ -1467,7 +1514,7 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -1484,7 +1531,7 @@ extern "C" {
         pEnv->SetDoubleArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         else
@@ -1495,7 +1542,7 @@ extern "C" {
     {
         double *val = pEnv->GetDoubleArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -666;
         }
         return val[index];
@@ -1508,7 +1555,7 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -1525,7 +1572,7 @@ extern "C" {
         pEnv->SetBooleanArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         else
@@ -1536,7 +1583,7 @@ extern "C" {
     {
         jboolean *val = pEnv->GetBooleanArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return false;
         }
         return (bool)val[index];
@@ -1550,7 +1597,7 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -1567,7 +1614,7 @@ extern "C" {
         pEnv->SetByteArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         else
@@ -1578,7 +1625,7 @@ extern "C" {
     {
         jbyte *val = pEnv->GetByteArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return val[index];
@@ -1592,7 +1639,7 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -1609,7 +1656,7 @@ extern "C" {
         pEnv->SetShortArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         else
@@ -1620,7 +1667,7 @@ extern "C" {
     {
         short *val = pEnv->GetShortArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -666;
         }
         return val[index];
@@ -1633,7 +1680,7 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -1650,7 +1697,7 @@ extern "C" {
         pEnv->SetCharArrayRegion(pArray, index, 1, (jchar *)elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         else
@@ -1661,7 +1708,7 @@ extern "C" {
     {
         jchar *val = pEnv->GetCharArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return (char)-1;
         }
         return val[index];
@@ -1697,7 +1744,7 @@ extern "C" {
         const char* _classname = GetNetString(pEnv, classname);
         int val = fnCreateInstance(_classname, len, (void**)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return -1;
         }
         return val;
@@ -1715,7 +1762,7 @@ extern "C" {
         const char* _funcname = GetNetString(pEnv, funcname);
         jobject val = fnInvoke(ptr, _funcname, len, (void**)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return NULL;
         }
         return val;
@@ -1733,7 +1780,7 @@ extern "C" {
         const char* _name = GetNetString(pEnv, name);
         jobject val = fnGetProperty(ptr, _name);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return NULL;
         }
         return val;
@@ -1767,7 +1814,7 @@ extern "C" {
         
         jobject val = fnRegisterFunc(_funcname, hash);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return NULL;
         }
         return val;
@@ -1785,7 +1832,7 @@ extern "C" {
     {
         jobject val = fnInvokeFunc(ptr, len, (void**)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            pEnv->ExceptionDescribe();
+            //pEnv->ExceptionDescribe();
             return NULL;
         }
         return val;
