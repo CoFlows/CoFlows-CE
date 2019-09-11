@@ -98,7 +98,7 @@ namespace QuantApp.Server.Controllers
 
             var permission = user == null ? QuantApp.Kernel.AccessType.Denied : group == null ? QuantApp.Kernel.AccessType.Read : group.Permission(null, user);
 
-            if (user != null && permission != QuantApp.Kernel.AccessType.Denied)
+            if (user != null && permission != QuantApp.Kernel.AccessType.Denied && user.VerifyPassword(model.Password))
             {
                 var remoteIpAddress = Request.HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress;
                 string ip = remoteIpAddress.ToString();
