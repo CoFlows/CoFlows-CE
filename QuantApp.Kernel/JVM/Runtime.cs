@@ -642,28 +642,34 @@ namespace QuantApp.Kernel.JVM
             {
                 var pres = res as PyObject;
                 if(PyString.IsStringType(pres))
+                {
                     res = pres.AsManagedObject(typeof(string));
+                }
 
                 else if(PyFloat.IsFloatType(pres))
+                {
                     res = pres.AsManagedObject(typeof(float));
+                }
 
                 else if(PyInt.IsIntType(pres))
+                {
                     res = pres.AsManagedObject(typeof(int));
+                }
 
                 else if(PyDict.IsDictType(pres))
+                {
                     res = pres.AsManagedObject(typeof(Dictionary<object, object>));
-
-                else if(PyList.IsListType(pres))
-                    res = pres.AsManagedObject(typeof(List<object>));
+                }
 
                 else if(PyLong.IsLongType(pres))
+                {
                     res = pres.AsManagedObject(typeof(long));
-
-                else if(PySequence.IsSequenceType(pres))
-                    res = pres.AsManagedObject(typeof(IEnumerable<object>));
+                }
 
                 else if(PyTuple.IsTupleType(pres))
+                {
                     res = pres.AsManagedObject(typeof(System.Tuple));
+                }
             }
 
 
@@ -798,10 +804,10 @@ namespace QuantApp.Kernel.JVM
                         return javaArray.Pointer.ToPointer();
                     }
 
-                    
-
-                    else if(res is IEnumerable<object>)
+                    else if(res is IEnumerable<object> || (res is PyObject && PyList.IsListType((PyObject)res)))
                     {
+                        if(res is PyObject && PyList.IsListType((PyObject)res))
+                            res = new PyList((PyObject)res);
                         void* ptr_res = (void *)(res.GetHashCode());
 
                         void** pAr_len = stackalloc void*[2];
@@ -983,35 +989,55 @@ namespace QuantApp.Kernel.JVM
                 
                 if(obj is DynamicObject)
                 {
+                    try
+                    {
 
-                    var res = Dynamic.InvokeGet(obj, name);
-                    
-                    if(res == null)
+                        var res = Dynamic.InvokeGet(obj, name);
+                        
+                        if(res == null)
+                            return IntPtr.Zero.ToPointer();
+
+                        return getObjectPointer((object)res);
+                    }
+                    catch
+                    {
                         return IntPtr.Zero.ToPointer();
-
-                    return getObjectPointer((object)res);
+                    }
                 }
                 else if(obj is ExpandoObject)
                 {
-                    var exp = obj as IDictionary<string, object>;
-                    return getObjectPointer(exp[name]);
+                    try
+                    {
+                        var exp = obj as IDictionary<string, object>;
+                        return getObjectPointer(exp[name]);
+                    }
+                    catch
+                    {
+                        return IntPtr.Zero.ToPointer();
+                    }
                 }
                 else
                 {
+                    try
+                    {
+                        FieldInfo field = obj.GetType().GetField(name);
+                        PropertyInfo property = obj.GetType().GetProperty(name);
+                        
+                        object res;
+                        
+                        if(field != null)
+                            res = field.GetValue(obj);
+                        else if(property != null)
+                            res = property.GetValue(obj);
+                        else
+                            return null;
 
-                    FieldInfo field = obj.GetType().GetField(name);
-                    PropertyInfo property = obj.GetType().GetProperty(name);
-                    
-                    object res;
-                    
-                    if(field != null)
-                        res = field.GetValue(obj);
-                    else if(property != null)
-                        res = property.GetValue(obj);
-                    else
-                        return null;
-
-                    return getObjectPointer(res);
+                        return getObjectPointer(res);
+                    }
+                    catch
+                    {
+                        return IntPtr.Zero.ToPointer();
+                    }
                 }
             }
             return null;
