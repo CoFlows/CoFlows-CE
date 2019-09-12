@@ -244,10 +244,10 @@ export class QuantAppComponent implements  CanActivate  {
         }
     }
 
-    login(name: string, pass: string, url : string): void {
-        this.http.post(this.quantapp_server + 'account/login', {Username : name, Password: pass}).subscribe(
+    login(name: string, pass: string, url : string, callback): void {
+        this.http.post(this.quantapp_server + 'account/login', {Username : name, Password: pass})
+        .subscribe(
             (data : any) => {
-                // console.log(data)
                 let token = data.token                
                 if(!(token == null || token == "null" || token == "")){
                     // Read the result field from the JSON response.
@@ -257,7 +257,6 @@ export class QuantAppComponent implements  CanActivate  {
                     
                     this.http.get(this.quantapp_server + 'account/whoami', { headers: this.header })
                         .toPromise().then(response => {  
-                            // console.log(response)
                             this.quser = response;
 
                             if(url == '/authentication/signin' || url == null || url == 'null')
@@ -267,23 +266,23 @@ export class QuantAppComponent implements  CanActivate  {
                             this.router.navigate ( [ url ] );
                         });
 
-                    // if(url == '/authentication/signin' || url == null || url == 'null')
-                    //     url = '/'
-
-                    // localStorage.setItem('QuantAppURL', null);
-                    // this.router.navigate ( [ url ] );       
+                    return "";
                 }
                 else{
                     this.quser = null;
                     this.header = null;
                     localStorage.setItem('CoFlows-QuantAppJWT', null);
+
+                    callback("login error")
                 }
             },
             err => {
+                console.log(err)
                 this.quser = null;
                 this.header = null;
                 localStorage.setItem('CoFlows-QuantAppJWT', null);
-                // console.log(err);       
+                
+                callback("login error")
             }
         );
     } 
@@ -649,8 +648,6 @@ export class QuantAppComponent implements  CanActivate  {
         })
     }
 
-    
-    
     LinkAction(key, load, add, exchange, remove):any {
         this.CheckUser(() => {
             this.http.get(this.quantapp_server + 'm/rawdata?type=' + key, { headers: this.header })
@@ -786,7 +783,6 @@ export class QuantAppComponent implements  CanActivate  {
     isArray(data){
         return Array.isArray(data)
     }
-
 
     stringify(item){
         return JSON.stringify(item)

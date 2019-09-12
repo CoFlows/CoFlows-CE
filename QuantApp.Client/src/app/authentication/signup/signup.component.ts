@@ -37,8 +37,10 @@ export class SignupComponent implements OnInit {
     } );
   }
 
+  errorMessage = ""
+
   onSubmit() {
-    
+
     let data = {
       FirstName: this.form.value.fname,
       LastName: this.form.value.lname,
@@ -46,17 +48,22 @@ export class SignupComponent implements OnInit {
       Password: this.form.value.password,
       ConfirmPassword: this.form.value.confirmPassword
     }
+
     
-    this.quantapp.Post('account/register',data,response =>{
-      console.log(response)
+    this.quantapp.PostAnonymous('account/register',data, response => {
 
-      if(response.User.ID){
-        console.log('User created...')
-
-        this.quantapp.login(data.Email, data.Password, '/')
+      if(response.ID){
+        this.errorMessage = response.ID
       }
-      else{
-        console.log('Sign up not working...')
+      else {
+        if(response.User.ID){
+          console.log('User created...')
+
+          this.quantapp.login(data.Email, data.Password, '/', x => x)
+        }
+        else{
+          this.errorMessage = 'Sign up not working...'
+        }
       }
     })
   }

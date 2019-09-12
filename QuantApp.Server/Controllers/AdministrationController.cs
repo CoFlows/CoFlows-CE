@@ -359,25 +359,23 @@ namespace QuantApp.Server.Controllers
         {
             try
             {
-
                 var users = UserRepository.RetrieveUsersFromTenant(userid);
                 var ienum = users.GetEnumerator();
                 ienum.MoveNext();
                 var user = ienum.Current;
                 
                 var quser = QuantApp.Kernel.User.FindUser(userid);
-                var old_hash = QuantApp.Kernel.Adapters.SQL.Factories.SQLUserFactory.GetMd5Hash(old_password);
-
-                if(!quser.VerifyPassword(old_hash))
+                
+                if(!quser.VerifyPassword(old_password))
                     return Ok(new { Data = "Incorrect password"});
 
                 if (!string.IsNullOrWhiteSpace(new_password))
                 {
-                    // user.Hash = QuantApp.Kernel.Adapters.SQL.Factories.SQLUserFactory.GetMd5Hash(new_password);
+                    user.Hash = QuantApp.Kernel.Adapters.SQL.Factories.SQLUserFactory.GetMd5Hash(new_password);
                     return Ok(new { Data = "ok"});
                 }
                 else
-                    return Ok(new { Data = "Incorrect empty password"});
+                    return Ok(new { Data = "Empty new password"});
             }
             catch(Exception e)
             {

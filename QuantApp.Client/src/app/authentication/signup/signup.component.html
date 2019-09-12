@@ -47,6 +47,11 @@
         </label>
         <input type="password" class="form-control" placeholder="********" [formControl]="form.controls['confirmPassword']" [ngClass]="{'form-control-danger': form.controls['confirmPassword'].hasError('required') && form.controls['confirmPassword'].touched}"/>
         <div class="form-control-feedback" *ngIf="form.controls['confirmPassword'].hasError('required') && form.controls['confirmPassword'].touched">Confirm your password.</div>
+
+        <div class="mb-3" *ngIf="errorMessage != ''">
+          <div class="block">&nbsp;</div>
+          <p class="ff-headers text-uppercase">{{errorMessage}}</p>
+        </div>
       </fieldset>
       
       <div class="block mb-3"></div>

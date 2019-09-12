@@ -31,18 +31,20 @@ export class SigninComponent implements OnInit {
     } );
   }
 
+  errorMessage = ""
+
   onSubmit() {    
     var name = this.form.value.uname;
     var pass = this.form.value.password;
 
-    let url = localStorage.getItem('QuantAppURL');
+    let url = localStorage.getItem('QuantAppURL')
     
 
     if(url != null && url != undefined){
-      this.quantapp.login(name, pass, url)
+      this.quantapp.login(name, pass, url, x => this.errorMessage = x)
     }
     else{
-      this.quantapp.login(name, pass, '/')
+      this.quantapp.login(name, pass, '/', x => this.errorMessage = x)
     }
     
   }

@@ -20,6 +20,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 
+using System.Linq;
+
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
@@ -198,9 +200,15 @@ namespace QuantApp.Server.Controllers
                         Secret = quser.Secret
                     });
                 }
+                else
+                    return Ok(new { Value = false, ID = "Email is already in use..." });
             }
 
-            return BadRequest(new { Value = false, ID = "Email is already in use..." });
+            string messages = string.Join("<br\\> ", ModelState.Values
+                                        .SelectMany(x => x.Errors)
+                                        .Select(x => x.ErrorMessage));
+
+            return Ok(new { Value = false, ID = messages });
         }
 
         [HttpGet, AllowAnonymous]
