@@ -464,169 +464,165 @@ namespace QuantApp.Kernel.JVM
         {
             void*  pEnv;
             if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
-            
+
             void** pAr_len = stackalloc void*[args == null ? 1 : 2];
             object[] pAr_len_data = args == null ? new object[]{ hashCode } : new object[]{ hashCode, args };
             getJavaParameters(ref pAr_len, pAr_len_data);
 
+            bool nullResult = false;
+
             void*  pNetBridgeClass;
             if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0)
             {
-
                 void*  pInvokeMethod;
                 if(GetStaticMethodID( pEnv, pNetBridgeClass, "InvokeDelegate", "(I[Ljava/lang/Object;)Ljava/lang/Object;", &pInvokeMethod ) == 0)
                 {
                     void*  pGetCLRObject;
                     if(CallStaticObjectMethod( pEnv, pNetBridgeClass, pInvokeMethod, &pGetCLRObject, 2, pAr_len) == 0)
                     {
-                        void* pClass;
-                        void* pNameClass;
-                        if(GetObjectClass(pEnv, pGetCLRObject, &pClass, &pNameClass) == 0)
+                        if(new IntPtr(pGetCLRObject) != IntPtr.Zero)
                         {
-                            string clsName = GetNetString(pEnv, pNameClass);
-
-                            switch(clsName)
+                            void* pClass;
+                            void* pNameClass;
+                            if(GetObjectClass(pEnv, pGetCLRObject, &pClass, &pNameClass) == 0)
                             {
-                                case "java.lang.Boolean":
-                                    void*  pInvokeMethod_boolean;
-                                    GetMethodID( pEnv, pGetCLRObject, "booleanValue", "()Z", &pInvokeMethod_boolean );
-                                    
-                                    
-                                    void** pAr_boolean = stackalloc void*[1];
-                                    bool res_bool;
-                                    if(CallBooleanMethod( pEnv, pGetCLRObject, pInvokeMethod_boolean, 1, pAr_boolean, &res_bool) != 0)
-                                        throw new Exception(GetException(pEnv));
-                                    return res_bool;
+                                string clsName = GetNetString(pEnv, pNameClass);
 
-                                case "java.lang.Byte":
-                                    void*  pInvokeMethod_byte;
-                                    GetMethodID( pEnv, pGetCLRObject, "byteValue", "()B", &pInvokeMethod_byte );
-                                    
-                                    
-                                    void** pAr_byte = stackalloc void*[1];
-                                    byte res_byte;
-                                    if(CallByteMethod( pEnv, pGetCLRObject, pInvokeMethod_byte, 1, pAr_byte, &res_byte) != 0)
-                                        throw new Exception(GetException(pEnv));
-                                    return res_byte;
+                                switch(clsName)
+                                {
+                                    case "java.lang.Boolean":
+                                        void*  pInvokeMethod_boolean;
+                                        GetMethodID( pEnv, pGetCLRObject, "booleanValue", "()Z", &pInvokeMethod_boolean );
+                                        
+                                        
+                                        void** pAr_boolean = stackalloc void*[1];
+                                        bool res_bool;
+                                        if(CallBooleanMethod( pEnv, pGetCLRObject, pInvokeMethod_boolean, 1, pAr_boolean, &res_bool) != 0)
+                                            throw new Exception(GetException(pEnv));
+                                        return res_bool;
 
-                                case "java.lang.Character":
-                                    void*  pInvokeMethod_char;
-                                    GetMethodID( pEnv, pGetCLRObject, "charValue", "()C", &pInvokeMethod_char );
-                                    
-                                    
-                                    void** pAr_char = stackalloc void*[1];
-                                    char _res;
-                                    if(CallCharMethod( pEnv, pGetCLRObject, pInvokeMethod_char, 1, pAr_char, &_res) != 0)
-                                        throw new Exception(GetException(pEnv));
-                                    return _res;
+                                    case "java.lang.Byte":
+                                        void*  pInvokeMethod_byte;
+                                        GetMethodID( pEnv, pGetCLRObject, "byteValue", "()B", &pInvokeMethod_byte );
+                                        
+                                        
+                                        void** pAr_byte = stackalloc void*[1];
+                                        byte res_byte;
+                                        if(CallByteMethod( pEnv, pGetCLRObject, pInvokeMethod_byte, 1, pAr_byte, &res_byte) != 0)
+                                            throw new Exception(GetException(pEnv));
+                                        return res_byte;
 
-                                case "java.lang.Short":
-                                    void*  pInvokeMethod_short;
-                                    GetMethodID( pEnv, pGetCLRObject, "shortValue", "()S", &pInvokeMethod_short );
-                                    
-                                    
-                                    void** pAr_short = stackalloc void*[1];
-                                    short res_short;
-                                    if(CallShortMethod( pEnv, pGetCLRObject, pInvokeMethod_short, 1, pAr_short, &res_short) != 0)
-                                        throw new Exception(GetException(pEnv));
-                                    return res_short;
+                                    case "java.lang.Character":
+                                        void*  pInvokeMethod_char;
+                                        GetMethodID( pEnv, pGetCLRObject, "charValue", "()C", &pInvokeMethod_char );
+                                        
+                                        
+                                        void** pAr_char = stackalloc void*[1];
+                                        char _res;
+                                        if(CallCharMethod( pEnv, pGetCLRObject, pInvokeMethod_char, 1, pAr_char, &_res) != 0)
+                                            throw new Exception(GetException(pEnv));
+                                        return _res;
 
-                                case "java.lang.Integer":
-                                    void*  pInvokeMethod_int;
-                                    GetMethodID( pEnv, pGetCLRObject, "intValue", "()I", &pInvokeMethod_int );
-                                    
-                                    
-                                    void** pAr_int = stackalloc void*[1];
-                                    int res_int;
-                                    if(CallIntMethod( pEnv, pGetCLRObject, pInvokeMethod_int, 1, pAr_int, &res_int) != 0)
-                                        throw new Exception(GetException(pEnv));
-                                    return res_int;
+                                    case "java.lang.Short":
+                                        void*  pInvokeMethod_short;
+                                        GetMethodID( pEnv, pGetCLRObject, "shortValue", "()S", &pInvokeMethod_short );
+                                        
+                                        
+                                        void** pAr_short = stackalloc void*[1];
+                                        short res_short;
+                                        if(CallShortMethod( pEnv, pGetCLRObject, pInvokeMethod_short, 1, pAr_short, &res_short) != 0)
+                                            throw new Exception(GetException(pEnv));
+                                        return res_short;
 
-                                case "java.lang.Long":
-                                    void*  pInvokeMethod_long;
-                                    GetMethodID( pEnv, pGetCLRObject, "longValue", "()J", &pInvokeMethod_long );
-                                    
-                                    
-                                    void** pAr_long = stackalloc void*[1];
-                                    long res_long;
-                                    if(CallLongMethod( pEnv, pGetCLRObject, pInvokeMethod_long, 1, pAr_long, &res_long) != 0)
-                                        throw new Exception(GetException(pEnv));
-                                    return res_long;
+                                    case "java.lang.Integer":
+                                        void*  pInvokeMethod_int;
+                                        GetMethodID( pEnv, pGetCLRObject, "intValue", "()I", &pInvokeMethod_int );
+                                        
+                                        
+                                        void** pAr_int = stackalloc void*[1];
+                                        int res_int;
+                                        if(CallIntMethod( pEnv, pGetCLRObject, pInvokeMethod_int, 1, pAr_int, &res_int) != 0)
+                                            throw new Exception(GetException(pEnv));
+                                        return res_int;
 
-
-                                case "java.lang.Float":
-                                    void*  pInvokeMethod_float;
-                                    GetMethodID( pEnv, pGetCLRObject, "floatValue", "()F", &pInvokeMethod_float );
-                                    
-                                    
-                                    void** pAr_float = stackalloc void*[1];
-                                    float res_float;
-                                    if(CallFloatMethod( pEnv, pGetCLRObject, pInvokeMethod_float, 1, pAr_float, &res_float) != 0)
-                                        throw new Exception(GetException(pEnv));
-                                    return res_float;
-
-                                case "java.lang.Double":
-                                    void*  pInvokeMethod_double;
-                                    GetMethodID( pEnv, pGetCLRObject, "doubleValue", "()D", &pInvokeMethod_double );
-                                    
-                                    
-                                    void** pAr_double = stackalloc void*[1];
-                                    // return CallDoubleMethod( pEnv, pGetCLRObject, pInvokeMethod_double, 1, pAr_double);
-                                    double res_double;
-                                    if(CallDoubleMethod( pEnv, pGetCLRObject, pInvokeMethod_double, 1, pAr_double, &res_double) != 0)
-                                        throw new Exception(GetException(pEnv));
-                                    return res_double;
+                                    case "java.lang.Long":
+                                        void*  pInvokeMethod_long;
+                                        GetMethodID( pEnv, pGetCLRObject, "longValue", "()J", &pInvokeMethod_long );
+                                        
+                                        
+                                        void** pAr_long = stackalloc void*[1];
+                                        long res_long;
+                                        if(CallLongMethod( pEnv, pGetCLRObject, pInvokeMethod_long, 1, pAr_long, &res_long) != 0)
+                                            throw new Exception(GetException(pEnv));
+                                        return res_long;
 
 
-                                case "java.lang.String":
-                                    return GetNetString(pEnv, pGetCLRObject);
+                                    case "java.lang.Float":
+                                        void*  pInvokeMethod_float;
+                                        GetMethodID( pEnv, pGetCLRObject, "floatValue", "()F", &pInvokeMethod_float );
+                                        
+                                        
+                                        void** pAr_float = stackalloc void*[1];
+                                        float res_float;
+                                        if(CallFloatMethod( pEnv, pGetCLRObject, pInvokeMethod_float, 1, pAr_float, &res_float) != 0)
+                                            throw new Exception(GetException(pEnv));
+                                        return res_float;
+
+                                    case "java.lang.Double":
+                                        void*  pInvokeMethod_double;
+                                        GetMethodID( pEnv, pGetCLRObject, "doubleValue", "()D", &pInvokeMethod_double );
+                                        
+                                        
+                                        void** pAr_double = stackalloc void*[1];
+                                        // return CallDoubleMethod( pEnv, pGetCLRObject, pInvokeMethod_double, 1, pAr_double);
+                                        double res_double;
+                                        if(CallDoubleMethod( pEnv, pGetCLRObject, pInvokeMethod_double, 1, pAr_double, &res_double) != 0)
+                                            throw new Exception(GetException(pEnv));
+                                        return res_double;
 
 
-                                case "java.util.LocalDateTime":
-                                    return GetNetDateTime(pEnv, pGetCLRObject);
-
-                                default:
-                                    if(clsName.StartsWith("["))
-                                        return getJavaArray(new IntPtr(pGetCLRObject), clsName);
-                                    
-                                    else
-                                    {
-                                            int hashID_res = getHashCode(pGetCLRObject);
-
-                                            
-                                            if(JVMDelegate.DB.ContainsKey(hashID_res)) //check if it is a CLRObject
-                                                return JVMDelegate.DB[hashID_res];
-
-                                            else if(Runtime.DB.ContainsKey(hashID_res)) //check if it is a JVMObject
-                                                return Runtime.DB[hashID_res];
+                                    case "java.lang.String":
+                                        return GetNetString(pEnv, pGetCLRObject);
 
 
-                                            else if(JVMObject.DB.ContainsKey(hashID_res)) //check if it is a JVMObject
-                                                return JVMObject.DB[hashID_res];
+                                    case "java.util.LocalDateTime":
+                                        return GetNetDateTime(pEnv, pGetCLRObject);
 
-                                            else
-                                            {
-                                                string cls = clsName.StartsWith("L") && clsName.EndsWith(";") ? clsName.Substring(1).Replace(";","") : clsName;
-                                                return CreateInstancePtr(cls, null, new IntPtr(pGetCLRObject), null );
+                                    default:
+                                        if(clsName.StartsWith("["))
+                                            return getJavaArray(new IntPtr(pGetCLRObject), clsName);
+                                        
+                                        else
+                                        {
+                                                int hashID_res = getHashCode(pGetCLRObject);
+
+                                                
+                                                if(JVMDelegate.DB.ContainsKey(hashID_res)) //check if it is a CLRObject
+                                                    return JVMDelegate.DB[hashID_res];
+
+                                                else if(Runtime.DB.ContainsKey(hashID_res)) //check if it is a JVMObject
+                                                    return Runtime.DB[hashID_res];
+
+
+                                                else if(JVMObject.DB.ContainsKey(hashID_res)) //check if it is a JVMObject
+                                                    return JVMObject.DB[hashID_res];
+
+                                                else
+                                                {
+                                                    string cls = clsName.StartsWith("L") && clsName.EndsWith(";") ? clsName.Substring(1).Replace(";","") : clsName;
+                                                    return CreateInstancePtr(cls, null, new IntPtr(pGetCLRObject), null );
+                                                }
                                             }
-                                        }
+                                }
+                            
                             }
-                        
                         }
                         else
-                            Console.WriteLine("InvokeDelegate GetObjectClass error");
+                            return null;
                     }
-                    else
-                        Console.WriteLine("InvokeDelegate error");
                 }
-                else
-                    Console.WriteLine("InvokeDelegate GetStaticMethod error");
             }
-            else
-                Console.WriteLine("InvokeDelegate find class app/quant/clr/CLRRuntime error");
-
-            return null;
-            
+            throw new Exception(GetException(pEnv));
         }
 
         private static unsafe void* getObjectPointer(object res)
@@ -911,14 +907,10 @@ namespace QuantApp.Kernel.JVM
                         object res = JVMDelegate.DB[hashCode].Invoke(classes_obj);
                         return getObjectPointer(res);
                     }
+                    throw new Exception("JVMDelegate not found");
                 }
-                else
-                    throw new Exception("Get ArrayClasses method error");
             }
-            else
-                throw new Exception("Get CLRRuntime class error");
-
-            return null;
+            throw new Exception(GetException(pEnv));
         }
         private unsafe delegate void* SetInvokeFunc(int hashCode, int len, void** args);
         

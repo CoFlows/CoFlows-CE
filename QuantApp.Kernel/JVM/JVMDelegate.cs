@@ -110,13 +110,19 @@ namespace QuantApp.Kernel.JVM
         }
         public object Invoke(params object[] args)
         {
-            Console.WriteLine("JVMDelegate Invoke(" + this.Pointer + "): " + args);
             return fx(args);
         }
 
         public object fx(params object[] args)
         {
-            return Runtime.InvokeFunc(Pointer, args);
+            try
+            {
+                return Runtime.InvokeFunc(Pointer, args);
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
         }
         public T f0<T>()
         {

@@ -1287,7 +1287,6 @@ extern "C" {
         
         const char* res = pEnv->GetStringUTFChars(jString, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            //pEnv->ExceptionDescribe();
             return "";
         }
         return res;
@@ -1296,6 +1295,7 @@ extern "C" {
     const char* GetException(JNIEnv* pEnv)
     {
         jthrowable exception = pEnv->ExceptionOccurred();
+
         pEnv->ExceptionClear();
 
         jclass clr_runtime_class = pEnv->FindClass("app/quant/clr/CLRRuntime");
