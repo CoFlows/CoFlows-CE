@@ -138,6 +138,7 @@ module Code =
     let CompiledJVMBaseClasses = System.Collections.Concurrent.ConcurrentDictionary<string, string>()
     let filePaths = System.Collections.Concurrent.ConcurrentDictionary<string, string>()
     let listeningPaths = System.Collections.Concurrent.ConcurrentDictionary<string, FileSystemWatcher>()
+    let lastBuilt = System.Collections.Concurrent.ConcurrentDictionary<string, string>()
 
     let InstallJar (url : String) : unit =
         let wc = new WebClient()
@@ -513,7 +514,7 @@ module Code =
                                                 if functionName |> String.IsNullOrWhiteSpace |> not then
                                                     if functionName = name then
                                                         let t0 = DateTime.Now
-                                                        "Executing: " + m.Name + " " + t0.ToString() |> Console.WriteLine
+                                                        // "Executing: " + m.Name + " " + t0.ToString() |> Console.WriteLine
 
                                                         let res = m.Invoke(
                                                             null, 
@@ -538,7 +539,7 @@ module Code =
                                                                     )
                                                             )
                                                         let pair = (name, res)
-                                                        "Executed: " + m.Name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
+                                                        // "Executed: " + m.Name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                         pair |> resdb.Add
                                                 elif parameterInfo |> Array.isEmpty && t.Namespace |> isNull then
                                                     let res = m.Invoke(null, null)
@@ -772,7 +773,6 @@ module Code =
 
                                                 let pyFile = pathTemp + name
 
-                                                "Python Compile: " + name + " " + pathTemp |> Console.WriteLine
                                                 File.WriteAllText(pyFile, code)
 
                                                 let name = name.Replace(".py", "")
@@ -1019,7 +1019,7 @@ module Code =
                                             if functionName |> String.IsNullOrWhiteSpace |> not then
                                                 if functionName = name then
                                                     let t0 = DateTime.Now
-                                                    "Executing: " + name + " " + t0.ToString() |> Console.WriteLine
+                                                    // "Executing: " + name + " " + t0.ToString() |> Console.WriteLine
                                                     let valu_s = valu.ToString()
                                                     if valu_s.StartsWith("function()") then
                                                         let func = valu.ToObject() :?> Func<Jint.Native.JsValue,Jint.Native.JsValue[],Jint.Native.JsValue>
@@ -1054,11 +1054,11 @@ module Code =
                                                                 res.ToObject() :> obj
                                                         let pair = (name, res)
 
-                                                        "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
+                                                        // "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                         pair |> resdb.Add
                                                     else
                                                         let pair = (name, valu.ToObject() :> obj)
-                                                        "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
+                                                        // "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                         pair |> resdb.Add
                                             elif name.StartsWith("__") |> not then
                                                 let valu_s = valu.ToString()
@@ -1632,7 +1632,7 @@ module Code =
             |> List.iter(fun (name, code) -> 
                 let md5 = code |> GetMd5Hash
                 if md5 |> CompiledBase.ContainsKey |> not then
-                    "Adding FILE during compile: " + name + " " + md5 |> Console.WriteLine 
+                    // "Compiling: " + name |> Console.WriteLine 
                     
                     CompiledBase.TryAdd(md5, name) |> ignore)
 
@@ -1691,21 +1691,38 @@ module Code =
     
     let ProcessPackageFile (pkg_file : string) : PKG =
         let setListener (pkgID, file : string) = 
-                let path = file |> Path.GetDirectoryName
-                if path |> listeningPaths.ContainsKey |> not then
-                    let fileSystemWatcher = FileSystemWatcher()
+            let path = file |> Path.GetDirectoryName
+            if path |> listeningPaths.ContainsKey |> not then
+                let fileSystemWatcher = FileSystemWatcher()
 
-                    fileSystemWatcher.Path <- path
-                    fileSystemWatcher.NotifyFilter <- NotifyFilters.LastWrite
-                    fileSystemWatcher.EnableRaisingEvents <- true
-                    fileSystemWatcher.IncludeSubdirectories <- true
+                fileSystemWatcher.Path <- path
+                fileSystemWatcher.NotifyFilter <- NotifyFilters.LastWrite
+                fileSystemWatcher.EnableRaisingEvents <- true
+                fileSystemWatcher.IncludeSubdirectories <- true
 
-                    fun (x : FileSystemEventArgs) ->
-                        let file =  x.FullPath
-                        let name = file |> Path.GetFileName
-                        let code = file |> File.ReadAllText
+                fun (x : FileSystemEventArgs) ->
+                    let file =  x.FullPath
+                    let name = file |> Path.GetFileName
+                    let code = file |> File.ReadAllText
 
-                        Utils.RegisterCode (false, false) [name, code]
+                    let hash = code |> GetMd5Hash
+                    
+                    let lastBuiltHash = if file |> lastBuilt.ContainsKey then lastBuilt.[file] else ""
+
+                    if lastBuiltHash <> hash then
+                        lastBuilt.[file] <- hash
+
+                        let t0 = DateTime.Now
+                        "--------------------Build started: " + name + " @ " + t0.ToString() |> Console.WriteLine
+                        let buildResult = Utils.RegisterCode (false, false) [name, code]
+
+                        if buildResult |> String.IsNullOrEmpty then
+                            "       building successful!!!" |> Console.WriteLine
+
+                        let t1 = DateTime.Now
+                        "--------------------Build done: " + name + " @ " + t0.ToString() + " ... " + (t1 - t0).ToString() |> Console.WriteLine
+                        ""|>Console.WriteLine
+                        ""|>Console.WriteLine
                         
                         let work_books = pkgID + "--Workbook" |> M.Base
                         let wb_res = work_books.[fun x -> M.V<string>(x, "Name") = name]
@@ -1713,10 +1730,11 @@ module Code =
                             let item = wb_res.[0] :?> CodeData
                             work_books.Exchange(item, { item with Code = code })
                         work_books.Save()
+                        
 
-                    |> fileSystemWatcher.Changed.Add
+                |> fileSystemWatcher.Changed.Add
 
-                    listeningPaths.TryAdd(path, fileSystemWatcher) |> ignore
+                listeningPaths.TryAdd(path, fileSystemWatcher) |> ignore
 
 
         let pkg_json = File.ReadAllText(pkg_file)
@@ -1922,7 +1940,7 @@ module Code =
             |> List.map(fun entry -> entry.Name, entry.Content) 
             |> List.map(fun (name, content) -> 
                 let md5 = content |> GetMd5Hash
-                "New FILE: " + name + " " + md5 |> Console.WriteLine
+                "New Base file: " + name + " " + md5 |> Console.WriteLine
                 md5)
             |> List.filter(CompiledBase.ContainsKey >> not)
             |> List.isEmpty
@@ -1969,7 +1987,7 @@ module Code =
             |> List.iter(fun entry -> 
                 let md5 = entry.Content |> GetMd5Hash
                 if md5 |> CompiledBase.ContainsKey |> not then
-                    "Added FILE: " + entry.Name + " " + md5 |> Console.WriteLine 
+                    // "Added FILE: " + entry.Name + " " + md5 |> Console.WriteLine 
                     CompiledBase.TryAdd(md5, entry.Name) |> ignore)
 
         [buildBase; buildAgents; buildQueries]
@@ -2215,13 +2233,7 @@ module Code =
                     Content = code
                     Exe = "pkg"
                 })
-                // let f = F.Find(id).Value
-                // let name, code = f.ScriptCode.[0]
-                // {
-                //     Name = name
-                //     Content = code
-                //     Exe = "pkg"
-                // })
+
 
         {
             ID = pkg_id

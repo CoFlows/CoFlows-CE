@@ -290,7 +290,7 @@ namespace QuantApp.Server
 
         protected static void OnExit(object sender, ConsoleCancelEventArgs args)
         {
-            Console.WriteLine("Exit");
+            Console.WriteLine("bye bye!");
             _closing.Set();
             Environment.Exit(0);
         }
@@ -355,7 +355,6 @@ namespace QuantApp.Server
                         foreach(var fid in wsp.Functions)
                         {
                             var cfid = fid.Replace("$WID$",id);
-
                             var f = F.Find(cfid).Value;
                             f.Start();
                         }

@@ -46,9 +46,9 @@ namespace QuantApp.Kernel
         /// <param name="schedule">Quartz formatted schedule</param>
         public void StartJob(string schedule)
         {
-            string jobID = "Func Job " + _name + " " + schedule;
+            string jobID = "Job: " + _name + " " + schedule;
 
-            Console.WriteLine("STARTING: " + jobID);
+            Console.WriteLine("Starting " + jobID);
 
             IJobDetail job = JobBuilder.Create<FuncJob>()
                 .WithIdentity(jobID, "Func Group " + _name)

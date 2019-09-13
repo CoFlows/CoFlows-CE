@@ -62,7 +62,6 @@ namespace QuantApp.Kernel
                     return _usersThread[tid];
                 else
                 {
-                    Console.WriteLine("NO THREAD USER");
                     return new UserData();
                 }
             }
