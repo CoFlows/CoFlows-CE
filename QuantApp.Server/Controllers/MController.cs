@@ -582,9 +582,6 @@ namespace QuantApp.Server.Controllers
                     var wb = wb_res.FirstOrDefault() as CodeData;
                     var codes = new List<Tuple<string,string>>();
 
-                    foreach(var c in workSpace.Code)
-                        codes.Add(c);
-                    
                     codes.Add(new Tuple<string, string>(wb.Name, wb.Code));
 
 

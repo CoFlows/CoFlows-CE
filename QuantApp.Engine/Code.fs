@@ -46,7 +46,6 @@ type JsWrapper =
         lock (this.monitorInitialize) (fun () ->
             try
                 let res =
-                    // "Calling JS " + (if parameters  |> isNull then "" else (parameters |> Array.length).ToString()) |> Console.WriteLine
                     func.Invoke(
                         Jint.Native.JsValue.Undefined,
                         if parameters |> isNull then
@@ -54,16 +53,10 @@ type JsWrapper =
                         else
                             parameters 
                             |> Array.map(fun x -> 
-                                // Console.WriteLine(x)
                                 if x.ToString().StartsWith("{\"") then
                                     let objr = x :> obj
                                     let res = Jint.Native.Json.JsonParser(this._engine).Parse(objr.ToString()) :> JsValue
-                                    res
-                                
-                                // elif false && x.ToString().StartsWith("{") then
-                                //     let str = Newtonsoft.Json.JsonConvert.SerializeObject(x) 
-                                //     let res = Jint.Native.Json.JsonParser(this._engine).Parse(str) :> JsValue
-                                //     res
+                                    res                                
                                 else
                                     let res = Jint.Native.JsValue.FromObject(this._engine, x)
                                     res
@@ -76,7 +69,7 @@ type JsWrapper =
                     res.ToObject() :> obj
             with
             | ex -> 
-                Console.WriteLine("JS Wrapper Error: " + ex.ToString())
+                "JS Wrapper Error: " + ex.ToString() |> Console.WriteLine
                 null
             )
 
@@ -293,7 +286,7 @@ module Code =
             
             
         let assembly = downloadPackage packageName packageVersion
-        Console.WriteLine("NuGet Loaded: " + packageName + " " + packageVersion.ToString() + " " + assembly.ToString())
+        "NuGet Loaded: " + packageName + " " + packageVersion.ToString() + " " + assembly.ToString() |> Console.WriteLine
         if M._compiledAssemblies.ContainsKey(packageName + packageVersion.ToString()) then
             M._compiledAssemblies.[packageName + packageVersion.ToString()] <- assembly
             M._compiledAssemblyNames.[packageName + packageVersion.ToString()] <- packageName + packageVersion.ToString()
@@ -392,7 +385,6 @@ module Code =
         with _ -> ()
 
         let compileExecute (saveDisk, execute) (codes_all : (string * string) list, functionName: string, parameters: obj []) =
-
             let codes = codes_all |> List.map(fun (name, code) -> name, code.Replace("open AQI.AQILabs.SecureWebClient",""))
 
             if saveDisk then
@@ -509,6 +501,8 @@ module Code =
                             | :? ReflectionTypeLoadException as ex -> 
                                 ex.Types |> Array.filter(isNull >> not)
                             |> Array.iter(fun t ->
+
+
                                 let methods = t.GetMethods()
                                 for m in methods do
                                     try
@@ -519,7 +513,7 @@ module Code =
                                                 if functionName |> String.IsNullOrWhiteSpace |> not then
                                                     if functionName = name then
                                                         let t0 = DateTime.Now
-                                                        Console.WriteLine("Executing: " + m.Name + " " + t0.ToString())
+                                                        "Executing: " + m.Name + " " + t0.ToString() |> Console.WriteLine
 
                                                         let res = m.Invoke(
                                                             null, 
@@ -544,7 +538,7 @@ module Code =
                                                                     )
                                                             )
                                                         let pair = (name, res)
-                                                        Console.WriteLine("Executed: " + m.Name + " " + (DateTime.Now - t0).ToString())
+                                                        "Executed: " + m.Name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                         pair |> resdb.Add
                                                 elif parameterInfo |> Array.isEmpty && t.Namespace |> isNull then
                                                     let res = m.Invoke(null, null)
@@ -564,11 +558,12 @@ module Code =
 
                         with
                             | :? TargetInvocationException as tex -> "Execution failed with: " + (tex.InnerException.ToString()) |> sbuilder.AppendLine |> ignore
-                            | ex -> Console.WriteLine("Execution cannot start, reason: " + ex.ToString()) |> ignore
+                            | ex -> "Execution cannot start, reason: " + ex.ToString() |> Console.WriteLine
 
                     resdb |> Seq.toList
                 
                 let compileFS (codes : (string * string) list) =
+                    
                     let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
                     
                     let hash = str |> GetMd5Hash
@@ -600,7 +595,7 @@ module Code =
                                 let errors, exitCode = args |> FSharpChecker.Create().Compile |> Async.RunSynchronously
                                 errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
                                 #if MONO_LINUX || MONO_OSX
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> Console.WriteLine(x))
+                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
                                 #endif
                                 let assembly = System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile)
 
@@ -632,7 +627,6 @@ module Code =
                         CompiledAssemblies.[hash] |> executeAssembly |> ignore
 
                 let compileCS (codes : (string * string) list) =
-                    
                     let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
                     let hash = str |> GetMd5Hash
                     if hash |> CompiledAssemblies.ContainsKey |> not then
@@ -690,7 +684,6 @@ module Code =
                         CompiledAssemblies.[hash] |> executeAssembly |> ignore
 
                 let compileVB (codes : (string * string) list) =
-                    
                     let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
                     let hash = str |> GetMd5Hash
                     if hash |> CompiledAssemblies.ContainsKey |> not then
@@ -733,7 +726,7 @@ module Code =
                                 assembly
                             else
                                 #if MONO_LINUX || MONO_OSX
-                                errors |> Seq.iter(fun f -> Console.WriteLine(f))
+                                errors |> Seq.iter(Console.WriteLine)
                                 #endif
                                 errors |> Seq.iter(fun err -> sbuilder.AppendLine(err.ToString()) |> ignore)
                                 null
@@ -1026,7 +1019,7 @@ module Code =
                                             if functionName |> String.IsNullOrWhiteSpace |> not then
                                                 if functionName = name then
                                                     let t0 = DateTime.Now
-                                                    Console.WriteLine("Executing: " + name + " " + t0.ToString())
+                                                    "Executing: " + name + " " + t0.ToString() |> Console.WriteLine
                                                     let valu_s = valu.ToString()
                                                     if valu_s.StartsWith("function()") then
                                                         let func = valu.ToObject() :?> Func<Jint.Native.JsValue,Jint.Native.JsValue[],Jint.Native.JsValue>
@@ -1543,7 +1536,6 @@ module Code =
                 let python_code = codes |> List.filter(fun (name, x) -> name.EndsWith(".py")) //is Python
                 let js_code = codes |> List.filter(fun (name, x) -> name.EndsWith(".js")) //is Javascript
 
-
                 if compiled_net_code |> List.isEmpty |> not then 
                     let orderedProject = 
                         let mutable counter = 0
@@ -1714,7 +1706,7 @@ module Code =
                         let code = file |> File.ReadAllText
 
                         Utils.RegisterCode (false, false) [name, code]
-
+                        
                         let work_books = pkgID + "--Workbook" |> M.Base
                         let wb_res = work_books.[fun x -> M.V<string>(x, "Name") = name]
                         if wb_res.Count > 0 then
@@ -2294,8 +2286,6 @@ module Code =
 
                     let entryStream = file.Open()
                     let streamWriter = BinaryWriter(entryStream)
-
-                    // entry.Content |> Console.WriteLine
                     
                     streamWriter.Write(System.Convert.FromBase64String(entry.Content))
                     streamWriter.Close()
