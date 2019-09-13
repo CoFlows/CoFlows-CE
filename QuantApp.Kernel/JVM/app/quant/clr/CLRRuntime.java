@@ -61,7 +61,6 @@ public class CLRRuntime
     public static Object Invoke(int ptr, String funcname, Object... args)
     {
         int len = args.length;
-        
         return nativeInvoke(ptr, funcname, len, (Object[])args);
     }
 

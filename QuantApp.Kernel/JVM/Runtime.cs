@@ -387,8 +387,12 @@ namespace QuantApp.Kernel.JVM
 
                     if(obj is Type)
                     {
-                        MethodInfo method = (obj as Type).GetMethod(funcname);
+                        MethodInfo method = getSuperMethod(obj as Type, funcname);
+                        if(method == null)
+                            return IntPtr.Zero.ToPointer();
+
                         object res = method.Invoke(null, classes_obj);
+
                         if(res == null)
                             return IntPtr.Zero.ToPointer();
                         
@@ -397,7 +401,6 @@ namespace QuantApp.Kernel.JVM
                     else if(obj is DynamicObject)
                     {
                         var res = Dynamic.InvokeMember(obj,funcname,classes_obj);
-                        
                         if(res == null)
                             return IntPtr.Zero.ToPointer();
 
@@ -405,10 +408,13 @@ namespace QuantApp.Kernel.JVM
                     }
                     else
                     {
-                        MethodInfo method = obj.GetType().GetMethod(funcname);
+                        MethodInfo method = getSuperMethod(obj.GetType(), funcname);
+
+                        if(method == null)
+                            return IntPtr.Zero.ToPointer();
 
                         object res = method.Invoke(obj, classes_obj);
-                        
+
                         if(res == null)
                             return IntPtr.Zero.ToPointer();
 
@@ -423,6 +429,74 @@ namespace QuantApp.Kernel.JVM
 
             return null;
             
+        }
+
+        private static MethodInfo getSuperMethod(Type type, string funcname)
+        {
+            if(type == null)
+                return null;
+            MethodInfo method = type.GetMethod(funcname);
+            if(method == null)
+            {
+                Type[] interfaces = type.GetInterfaces();
+                if(interfaces != null)
+                    foreach(var t in interfaces)
+                    {
+                        var m = getSuperMethod(t, funcname);
+                        if(m != null)
+                            return m;
+                    }
+                Type tbase = type.BaseType;
+                return getSuperMethod(tbase, funcname);
+            }
+
+            return method;
+        }
+
+        private static FieldInfo getSuperField(Type type, string funcname)
+        {
+            if(type == null)
+                return null;
+            
+            FieldInfo field = type.GetField(funcname);
+            if(field == null)
+            {
+                Type[] interfaces = type.GetInterfaces();
+                if(interfaces != null)
+                    foreach(var t in interfaces)
+                    {
+                        var m = getSuperField(t, funcname);
+                        if(m != null)
+                            return m;
+                    }
+                Type tbase = type.BaseType;
+                return getSuperField(tbase, funcname);
+            }
+
+            return field;
+        }
+
+        private static PropertyInfo getSuperProperty(Type type, string funcname)
+        {
+            if(type == null)
+                return null;
+            
+            PropertyInfo property = type.GetProperty(funcname);
+            if(property == null)
+            {
+                Type[] interfaces = type.GetInterfaces();
+                if(interfaces != null)
+                    foreach(var t in interfaces)
+                    {
+                        var m = getSuperProperty(t, funcname);
+                        if(m != null)
+                            return m;
+                    }
+                Type tbase = type.BaseType;
+                return getSuperProperty(tbase, funcname);
+            }
+
+            return property;
         }
         private unsafe delegate void* SetInvoke(int ptr, string funcname, int len, void** args);
 
@@ -948,14 +1022,18 @@ namespace QuantApp.Kernel.JVM
                         }
                         else
                         {
-                            FieldInfo field = obj.GetType().GetField(name);
-                            PropertyInfo property = obj.GetType().GetProperty(name);
-
+                            // FieldInfo field = obj.GetType().GetField(name);
+                            FieldInfo field = getSuperField(obj.GetType(), name);
                             if(field != null)
                                 field.SetValue(obj, classes_obj[0]);
                             else
-                                property.SetValue(obj, classes_obj[0]);
+                            {
+                                // PropertyInfo property = obj.GetType().GetProperty(name);
+                                PropertyInfo property = getSuperProperty(obj.GetType(), name);
+                                if(property != null)
+                                    property.SetValue(obj, classes_obj[0]);
                             }
+                        }
                     }
                 }
                 else
@@ -1012,17 +1090,23 @@ namespace QuantApp.Kernel.JVM
                 {
                     try
                     {
-                        FieldInfo field = obj.GetType().GetField(name);
-                        PropertyInfo property = obj.GetType().GetProperty(name);
+                        // FieldInfo field = obj.GetType().GetField(name);
+                        FieldInfo field = getSuperField(obj.GetType(), name);
+                        
                         
                         object res;
                         
                         if(field != null)
                             res = field.GetValue(obj);
-                        else if(property != null)
-                            res = property.GetValue(obj);
                         else
-                            return null;
+                        {
+                            // PropertyInfo property = obj.GetType().GetProperty(name);
+                            PropertyInfo property = getSuperProperty(obj.GetType(),name);
+                            if(property != null)
+                                res = property.GetValue(obj);
+                            else
+                                return null;
+                        }
 
                         return getObjectPointer(res);
                     }

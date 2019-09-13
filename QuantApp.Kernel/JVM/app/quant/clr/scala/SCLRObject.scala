@@ -62,7 +62,7 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
     // def applyDynamic[R >: Null <: Any](namep: String)(args: Any*): R = {    
     def applyDynamic[R <: Any](namep: String)(args: Any*): R = {
         val argSig = args.map(x => if(x == null) null else x.getClass).map(CLRRuntime.TransformType(_)).map(x => x.replaceAll("app/quant/clr/CLRObject", "java/lang/Object").replaceAll("app/quant/clr/scala/SCLRObject", "java/lang/Object")).mkString
-
+        
         val name = namep + argSig
         val func = this.getOrElse(name, null)
 
@@ -74,8 +74,10 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
                     val ares = 
                         if(res.isInstanceOf[app.quant.clr.CLRIterable])
                             res.asInstanceOf[app.quant.clr.CLRIterable].asScala
+                        
                         else 
                             res
+                        
                     ares.asInstanceOf[R]
                 }
                 else {
@@ -85,15 +87,14 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
                             case o: CLRObject => o.asInstanceOf[CLRObject]
                             case o: AnyRef => o.asInstanceOf[AnyRef]
                         }).toArray
+                    
                     val res = clrObject.InvokeArr(namep, vargs )
                     
                     val ares = 
                         if(res.isInstanceOf[app.quant.clr.CLRIterable])
                             res.asInstanceOf[app.quant.clr.CLRIterable].asScala 
-                        
                         else 
                             res
-                        
                     ares.asInstanceOf[R]
                 }
 
