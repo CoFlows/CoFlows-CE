@@ -1,6 +1,6 @@
-# CoFlows Community Edition
+# CoFlows - Polyglot Runtime
 
-**CoFlows Community Edition** is a polyglot compute engine that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and javascript. Furthermore, functions written in any of these languages can call each other within the same process with full interop.
+**CoFlows Community Edition** is a polyglot runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and javascript. Furthermore, functions written in any of these languages can call each other within the same process with full interop.
 
 Our **Community Edition** is a version of our commercial codebase that we have used in various Data science projects including:
 * Algorithmic Trading
