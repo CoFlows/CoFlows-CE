@@ -1977,14 +1977,12 @@ module Code =
                 "Queries not compiled"
 
         if pkg_content.ID |> CompiledPackages.ContainsKey |> not then
-            "Base for " + pkg_content.ID + " added to cache" |> Console.WriteLine
             CompiledPackages.TryAdd(pkg_content.ID, pkg_content.ID) |> ignore
             CompiledBase.Clear()
             pkg_content.Base |> Seq.toList 
             |> List.iter(fun entry -> 
                 let md5 = entry.Content |> GetMd5Hash
                 if md5 |> CompiledBase.ContainsKey |> not then
-                    // "Added FILE: " + entry.Name + " " + md5 |> Console.WriteLine 
                     CompiledBase.TryAdd(md5, entry.Name) |> ignore)
 
         [buildBase; buildAgents; buildQueries]
