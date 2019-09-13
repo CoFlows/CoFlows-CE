@@ -9,7 +9,6 @@
 namespace QuantApp.Engine
 
 open System
-open System.Linq
 open System.IO
 open System.IO.Compression
 
@@ -30,12 +29,10 @@ open QuantApp.Kernel
 open Python.Runtime
 open QuantApp.Kernel.JVM
 
-open System
-
 open System.Xml
 open System.Net
 
-open FSharp.Interop.Dynamic
+// open FSharp.Interop.Dynamic
 
 type JsWrapper =
 
@@ -147,6 +144,7 @@ module Code =
     let CompiledJVMClasses = System.Collections.Concurrent.ConcurrentDictionary<string, string>()
     let CompiledJVMBaseClasses = System.Collections.Concurrent.ConcurrentDictionary<string, string>()
     let filePaths = System.Collections.Concurrent.ConcurrentDictionary<string, string>()
+    let listeningPaths = System.Collections.Concurrent.ConcurrentDictionary<string, FileSystemWatcher>()
 
     let InstallJar (url : String) : unit =
         let wc = new WebClient()
@@ -180,9 +178,8 @@ module Code =
                                 |> wc.DownloadData
                                 |> MemoryStream
                                 |> ZipArchive
-                                //ZipArchive(MemoryStream(wc.DownloadData("https://www.nuget.org/api/v2/package/" + name + "/" + version)))
                                 
-                    let files = Collections.Generic.Dictionary<string, string>()
+                    //let files = Collections.Generic.Dictionary<string, string>()
                     let files =
                         [|
                             for entry in archive.Entries do
@@ -343,12 +340,12 @@ module Code =
                 )
             )
 
-        System.Reflection.Assembly.GetEntryAssembly().GetReferencedAssemblies()
-        |> Seq.append(System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
-        |> Seq.append(System.Reflection.Assembly.GetCallingAssembly().GetReferencedAssemblies())
-        |> Seq.append([System.Reflection.Assembly.GetEntryAssembly().GetName()])
-        |> Seq.append([System.Reflection.Assembly.GetExecutingAssembly().GetName()])
-        |> Seq.append([System.Reflection.Assembly.GetCallingAssembly().GetName()])
+        Assembly.GetEntryAssembly().GetReferencedAssemblies()
+        |> Seq.append(Assembly.GetExecutingAssembly().GetReferencedAssemblies())
+        |> Seq.append(Assembly.GetCallingAssembly().GetReferencedAssemblies())
+        |> Seq.append([Assembly.GetEntryAssembly().GetName()])
+        |> Seq.append([Assembly.GetExecutingAssembly().GetName()])
+        |> Seq.append([Assembly.GetCallingAssembly().GetName()])
         |> Seq.iter(fun an -> 
             let name = an.ToString()
             
@@ -402,11 +399,14 @@ module Code =
                 codes 
                 |> List.iter(fun (name, code) -> 
                     if name |> filePaths.ContainsKey then
-
                         let path = filePaths.[name]
-                        File.WriteAllText(path, code)
+
+                        let hashCode = code |> GetMd5Hash
+                        let hashFile = File.ReadAllText(path) |> GetMd5Hash
+
+                        if hashCode <> hashFile then File.WriteAllText(path, code)
                 )
-            
+
             let sbuilder = StringBuilder()
             let resdb = Collections.Generic.List<string * obj>()
             
@@ -508,7 +508,6 @@ module Code =
                             with
                             | :? ReflectionTypeLoadException as ex -> 
                                 ex.Types |> Array.filter(isNull >> not)
-                                
                             |> Array.iter(fun t ->
                                 let methods = t.GetMethods()
                                 for m in methods do
@@ -553,18 +552,18 @@ module Code =
                                                     pair |> resdb.Add
                                             with
                                             | ex ->
-                                                let pair = (name, ex.InnerException.Message + Environment.NewLine + ex.InnerException.StackTrace :> obj)
-                                                pair |> resdb.Add
+                                                (name, ex.InnerException.ToString() :> obj)
+                                                |> resdb.Add
                                     with
                                     | ex -> 
-                                        sbuilder.AppendLine(ex.ToString()) |> ignore
+                                        ex.ToString() |> sbuilder.AppendLine |> ignore
                                     )
 
                             if a.EntryPoint |> isNull |> not then
                                 a.EntryPoint.Invoke(null, null) |> ignore
-                    
+
                         with
-                            | :? TargetInvocationException as tex -> sbuilder.AppendLine("Execution failed with: " + (tex.InnerException.Message)) |> ignore
+                            | :? TargetInvocationException as tex -> "Execution failed with: " + (tex.InnerException.ToString()) |> sbuilder.AppendLine |> ignore
                             | ex -> Console.WriteLine("Execution cannot start, reason: " + ex.ToString()) |> ignore
 
                     resdb |> Seq.toList
@@ -598,16 +597,14 @@ module Code =
                                     |> Array.toSeq |> Seq.distinct |> Seq.toArray
 
                             let errors, exitCode, assembly = 
-                                
+                                let errors, exitCode = args |> FSharpChecker.Create().Compile |> Async.RunSynchronously
+                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
+                                #if MONO_LINUX || MONO_OSX
+                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> Console.WriteLine(x))
+                                #endif
+                                let assembly = System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile)
+
                                 if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("namespace") then
-
-                                    let errors, exitCode = args |> FSharpChecker.Create().Compile |> Async.RunSynchronously
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
-                                    #if MONO_LINUX || MONO_OSX
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> Console.WriteLine(x))
-                                    #endif
-                                    let assembly = System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile)
-
                                     M._compiledAssemblies.TryAdd(hash, assembly) |> ignore
                                     try
                                         assembly.GetTypes()
@@ -616,22 +613,10 @@ module Code =
                                             M._compiledAssemblyNames.[name] <- hash
                                             )
                                     with
-                                    | _-> 1 |> ignore
-                                    
-                                    
-                                    errors, exitCode, assembly
-                                else
-                                    
-                                    let errors, exitCode, assembly = checker.CompileToDynamicAssembly(args, execute = None) |> Async.RunSynchronously                                    
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
-                                    
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
-                                    #if MONO_LINUX || MONO_OSX
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> Console.WriteLine(x))
-                                    #endif
-
-                                    
-                                    errors, exitCode, (if assembly.IsSome then assembly.Value else null)
+                                    | _-> ()
+                                
+                                
+                                errors, exitCode, assembly
                                 
                             if errors |> Seq.filter(fun e -> e.ToString().Contains("error")) |> Seq.isEmpty && (assembly |> isNull |> not)  then
                                 assembly
@@ -691,9 +676,9 @@ module Code =
                                 assembly
                             else
                                 #if MONO_LINUX || MONO_OSX
-                                errors |> Seq.iter(fun f -> Console.WriteLine(f))
+                                errors |> Seq.iter(Console.WriteLine)
                                 #endif
-                                errors |> Seq.iter(fun err -> sbuilder.AppendLine(err.ToString()) |> ignore)
+                                errors |> Seq.map(fun err -> err.ToString()) |> Seq.iter(sbuilder.AppendLine >> ignore)
                                 null
 
                         let assembly = codes |> compileCS
@@ -1174,11 +1159,6 @@ module Code =
                             let path = Path.GetFileNameWithoutExtension(Path.GetTempFileName())
                             let path = Path.Combine(Path.GetDirectoryName(Path.GetTempFileName()), path)
 
-
-                            // let jPath = 
-                            //     let name, _ = codes |> List.head
-                            //     if "/" |> name.Contains then name.Substring(0, name.LastIndexOf("/")) else ""
-
                             let javaFiles =
                                 codes
                                 |> List.map(fun (name, code) ->
@@ -1368,17 +1348,11 @@ module Code =
                     
                     let hash = str |> GetMd5Hash
 
-                    // if not (CompiledJVMClasses.ContainsKey(hash)) then
                     if hash |> CompiledJVMClasses.ContainsKey |> not then
  
                         let compileScala (codes : (string * string) list) =
                             let path = Path.GetFileNameWithoutExtension(Path.GetTempFileName())
                             let path = Path.Combine(Path.GetDirectoryName(Path.GetTempFileName()), path)
-
-
-                            let jPath = 
-                                let name, _ = codes |> List.head
-                                if "/" |> name.Contains then name.Substring(0, name.LastIndexOf("/")) else ""
 
                             let scalaFiles =
                                 codes
@@ -1389,8 +1363,6 @@ module Code =
                                     let scalaFile = Path.ChangeExtension(fn, ".scala")
                                     File.WriteAllText(scalaFile, code)
                                     scalaFile)
-
-                            
 
                             if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("package") then
                                 
@@ -1588,7 +1560,7 @@ module Code =
                             (name, code, counter)
                             )
                         |> List.groupBy(fun (name, code, counter) -> counter)
-                        |> List.map(fun (g, files) -> (g, files |> List.map(fun (name, code, counter) -> (name, code))))
+                        |> List.map(fun (g, files) -> (g, files |> List.map(fun (name, code, _) -> (name, code))))
                         
 
                     orderedProject
@@ -1726,6 +1698,35 @@ module Code =
                 )
     
     let ProcessPackageFile (pkg_file : string) : PKG =
+        let setListener (pkgID, file : string) = 
+                let path = file |> Path.GetDirectoryName
+                if path |> listeningPaths.ContainsKey |> not then
+                    let fileSystemWatcher = FileSystemWatcher()
+
+                    fileSystemWatcher.Path <- path
+                    fileSystemWatcher.NotifyFilter <- NotifyFilters.LastWrite
+                    fileSystemWatcher.EnableRaisingEvents <- true
+                    fileSystemWatcher.IncludeSubdirectories <- true
+
+                    fun (x : FileSystemEventArgs) ->
+                        let file =  x.FullPath
+                        let name = file |> Path.GetFileName
+                        let code = file |> File.ReadAllText
+
+                        Utils.RegisterCode (false, false) [name, code]
+
+                        let work_books = pkgID + "--Workbook" |> M.Base
+                        let wb_res = work_books.[fun x -> M.V<string>(x, "Name") = name]
+                        if wb_res.Count > 0 then
+                            let item = wb_res.[0] :?> CodeData
+                            work_books.Exchange(item, { item with Code = code })
+                        work_books.Save()
+
+                    |> fileSystemWatcher.Changed.Add
+
+                    listeningPaths.TryAdd(path, fileSystemWatcher) |> ignore
+
+
         let pkg_json = File.ReadAllText(pkg_file)
         let pkg_path = Path.GetDirectoryName(pkg_file)
         let pkg_type = Newtonsoft.Json.JsonConvert.DeserializeObject<QuantApp.Engine.PKG>(pkg_json)
@@ -1790,6 +1791,8 @@ module Code =
                             let name = if entry.Name |> String.IsNullOrEmpty then Path.GetFileName(pkg_path + Path.DirectorySeparatorChar.ToString() + entry.Content) else entry.Name
                             let content = File.ReadAllText(pkg_path + Path.DirectorySeparatorChar.ToString() + entry.Content)
 
+                            (pkg_id, pkg_path + Path.DirectorySeparatorChar.ToString() + entry.Content) |> setListener
+
                             if name |> filePaths.ContainsKey then
                                 filePaths.[name] <- pkg_path + Path.DirectorySeparatorChar.ToString() + entry.Content
                             else
@@ -1839,8 +1842,7 @@ module Code =
                             | _ -> entry.Name, entry.Content
                     { entry with Name = name; Content = content }
                 )
-                
-            
+
             let readme_content = File.ReadAllText(pkg_path + Path.DirectorySeparatorChar.ToString() + pkg.ReadMe)
             
             { 
@@ -2048,7 +2050,6 @@ module Code =
                                     Utils.CreatePKG(
                                     [
                                         (entry.Name, entry.Content.Replace("$WID$", pkg_content.ID))
-                                        // (entry.Name, entry.Content)
                                     ],
                                     entry.Exe, [||])
                                 let fpkg = { fpkg with ID = fpkg.ID.Replace("$WID$", pkg_id); WorkspaceID = fpkg.WorkspaceID.Replace("$WID$", pkg_id) }
@@ -2077,8 +2078,9 @@ module Code =
                 |> List.iter(fun entry ->
                     let wb_res = work_books.[fun x -> M.V<string>(x, "ID") = entry.ID]
                     if wb_res.Count > 0 then
-                    
+
                         let item = wb_res.[0] :?> CodeData
+                        
                         work_books.Exchange(
                             item, 
                             {    
