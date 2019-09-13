@@ -1938,10 +1938,7 @@ module Code =
             pkg_content.Base 
             |> Seq.toList 
             |> List.map(fun entry -> entry.Name, entry.Content) 
-            |> List.map(fun (name, content) -> 
-                let md5 = content |> GetMd5Hash
-                "New Base file: " + name + " " + md5 |> Console.WriteLine
-                md5)
+            |> List.map(fun (_, content) -> content |> GetMd5Hash)
             |> List.filter(CompiledBase.ContainsKey >> not)
             |> List.isEmpty
             |> not
