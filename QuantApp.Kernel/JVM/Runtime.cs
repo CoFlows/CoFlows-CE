@@ -1274,21 +1274,26 @@ namespace QuantApp.Kernel.JVM
                 void*  pDateClass;
                 if(FindClass( pEnv, "java/time/LocalDateTime", &pDateClass) == 0)
                 {
-
                     void*  pInvokeMethod;
                     if(GetMethodID( pEnv, pDate, "toString", "()Ljava/lang/String;", &pInvokeMethod ) == 0)
                     {
                         void*  pDateStr;
-                        CallObjectMethod( pEnv, pDate, pInvokeMethod, &pDateStr, 0, pAr_len);
-
-                        string str = GetNetString(pEnv, pDateStr);
-                        return DateTime.Parse(str);
+                        if(CallObjectMethod( pEnv, pDate, pInvokeMethod, &pDateStr, 0, pAr_len) == 0)
+                        {
+                            if(new IntPtr(pDateStr) != IntPtr.Zero)
+                            {
+                                string str = GetNetString(pEnv, pDateStr);
+                                return DateTime.Parse(str);
+                            }
+                        }
+                        else
+                            throw new Exception(GetException(pEnv));
                     }
                     else
-                        Console.WriteLine("LocalDateTime toString Method not found");
+                        throw new Exception(GetException(pEnv));
                 }
                 else
-                    Console.WriteLine("LocalDateTime class not found");
+                    throw new Exception(GetException(pEnv));
             }
 
             return DateTime.MinValue;
@@ -1311,13 +1316,13 @@ namespace QuantApp.Kernel.JVM
                     if(CallStaticObjectMethod( pEnv, pDateClass, pInvokeMethod, &pDate, 7, pAr_len) == 0)
                         return pDate;
                     else
-                        throw new Exception("GetJavaDateTime call LocalDateTime.of error");
+                        throw new Exception(GetException(pEnv));
                 }
                 else
-                    Console.WriteLine("Date method not found");
+                    throw new Exception(GetException(pEnv));
             }
             else
-                Console.WriteLine("Date class not found");
+                throw new Exception(GetException(pEnv));
 
             return IntPtr.Zero.ToPointer();
         }
