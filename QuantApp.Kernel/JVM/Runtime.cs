@@ -659,7 +659,7 @@ namespace QuantApp.Kernel.JVM
                                         return GetNetString(pEnv, pGetCLRObject);
 
 
-                                    case "java.util.LocalDateTime":
+                                    case "java.time.LocalDateTime":
                                         return GetNetDateTime(pEnv, pGetCLRObject);
 
                                     default:
@@ -1825,16 +1825,15 @@ namespace QuantApp.Kernel.JVM
                 {
                     
                     void* pElementClass;
-                    GetObjectArrayElement(pEnv, pArrClasses, i, &pElementClass);
+                    if(GetObjectArrayElement(pEnv, pArrClasses, i, &pElementClass) != 0)
+                        throw new Exception(GetException(pEnv));
                     
                     if(new IntPtr(pElementClass) == IntPtr.Zero)
-                    {
                         resultArray[i] = null;
-                    }
+                    
                     else
                     {
                         string retElementClass = GetNetString(pEnv, pElementClass);
-                        
 
                         if(retElementClass.StartsWith("prim-"))
                         {
@@ -1882,7 +1881,7 @@ namespace QuantApp.Kernel.JVM
                             else
                                 resultArray[i] = GetNetString(pEnv, pElement_string);
                         }
-                        else if(retElementClass == "java.util.LocalDateTime")
+                        else if(retElementClass == "java.time.LocalDateTime")
                         {
                             void* pElement_date;
                             GetObjectArrayElement(pEnv, pObjResult, i, &pElement_date);
@@ -2266,7 +2265,7 @@ namespace QuantApp.Kernel.JVM
                 return -2;
             }
 
-            void*  pEnv;// = (void*)EnvPtr;
+            void*  pEnv;
             if(AttacheThread((void*)JVMPtr,&pEnv) == 0)
             {
 
@@ -2430,10 +2429,7 @@ namespace QuantApp.Kernel.JVM
                     if(CallStaticObjectMethod( pEnv, pNetBridgeClass, pGetJVMObjectMethod, &pGetJVMObject, 1, pAr_len) == 0)
                         return pGetJVMObject;
                     else
-                    {
-                        Console.WriteLine("GetObject error in CallStaticObjectMethod");
                         return IntPtr.Zero.ToPointer();
-                    }
                 }
                 else
                     Console.WriteLine("GetObject method not found");
@@ -2568,7 +2564,7 @@ namespace QuantApp.Kernel.JVM
                     case "java.lang.String":
                         return GetNetString(_pEnv, pObjResult);
 
-                    case "java.util.LocalDateTime":
+                    case "java.time.LocalDateTime":
                         return GetNetDateTime(_pEnv, pObjResult);
 
                     case "scala.Tuple1":
@@ -2722,10 +2718,8 @@ namespace QuantApp.Kernel.JVM
                                     object[] ar_data = new object[]{ sClass };
                                     getJavaParameters(ref pArg_sig, ar_data);
                                     void* rArr;
-                                    
-                                    int res = CallStaticObjectMethod( pEnv, pNetBridgeClass, pSignaturesMethod, &rArr, 1, pArg_sig);
 
-                                    if(res == 0)
+                                    if(CallStaticObjectMethod( pEnv, pNetBridgeClass, pSignaturesMethod, &rArr, 1, pArg_sig) == 0)
                                     {
                                         int sig_hashID = getHashCode(rArr);
 
