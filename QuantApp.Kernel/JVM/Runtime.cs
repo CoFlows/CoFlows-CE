@@ -2265,14 +2265,17 @@ namespace QuantApp.Kernel.JVM
                 pClass = IntPtr.Zero.ToPointer();
                 return -2;
             }
+
             void*  pEnv;// = (void*)EnvPtr;
             if(AttacheThread((void*)JVMPtr,&pEnv) == 0)
             {
 
                 void* pNameClass;
                 void* _pClass;
+
                 if(GetObjectClass(pEnv, pObj, &_pClass, &pNameClass) == 0)
                 {
+
                     pClass = _pClass;
                     return 0;
                 }
@@ -4300,17 +4303,25 @@ namespace QuantApp.Kernel.JVM
                                                                 { 
                                                                     void* _pClass = IntPtr.Zero.ToPointer();
                                                                     if(getClass(_pObj,  ref _pClass) == 0)
+                                                                    {
                                                                         if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                            CallStaticVoidMethod( _pEnv, _pClass, pMethod, call_len, ar_call);
+                                                                        {
+                                                                            if(CallStaticVoidMethod( _pEnv, _pClass, pMethod, call_len, ar_call) != 0)
+                                                                                throw new Exception(GetException(_pEnv));
+                                                                        }
                                                                         else
                                                                             throw new Exception(GetException(_pEnv));
+                                                                    }
                                                                     else
                                                                         throw new Exception(GetException(_pEnv));
                                                                 } 
                                                                 else  
                                                                 { 
                                                                     if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                        CallVoidMethod( _pEnv, _pObj, pMethod, call_len, ar_call);
+                                                                    {
+                                                                        if(CallVoidMethod( _pEnv, _pObj, pMethod, call_len, ar_call) != 0)
+                                                                           throw new Exception(GetException(_pEnv));
+                                                                    }
                                                                     else
                                                                         throw new Exception(GetException(_pEnv));
                                                                 }
@@ -4362,6 +4373,9 @@ namespace QuantApp.Kernel.JVM
                                                                         throw new Exception(GetException(_pEnv));
                                                                 }
 
+                                                                if(new IntPtr(pObjResult) == IntPtr.Zero)
+                                                                        return null;
+
                                                                 return GetNetString(_pEnv, pObjResult);
                                                             }
                                                             else
@@ -4383,6 +4397,7 @@ namespace QuantApp.Kernel.JVM
                                                             
                                                             void* pObjResult = IntPtr.Zero.ToPointer();
                                                             void* _pObj = GetJVMObject(hashID);
+
                                                             if(_pObj != pObjResult)
                                                             {
                                                                 void* pMethod;
@@ -4390,23 +4405,32 @@ namespace QuantApp.Kernel.JVM
                                                                 { 
                                                                     void* _pClass = IntPtr.Zero.ToPointer();
                                                                     if(getClass(_pObj,  ref _pClass) == 0)
+                                                                    {
                                                                         if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        {
                                                                             if(CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call) != 0)
                                                                                 throw new Exception(GetException(_pEnv));
+                                                                        }
                                                                         else
                                                                             throw new Exception(GetException(_pEnv));
+                                                                    }
                                                                     else
                                                                         throw new Exception(GetException(_pEnv));
                                                                 } 
                                                                 else  
                                                                 { 
                                                                     if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                    {
                                                                         if(CallObjectMethod( _pEnv, _pObj, pMethod, &pObjResult, call_len, ar_call) != 0)
                                                                             throw new Exception(GetException(_pEnv));
+                                                                    }
                                                                     else
                                                                         throw new Exception(GetException(_pEnv));
                                                                 }
-                                                            
+
+                                                                if(new IntPtr(pObjResult) == IntPtr.Zero)
+                                                                    return DateTime.MinValue;
+
                                                                 return GetNetDateTime(_pEnv, pObjResult);
                                                             }
                                                             else
@@ -4437,19 +4461,25 @@ namespace QuantApp.Kernel.JVM
                                                                     { 
                                                                         void* _pClass = IntPtr.Zero.ToPointer();
                                                                         if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        {
                                                                             if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                            {
                                                                                 if(CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call) != 0)
                                                                                     throw new Exception(GetException(_pEnv));
+                                                                            }
                                                                             else
                                                                                 throw new Exception(GetException(_pEnv));
+                                                                        }
                                                                         else
                                                                             throw new Exception(GetException(_pEnv));
                                                                     } 
                                                                     else  
                                                                     { 
                                                                         if(GetMethodID( _pEnv, _pObj, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
+                                                                        {
                                                                             if(CallObjectMethod( _pEnv, _pObj, pMethod, &pObjResult, call_len, ar_call) != 0)
                                                                                 throw new Exception(GetException(_pEnv));
+                                                                        }
                                                                         else
                                                                             throw new Exception(GetException(_pEnv));
                                                                     }
@@ -4486,10 +4516,15 @@ namespace QuantApp.Kernel.JVM
                                                                     { 
                                                                         void* _pClass = IntPtr.Zero.ToPointer();
                                                                         if(getClass(_pObj,  ref _pClass) == 0)
+                                                                        {
                                                                             if(GetStaticMethodID( _pEnv, _pClass, name, "(" + preArgsSignature + ")" + returnSignature, &pMethod ) == 0)
-                                                                                CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call);
+                                                                            {
+                                                                                if(CallStaticObjectMethod( _pEnv, _pClass, pMethod, &pObjResult, call_len, ar_call) != 0)
+                                                                                    throw new Exception(GetException(_pEnv));
+                                                                            }
                                                                             else
                                                                                 throw new Exception(GetException(_pEnv));
+                                                                        }
                                                                         else
                                                                             throw new Exception(GetException(_pEnv));
                                                                     } 
