@@ -3,6 +3,7 @@ C# Polyglot
 
     using QuantApp.Kernel;
     using System.Collections.Generic;
+    using QuantApp.Kernel.JVM;
 
     public class CsPolyglot
     {   
