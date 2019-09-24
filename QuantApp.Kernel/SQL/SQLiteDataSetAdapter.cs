@@ -290,9 +290,8 @@ namespace QuantApp.Kernel.Adapters.SQL
                         }
                         insert = insert.Substring(0, insert.Length - 1) + ")";
 
+                        var dbCommand = new SQLiteCommand(_connectionInternal);
                         var transaction = _connectionInternal.BeginTransaction();
-
-
 
                         // string masterString = "";
                         var mstStr = new StringWriter();
@@ -327,15 +326,18 @@ namespace QuantApp.Kernel.Adapters.SQL
                             }
 
                             addstring = addstring.Remove(addstring.Length - 2) + ");";
-                            mstStr.Write(addstring);
+
+                            dbCommand.CommandText = addstring;
+                            dbCommand.ExecuteNonQuery();
+                            // mstStr.Write(addstring);
                             // masterString += addstring;
                         }
 
                         debugTime = DateTime.Now;
                         // var dbCommand = new SQLiteCommand(masterString, _connectionInternal, transaction);
-                        var dbCommand = new SQLiteCommand(mstStr.ToString(), _connectionInternal, transaction);
-                        dbCommand.CommandTimeout = 0 * 60 * 15;
-                        dbCommand.ExecuteNonQuery();
+                        // var dbCommand = new SQLiteCommand(mstStr.ToString(), _connectionInternal, transaction);
+                        // dbCommand.CommandTimeout = 0 * 60 * 15;
+                        // dbCommand.ExecuteNonQuery();
                         debugTime = DateTime.Now;
                         transaction.Commit();
                         debugTime = DateTime.Now;
