@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.2-aspnetcore-runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.0
 
 WORKDIR /App
 
@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 RUN apt-get update --fix-missing && \
     apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 libglib2.0-dev
 
-RUN apt-get install -y build-essential checkinstall
+RUN apt-get install -y build-essential
 RUN apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev liblzma-dev
 RUN ln -s /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so
 
@@ -84,7 +84,7 @@ RUN \
 
 
 # set up network
-ENV ASPNETCORE_PKG_VERSION 2.2
+ENV ASPNETCORE_PKG_VERSION 3.0
 
 # SSL
 # ENV ASPNETCORE_URLS https://+:443

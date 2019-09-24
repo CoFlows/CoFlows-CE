@@ -582,6 +582,10 @@ namespace Python.Runtime
 
     public static class Py
     {
+        public static T T<T>(PyObject obj)
+        {
+            return obj.As<T>();
+        }
         public static GILState GIL()
         {
             if (!PythonEngine.IsInitialized)
