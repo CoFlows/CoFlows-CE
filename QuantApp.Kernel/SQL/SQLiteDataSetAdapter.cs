@@ -282,6 +282,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                         int colLength = cols.Count;
 
                         string insert = @"INSERT INTO " + table.TableName + "(";
+
                         for (int i = 0; i < colLength; i++)
                         {
                             DataColumn col = cols[i];
@@ -293,7 +294,8 @@ namespace QuantApp.Kernel.Adapters.SQL
 
 
 
-                        string masterString = "";
+                        // string masterString = "";
+                        var mstStr = new StringWriter();
                         debugTime = DateTime.Now;
 
                         for (int i = 0; i < rowLength; i++)
@@ -325,11 +327,13 @@ namespace QuantApp.Kernel.Adapters.SQL
                             }
 
                             addstring = addstring.Remove(addstring.Length - 2) + ");";
-                            masterString += addstring;
+                            mstStr.Write(addstring);
+                            // masterString += addstring;
                         }
 
                         debugTime = DateTime.Now;
-                        var dbCommand = new SQLiteCommand(masterString, _connectionInternal, transaction);
+                        // var dbCommand = new SQLiteCommand(masterString, _connectionInternal, transaction);
+                        var dbCommand = new SQLiteCommand(mstStr.ToString(), _connectionInternal, transaction);
                         dbCommand.CommandTimeout = 0 * 60 * 15;
                         dbCommand.ExecuteNonQuery();
                         debugTime = DateTime.Now;
