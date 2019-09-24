@@ -15,8 +15,12 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 
 using Microsoft.AspNetCore;
+// using Microsoft.AspNetCore.Hosting;
+// using Microsoft.Extensions.Configuration;
+// using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 
@@ -46,8 +50,8 @@ namespace QuantApp.Server
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
         {
-            #if NETCOREAPP2_2
-            Console.Write("NetCoreApp 2.2... ");
+            #if NETCOREAPP3_0
+            Console.Write("NetCoreApp 3.0... ");
             #endif
 
             #if NET461
@@ -261,7 +265,7 @@ namespace QuantApp.Server
                 SetDefaultWorkSpaces(new string[]{ pkg.ID });
 
 
-                #if NETCOREAPP2_2
+                #if NETCOREAPP3_0
                 if(!sslFlag)
                     Init(new string[]{"--urls", "http://*:80"});
                 else
@@ -428,23 +432,27 @@ namespace QuantApp.Server
             QuantApp.Kernel.RTDEngine.Factory = new Realtime.WebSocketListner();
 
             if (args == null || args.Length == 0)            
-                WebHost.CreateDefaultBuilder(args)
-                    .UseConfiguration(new ConfigurationBuilder().AddCommandLine(args).Build())
-                    .UseKestrel(options =>
+                Host.CreateDefaultBuilder(args)
+                    .ConfigureWebHostDefaults(webBuilder =>
                     {
-                        options.Listen(System.Net.IPAddress.Any, 443, listenOptions =>
+                        webBuilder.ConfigureKestrel(serverOptions =>
                         {
-                            listenOptions.UseHttps(ssl_cert, ssl_password);
-                        });
+                            serverOptions.Listen(System.Net.IPAddress.Any, 443, listenOptions =>
+                            {
+                                listenOptions.UseHttps(ssl_cert, ssl_password);
+                            });
+                        })
+                        .UseStartup<Startup>();
                         
                     })
-                    .UseStartup<Startup>()
                     .Build()
                     .Run();
             else
-                WebHost.CreateDefaultBuilder(args)
-                    .UseConfiguration(new ConfigurationBuilder().AddCommandLine(args).Build())                    
-                    .UseStartup<Startup>()
+                Host.CreateDefaultBuilder(args)
+                    .ConfigureWebHostDefaults(webBuilder =>
+                    {
+                        webBuilder.UseStartup<Startup>();
+                    })
                     .Build()
                     .Run();            
         }

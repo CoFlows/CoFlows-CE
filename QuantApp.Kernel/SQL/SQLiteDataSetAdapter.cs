@@ -294,7 +294,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                         var transaction = _connectionInternal.BeginTransaction();
 
                         // string masterString = "";
-                        var mstStr = new StringWriter();
+                        // var mstStr = new StringWriter();
                         debugTime = DateTime.Now;
 
                         for (int i = 0; i < rowLength; i++)
