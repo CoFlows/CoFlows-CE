@@ -304,12 +304,12 @@ namespace QuantApp.Kernel.Adapters.SQL
                         insert = insert.Substring(0, insert.Length - 1) + ")";
 
                         var transaction = _connectionInternal.BeginTransaction();
+
                         for (int j = 0; j < rowLength; j++)
                         {
                             DataRow row = rows[j];
 
                             string addstring = insert + " VALUES(";
-
 
                             for (int i = 0; i < colLength; i++)
                             {
@@ -328,7 +328,6 @@ namespace QuantApp.Kernel.Adapters.SQL
                             }
 
                             addstring = addstring.Substring(0, addstring.Length - 2) + ");";
-
                             SqlCommand command = new SqlCommand(addstring, _connectionInternal, transaction);
                             command.ExecuteNonQuery();
                         }
@@ -375,7 +374,6 @@ namespace QuantApp.Kernel.Adapters.SQL
                                 {
                                     added++;
                                     string value = "";
-
                                     if (col.DataType == typeof(string) || col.DataType == typeof(char))
                                         value = "'" + row[col] + "' , ";
 
@@ -394,7 +392,6 @@ namespace QuantApp.Kernel.Adapters.SQL
 
                             if (added > 0)
                             {
-
                                 update = update.Substring(0, update.Length - 2) + " WHERE ";
 
                                 for (int i = 0; i < pl; i++)
@@ -402,6 +399,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                                     var col = primary[i];
                                     string name = col.ColumnName;
                                     string value = "";
+
                                     if (col.DataType == typeof(string) || col.DataType == typeof(char))
                                         value = "'" + row[col] + "'";
 
@@ -425,6 +423,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                                 command.ExecuteNonQuery();
                             }
                         }
+
                         transaction.Commit();
                         table.AcceptChanges();                        
                     }
@@ -482,7 +481,6 @@ namespace QuantApp.Kernel.Adapters.SQL
                             SqlCommand command = new SqlCommand(update, _connectionInternal, transaction);
                             command.ExecuteNonQuery();
                         }
-
                         transaction.Commit();
                         table.AcceptChanges();
                     }
