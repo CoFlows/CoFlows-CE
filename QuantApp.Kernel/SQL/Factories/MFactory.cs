@@ -148,7 +148,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
 
                 if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
                 {
-                    searchString = "ID = '" + m.ID + "' LIMIT 0";
+                    searchString += " LIMIT 0";
                     targetString = "*";
                 }
                 DataTable table = Database.DB["Kernel"].GetDataTable(_mainTableName, targetString, searchString);
@@ -189,7 +189,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                             
                             if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
                             {
-                                searchString = "ID = '" + m.ID + "' LIMIT 0";
+                                searchString += " LIMIT 0";
                                 targetString = "*";
                             }
 

@@ -19,7 +19,7 @@ import { WebsocketService } from './core/websocket.service';
 import { MessagingService } from './core/messaging.service';
 
 import { QAWorkbookComponent } from './workbook/qaworkbook.component';
-// import { QAStrategiesComponent } from './strategies/qastrategies.component';
+import { QAStrategiesComponent } from './strategies/qastrategies.component';
 
 
 
@@ -37,20 +37,18 @@ import { QAWorkbookComponent } from './workbook/qaworkbook.component';
   declarations: [
     QuantAppComponent,
     QAWorkbookComponent,
-    // QAStrategiesComponent
+    QAStrategiesComponent
   ],
   providers: [
     QuantAppComponent,
     WebsocketService, 
     MessagingService,
-    QAWorkbookComponent
-    // ,
-    // QAStrategiesComponent
+    QAWorkbookComponent,
+    QAStrategiesComponent
   ],
   exports: [
-    QAWorkbookComponent
-    // ,
-    // QAStrategiesComponent
+    QAWorkbookComponent,
+    QAStrategiesComponent
   ]
 })
 
