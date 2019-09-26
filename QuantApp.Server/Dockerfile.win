@@ -4,8 +4,7 @@ ARG PYTHON_HOME=C:\\Python
 ARG SCALA_HOME=C:\\scala
 ARG CYGWIN_HOME=C:\\tools\\cygwin
 ARG SPARK_HOME=C:\\spark
-
-ARG CYGWIN_INSTALL=c:\\install.ps1
+ARG PYTHONPATH=C:\\App\\mnt\\pip
 
 FROM mcr.microsoft.com/windows/servercore:1607 as builder
 
@@ -122,7 +121,7 @@ RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tl
 
 ARG CYGWIN_HOME
 RUN Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing | Invoke-Expression
-RUN choco install cygwin -y
+RUN choco install cygwin -y;
 
 RUN $newPath = ('{0}\bin;{1}' -f $env:CYGWIN_HOME, $env:PATH); \
 	Write-Host ('Updating PATH: {0}' -f $newPath); \
@@ -133,22 +132,28 @@ RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tl
     tar xzf spark.tgz; \
     Remove-Item -Force spark.tgz; \
     mv spark-2.4.4-bin-hadoop2.7 spark
-    
-FROM mcr.microsoft.com/windows/nanoserver:sac2016
+
+
+# FROM mcr.microsoft.com/windows/nanoserver:sac2016
+
 ARG JAVA_HOME
 ARG NET_HOME
 ARG PYTHON_HOME
 ARG SCALA_HOME
-ARG CYGWIN_HOME
 ARG SPARK_HOME
+ARG PYTHON_INSTALL
+ARG PIP_INSTALL
+ARG PYTHONPATH
 
-COPY --from=builder ["$JAVA_HOME", "$JAVA_HOME"]
-COPY --from=builder ["$NET_HOME", "$NET_HOME"]
-COPY --from=builder ["$PYTHON_HOME", "$PYTHON_HOME"]
-COPY --from=builder ["$SCALA_HOME", "$SCALA_HOME"]
-COPY --from=builder ["$SPARK_HOME", "$SPARK_HOME"]
+# COPY --from=builder ["$JAVA_HOME", "$JAVA_HOME"]
+# COPY --from=builder ["$NET_HOME", "$NET_HOME"]
+# COPY --from=builder ["$PYTHON_HOME", "$PYTHON_HOME"]
+# COPY --from=builder ["$SCALA_HOME", "$SCALA_HOME"]
+# COPY --from=builder ["$SPARK_HOME", "$SPARK_HOME"]
+# COPY --from=builder ["$PYTHON_INSTALL", "$PYTHON_INSTALL"]
+# COPY --from=builder ["$PIP_INSTALL", "$PIP_INSTALL"]
 
-SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+# SHELL ["powershell", "-Command"]
 
 
 RUN $newPath = ('{0}\bin;{1}' -f $env:JAVA_HOME, $env:PATH); \
@@ -163,6 +168,10 @@ RUN $newPath = ('{0};{1}' -f $env:PYTHON_HOME, $env:PATH); \
 	Write-Host ('Updating PATH: {0}' -f $newPath); \
 	setx /M PATH $newPath
 
+RUN $newPath = ('{0}\Scripts;{1}' -f $env:PYTHON_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
 RUN $newPath = ('{0};{1}' -f $env:NET_HOME, $env:PATH); \
 	Write-Host ('Updating PATH: {0}' -f $newPath); \
 	setx /M PATH $newPath
@@ -171,16 +180,16 @@ RUN $newPath = ('{0}\bin;{1}' -f $env:SPARK_HOME, $env:PATH); \
 	Write-Host ('Updating PATH: {0}' -f $newPath); \
 	setx /M PATH $newPath
 
-RUN setx /M PYTHON_HOME "%PYTHON_HOME%"
-
-# # No SSL
-# ENV ASPNETCORE_URLS http://+:80
-# EXPOSE 80/tcp
+# No SSL
+ENV ASPNETCORE_URLS http://+:80
+EXPOSE 80/tcp
 
 WORKDIR /App
+RUN mkdir pip
 
-ENV PATH /App:$PATH
+RUN $newPath = ('{0}\Scripts;{0};{1}' -f $env:PYTHON_HOME, $env:PYTHONPATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PYTHONPATH $newPath
 
-
-# COPY ${source:-obj/Docker/publish} ./
-#ENTRYPOINT ["dotnet", "QuantApp.Server.dll"]
+COPY ${source:-obj/Docker/publish} ./
+ENTRYPOINT ["dotnet", "QuantApp.Server.win.dll"]

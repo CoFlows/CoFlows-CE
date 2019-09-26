@@ -5,23 +5,71 @@
     "tasks": [
         
         {
-            "label": "clean server",
-            "command": "dotnet clean ./CoFlows.CE.sln",
+            "label": "clean server osx",
+            "command": "dotnet clean ./CoFlows.CE.osx.sln",
             "type": "shell",
             "group": "build",
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "build server",            
-            "command": "dotnet build ./CoFlows.CE.sln",
+            "label": "build server osx",            
+            "command": "dotnet build ./CoFlows.CE.osx.sln",
             "type": "shell",
             "group": "build",
             //"dependsOn": "clean server",
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish server",            
-            "command": "dotnet publish -c Release -f netcoreapp2.2 -o obj/Core/publish ./CoFlows.CE.sln",
+            "label": "publish server osx",            
+            "command": "dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/Core/publish QuantApp.Server/QuantApp.Server.osx.csproj",
+            "type": "shell",
+            "group": "build",
+            //"dependsOn": "clean server",
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "clean server win",
+            "command": "dotnet clean ./CoFlows.CE.win.sln",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build server win",            
+            "command": "dotnet build ./CoFlows.CE.win.sln",
+            "type": "shell",
+            "group": "build",
+            //"dependsOn": "clean server",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish server win",            
+            "command": "dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/Core/publish QuantApp.Server/QuantApp.Server.win.csproj",
+            "type": "shell",
+            "group": "build",
+            //"dependsOn": "clean server",
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "clean server lnx",
+            "command": "dotnet clean ./CoFlows.CE.lnx.sln",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build server lnx",            
+            "command": "dotnet build ./CoFlows.CE.lnx.sln",
+            "type": "shell",
+            "group": "build",
+            //"dependsOn": "clean server",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish server lnx",            
+            "command": "dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/Core/publish QuantApp.Server/QuantApp.Server.lnx.csproj",
             "type": "shell",
             "group": "build",
             //"dependsOn": "clean server",

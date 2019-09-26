@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.csproj" />
+    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.lnx.csproj" />
   </ItemGroup>
 
   <ItemGroup>   

@@ -37,7 +37,7 @@
   </ItemGroup>
   <ItemGroup>
 
-    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.csproj" />
-    <ProjectReference Include="..\QuantApp.Engine\QuantApp.Engine.fsproj" />
+    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.lnx.csproj" />
+    <ProjectReference Include="..\QuantApp.Engine\QuantApp.Engine.lnx.fsproj" />
   </ItemGroup>  
 </Project>

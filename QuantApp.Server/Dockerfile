@@ -126,4 +126,4 @@ RUN apt-get install -y git
 
 ENV PATH /App:$PATH
 
-ENTRYPOINT ["dotnet", "QuantApp.Server.dll"]
+ENTRYPOINT ["dotnet", "QuantApp.Server.lnx.dll"]
