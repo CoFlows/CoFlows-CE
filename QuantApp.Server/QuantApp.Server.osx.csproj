@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants>NETSTANDARD;MONO_LINUX;TRACE;DEBUG;PYTHON3;PYTHON37;UCS4;PYTHON_WITH_PYMALLOC</DefineConstants>
+    <DefineConstants>NETSTANDARD;MONO_OSX;TRACE;DEBUG;PYTHON3;PYTHON37;UCS4;PYTHON_WITH_PYMALLOC</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,7 +37,7 @@
   </ItemGroup>
   <ItemGroup>
 
-    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.csproj" />
-    <ProjectReference Include="..\QuantApp.Engine\QuantApp.Engine.fsproj" />
+    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.osx.csproj" />
+    <ProjectReference Include="..\QuantApp.Engine\QuantApp.Engine.osx.fsproj" />
   </ItemGroup>  
 </Project>

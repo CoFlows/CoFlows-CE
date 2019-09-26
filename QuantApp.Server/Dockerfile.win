@@ -1,0 +1,186 @@
+ARG JAVA_HOME=C:\\openjdk-8
+ARG NET_HOME=C:\\dotnet
+ARG PYTHON_HOME=C:\\Python
+ARG SCALA_HOME=C:\\scala
+ARG CYGWIN_HOME=C:\\tools\\cygwin
+ARG SPARK_HOME=C:\\spark
+
+ARG CYGWIN_INSTALL=c:\\install.ps1
+
+FROM mcr.microsoft.com/windows/servercore:1607 as builder
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+# ENV JAVA_HOME C:\\openjdk-8
+ARG JAVA_HOME
+RUN $newPath = ('{0}\bin;{1}' -f $env:JAVA_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+    # Nano Server does not have "[Environment]::SetEnvironmentVariable()"
+	setx /M PATH $newPath
+
+# https://adoptopenjdk.net/upstream.html
+ENV JAVA_VERSION 8u222
+ENV JAVA_BASE_URL https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jdk_
+ENV JAVA_URL_VERSION 8u222b10
+# https://github.com/docker-library/openjdk/issues/320#issuecomment-494050246
+
+RUN $url = ('{0}x64_windows_{1}.zip' -f $env:JAVA_BASE_URL, $env:JAVA_URL_VERSION); \
+	Write-Host ('Downloading {0} ...' -f $url); \
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+	Invoke-WebRequest -Uri $url -OutFile 'openjdk.zip'; \
+    # TODO signature? checksum?
+	\
+	Write-Host 'Expanding ...'; \
+	New-Item -ItemType Directory -Path C:\temp | Out-Null; \
+	Expand-Archive openjdk.zip -DestinationPath C:\temp; \
+	Move-Item -Path C:\temp\* -Destination $env:JAVA_HOME; \
+	Remove-Item C:\temp; \
+	\
+	Write-Host 'Removing ...'; \
+	Remove-Item openjdk.zip -Force; \
+	\
+	Write-Host 'Verifying install ...'; \
+	Write-Host '  javac -version'; javac -version; \
+	Write-Host '  java -version'; java -version; \
+	\
+	Write-Host 'Complete.'
+
+# Install ASP.NET Core Runtime
+ENV ASPNETCORE_VERSION 3.0.0
+
+RUN Invoke-WebRequest -OutFile aspnetcore.zip https://dotnetcli.blob.core.windows.net/dotnet/aspnetcore/Runtime/$Env:ASPNETCORE_VERSION/aspnetcore-runtime-$Env:ASPNETCORE_VERSION-win-x64.zip; \
+    Expand-Archive aspnetcore.zip -DestinationPath dotnet; \
+    Remove-Item -Force aspnetcore.zip
+
+ENV PYTHON_VERSION 3.7.4
+ENV PYTHON_RELEASE 3.7.4
+
+RUN $url = ('https://www.python.org/ftp/python/{0}/python-{1}-amd64.exe' -f $env:PYTHON_RELEASE, $env:PYTHON_VERSION); \
+	Write-Host ('Downloading {0} ...' -f $url); \
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+	Invoke-WebRequest -Uri $url -OutFile 'python.exe'; \
+	\
+	Write-Host 'Installing ...'; \
+    # https://docs.python.org/3.5/using/windows.html#installing-without-ui
+	Start-Process python.exe -Wait \
+		-ArgumentList @( \
+			'/quiet', \
+			'InstallAllUsers=1', \
+			'TargetDir=C:\Python', \
+			'PrependPath=1', \
+			'Shortcuts=0', \
+			'Include_doc=0', \
+			'Include_pip=0', \
+			'Include_test=0' \
+		); \
+	\
+    # the installer updated PATH, so we should refresh our local value
+	$env:PATH = [Environment]::GetEnvironmentVariable('PATH', [EnvironmentVariableTarget]::Machine); \
+	\
+	Write-Host 'Verifying install ...'; \
+	Write-Host '  python --version'; python --version; \
+	\
+	Write-Host 'Removing ...'; \
+	Remove-Item python.exe -Force; \
+	\
+	Write-Host 'Complete.'
+
+# if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
+ENV PYTHON_PIP_VERSION 19.2.3
+# https://github.com/pypa/get-pip
+ENV PYTHON_GET_PIP_URL https://github.com/pypa/get-pip/raw/309a56c5fd94bd1134053a541cb4657a4e47e09d/get-pip.py
+ENV PYTHON_GET_PIP_SHA256 57e3643ff19f018f8a00dfaa6b7e4620e3c1a7a2171fd218425366ec006b3bfe
+
+RUN Write-Host ('Downloading get-pip.py ({0}) ...' -f $env:PYTHON_GET_PIP_URL); \
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+	Invoke-WebRequest -Uri $env:PYTHON_GET_PIP_URL -OutFile 'get-pip.py'; \
+	Write-Host ('Verifying sha256 ({0}) ...' -f $env:PYTHON_GET_PIP_SHA256); \
+	if ((Get-FileHash 'get-pip.py' -Algorithm sha256).Hash -ne $env:PYTHON_GET_PIP_SHA256) { \
+		Write-Host 'FAILED!'; \
+		exit 1; \
+	}; \
+	\
+	Write-Host ('Installing pip=={0} ...' -f $env:PYTHON_PIP_VERSION); \
+	python get-pip.py \
+		--disable-pip-version-check \
+		--no-cache-dir \
+		('pip=={0}' -f $env:PYTHON_PIP_VERSION) \
+	; \
+	Remove-Item get-pip.py -Force; \
+	\
+	Write-Host 'Verifying pip install ...'; \
+	pip --version; \
+	\
+	Write-Host 'Complete.'
+
+RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+    Invoke-WebRequest -OutFile scala.zip https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.zip; \
+    Expand-Archive scala.zip -DestinationPath scala; \
+    Remove-Item -Force scala.zip; \
+    mv scala/scala-2.12.8/* scala; \
+    rm -r scala/scala-2.12.8
+
+ARG CYGWIN_HOME
+RUN Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing | Invoke-Expression
+RUN choco install cygwin -y
+
+RUN $newPath = ('{0}\bin;{1}' -f $env:CYGWIN_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+    Invoke-WebRequest -OutFile spark.tgz https://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz; \
+    tar xzf spark.tgz; \
+    Remove-Item -Force spark.tgz; \
+    mv spark-2.4.4-bin-hadoop2.7 spark
+    
+FROM mcr.microsoft.com/windows/nanoserver:sac2016
+ARG JAVA_HOME
+ARG NET_HOME
+ARG PYTHON_HOME
+ARG SCALA_HOME
+ARG CYGWIN_HOME
+ARG SPARK_HOME
+
+COPY --from=builder ["$JAVA_HOME", "$JAVA_HOME"]
+COPY --from=builder ["$NET_HOME", "$NET_HOME"]
+COPY --from=builder ["$PYTHON_HOME", "$PYTHON_HOME"]
+COPY --from=builder ["$SCALA_HOME", "$SCALA_HOME"]
+COPY --from=builder ["$SPARK_HOME", "$SPARK_HOME"]
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+
+RUN $newPath = ('{0}\bin;{1}' -f $env:JAVA_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN $newPath = ('{0}\bin;{1}' -f $env:SCALA_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN $newPath = ('{0};{1}' -f $env:PYTHON_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN $newPath = ('{0};{1}' -f $env:NET_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN $newPath = ('{0}\bin;{1}' -f $env:SPARK_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN setx /M PYTHON_HOME "%PYTHON_HOME%"
+
+# # No SSL
+# ENV ASPNETCORE_URLS http://+:80
+# EXPOSE 80/tcp
+
+WORKDIR /App
+
+ENV PATH /App:$PATH
+
+
+# COPY ${source:-obj/Docker/publish} ./
+#ENTRYPOINT ["dotnet", "QuantApp.Server.dll"]
