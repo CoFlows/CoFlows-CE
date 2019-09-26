@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants Condition=" !Exists('$(OS)')">NETSTANDARD;MONO_LINUX;TRACE;DEBUG;PYTHON3;PYTHON37;UCS4;PYTHON_WITH_PYMALLOC</DefineConstants>
-    <DefineConstants Condition=" '$(OS)' == 'osx' ">NETSTANDARD;MONO_OSX;TRACE;DEBUG;PYTHON3;PYTHON37;UCS4;PYTHON_WITH_PYMALLOC</DefineConstants>    
-    <DefineConstants Condition=" '$(OS)' == 'win' ">NETSTANDARD;TRACE;DEBUG;PYTHON3;PYTHON36;UCS2</DefineConstants>    
+    <DefineConstants>NETSTANDARD;MONO_OSX;TRACE;DEBUG;PYTHON3;PYTHON37;UCS4;PYTHON_WITH_PYMALLOC</DefineConstants>    
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.csproj" />
+    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.osx.csproj" />
   </ItemGroup>
 
   <ItemGroup>   
