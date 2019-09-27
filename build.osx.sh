@@ -15,3 +15,5 @@ jar -cf app.quant.clr.jar -C ./QuantApp.Kernel/JVM/ .
 rm ./QuantApp.Kernel/JVM/app/quant/clr/*.class
 rm ./QuantApp.Kernel/JVM/app/quant/clr/scala/*.class
 mv app.quant.clr.jar ./QuantApp.Server/obj/osx/publish
+cp ./QuantApp.Kernel/JVM/JNIWrapper.cpp ./QuantApp.Server/obj/osx/publish/
+cp ./QuantApp.Kernel/JVM/app_quant_clr_CLRRuntime.h ./QuantApp.Server/obj/osx/publish/
