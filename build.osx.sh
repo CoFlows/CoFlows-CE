@@ -6,6 +6,12 @@
 # cd ../
 
 dotnet clean CoFlows.CE.osx.sln
-dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/Docker/publish QuantApp.Server/QuantApp.Server.osx.csproj
+dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/osx/publish QuantApp.Server/QuantApp.Server.osx.csproj
 
-make
+# make
+javac -cp jars/scalap-2.12.8.jar:jars/scala-library.jar:./QuantApp.Kernel/JVM/app/quant/clr/ ./QuantApp.Kernel/JVM/app/quant/clr/*.java
+scalac -d ./QuantApp.Kernel/JVM -cp ./QuantApp.Kernel/JVM/ ./QuantApp.Kernel/JVM/app/quant/clr/scala/*.scala
+jar -cf app.quant.clr.jar -C ./QuantApp.Kernel/JVM/ .
+rm ./QuantApp.Kernel/JVM/app/quant/clr/*.class
+rm ./QuantApp.Kernel/JVM/app/quant/clr/scala/*.class
+mv app.quant.clr.jar ./QuantApp.Server/obj/osx/publish

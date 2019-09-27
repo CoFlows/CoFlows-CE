@@ -19,7 +19,6 @@ QuantApp.Server/.ipynb_checkpoints/
 
 QuantApp.Server/wwwroot/
 
-bin/
 obj/
 mnt/
 
