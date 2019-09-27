@@ -47,9 +47,13 @@ Javascript interpretation is achieved using the great [Jint](https://github.com/
 For further details please read [Polyglot](docs/Polyglot/General.md "Polyglot")
 
 ## Setup  
-Install the docker cli tools for Linux containers. Pull the docker public quantapp/coflows:ce image.
+Install the docker cli tools for Linux containers. Pull the docker public quantapp/coflows-ce image.
 
-    docker pull quantapp/coflows:ce
+    docker pull quantapp/coflows-ce
+
+Alternatively you can pull a windows core image quantapp/coflows-ce-win.
+
+    docker pull quantapp/coflows-ce-win
 
 Download a **CoFlows** package from a sample repo or create your own package. If you create your own package from scratch please read [Workspace](docs/Workspace.md "Workspace"). Ensure a file called _quantapp_config.json_ exists in the folder you are running **CoFlows** in.
 
