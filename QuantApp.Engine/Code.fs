@@ -771,11 +771,12 @@ module Code =
 
                                                 let name = (if modFlag then ("A" + hash) else "") + name
 
-                                                let pyFile = pathTemp + name
+                                                Directory.CreateDirectory(pathTemp + (if modFlag then "" else "Base/"))
+
+                                                let pyFile = pathTemp + (if modFlag then "" else "Base/") + name
 
                                                 File.WriteAllText(pyFile, code)
 
-                                                let name = name.Replace(".py", "")
 
                                                 let modName = "<module '" + name + "' from '" + pyFile + "'>"
 

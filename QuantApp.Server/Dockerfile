@@ -94,7 +94,7 @@ ENV ASPNETCORE_PKG_VERSION 3.0
 ENV ASPNETCORE_URLS http://+:80
 EXPOSE 80/tcp
 
-COPY ${source:-obj/Docker/publish} ./
+COPY ${source:-obj/lnx/publish} ./
 
 RUN chmod +x /App/lab
 RUN chmod +x /App/coflows

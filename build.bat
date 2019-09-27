@@ -6,7 +6,7 @@ ng build --prod --aot
 cd ../
 
 dotnet clean CoFlows.CE.win.sln
-dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/Docker/publish QuantApp.Server/QuantApp.Server.win.csproj
+dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/win/publish QuantApp.Server/QuantApp.Server.win.csproj
 
 REM make
 

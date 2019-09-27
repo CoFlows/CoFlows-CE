@@ -43,6 +43,7 @@ namespace QuantApp.Server
         private static string hostName = null;
         private static string ssl_cert = null;
         private static string ssl_password = null;
+        private static bool useJupyter = false;
 
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
@@ -70,6 +71,8 @@ namespace QuantApp.Server
             ssl_cert = config["Server"]["SSL"]["Cert"].ToString();
             ssl_password = config["Server"]["SSL"]["Password"].ToString();
             var sslFlag = !string.IsNullOrWhiteSpace(ssl_cert);
+
+            useJupyter = config["Jupyter"].ToString().ToLower() == "true";
 
             var connectionString = config["Database"].ToString();
 
@@ -359,19 +362,23 @@ namespace QuantApp.Server
                             var f = F.Find(cfid).Value;
                             f.Start();
                         }
-                    
-                        var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/App/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
-                        
-                        
-                        var th = new System.Threading.Thread(() => {
-                            using (Py.GIL())
-                            {
-                                Console.WriteLine("Starting Jupyter...");
-                                Console.WriteLine(code);
-                                PythonEngine.Exec(code);
-                            }
-                        });
-                        th.Start();
+
+                        #if MONO_LINUX || MONO_OSX
+                        if(useJupyter)
+                        {
+                            var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/App/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
+                            
+                            var th = new System.Threading.Thread(() => {
+                                using (Py.GIL())
+                                {
+                                    Console.WriteLine("Starting Jupyter...");
+                                    Console.WriteLine(code);
+                                    PythonEngine.Exec(code);
+                                }
+                            });
+                            th.Start();
+                        }
+                        #endif
                     }
                     else
                     {

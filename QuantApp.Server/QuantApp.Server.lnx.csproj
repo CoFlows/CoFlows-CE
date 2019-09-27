@@ -23,9 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>    
-    <PackageReference Include="KubernetesClient" Version="1.5.26" />
+    <!-- <PackageReference Include="KubernetesClient" Version="1.5.26" /> -->
     <PackageReference Include="Sendgrid" Version="9.12.0" />
-    <PackageReference Include="Stripe.net" Version="11.6.1" />    
+    <!-- <PackageReference Include="Stripe.net" Version="11.6.1" />     -->
 
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0"/>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0"/>
