@@ -21,7 +21,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 
-
 using QuantApp.Kernel;
 using QuantApp.Kernel.Adapters.SQL;
 using QuantApp.Engine;
@@ -34,10 +33,6 @@ using QuantApp.Kernel.JVM;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-using AQI.AQILabs.Kernel;
-using AQI.AQILabs.Derivatives;
-using AQI.AQILabs.SDK.Strategies;
-
 
 namespace QuantApp.Server
 {
@@ -48,6 +43,7 @@ namespace QuantApp.Server
         private static string hostName = null;
         private static string ssl_cert = null;
         private static string ssl_password = null;
+        private static bool useJupyter = false;
 
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
@@ -65,10 +61,7 @@ namespace QuantApp.Server
 
             Code.InitializeCodeTypes(new Type[]{ 
                 typeof(QuantApp.Engine.WorkSpace),
-                typeof(Jint.Native.Array.ArrayConstructor),
-                typeof(AQI.AQILabs.Kernel.Instrument), 
-                typeof(AQI.AQILabs.Derivatives.CashFlow), 
-                typeof(AQI.AQILabs.SDK.Strategies.PortfolioStrategy)
+                typeof(Jint.Native.Array.ArrayConstructor)
                 });
 
             JObject config = (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/quantapp_config.json")));
@@ -78,6 +71,10 @@ namespace QuantApp.Server
             ssl_cert = config["Server"]["SSL"]["Cert"].ToString();
             ssl_password = config["Server"]["SSL"]["Password"].ToString();
             var sslFlag = !string.IsNullOrWhiteSpace(ssl_cert);
+
+            useJupyter = config["Jupyter"].ToString().ToLower() == "true";
+
+            var connectionString = config["Database"].ToString();
 
             var cloudHost = config["Cloud"]["Host"].ToString();
             var cloudKey = config["Cloud"]["SecretKey"].ToString();
@@ -257,19 +254,7 @@ namespace QuantApp.Server
             {
                 PythonEngine.BeginAllowThreads();
 
-                if(config["Database"].Children().Count() > 0)
-                {
-                    var kernelString = config["Database"]["Kernel"].ToString();
-                    var strategyString = config["Database"]["Strategies"].ToString();
-                    var quantappString = config["Database"]["QuantApp"].ToString();
-                    Databases(kernelString, strategyString, quantappString);
-                }
-                else
-                {
-                    var connectionString = config["Database"].ToString();
-                    Databases(connectionString);
-                }
-
+                Databases(connectionString);
                 Console.WriteLine("QuantApp Server " + DateTime.Now);
                 Console.WriteLine("DB Connected");
 
@@ -279,25 +264,7 @@ namespace QuantApp.Server
                 Code.ProcessPackageJSON(pkg);
                 SetDefaultWorkSpaces(new string[]{ pkg.ID });
 
-                /// QuantSpecific START
-                Instrument.TimeSeriesLoadFromDatabaseIntraday = config["Quant"]["Intraday"].ToString().ToLower() == "true";
-                if(Instrument.TimeSeriesLoadFromDatabaseIntraday)
-                    Console.WriteLine("Intraday Timeseries");
-                else
-                    Console.WriteLine("Close Timeseries");
-                Strategy.Executer = true;
-                // Market.Initialize();
 
-                var saveAll = config["Quant"]["AutoSave"].ToString().ToLower() == "true";
-                if (saveAll) {
-                    var ths = new System.Threading.Thread(x => (AQI.AQILabs.Kernel.Instrument.Factory as AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLInstrumentFactory).SaveAllLoop(5));
-                    ths.Start();
-                }
-                else
-                    Console.WriteLine("Not saving timeseries");
-                /// QuantSpecific END
-
-                
                 #if NETCOREAPP3_0
                 if(!sslFlag)
                     Init(new string[]{"--urls", "http://*:80"});
@@ -313,6 +280,7 @@ namespace QuantApp.Server
                 Task.Factory.StartNew(() => {
                     while (true)
                     {
+                        // Console.WriteLine(DateTime.Now.ToString());
                         System.Threading.Thread.Sleep(1000);
                     }
                 });
@@ -333,126 +301,42 @@ namespace QuantApp.Server
 
         private static void Databases(string sqliteFile)
         {
+     
             string KernelConnectString = "Data Source=" + sqliteFile;
+
             bool dbExists = File.Exists(sqliteFile);
 
             string CloudAppConnectString = KernelConnectString;
-            string StrategyConnectString = KernelConnectString;
 
-            if(!dbExists)
-            {
-                SQLiteDataSetAdapter KernelDataAdapter = new SQLiteDataSetAdapter();
-                KernelDataAdapter.ConnectString = KernelConnectString;
-                QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
-                Console.WriteLine("Creating table structure in: " + sqliteFile);
-                var script = File.ReadAllText(@"create.sql");
-                QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(script);
-            }
-
-            Databases(KernelConnectString, StrategyConnectString, CloudAppConnectString);
-        }
-        private static void Databases(string KernelConnectString, string StrategyConnectString, string CloudAppConnectString)
-        {
+            SQLiteDataSetAdapter KernelDataAdapter = new SQLiteDataSetAdapter();
+            
+            KernelDataAdapter.ConnectString = KernelConnectString;
+            SQLiteDataSetAdapter CloudAppDataAdapter = KernelDataAdapter;
+            
             if (QuantApp.Kernel.User.CurrentUser == null)
                 QuantApp.Kernel.User.CurrentUser = new QuantApp.Kernel.User("System");
 
-            if (QuantApp.Kernel.M.Factory == null)
+            if (!QuantApp.Kernel.Database.DB.ContainsKey("Kernel"))
             {         
-                if(KernelConnectString.StartsWith("Server="))
-                {
-                    MSSQLDataSetAdapter KernelDataAdapter = new MSSQLDataSetAdapter();
-                    KernelDataAdapter.ConnectString = KernelConnectString;
-                    QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
-                }
-                else
-                {
-                    if(!QuantApp.Kernel.Database.DB.ContainsKey("Kernel"))
-                    {
-                        SQLiteDataSetAdapter KernelDataAdapter = new SQLiteDataSetAdapter();
-                        KernelDataAdapter.ConnectString = KernelConnectString;
-                        QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
-                    }
-                }
-
+                QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
 
                 QuantApp.Kernel.M.Factory = new QuantApp.Kernel.Adapters.SQL.Factories.SQLMFactory();
-
-
-                // Quant
-                Calendar.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLCalendarFactory();
-                Currency.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLCurrencyFactory();
-                CurrencyPair.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLCurrencyPairFactory();
-                DataProvider.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLDataProviderFactory();
-                Exchange.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLExchangeFactory();
-
-                Instrument.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLInstrumentFactory();
-                Security.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLSecurityFactory();
-                Future.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLFutureFactory();
-                Portfolio.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLPortfolioFactory();
-                Strategy.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLStrategyFactory();
-                Market.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLMarketFactory();
-
-                InterestRate.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLInterestRateFactory();
-                Deposit.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLDepositFactory();
-                InterestRateSwap.Factory = new AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLInterestRateSwapFactory();
-
-                DataProvider.DefaultProvider = DataProvider.FindDataProvider("AQI");
-
             }
 
             if (!QuantApp.Kernel.Database.DB.ContainsKey("CloudApp"))
             {
-                if(CloudAppConnectString.StartsWith("Server="))
-                {
-                    if(KernelConnectString == CloudAppConnectString)
-                        QuantApp.Kernel.Database.DB.Add("CloudApp", QuantApp.Kernel.Database.DB["Kernel"]);
-                    else
-                    {
-                        MSSQLDataSetAdapter CloudAppDataAdapter = new MSSQLDataSetAdapter();
-                        CloudAppDataAdapter.ConnectString = CloudAppConnectString;
-                        QuantApp.Kernel.Database.DB.Add("CloudApp", CloudAppDataAdapter);
-                    }
-                }
-                else
-                {
-                    if(KernelConnectString == CloudAppConnectString)
-                        QuantApp.Kernel.Database.DB.Add("CloudApp", QuantApp.Kernel.Database.DB["Kernel"]);
-                    else
-                    {
-                        SQLiteDataSetAdapter CloudAppDataAdapter = new SQLiteDataSetAdapter();
-                        CloudAppDataAdapter.ConnectString = CloudAppConnectString;
-                        QuantApp.Kernel.Database.DB.Add("CloudApp", CloudAppDataAdapter);
-                    }
-                }
+                QuantApp.Kernel.Database.DB.Add("CloudApp", CloudAppDataAdapter);
 
                 QuantApp.Kernel.User.Factory = new QuantApp.Kernel.Adapters.SQL.Factories.SQLUserFactory();
                 Group.Factory = new QuantApp.Kernel.Adapters.SQL.Factories.SQLGroupFactory();
             }
 
-            if (!QuantApp.Kernel.Database.DB.ContainsKey("DefaultStrategy"))
+
+            if(!dbExists)
             {
-                if(CloudAppConnectString.StartsWith("Server="))
-                {
-                    if(KernelConnectString == StrategyConnectString)
-                        QuantApp.Kernel.Database.DB.Add("DefaultStrategy", QuantApp.Kernel.Database.DB["Kernel"]);
-                    else
-                    {
-                        MSSQLDataSetAdapter StrategyDataAdapter = new MSSQLDataSetAdapter();
-                        StrategyDataAdapter.ConnectString = StrategyConnectString;
-                        QuantApp.Kernel.Database.DB.Add("DefaultStrategy", StrategyDataAdapter);
-                    }
-                }
-                else
-                {
-                    if(KernelConnectString == StrategyConnectString)
-                        QuantApp.Kernel.Database.DB.Add("DefaultStrategy", QuantApp.Kernel.Database.DB["Kernel"]);
-                    else
-                    {
-                        SQLiteDataSetAdapter StrategyDataAdapter = new SQLiteDataSetAdapter();
-                        StrategyDataAdapter.ConnectString = StrategyConnectString;
-                        QuantApp.Kernel.Database.DB.Add("DefaultStrategy", StrategyDataAdapter);
-                    }
-                }
+                Console.WriteLine("Creating table structure in: " + sqliteFile);
+                var script = File.ReadAllText(@"create.sql");
+                QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(script);
             }
         }
 
@@ -478,19 +362,23 @@ namespace QuantApp.Server
                             var f = F.Find(cfid).Value;
                             f.Start();
                         }
-                    
-                        var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/App/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
-                        
-                        
-                        var th = new System.Threading.Thread(() => {
-                            using (Py.GIL())
-                            {
-                                Console.WriteLine("Starting Jupyter...");
-                                Console.WriteLine(code);
-                                PythonEngine.Exec(code);
-                            }
-                        });
-                        th.Start();
+
+                        #if MONO_LINUX || MONO_OSX
+                        if(useJupyter)
+                        {
+                            var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/App/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
+                            
+                            var th = new System.Threading.Thread(() => {
+                                using (Py.GIL())
+                                {
+                                    Console.WriteLine("Starting Jupyter...");
+                                    Console.WriteLine(code);
+                                    PythonEngine.Exec(code);
+                                }
+                            });
+                            th.Start();
+                        }
+                        #endif
                     }
                     else
                     {
