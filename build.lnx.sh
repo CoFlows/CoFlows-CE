@@ -1,14 +1,13 @@
-# cd QuantApp.Client
+cd QuantApp.Client
 # # npm install
 # # npm install -g @angular/cli
 # ng build --prod --aot
 
-# cd ../
+cd ../
 
 dotnet clean CoFlows.CE.lnx.sln
 dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/lnx/publish QuantApp.Server/QuantApp.Server.lnx.csproj
 
-# make
 javac -cp jars/scalap-2.12.8.jar:jars/scala-library.jar:./QuantApp.Kernel/JVM/app/quant/clr/ ./QuantApp.Kernel/JVM/app/quant/clr/*.java
 scalac -d ./QuantApp.Kernel/JVM -cp ./QuantApp.Kernel/JVM/ ./QuantApp.Kernel/JVM/app/quant/clr/scala/*.scala
 jar -cf app.quant.clr.jar -C ./QuantApp.Kernel/JVM/ .
@@ -19,5 +18,5 @@ mv app.quant.clr.jar ./QuantApp.Server/obj/lnx/publish
 cd QuantApp.Server
 
 docker build -t coflows/ce .
-docker tag coflows/ce quantapp/coflows:ce
-# docker push quantapp/coflows:ce
+docker tag coflows/ce quantapp/coflows-ce:latest
+docker push quantapp/coflows-ce:latest

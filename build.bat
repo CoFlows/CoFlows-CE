@@ -13,5 +13,5 @@ REM make
 cd QuantApp.Server
 
 docker build -t coflows/ce-win -f Dockerfile.win .
-docker tag coflows/ce-win quantapp/coflows:ce-win
-docker push quantapp/coflows:ce-win
+docker tag coflows/ce-win quantapp/coflows-ce-win:latest
+docker push quantapp/coflows-ce-win:latest
