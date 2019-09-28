@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103R-16F7-4668-BE54-9A1E7A4F7556}") = "QuantApp.Kernel", "QuantApp.Kernel\QuantApp.Kernel.csproj", "{5A102363-8BF9-4CDD-9175-F88B66DDFF99}"
+Project("{9A19103R-16F7-4668-BE54-9A1E7A4F7556}") = "QuantApp.Kernel", "QuantApp.Kernel\QuantApp.Kernel.osx.csproj", "{5A102363-8BF9-4CDD-9175-F88B66DDFF99}"
 EndProject
-Project("{9A19103E-16F7-4668-BE54-9A1E7A4F7556}") = "QuantApp.Engine", "QuantApp.Engine\QuantApp.Engine.fsproj", "{6A102363-8BF9-4CDD-9174-F88B66DDFF99}"
+Project("{9A19103E-16F7-4668-BE54-9A1E7A4F7556}") = "QuantApp.Engine", "QuantApp.Engine\QuantApp.Engine.osx.fsproj", "{6A102363-8BF9-4CDD-9174-F88B66DDFF99}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantApp.Server", "QuantApp.Server/QuantApp.Server.csproj", "{06CFEB5E-6636-4D7B-A232-1EF5537E8E0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantApp.Server", "QuantApp.Server/QuantApp.Server.quant.osx.csproj", "{06CFEB5E-6636-4D7B-A232-1EF5537E8E0A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AQI.AQILabs.Derivatives", "AQI.AQILabs.Derivatives/AQI.AQILabs.Derivatives.csproj", "{16CFEB5E-6636-4D7B-A232-1EF5537E8E0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AQI.AQILabs.Derivatives", "AQI.AQILabs.Derivatives/AQI.AQILabs.Derivatives.osx.csproj", "{16CFEB5E-6636-4D7B-A232-1EF5537E8E0A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AQI.AQILabs.Kernel", "AQI.AQILabs.Kernel/AQI.AQILabs.Kernel.csproj", "{26CFEB5E-6636-4D7B-A232-1EF5537E8E0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AQI.AQILabs.Kernel", "AQI.AQILabs.Kernel/AQI.AQILabs.Kernel.osx.csproj", "{26CFEB5E-6636-4D7B-A232-1EF5537E8E0A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AQI.AQILabs.SDK.Strategies", "AQI.AQILabs.SDK.Strategies/AQI.AQILabs.SDK.Strategies.fsproj", "{36CFEB5E-6636-4D7B-A232-1EF5537E8E0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AQI.AQILabs.SDK.Strategies", "AQI.AQILabs.SDK.Strategies/AQI.AQILabs.SDK.Strategies.osx.fsproj", "{36CFEB5E-6636-4D7B-A232-1EF5537E8E0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

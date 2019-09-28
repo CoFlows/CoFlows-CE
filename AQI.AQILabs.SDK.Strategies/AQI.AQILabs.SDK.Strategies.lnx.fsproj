@@ -19,11 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.csproj" />
-    <ProjectReference Include="..\QuantApp.Engine\QuantApp.Engine.fsproj" />
+    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.lnx.csproj" />
+    <ProjectReference Include="..\QuantApp.Engine\QuantApp.Engine.lnx.fsproj" />
 
-    <ProjectReference Include="..\AQI.AQILabs.Derivatives\AQI.AQILabs.Derivatives.csproj" />    
-    <ProjectReference Include="..\AQI.AQILabs.Kernel\AQI.AQILabs.Kernel.csproj" />
+    <ProjectReference Include="..\AQI.AQILabs.Derivatives\AQI.AQILabs.Derivatives.lnx.csproj" />    
+    <ProjectReference Include="..\AQI.AQILabs.Kernel\AQI.AQILabs.Kernel.lnx.csproj" />
   </ItemGroup>
 
 </Project>

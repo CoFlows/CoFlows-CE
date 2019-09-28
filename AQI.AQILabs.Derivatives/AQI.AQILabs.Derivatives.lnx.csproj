@@ -5,6 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AQI.AQILabs.Kernel\AQI.AQILabs.Kernel.csproj" />
+    <ProjectReference Include="..\AQI.AQILabs.Kernel\AQI.AQILabs.Kernel.lnx.csproj" />
   </ItemGroup>
 </Project>
