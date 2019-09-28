@@ -49,11 +49,11 @@ namespace QuantApp.Server
         public static void Main(string[] args)
         {
             #if NETCOREAPP3_0
-            Console.Write("NetCoreApp 3.0... ");
+            Console.Write("CoFlows CE - NetCoreApp 3.0... ");
             #endif
 
             #if NET461
-            Console.Write("Net Framework 461... ");
+            Console.Write("CoFlows CE - Net Framework 461... ");
             #endif
             
             Console.Write("Python starting... ");
