@@ -146,9 +146,6 @@ namespace QuantApp.Server.Realtime
         public HttpProxyResponse Data { get; set; }
     }
 
-    public delegate System.Tuple<string, string> RTDMessageDelegate(string content);
-    
-
     public class RTDSocketMiddleware
     {
         private readonly RequestDelegate _next;
@@ -371,6 +368,8 @@ namespace QuantApp.Server.Realtime
         }
     }
 
+    public delegate System.Tuple<string, string> RTDMessageDelegate(string content);
+
     public class WebSocketListner : QuantApp.Kernel.Factories.IRTDEngineFactory
     {
         public static ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>> subscriptions = new ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>>();
@@ -575,213 +574,13 @@ namespace QuantApp.Server.Realtime
                                     client.Send(pd.Content);
                                 }
                             }
+
                             else if(RTDMessageFunction != null)
                             {
-                                var mess = RTDMessageFunction(message.Content.ToString());
+                                var mess = RTDMessageFunction(message_string);
                                 if(mess != null)
                                     Share(session, mess.Item1, mess.Item2);
                             }
-
-
-
-                            //Quant module added
-                            else if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.MarketData)
-                            {
-                                try
-                                {
-                                    AQI.AQILabs.Kernel.RTDMessage.MarketData content = JsonConvert.DeserializeObject<AQI.AQILabs.Kernel.RTDMessage.MarketData>(message.Content.ToString());
-
-                                    AQI.AQILabs.Kernel.Instrument instrument = AQI.AQILabs.Kernel.Instrument.FindInstrument(content.InstrumentID);
-
-                                    DateTime stamp = content.Timestamp;
-                                    if (content.Value != 0)
-                                        instrument.AddTimeSeriesPoint(stamp, content.Value, content.Type, AQI.AQILabs.Kernel.DataProvider.DefaultProvider, true, false);
-
-                                    
-                                    Share(session, instrument.ID.ToString(), message_string);
-
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine("MarketData Exception: " + e + " " + skey);
-                                }
-                            }
-                            else if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.StrategyData)
-                            {
-                                try
-                                {
-                                    AQI.AQILabs.Kernel.RTDMessage.StrategyData content = JsonConvert.DeserializeObject<AQI.AQILabs.Kernel.RTDMessage.StrategyData>(message.Content.ToString());
-
-                                    AQI.AQILabs.Kernel.Strategy instrument = AQI.AQILabs.Kernel.Instrument.FindInstrument(content.InstrumentID) as AQI.AQILabs.Kernel.Strategy;
-
-                                    instrument.AddMemoryPoint(content.Timestamp, content.Value, content.MemoryTypeID, content.MemoryClassID, true, false);
-
-                                    Share(session, instrument.ID.ToString(), message_string);
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine("StrategyData Exception: " + e + " " + skey);
-                                }
-                            }
-                            else if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.CreateAccount)
-                            {
-                                try
-                                {
-                                    AQI.AQILabs.Kernel.RTDMessage.CreateAccount content = JsonConvert.DeserializeObject<AQI.AQILabs.Kernel.RTDMessage.CreateAccount>(message.Content.ToString());
-
-                                    int id = content.StrategyID;
-
-                                    AQI.AQILabs.Kernel.Strategy s = AQI.AQILabs.Kernel.Instrument.FindInstrument(id) as AQI.AQILabs.Kernel.Strategy;
-                                    if (s != null)
-                                    {
-                                        QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(content.UserID);
-                                        QuantApp.Kernel.User attorney = content.AttorneyID == null ? null : QuantApp.Kernel.User.FindUser(content.AttorneyID);
-                                        if (user != null && attorney != null)
-                                        {
-                                            List<PALMPending> pendings = PALM.GetPending(user);
-                                            foreach (PALMPending pending in pendings)
-                                            {
-                                                if (pending.AccountID == content.AccountID)
-                                                {
-
-                                                    pending.Strategy = s;
-                                                    pending.CreationDate = s.CreateTime;
-                                                    pending.Attorney = attorney;
-                                                    PALM.UpdatePending(pending);
-                                                    PALM.AddStrategy(pending.User, pending.Attorney, s);
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine("Create Account Exception: " + e + " " + skey);
-                                }
-                            }
-                            else if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.UpdateOrder)
-                            {
-                                try
-                                {
-                                    AQI.AQILabs.Kernel.RTDMessage.OrderMessage content = JsonConvert.DeserializeObject<AQI.AQILabs.Kernel.RTDMessage.OrderMessage>(message.Content.ToString());
-
-                                    content.Order.Portfolio.UpdateOrder(content.Order, content.OnlyMemory, false);
-
-                                    Share(session, content.Order.Portfolio.ID.ToString(), message_string);
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine("UpdateOrder Exception: " + e + " " + skey);
-                                }
-                            }
-                            else if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.UpdatePosition)
-                            {
-                                try
-                                {
-                                    AQI.AQILabs.Kernel.RTDMessage.PositionMessage content = JsonConvert.DeserializeObject<AQI.AQILabs.Kernel.RTDMessage.PositionMessage>(message.Content.ToString());
-
-                                    content.Position.Portfolio.UpdatePositionMemory(content.Position, content.Timestamp, content.AddNew, true, false);
-
-                                    Share(session, content.Position.Portfolio.ID.ToString(), message_string);
-
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine("UpdatePosition Exception: " + e + " --- " + e.StackTrace + " " + skey);
-                                }
-                            }
-                            else if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.AddNewOrder)
-                            {
-                                try
-                                {
-                                    AQI.AQILabs.Kernel.Order content = JsonConvert.DeserializeObject<AQI.AQILabs.Kernel.Order>(message.Content.ToString());
-
-                                    content.Portfolio.AddOrderMemory(content);
-
-                                    Share(session, content.Portfolio.ID.ToString(), message_string);
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine("AddNewOrder Exception: " + e + " " + skey);
-                                }
-                            }
-                            else if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.AddNewPosition)
-                            {
-                                try
-                                {
-                                    AQI.AQILabs.Kernel.Position content = JsonConvert.DeserializeObject<AQI.AQILabs.Kernel.Position>(message.Content.ToString());
-
-                                    content.Portfolio.UpdatePositionMemory(content, content.Timestamp, true, true, false);
-
-                                    Share(session, content.Portfolio.ID.ToString(), message_string);
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine("AddNewPosition Exception: " + e + " " + e.StackTrace + " " + skey);
-                                }
-                            }
-                            else if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.SavePortfolio)
-                            {
-                                try
-                                {
-                                    int content = JsonConvert.DeserializeObject<int>(message.Content.ToString());
-
-                                    (AQI.AQILabs.Kernel.Instrument.FindInstrument(content) as AQI.AQILabs.Kernel.Portfolio).SaveNewPositions();
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine(e);
-                                }
-                            }
-                            else if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.Property)
-                            {
-                                try
-                                {
-                                    AQI.AQILabs.Kernel.RTDMessage.PropertyMessage content = JsonConvert.DeserializeObject<AQI.AQILabs.Kernel.RTDMessage.PropertyMessage>(message.Content.ToString());
-
-                                    object obj = AQI.AQILabs.Kernel.Instrument.FindInstrument(content.ID);
-
-                                    PropertyInfo prop = obj.GetType().GetProperty(content.Name, BindingFlags.Public | BindingFlags.Instance);
-                                    if (null != prop && prop.CanWrite)
-                                    {
-                                        if (content.Value.GetType() == typeof(Int64))
-                                            prop.SetValue(obj, Convert.ToInt32(content.Value), null);
-                                        else
-                                            prop.SetValue(obj, content.Value, null);
-                                    }
-
-
-                                    AQI.AQILabs.Kernel.Instrument instrument = obj as AQI.AQILabs.Kernel.Instrument;
-                                    Share(session, instrument.ID.ToString(), message_string);
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine(e);
-                                }
-                            }
-                            else if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.Function)
-                            {
-                                try
-                                {
-                                    AQI.AQILabs.Kernel.RTDMessage.FunctionMessage content = JsonConvert.DeserializeObject<AQI.AQILabs.Kernel.RTDMessage.FunctionMessage>(message.Content.ToString());
-                                    object obj = AQI.AQILabs.Kernel.Instrument.FindInstrument(content.ID);
-
-                                    MethodInfo method = obj.GetType().GetMethod(content.Name);
-                                    if (null != method)
-                                        method.Invoke(obj, content.Parameters);
-
-
-                                    AQI.AQILabs.Kernel.Instrument instrument = obj as AQI.AQILabs.Kernel.Instrument;
-
-                                    Share(session, instrument.ID.ToString(), message_string);
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine(e);
-                                }
-                            }
-
                         }
 
                         else
