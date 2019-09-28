@@ -154,7 +154,26 @@ namespace QuantApp.Server.Controllers
             foreach(var w in ws)
                 foreach(var p in w.Permissions)
                     if(p.ID == quser.Email && (int)p.Permission > (int)AccessType.Denied)
-                        filtered.Add(w);
+                        {
+                            var newWorkSpace = new WorkSpace(
+                                w.ID, 
+                                w.Name, 
+                                w.Strategies,
+                                null,//w.Code,
+                                w.Functions, 
+                                w.Permissions, 
+                                w.NuGets, 
+                                w.Pips, 
+                                w.Jars, 
+                                null,//w.Bins, 
+                                null,//workSpace.Files, 
+                                w.ReadMe, 
+                                w.Publisher, 
+                                w.PublishTimestamp, 
+                                w.AutoDeploy, 
+                                w.Container);
+                            filtered.Add(newWorkSpace);
+                        }
                 
             
 
@@ -288,7 +307,26 @@ namespace QuantApp.Server.Controllers
                 var w = QuantApp.Kernel.M.Base(id)[x => true].FirstOrDefault() as WorkSpace;
                 foreach(var p in w.Permissions)
                     if(p.ID == quser.Email && (int)p.Permission > (int)AccessType.Denied || p.ID.ToLower() == "public")
-                        filtered.Add(w);
+                    {
+                        var newWorkSpace = new WorkSpace(
+                            w.ID, 
+                            w.Name, 
+                            w.Strategies,
+                            null,//w.Code,
+                            w.Functions, 
+                            w.Permissions, 
+                            w.NuGets, 
+                            w.Pips, 
+                            w.Jars, 
+                            null,//w.Bins, 
+                            null,//workSpace.Files, 
+                            w.ReadMe, 
+                            w.Publisher, 
+                            w.PublishTimestamp, 
+                            w.AutoDeploy, 
+                            w.Container);
+                        filtered.Add(newWorkSpace);
+                    }
             }
                 
             
@@ -557,7 +595,6 @@ namespace QuantApp.Server.Controllers
         }
 
         [HttpGet, AllowAnonymous]
-        //HERE
         public async Task<IActionResult> GetWB(string workbook, string id, string name, string[] p)
         {
             string userId = this.User.QID();

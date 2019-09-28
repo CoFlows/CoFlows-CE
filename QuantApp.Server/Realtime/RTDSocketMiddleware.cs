@@ -146,6 +146,9 @@ namespace QuantApp.Server.Realtime
         public HttpProxyResponse Data { get; set; }
     }
 
+    public delegate System.Tuple<string, string> RTDMessageDelegate(string content);
+    
+
     public class RTDSocketMiddleware
     {
         private readonly RequestDelegate _next;
@@ -388,6 +391,9 @@ namespace QuantApp.Server.Realtime
         public WebSocketListner(ClientWebSocket _socket){ this._socket = _socket; }
 
         static int counter = 0;
+
+        public static RTDMessageDelegate RTDMessageFunction = null;
+
         public static void appServer_NewMessageReceived(WebSocket session, string message_string, string path, List<KeyValuePair<string, string>> headers)
         {
             try
@@ -569,6 +575,13 @@ namespace QuantApp.Server.Realtime
                                     client.Send(pd.Content);
                                 }
                             }
+                            else if(RTDMessageFunction != null)
+                            {
+                                var mess = RTDMessageFunction(message.Content.ToString());
+                                if(mess != null)
+                                    Share(session, mess.Item1, mess.Item2);
+                            }
+
 
                         }
 
