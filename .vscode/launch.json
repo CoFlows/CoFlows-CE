@@ -8,7 +8,7 @@
             "request": "launch",
             "preLaunchTask": "build server osx",
             "program": "${workspaceRoot}/QuantApp.Server/bin/Debug/netcoreapp3.0/QuantApp.Server.osx.dll",
-            "args": [],
+            "args": ["server"],
             "cwd": "${workspaceRoot}/QuantApp.Server/",
             "stopAtEntry": false,
             "console": "internalConsole"

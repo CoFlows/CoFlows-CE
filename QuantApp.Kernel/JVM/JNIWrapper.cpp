@@ -6,6 +6,7 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <inttypes.h>
 #include <jni.h>
 
 #include "app_quant_clr_CLRRuntime.h"
@@ -17,7 +18,6 @@
 
 #include <limits.h>
 #include <stdlib.h>
-#include <dlfcn.h>
 #include <string.h>
 #include <set>
 #include <dirent.h>
@@ -1408,7 +1408,7 @@ extern "C" {
 
     int SetIntArrayElement(JNIEnv* pEnv, jintArray pArray, int index, int value)
     {
-        int elements[] = { value };
+        const jint elements[] = { value };
         pEnv->SetIntArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
@@ -1421,7 +1421,7 @@ extern "C" {
 
     int GetIntArrayElement(JNIEnv* pEnv, jintArray pArray, int index)
     {
-        int *val = pEnv->GetIntArrayElements(pArray, 0);
+        jint *val = pEnv->GetIntArrayElements(pArray, 0);
         return val[index];
     }
 
@@ -1739,7 +1739,7 @@ extern "C" {
         fnCreateInstance = (int (*)(const char*, int, void**))cb;
     }
 
-    JNIEXPORT int JNICALL Java_app_quant_clr_CLRRuntime_nativeCreateInstance(JNIEnv* pEnv, jclass cls, jstring classname, jint len, jobjectArray args)
+    JNIEXPORT jint JNICALL Java_app_quant_clr_CLRRuntime_nativeCreateInstance(JNIEnv* pEnv, jclass cls, jstring classname, jint len, jobjectArray args)
     {
         const char* _classname = GetNetString(pEnv, classname);
         int val = fnCreateInstance(_classname, len, (void**)args);

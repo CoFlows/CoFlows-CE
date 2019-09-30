@@ -4,7 +4,7 @@
     <UserSecretsId>aspnet-QuantApp.Server-2AA057A6-1CB4-4720-BB1F-099CC90AA338</UserSecretsId>    
     <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <DefaultItemExcludes>Client\**;ref\**</DefaultItemExcludes>
+    <DefaultItemExcludes>Client\**;ref\**;mnt\**</DefaultItemExcludes>
     <NoWarn>CS1998;CS0168;CS0105;CS0162;CS0105;CS4014</NoWarn>  
   </PropertyGroup>
 
