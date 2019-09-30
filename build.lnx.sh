@@ -21,4 +21,4 @@ cd QuantApp.Server
 
 docker build -t coflows/ce .
 docker tag coflows/ce quantapp/coflows-ce:latest
-docker push quantapp/coflows-ce:latest
+# docker push quantapp/coflows-ce:latest

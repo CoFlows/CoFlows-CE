@@ -100,7 +100,7 @@ RUN chmod +x /App/lab
 RUN chmod +x /App/coflows
 
 # RUN g++ -shared -o libJNIWrapper.so -L/usr/java/openjdk-12/lib/server  -I/usr/java/openjdk-12/include -I/usr/java/openjdk-12/include/linux JNIWrapper.cpp -ljvm -fPIC  -ldl -lpthread
-RUN g++ -shared -o libJNIWrapper.so  -I/usr/java/openjdk-8/include -I/usr/java/openjdk-8/include/linux JNIWrapper.cpp -fPIC  -ldl -lpthread
+RUN g++ -shared -o libJNIWrapper.so  -I/usr/java/openjdk-8/include -I/usr/java/openjdk-8/include/linux JNIWrapper.cpp -fPIC -lpthread
 
 RUN \
     mkdir /App/jars && \
