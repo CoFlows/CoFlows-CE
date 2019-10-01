@@ -753,6 +753,7 @@ module Code =
                                 let pathTemp = Path.GetTempPath()
 
                                 pathTemp |> setPythonImportPath |> PythonEngine.RunSimpleString
+                                pathTemp + Path.DirectorySeparatorChar.ToString() + "Base" |> setPythonImportPath |> PythonEngine.RunSimpleString
 
                                 let modules = 
                                     codes 
@@ -763,7 +764,7 @@ module Code =
                                             if hash |> CompiledPythonModules.ContainsKey && name |> CompiledPythonModulesNameHash.ContainsKey && CompiledPythonModulesNameHash.[name] = hash then
                                                 CompiledPythonModules.[hash]
                                             else
-                                                let names = code.Split(Environment.NewLine.ToCharArray()) |> Array.filter(fun x -> x.Contains(pyFlag))
+                                                let names = Environment.NewLine.ToCharArray() |> code.Split |> Array.filter(fun x -> pyFlag |> x.Contains)
 
                                                 let modFlag = (names |> Array.length > 0) |> not
 
@@ -771,9 +772,9 @@ module Code =
 
                                                 let name = (if modFlag then ("A" + hash) else "") + name
 
-                                                Directory.CreateDirectory(pathTemp + (if modFlag then "" else "Base/"))
+                                                Directory.CreateDirectory(pathTemp + (if modFlag then "" else ("Base" + Path.DirectorySeparatorChar.ToString())))
 
-                                                let pyFile = pathTemp + (if modFlag then "" else "Base/") + name
+                                                let pyFile = pathTemp + (if modFlag then "" else ("Base" + Path.DirectorySeparatorChar.ToString())) + name
 
                                                 File.WriteAllText(pyFile, code)
 
@@ -789,6 +790,7 @@ module Code =
                                                 
                                                 let pyMod = PythonEngine.CompileToModule(name, code, pyFile)
                                                 if pyMod |> isNull then 
+                                                    "Error loading: " + name |> Console.WriteLine
                                                     null 
                                                 else 
                                                     (hash, pyMod) |> CompiledPythonModules.TryAdd

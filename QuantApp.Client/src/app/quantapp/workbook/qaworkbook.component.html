@@ -21,8 +21,9 @@
 
                 <div [chart]="charts[result.Item1]" *ngIf="result.IsChart"></div>
                 
-                <img *ngIf="result.IsFigure" [src]="figures[result.Item1]">
-
+                <img *ngIf="result.IsFigure" [src]="figures[result.Item1]" />
+                <!-- <div *ngIf="result.IsFigure" [innerHtml]="figures[result.Item1]" ></div> -->
+                
                 <ngx-datatable *ngIf="quantapp.isArray(result.Item2) && !(result.IsChart || result.IsMap || result.IsFigure)"
                     [columnMode]="'force'"
                     [headerHeight]="40"

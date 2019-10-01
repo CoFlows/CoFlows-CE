@@ -2789,9 +2789,11 @@ namespace QuantApp.Kernel.JVM
                                             expandoObject = new JVMIEnumerable(expandoObject);
 
                                         JVMObject.DB[expandoObject.JavaHashCode] = expandoObject;
-                                        
+
+                                        // Console.WriteLine("--------------------");
                                         foreach(var signature in signatures)
                                         {
+                                            // Console.WriteLine(signature);
                                             if(signature.StartsWith("F/") || signature.StartsWith("S-F/"))
                                             {
                                                 bool isStatic = signature.StartsWith("S-");
