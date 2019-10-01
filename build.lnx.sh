@@ -1,7 +1,7 @@
 cd QuantApp.Client
 # # npm install
 # # npm install -g @angular/cli
-# ng build --prod --aot
+ng build --prod --aot
 
 cd ../
 

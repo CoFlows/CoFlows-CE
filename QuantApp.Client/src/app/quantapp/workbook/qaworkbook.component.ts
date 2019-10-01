@@ -206,13 +206,11 @@ export class QAWorkbookComponent {
 
                         }
                         else if(result.Item1.indexOf('_fig') >= 0){
-                            // result.IsFigure = true
                             let data = result.Item2
 
                             result.IsFigure = data.indexOf('Python.Runtime.PythonException:') < 0
-                            
-                            this.figures[result.Item1] = this.sanitization.bypassSecurityTrustResourceUrl('data:image/svg+xml;charset=UTF-8,' + data)
-                            // console.log(this.figures[result.Item1])
+                            this.figures[result.Item1] = this.sanitization.bypassSecurityTrustResourceUrl('data:image/svg+xml;base64,' + btoa(data))
+
 
                         }
                         else if(result.Item1.indexOf('_map') >= 0){
@@ -486,7 +484,7 @@ export class QAWorkbookComponent {
 
             result.IsFigure = data.indexOf('Python.Runtime.PythonException:') < 0
             
-            this.figures[result.Item1] = this.sanitization.bypassSecurityTrustResourceUrl('data:image/svg+xml;charset=UTF-8,' + data)
+            this.figures[result.Item1] = this.sanitization.bypassSecurityTrustResourceUrl('data:image/svg+xml;base64,' + btoa(data))
 
         }
         else if(result.Item1.indexOf('_map') >= 0){
