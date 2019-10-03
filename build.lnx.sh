@@ -21,5 +21,5 @@ cp ./QuantApp.Kernel/JVM/app_quant_clr_CLRRuntime.h ./QuantApp.Server/obj/lnx/pu
 cd QuantApp.Server
 
 docker build -t coflows/ce .
-docker tag coflows/ce quantapp/coflows-ce:latest
-docker push quantapp/coflows-ce:latest
+docker tag coflows/ce coflows/ce:latest
+docker push coflows/ce:latest

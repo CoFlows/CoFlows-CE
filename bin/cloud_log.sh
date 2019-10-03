@@ -1,2 +1,2 @@
 cd ..
-docker run -v $(pwd)/mnt:/App/mnt quantapp/coflows-ce cloud log
+docker run -v $(pwd)/mnt:/App/mnt coflows/ce cloud log
