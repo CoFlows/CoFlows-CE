@@ -287,6 +287,19 @@ namespace QuantApp.Server
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(OnExit);
                 _closing.WaitOne();
             }
+            else if(args != null && args.Length > 1 && args[0] == "local" && args[1] == "build")
+            {
+                PythonEngine.BeginAllowThreads();
+
+                Databases(connectionString);
+                Console.WriteLine("DB Connected");
+
+                Console.WriteLine("Local build");
+
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var res = Code.BuildRegisterPackage(pkg);
+                Console.WriteLine(res);
+            }
             else if(args != null && args.Length > 2 && args[0] == "local" && args[1] == "query")
             {
                 PythonEngine.BeginAllowThreads();
