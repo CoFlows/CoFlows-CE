@@ -260,7 +260,7 @@ namespace QuantApp.Server
 
                 Console.WriteLine("Local deployment");
 
-                var pkg = Code.ProcessPackageFile(workspace_name);
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
                 Code.ProcessPackageJSON(pkg);
                 SetDefaultWorkSpaces(new string[]{ pkg.ID });
 
@@ -319,7 +319,7 @@ namespace QuantApp.Server
                 Console.WriteLine("Parameters: " + parameters);
 
 
-                var pkg = Code.ProcessPackageFile(workspace_name);
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
                 Code.ProcessPackageJSON(pkg);
                 
 
