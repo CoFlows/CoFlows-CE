@@ -759,22 +759,28 @@ module Code =
                                     codes 
                                     |> List.map(fun (name : string, code : string) ->
                                         try
+                                            let code = code.Replace("from . ", "").Replace("from .. ", "").Replace("from ..", "from ").Replace("from .", "from ")
                                             let hash = code |> GetMd5Hash
                                            
                                             if hash |> CompiledPythonModules.ContainsKey && name |> CompiledPythonModulesNameHash.ContainsKey && CompiledPythonModulesNameHash.[name] = hash then
                                                 CompiledPythonModules.[hash]
                                             else
-                                                let names = Environment.NewLine.ToCharArray() |> code.Split |> Array.filter(fun x -> pyFlag |> x.Contains)
+                                                // let names = Environment.NewLine.ToCharArray() |> code.Split |> Array.filter(fun x -> pyFlag |> x.Contains)
 
-                                                let modFlag = (names |> Array.length > 0) |> not
+                                                // let modFlag = (names |> Array.length > 0) |> not
+                                                let modFlag = "Base/" |> name.StartsWith |> not
 
+                                                let name = if modFlag then name.Substring("Base/".Length) else name
+
+                                                
                                                 CompiledPythonModulesNameHash.[name] <- hash
 
                                                 let name = (if modFlag then ("A" + hash) else "") + name
 
-                                                Directory.CreateDirectory(pathTemp + (if modFlag then "" else ("Base" + Path.DirectorySeparatorChar.ToString())))
+                                                // let pyFile = pathTemp + (if modFlag then "" else ("Base" + Path.DirectorySeparatorChar.ToString())) + name
+                                                let pyFile = pathTemp + name.Replace("/", Path.DirectorySeparatorChar.ToString())
 
-                                                let pyFile = pathTemp + (if modFlag then "" else ("Base" + Path.DirectorySeparatorChar.ToString())) + name
+                                                pyFile |> Path.GetDirectoryName |> Directory.CreateDirectory
 
                                                 File.WriteAllText(pyFile, code)
 
@@ -1883,7 +1889,7 @@ module Code =
             let base_content = 
                 pkg.Base 
                 |> Seq.map(fun entry -> 
-                    let content = pkg_dict.["Base/" + entry.Name]
+                    let content = pkg_dict.[(if "Base/" |> entry.Name.StartsWith then "" else "Base/") + entry.Name]
                     { entry with Content = content }
                 )
 
@@ -2259,7 +2265,7 @@ module Code =
             (fun archive -> 
                 pkg.Base
                 |> Seq.iter(fun entry -> 
-                    let file = archive.CreateEntry("Base/" + entry.Name, CompressionLevel.Optimal)
+                    let file = archive.CreateEntry((if "Base/" |> entry.Name.StartsWith then "" else "Base/") + entry.Name, CompressionLevel.Optimal)
 
                     let entryStream = file.Open()
                     let streamWriter = StreamWriter(entryStream)
@@ -2331,7 +2337,7 @@ module Code =
                         pkg with
                             Base =
                                 pkg.Base
-                                |> Seq.map(fun entry -> { entry with Content = "Base/" + entry.Name });
+                                |> Seq.map(fun entry -> { entry with Content =(if "Base/" |> entry.Name.StartsWith then "" else "Base/") + entry.Name });
                             Agents =
                                 pkg.Agents
                                 |> Seq.map(fun entry -> { entry with Content = "Agents/" + entry.Name });
