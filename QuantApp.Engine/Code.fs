@@ -759,6 +759,7 @@ module Code =
                                     codes 
                                     |> List.map(fun (name : string, code : string) ->
                                         try
+                                            let code = code.Replace("from . ", "").Replace("from ..", "from ").Replace("from .", "from ")
                                             let hash = code |> GetMd5Hash
                                            
                                             if hash |> CompiledPythonModules.ContainsKey && name |> CompiledPythonModulesNameHash.ContainsKey && CompiledPythonModulesNameHash.[name] = hash then
@@ -772,9 +773,9 @@ module Code =
 
                                                 let name = (if modFlag then ("A" + hash) else "") + name
 
-                                                Directory.CreateDirectory(pathTemp + (if modFlag then "" else ("Base" + Path.DirectorySeparatorChar.ToString())))
-
                                                 let pyFile = pathTemp + (if modFlag then "" else ("Base" + Path.DirectorySeparatorChar.ToString())) + name
+
+                                                pyFile |> Path.GetDirectoryName |> Directory.CreateDirectory
 
                                                 File.WriteAllText(pyFile, code)
 
