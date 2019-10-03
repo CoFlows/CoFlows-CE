@@ -2425,8 +2425,9 @@ module Code =
                     |> Seq.map(fun entry -> entry.Substring(entry.IndexOf("/Base") + 1))
                     |> Seq.filter(fun entry -> baseNames |> Seq.contains(entry) |> not)
                     |> Seq.map(fun entry -> 
+                        let id = if ".py" |> entry.EndsWith then entry else entry.Substring(entry.IndexOf("/Base") + "/Base".Length + 1)
                         {
-                            Name = entry
+                            Name = id
                             Content = entry
                         }
                     )
