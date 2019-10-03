@@ -287,6 +287,50 @@ namespace QuantApp.Server
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(OnExit);
                 _closing.WaitOne();
             }
+            else if(args != null && args.Length > 2 && args[0] == "local" && args[1] == "query")
+            {
+                PythonEngine.BeginAllowThreads();
+
+                Databases(connectionString);
+                Console.WriteLine("Local Query " + DateTime.Now);
+                Console.WriteLine("DB Connected");
+
+                Console.WriteLine("CoFlows Local query... ");
+
+                var queryID = args[2];
+                var funcName = args.Length > 3 ? args[3] : null;
+                var parameters = args.Length > 4 ? args.Skip(4).ToArray() : null;
+
+                Console.WriteLine("QueryID: " + queryID);
+                Console.WriteLine("FuncName: " + funcName);
+                Console.WriteLine("Parameters: " + parameters);
+
+
+                var pkg = Code.ProcessPackageFile(workspace_name);
+                Code.ProcessPackageJSON(pkg);
+                
+
+                if(parameters != null)
+                    for(int i = 0; i < parameters.Length; i++)
+                        Console.WriteLine("Parameter[" + i + "]: " + parameters[i]);
+
+                
+                var (code_name, code) = pkg.Queries.Where(entry => entry.ID == queryID).Select(entry => (entry.Name as string, entry.Content as string)).FirstOrDefault();
+                var t0 = DateTime.Now;
+                Console.WriteLine("Started: " + t0);
+
+                // var wb = wb_res.FirstOrDefault() as CodeData;
+                var codes = new List<Tuple<string,string>>();
+                codes.Add(new Tuple<string, string>(code_name, code));
+
+                var result = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, funcName, parameters);
+                //var result = Connection.Client.Execute(code, code_name, pkg.ID, queryID, funcName, parameters);
+                var t1 = DateTime.Now;
+                Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
+                
+                Console.WriteLine("Result: ");
+                Console.WriteLine(result);
+            }
             else
                 Console.WriteLine("Wrong argument");
 

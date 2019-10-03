@@ -14,6 +14,17 @@
             "console": "internalConsole"
         },
         {
+            "name": "Query OSX",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build server osx",
+            "program": "${workspaceRoot}/QuantApp.Server/bin/Debug/netcoreapp3.0/QuantApp.Server.osx.dll",
+            "args": ["local", "query", "CsQuery"],
+            "cwd": "${workspaceRoot}/QuantApp.Server/",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
             "name": "Server WIN",
             "type": "coreclr",
             "request": "launch",

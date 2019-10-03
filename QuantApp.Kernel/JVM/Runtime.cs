@@ -1137,8 +1137,8 @@ namespace QuantApp.Kernel.JVM
                 var arg = call_args[i];
 
                 if(arg is ObjectWrapper)
-                 arg = (arg as ObjectWrapper).Object;
-                
+                    arg = (arg as ObjectWrapper).Object;
+
                 var type = arg.GetType();
 
                 switch(Type.GetTypeCode(type))
@@ -1197,6 +1197,12 @@ namespace QuantApp.Kernel.JVM
                         ar_call[i] = string_arg;
                         break;
 
+                    case TypeCode.DateTime:
+                        void* date_arg = GetJavaDateTime(pEnv, (DateTime)arg);
+                        
+                        ar_call[i] = date_arg;
+                        break;
+
                     default:
                         
                         if(arg is JVMTuple)
@@ -1228,6 +1234,424 @@ namespace QuantApp.Kernel.JVM
                             Array sub = arg as Array;
                             JVMObject javaArray = getJavaArray(sub);
                             ar_call[i] = javaArray.Pointer.ToPointer();
+                        }
+
+                        else if(arg is IEnumerable<object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/CLRIterable", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+
+                        else if(arg is System.Func<Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction1", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction2", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction3", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction4", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction5", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction6", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction7", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction8", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction9", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction10", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction11", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction12", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction13", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction14", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(arg.GetHashCode());
+
+                            void** pAr_len = stackalloc void*[2];
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), arg.GetHashCode() };
+                            getJavaParameters(ref pAr_len, pAr_len_data);
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(FindClass( pEnv, "app/quant/clr/function/CLRFunction15", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                    DB.TryAdd(arg.GetHashCode(), arg);
+                                }
+                                else
+                                    throw new Exception(GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(GetException(pEnv));
                         }
 
                         else
@@ -1704,6 +2128,397 @@ namespace QuantApp.Kernel.JVM
                                         throw new Exception(GetException(pEnv));
                                 }
 
+                                else if(res is System.Func<Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction1", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction2", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction3", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction4", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction5", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction6", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction7", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction8", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction9", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction10", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction11", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction12", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction13", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction14", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    void* ptr_res = (void *)(res.GetHashCode());
+
+                                    void** pAr_len = stackalloc void*[2];
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), res.GetHashCode() };
+                                    getJavaParameters(ref pAr_len, pAr_len_data);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(FindClass( pEnv, "app/quant/clr/function/CLRFunction15", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            RegisterJVMObject(getHashCode(pObj) ,pObj);
+                                            DB.TryAdd(res.GetHashCode(), res);
+                                            SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                        }
+                                        else
+                                            throw new Exception(GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(GetException(pEnv));
+                                }
+
                                 else
                                 {
                                     void* ptr_res = (void *)(sub_element.GetHashCode());
@@ -2051,6 +2866,44 @@ namespace QuantApp.Kernel.JVM
                     else if(type.IsArrayOf<object>())
                         return "[Ljava/lang/Object;";
 
+                    // else if(type == typeof(System.Func<Object, Object>))
+                    // {
+                    //     Console.WriteLine("JAVA FUNCTION");
+                    //     return "Ljava/util/function/Function;";
+                    // }
+                    else if(type == typeof(System.Func<Object, Object>))
+                        return "Lscala/Function1;";
+                    else if(type == typeof(System.Func<Object, Object, Object>))
+                        return "Lscala/Function2;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object>))
+                        return "Lscala/Function3;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object>))
+                        return "Lscala/Function4;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function5;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function6;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function7;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function8;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function9;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function10;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function11;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function12;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function13;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function14;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function15;";
+
+                    else if(type == typeof(IEnumerable<object>))
+                        return "Ljava/lang/Iterable;";
                     else
                         return "Ljava/lang/Object;";
 
@@ -2124,6 +2977,44 @@ namespace QuantApp.Kernel.JVM
                             cls = "L" + cls + ";";
                         return cls;
                     }
+                    // else if(obj is System.Func<Object, Object>)
+                    // {
+                    //     Console.WriteLine("JAVA FUNCTION");
+                    //     return "Ljava/util/function/Function;";
+                    // }
+                    else if(type == typeof(System.Func<Object, Object>))
+                        return "Lscala/Function1;";
+                    else if(type == typeof(System.Func<Object, Object, Object>))
+                        return "Lscala/Function2;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object>))
+                        return "Lscala/Function3;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object>))
+                        return "Lscala/Function4;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function5;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function6;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function7;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function8;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function9;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function10;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function11;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function12;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function13;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function14;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function15;";
+                    else if(obj is IEnumerable<object>)
+                        return "Ljava/lang/Iterable;";
+
                     else
                         return "Ljava/lang/Object;";
 
@@ -2790,10 +3681,8 @@ namespace QuantApp.Kernel.JVM
 
                                         JVMObject.DB[expandoObject.JavaHashCode] = expandoObject;
 
-                                        // Console.WriteLine("--------------------");
                                         foreach(var signature in signatures)
                                         {
-                                            // Console.WriteLine(signature);
                                             if(signature.StartsWith("F/") || signature.StartsWith("S-F/"))
                                             {
                                                 bool isStatic = signature.StartsWith("S-");
