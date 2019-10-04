@@ -765,9 +765,6 @@ module Code =
                                             if hash |> CompiledPythonModules.ContainsKey && name |> CompiledPythonModulesNameHash.ContainsKey && CompiledPythonModulesNameHash.[name] = hash then
                                                 CompiledPythonModules.[hash]
                                             else
-                                                // let names = Environment.NewLine.ToCharArray() |> code.Split |> Array.filter(fun x -> pyFlag |> x.Contains)
-
-                                                // let modFlag = (names |> Array.length > 0) |> not
                                                 let modFlag = "Base/" |> name.StartsWith |> not
 
                                                 let name = if modFlag then name.Substring("Base/".Length) else name
@@ -777,7 +774,6 @@ module Code =
 
                                                 let name = (if modFlag then ("A" + hash) else "") + name
 
-                                                // let pyFile = pathTemp + (if modFlag then "" else ("Base" + Path.DirectorySeparatorChar.ToString())) + name
                                                 let pyFile = pathTemp + name.Replace("/", Path.DirectorySeparatorChar.ToString())
 
                                                 pyFile |> Path.GetDirectoryName |> Directory.CreateDirectory
@@ -2411,43 +2407,120 @@ module Code =
         files |> ProcessPackageDictionary
 
     let UpdatePackageFile (pkg_file : string) : string =
-        let pkg_json = File.ReadAllText(pkg_file)
-        let pkg_path = Path.GetDirectoryName(pkg_file)
-        let pkg_type = Newtonsoft.Json.JsonConvert.DeserializeObject<QuantApp.Engine.PKG>(pkg_json)
+        let pkgJson = File.ReadAllText(pkg_file)
+        let pkgPath = Path.GetDirectoryName(pkg_file)
+        let pkgType = Newtonsoft.Json.JsonConvert.DeserializeObject<QuantApp.Engine.PKG>(pkgJson)
 
-        let pkg_id = if pkg_type.ID |> String.IsNullOrEmpty then System.Guid.NewGuid().ToString() else pkg_type.ID
+        let pkgId = if pkgType.ID |> String.IsNullOrEmpty then System.Guid.NewGuid().ToString() else pkgType.ID
 
         let parse_content (pkg : QuantApp.Engine.PKG) : QuantApp.Engine.PKG = 
-            
-            let bins_content = 
-                if pkg_path + "/Bins" |> Directory.Exists then
+
+            let baseContent : seq<PKG_Base> =
+                if pkgPath + "/Base" |> Directory.Exists then
+
+                    let baseNames = pkg.Base |> Seq.map(fun entry -> entry.Content)
                     
-                    (pkg_path + "/Bins", "*", SearchOption.AllDirectories)
+                    (pkgPath + "/Base", "*", SearchOption.AllDirectories)
                     |> Directory.GetFiles
+                    |> Seq.map(
+                        fun entry -> entry.Replace(Path.DirectorySeparatorChar.ToString(), "/")
+                        >>
+                        fun entry -> entry.Substring(entry.IndexOf("/Base") + 1))
+                    |> Seq.filter(fun entry -> baseNames |> Seq.contains(entry) |> not)
                     |> Seq.map(fun entry -> 
-                        { Name = entry.Substring(entry.IndexOf("/Bins") + "/Bins".Length + 1); Content = entry.Substring(entry.IndexOf("/Bins") + 1)}
+                        let id = if ".py" |> entry.EndsWith then entry else entry.Substring(entry.IndexOf("/Base") + "/Base".Length + 1)
+                        {
+                            Name = id
+                            Content = entry
+                        }
                     )
                 else
                     Seq.empty
 
-            let files_content = 
-                if pkg_path + "/Files" |> Directory.Exists then
+            let queriesContent : seq<PKG_Query> =
+                if pkgPath + "/Queries" |> Directory.Exists then
+
+                    let queryNames = pkg.Queries |> Seq.map(fun entry -> entry.Content)
                     
-                    (pkg_path + "/Files", "*", SearchOption.AllDirectories)
+                    (pkgPath + "/Queries", "*", SearchOption.AllDirectories)
                     |> Directory.GetFiles
-                    |> Seq.map(fun entry -> 
-                        { Name = entry.Substring(entry.IndexOf("/Files") + "/Files".Length + 1); Content = entry.Substring(entry.IndexOf("/Files") + 1)}
+                    |> Seq.map(
+                        fun entry -> entry.Replace(Path.DirectorySeparatorChar.ToString(), "/")
+                        >>
+                        fun entry -> entry.Substring(entry.IndexOf("/Queries") + 1))
+                    |> Seq.filter(fun entry -> queryNames |> Seq.contains(entry) |> not)
+                    |> Seq.map(fun entry ->
+                        let id = entry.Substring(entry.IndexOf("/Queries") + "/Queries".Length + 1)
+                        {
+                            ID = id
+                            Name = id
+                            Content = entry
+                        }
+                    )
+                else
+                    Seq.empty
+
+            let agentContent : seq<PKG_Agent> =
+                if pkgPath + "/Agents" |> Directory.Exists then
+
+                    let agentNames = pkg.Agents |> Seq.map(fun entry -> entry.Content)
+                    
+                    (pkgPath + "/Agents", "*", SearchOption.AllDirectories)
+                    |> Directory.GetFiles
+                    |> Seq.map(
+                        fun entry -> entry.Replace(Path.DirectorySeparatorChar.ToString(), "/")
+                        >>
+                        fun entry -> entry.Substring(entry.IndexOf("/Agents") + 1))
+                    |> Seq.filter(fun entry -> agentNames |> Seq.contains(entry) |> not)
+                    |> Seq.map(fun entry ->
+                        let id = entry.Substring(entry.IndexOf("/Agents") + "/Agents".Length + 1)
+                        {
+                            Exe = "pkg"
+                            Name = id
+                            Content = entry
+                        }
+                    )
+                else
+                    Seq.empty
+            
+            let binsContent = 
+                if pkgPath + "/Bins" |> Directory.Exists then
+                    
+                    (pkgPath + "/Bins", "*", SearchOption.AllDirectories)
+                    |> Directory.GetFiles
+                    |> Seq.map(
+                        fun entry -> entry.Replace(Path.DirectorySeparatorChar.ToString(), "/")
+                        >>
+                        fun entry -> 
+                            { Name = entry.Substring(entry.IndexOf("/Bins") + "/Bins".Length + 1); Content = entry.Substring(entry.IndexOf("/Bins") + 1)}
+                    )
+                else
+                    Seq.empty
+
+            let filesContent = 
+                if pkgPath + "/Files" |> Directory.Exists then
+                    
+                    (pkgPath + "/Files", "*", SearchOption.AllDirectories)
+                    |> Directory.GetFiles
+                    |> Seq.map(
+                        fun entry -> entry.Replace(Path.DirectorySeparatorChar.ToString(), "/")
+                        >>
+                        fun entry -> 
+                            { Name = entry.Substring(entry.IndexOf("/Files") + "/Files".Length + 1); Content = entry.Substring(entry.IndexOf("/Files") + 1)}
                     )
                 else
                     Seq.empty
 
             { 
                 pkg with 
-                    Bins = bins_content
-                    Files = files_content
+                    Base = baseContent |> Seq.append(pkg.Base)
+                    Queries = queriesContent |> Seq.append(pkg.Queries)
+                    Agents = agentContent |> Seq.append(pkg.Agents)
+                    Bins = binsContent
+                    Files = filesContent
             }
 
-        let pkg_content = pkg_type |> parse_content        
+        let pkgContent = pkgType |> parse_content        
 
-        File.WriteAllText(pkg_file, Newtonsoft.Json.JsonConvert.SerializeObject(pkg_content, Newtonsoft.Json.Formatting.Indented))
+        File.WriteAllText(pkg_file, Newtonsoft.Json.JsonConvert.SerializeObject(pkgContent, Newtonsoft.Json.Formatting.Indented))
         pkg_file
