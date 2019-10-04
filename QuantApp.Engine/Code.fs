@@ -767,9 +767,8 @@ module Code =
                                             else
                                                 let modFlag = "Base/" |> name.StartsWith |> not
 
-                                                let name = if modFlag then name.Substring("Base/".Length) else name
-
                                                 
+                                                // let name = if modFlag then name else name.Substring("Base/".Length)
                                                 CompiledPythonModulesNameHash.[name] <- hash
 
                                                 let name = (if modFlag then ("A" + hash) else "") + name
