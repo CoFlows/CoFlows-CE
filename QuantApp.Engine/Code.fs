@@ -765,6 +765,26 @@ module Code =
                                             if hash |> CompiledPythonModules.ContainsKey && name |> CompiledPythonModulesNameHash.ContainsKey && CompiledPythonModulesNameHash.[name] = hash then
                                                 CompiledPythonModules.[hash]
                                             else
+
+                                                try
+                                                    if name |> CompiledPythonModulesNameHash.ContainsKey then
+                                                        let lastHash = CompiledPythonModulesNameHash.[name]
+                                                        if lastHash |> CompiledPythonModules.ContainsKey then
+                                                            let lastMod = CompiledPythonModules.[lastHash]
+                                                            let name = "A" + lastHash + name
+                                                            
+                                                            let delCommand =
+                                                                "import sys \n" +
+                                                                "import " + name.Replace(".py","") + "  \n" +
+                                                                "del sys.modules['" + name + "'] \n" +
+                                                                "del " + name.Replace(".py","")
+
+                                                            delCommand |> PythonEngine.Exec
+                                                            // PythonEngine.ReloadModule(lastMod) |> ignore
+                                                with 
+                                                | e -> e |> Console.WriteLine
+
+
                                                 let modFlag = "Base/" |> name.StartsWith |> not
 
                                                 

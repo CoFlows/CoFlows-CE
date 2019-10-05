@@ -118,6 +118,8 @@ RUN python3 get-pip.py
 RUN pip install tornado==5.1.1
 RUN pip install jupyter
 RUN pip install jupyterlab
+RUN pip install dash
+RUN pip install dash-daq
 
 RUN mv /App/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kernel.json
 

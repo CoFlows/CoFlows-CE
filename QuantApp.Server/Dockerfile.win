@@ -177,8 +177,8 @@ RUN $newPath = ('{0};{1}' -f $env:NET_HOME, $env:PATH); \
 	setx /M PATH $newPath
 
 RUN $newPath = ('{0}\bin;{1}' -f $env:SPARK_HOME, $env:PATH); \
-	Write-Host ('Updating PATH: {0}' -f $newPath); \
-	setx /M PATH $newPath
+    Write-Host ('Updating PATH: {0}' -f $newPath); \
+    setx /M PATH $newPath
 
 # No SSL
 ENV ASPNETCORE_URLS http://+:80
@@ -188,16 +188,9 @@ WORKDIR /App
 RUN mkdir pip
 
 RUN $newPath = ('{0}\Scripts;{0};{1}' -f $env:PYTHON_HOME, $env:PYTHONPATH); \
-	Write-Host ('Updating PATH: {0}' -f $newPath); \
-	setx /M PYTHONPATH $newPath
+    Write-Host ('Updating PATH: {0}' -f $newPath); \
+    setx /M PYTHONPATH $newPath
 
 COPY ${source:-obj/win/publish} ./
-
-RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-    Invoke-WebRequest -OutFile sql.tgz https://download.microsoft.com/download/0/2/A/02AAE597-3865-456C-AE7F-613F99F850A8/sqljdbc_6.0.8112.200_enu.tar.gz; \
-    tar xzf sql.tgz; \
-    Remove-Item -Force sql.tgz; \
-    cp sqljdbc_6.0/enu/jre8/sqljdbc42.jar /App/mnt/jars
-	mv sqljdbc_6.0/enu/auth/sqljdbc_auth.dll /App
 
 ENTRYPOINT ["dotnet", "QuantApp.Server.win.dll"]
