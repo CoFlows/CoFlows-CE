@@ -191,6 +191,10 @@ RUN $newPath = ('{0}\Scripts;{0};{1}' -f $env:PYTHON_HOME, $env:PYTHONPATH); \
     Write-Host ('Updating PATH: {0}' -f $newPath); \
     setx /M PYTHONPATH $newPath
 
+RUN pip install dash
+RUN pip install dash-daq
+RUN pip install requests
+
 COPY ${source:-obj/win/publish} ./
 
 ENTRYPOINT ["dotnet", "QuantApp.Server.win.dll"]
