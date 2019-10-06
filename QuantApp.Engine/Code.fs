@@ -780,6 +780,7 @@ module Code =
                                                                 "del " + name.Replace(".py","")
 
                                                             delCommand |> PythonEngine.Exec
+                                                            CompiledPythonModules.TryRemove(lastHash) |> ignore
                                                             // PythonEngine.ReloadModule(lastMod) |> ignore
                                                 with 
                                                 | e -> e |> Console.WriteLine

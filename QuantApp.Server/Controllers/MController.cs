@@ -1382,7 +1382,7 @@ namespace QuantApp.Server.Controllers
 
             string _message = "";
             System.Net.Http.HttpResponseMessage response = null;
-            for(int i = 0; i < 100; i++)
+            for(int i = 0; i < 4; i++)
             {
                 try
                 {
