@@ -32,7 +32,7 @@ open QuantApp.Kernel.JVM
 open System.Xml
 open System.Net
 
-// open FSharp.Interop.Dynamic
+open FSharp.Interop.Dynamic
 
 type JsWrapper =
 
@@ -742,11 +742,8 @@ module Code =
                          |> executeAssembly |> ignore
 
                 let runPython (codes : (string * string) list) =
-                    
                     try
-
                         using (Py.GIL()) (fun _ ->
-                            
                             setPythonOut |> PythonEngine.RunSimpleString
 
                             let pyModule = 
@@ -765,11 +762,26 @@ module Code =
                                             if hash |> CompiledPythonModules.ContainsKey && name |> CompiledPythonModulesNameHash.ContainsKey && CompiledPythonModulesNameHash.[name] = hash then
                                                 CompiledPythonModules.[hash]
                                             else
+
+                                                try
+                                                    if name |> CompiledPythonModulesNameHash.ContainsKey then
+                                                        let lastHash = CompiledPythonModulesNameHash.[name]
+                                                        if lastHash |> CompiledPythonModules.ContainsKey then
+                                                            let lastMod = CompiledPythonModules.[lastHash]
+                                                            let name = "A" + lastHash + name
+                                                            
+                                                            let delCommand =
+                                                                "import sys \n" +
+                                                                "import " + name.Replace(".py","") + "  \n" +
+                                                                "del sys.modules['" + name + "'] \n" +
+                                                                "del " + name.Replace(".py","")
+
+                                                            delCommand |> PythonEngine.Exec
+                                                            CompiledPythonModules.TryRemove(lastHash) |> ignore
+                                                with 
+                                                | e -> e |> Console.WriteLine
+
                                                 let modFlag = "Base/" |> name.StartsWith |> not
-
-                                                let name = if modFlag then name.Substring("Base/".Length) else name
-
-                                                
                                                 CompiledPythonModulesNameHash.[name] <- hash
 
                                                 let name = (if modFlag then ("A" + hash) else "") + name
@@ -918,14 +930,29 @@ module Code =
                                         for n in names do
                                             let n_str = n.ToString()
                                             let func = pyModule.GetAttr(n)
-                                            if n_str.StartsWith("__") |> not && func.ToString().Contains("built-in") |> not then
+                                            if func |> isNull |> not then
+                                                let func_str = func.ToString()
+                                                if 
+                                                    n_str |> isNull |> not &&
+                                                    func_str |> isNull |> not &&
+                                                    n_str.StartsWith("__") |> not && 
+                                                    func_str.Contains("built-in") |> not && 
+                                                    func_str.Contains("<module '") |> not &&
+                                                    func_str.Contains("<class '") |> not 
+                                                then
                                                     let cls = func.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
 
-                                                    let obje = cls |> obje_func(func, n.ToString())
-
-                                                    if obje |> isNull |> not then
-                                                        let pair = (n.ToString(), obje)
-                                                        pair |> resdb.Add
+                                                    let funcModuleName =
+                                                        try
+                                                            func?__module__.ToString()
+                                                        with
+                                                        | _ -> ""
+                                                    
+                                                    if funcModuleName |> String.IsNullOrWhiteSpace || moduleName.Contains(funcModuleName) then
+                                                        let obje = cls |> obje_func(func, n.ToString())
+                                                        if obje |> isNull |> not then
+                                                            let pair = (n.ToString(), obje)
+                                                            pair |> resdb.Add
 
                                     else
                                         try

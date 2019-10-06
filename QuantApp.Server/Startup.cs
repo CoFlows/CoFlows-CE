@@ -94,6 +94,7 @@ namespace QuantApp.Server
             app.UseWebSockets();
             app.UseMiddleware<RTDSocketMiddleware>();
 
+
             app.UseAuthentication();
             app.UseMvc();
         }

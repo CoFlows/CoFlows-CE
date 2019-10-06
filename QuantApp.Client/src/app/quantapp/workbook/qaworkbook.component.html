@@ -18,8 +18,13 @@
                 <div class="col-sm-12 col-md-12">
                     <a class="f-headers text-color"  target="_blank" href="{{quantapp.quantapp_server}}m/getwb?workbook={{selectedWB.WorkspaceID}}&id={{selectedWB.ID}}&name={{result.Item1}}">{{quantapp.quantapp_server}}m/getwb?workbook={{selectedWB.WorkspaceID}}&id={{selectedWB.ID}}&name={{result.Item1}}</a>
                 </div>
+                <div *ngIf="result.IsDash" class="col-sm-12 col-md-12">
+                    <a class="f-headers text-color"  target="_blank" [href]="result.URL">Dash Link</a>
+                </div>
 
                 <div [chart]="charts[result.Item1]" *ngIf="result.IsChart"></div>
+
+                <iframe *ngIf="result.IsDash" frameborder="0" width="100%" height="100%" style="min-height:500px;" [src]="result.URL"></iframe>
                 
                 <img *ngIf="result.IsFigure" [src]="figures[result.Item1]" />
                 <!-- <div *ngIf="result.IsFigure" [innerHtml]="figures[result.Item1]" ></div> -->
@@ -65,12 +70,15 @@
                     ></drawing-manager>
                 </ngui-map>
 
-                <textarea *ngIf="!quantapp.isArray(result.Item2) && !(result.IsChart || result.IsMap || result.IsFigure)"  class="form-control" [(ngModel)]="result.Item2" rows="10"></textarea>
+                <textarea *ngIf="!quantapp.isArray(result.Item2) && !(result.IsChart || result.IsMap || result.IsFigure || result.IsDash)"  class="form-control" [(ngModel)]="result.Item2" rows="10"></textarea>
 
                 <div *ngFor="let item of result.SubItems">
                     <ngb-alert [type]="'info'" (close)="removeItem(result.SubItems, item)">&nbsp;</ngb-alert>
 
                     <div [chart]="charts[item.Item1]" *ngIf="item.IsChart"></div>
+
+                    <iframe *ngIf="item.IsDash" frameborder="0" width="100%" height="100%" style="min-height:500px;" [src]="item.URL"></iframe>
+                
 
                     <!-- <img src="{{figures[item.Item1]}}" *ngIf="item.IsFigure" /> -->
                     <img [src]="figures[item.Item1]" *ngIf="item.IsFigure" />
@@ -119,7 +127,7 @@
                         ></drawing-manager>
                     </ngui-map>
 
-                    <textarea *ngIf="!quantapp.isArray(item.Item2) && !(item.IsChart || item.IsMap || item.IsFigure)"  class="form-control" [(ngModel)]="item.Item2" rows="10"></textarea>
+                    <textarea *ngIf="!quantapp.isArray(item.Item2) && !(item.IsChart || item.IsMap || item.IsFigure || item.IsDash)"  class="form-control" [(ngModel)]="item.Item2" rows="10"></textarea>
 
 
                 </div>
