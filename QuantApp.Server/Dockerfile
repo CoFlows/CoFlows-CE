@@ -120,6 +120,7 @@ RUN pip install jupyter
 RUN pip install jupyterlab
 RUN pip install dash
 RUN pip install dash-daq
+RUN pip install requests
 
 RUN mv /App/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kernel.json
 
