@@ -130,7 +130,6 @@ export class QAWorkbookComponent {
     }
 
     submitCode(workbook){
-        // console.log(workbook)
         QuantAppComponent.UpdateInstruments = false
         this.selectedWB = workbook
 
@@ -151,23 +150,15 @@ export class QAWorkbookComponent {
         data => {
             let t1 = new Date()
             this.status = "executed in " + (Date.now() - t00) / 1000 + " seconds @ " + t1.toTimeString()
-            // console.log(data)
             this.results = []
 
             if(data.Result.length > 0){
                 
-                // this.results = data.Result
-
-
                 data.Result.forEach(result => {
-
-                    
-                    if(result.Item2 != ''){
+                    if((typeof result.Item2 === 'string' || result.Item2 instanceof String) && result.Item2 != '' || !(typeof result.Item2 === 'string' || result.Item2 instanceof String)){
                         this.results.push(result)
-                    
-                        
+
                         if(result.Item1.indexOf('_chart') >= 0){
-                            
                             let data = result.Item2
 
                             result.IsChart = data.indexOf('Python.Runtime.PythonException:') < 0
@@ -210,8 +201,12 @@ export class QAWorkbookComponent {
 
                             result.IsFigure = data.indexOf('Python.Runtime.PythonException:') < 0
                             this.figures[result.Item1] = this.sanitization.bypassSecurityTrustResourceUrl('data:image/svg+xml;base64,' + btoa(data))
+                        }
+                        else if(result.Item1.indexOf('dash_init') >= 0){
+                            let data = result.Item2
 
-
+                            result.IsDash = true
+                            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.quantapp.quantapp_server + 'dash/' + workbook.WorkspaceID + '/' + workbook.ID + '/')
                         }
                         else if(result.Item1.indexOf('_map') >= 0){
                             let name = result.Item1
@@ -437,7 +432,7 @@ export class QAWorkbookComponent {
 
 
     private addItem_internal(items, name, item){
-        let result = { Item1: name, Item2: item, columns: [], IsChart: false, IsMap: false, IsFigure: false}
+        let result = { Item1: name, Item2: item, columns: [], IsChart: false, IsMap: false, IsFigure: false, IsDash: false, URL: null}
         if(result.Item1.indexOf('_chart') >= 0){
             //let name = result.Item1
             
@@ -486,6 +481,12 @@ export class QAWorkbookComponent {
             
             this.figures[result.Item1] = this.sanitization.bypassSecurityTrustResourceUrl('data:image/svg+xml;base64,' + btoa(data))
 
+        }
+        else if(result.Item1.indexOf('dash_init') >= 0){
+            let data = result.Item2
+
+            result.IsDash = true
+            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.quantapp.quantapp_server + 'dash/' + this.selectedWB.WorkspaceID + '/' + this.selectedWB.ID + '/')
         }
         else if(result.Item1.indexOf('_map') >= 0){
             let name = this.selectedTab

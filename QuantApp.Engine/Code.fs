@@ -742,11 +742,8 @@ module Code =
                          |> executeAssembly |> ignore
 
                 let runPython (codes : (string * string) list) =
-                    
                     try
-
                         using (Py.GIL()) (fun _ ->
-                            
                             setPythonOut |> PythonEngine.RunSimpleString
 
                             let pyModule = 
@@ -781,15 +778,10 @@ module Code =
 
                                                             delCommand |> PythonEngine.Exec
                                                             CompiledPythonModules.TryRemove(lastHash) |> ignore
-                                                            // PythonEngine.ReloadModule(lastMod) |> ignore
                                                 with 
                                                 | e -> e |> Console.WriteLine
 
-
                                                 let modFlag = "Base/" |> name.StartsWith |> not
-
-                                                
-                                                // let name = if modFlag then name else name.Substring("Base/".Length)
                                                 CompiledPythonModulesNameHash.[name] <- hash
 
                                                 let name = (if modFlag then ("A" + hash) else "") + name
