@@ -6,7 +6,7 @@ ARG CYGWIN_HOME=C:\\tools\\cygwin
 ARG SPARK_HOME=C:\\spark
 ARG PYTHONPATH=C:\\App\\mnt\\pip
 
-FROM mcr.microsoft.com/windows/servercore:1607 as builder
+FROM mcr.microsoft.com/windows as builder
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
@@ -177,8 +177,8 @@ RUN $newPath = ('{0};{1}' -f $env:NET_HOME, $env:PATH); \
 	setx /M PATH $newPath
 
 RUN $newPath = ('{0}\bin;{1}' -f $env:SPARK_HOME, $env:PATH); \
-    Write-Host ('Updating PATH: {0}' -f $newPath); \
-    setx /M PATH $newPath
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
 
 # No SSL
 ENV ASPNETCORE_URLS http://+:80
@@ -188,32 +188,8 @@ WORKDIR /App
 RUN mkdir pip
 
 RUN $newPath = ('{0}\Scripts;{0};{1}' -f $env:PYTHON_HOME, $env:PYTHONPATH); \
-    Write-Host ('Updating PATH: {0}' -f $newPath); \
-    setx /M PYTHONPATH $newPath
-
-RUN pip install dash
-RUN pip install dash-daq
-RUN pip install requests
-
-# RUN winutils chmod -R 777 C:\Users\ContainerAdministrator\AppData\Local\Temp
- 
-RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-    Invoke-WebRequest -OutFile winutils.exe http://public-repo-1.hortonworks.com/hdp-win-alpha/winutils.exe; \
-    mv winutils.exe C:\\spark\\bin;
-
-RUN $newPath = ('{0};{0};{1}' -f $env:SPARK_HOME, $env:PATH); \
-    Write-Host ('Updating HADOOP_HOME: {0}' -f $newPath); \
-    setx /M HADOOP_HOME $newPath
-
-ENV HADOOP_HOME=C:\\spark
-ENV SPARK_HOME=C:\\spark
-
-#RUN icacls.exe C:\\spark\\bin\\winutils.exe /grant BUILTIN\Users:F /t
-#RUN icacls.exe C:\\spark\\bin\\winutils.exe /grant Everyone:F /t
-#RUN icacls.exe C:\\spark /inheritance:r /grant Everyone:F /t
-RUN c:\\spark\\bin\\winutils.exe chmod -R 7777 c:\\spark\\bin
-#RUN c:\\spark\\bin\\winutils.exe chmod -R 7777 c:\\spark\\bin\\winutils.exe
-
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PYTHONPATH $newPath
 
 COPY ${source:-obj/win/publish} ./
 
