@@ -284,7 +284,7 @@ namespace QuantApp.Kernel.JVM
             void*  pEnv;// = (void*)EnvPtr;
             if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
             
-            object[] classes_obj = getJavaArray(new IntPtr(args), "[Ljava/lang/Object;");
+            object[] classes_obj = len == 0 ? null : getJavaArray(new IntPtr(args), "[Ljava/lang/Object;");
             
 
             Type ct = null;
@@ -424,7 +424,7 @@ namespace QuantApp.Kernel.JVM
             }
             catch(Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("Java_app_quant_clr_CLRRuntime_nativeInvoke: " + funcname + " " + e);
             }
 
             return null;
@@ -526,7 +526,7 @@ namespace QuantApp.Kernel.JVM
             }
             catch(Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("Java_app_quant_clr_CLRRuntime_nativeRegisterFunc: " + funcname + " " + e);
                 return IntPtr.Zero.ToPointer();
             }
             
