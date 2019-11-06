@@ -12,4 +12,5 @@
         "*.ipynb": "python",
         "exception": "cpp"
     },
+    "python.pythonPath": "/usr/bin/python3",
 }

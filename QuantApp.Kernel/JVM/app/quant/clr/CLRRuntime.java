@@ -38,39 +38,39 @@ public class CLRRuntime
         return errors.toString();
     }
 
-    public static CLRObject CreateInstance(String classname, Object... args)
+    public static synchronized CLRObject CreateInstance(String classname, Object... args)
     {
         int len = args.length;
         int ptr = nativeCreateInstance(classname, len, (Object[])args);
         return new CLRObject(classname, ptr);
     }
 
-    public static CLRObject CreateInstanceArr(String classname, Object[] args)
+    public static synchronized CLRObject CreateInstanceArr(String classname, Object[] args)
     {
         int len = args.length;
         int ptr = nativeCreateInstance(classname, len, args);
         return new CLRObject(classname, ptr);
     }
 
-    public static CLRObject GetClass(String classname)
+    public static synchronized CLRObject GetClass(String classname)
     {
         int ptr = nativeCreateInstance(classname, 0, new Object[0]);
         return new CLRObject(classname, ptr);
     }
 
-    public static Object Invoke(int ptr, String funcname, Object... args)
+    public static synchronized Object Invoke(int ptr, String funcname, Object... args)
     {
         int len = args.length;
         return nativeInvoke(ptr, funcname, len, (Object[])args);
     }
 
-    public static Object GetProperty(int ptr, String name)
+    public static synchronized Object GetProperty(int ptr, String name)
     {
         Object res = nativeGetProperty(ptr, name);
         return res;
     }
 
-    public static void SetProperty(int ptr, String name, Object value)
+    public static synchronized void SetProperty(int ptr, String name, Object value)
     {
         nativeSetProperty(ptr, name, new Object[]{ value });
     }
@@ -99,7 +99,7 @@ public class CLRRuntime
 
     public static HashMap<Integer, Function<Object[], Object>> Functions = new HashMap<Integer, Function<Object[], Object>>();
 
-    public static CLRObject CreateDelegate(String classname, Function<Object[], Object> func)
+    public static synchronized CLRObject CreateDelegate(String classname, Function<Object[], Object> func)
     {
         int hash = func.hashCode();
 
@@ -108,7 +108,7 @@ public class CLRRuntime
         return (CLRObject)nativeRegisterFunc(classname, hash);
     }
 
-    public static Object Python(Function<Object[], Object> func)
+    public static synchronized Object Python(Function<Object[], Object> func)
     {
         CLRObject runtime = CLRRuntime.GetClass("QuantApp.Kernel.JVM.Runtime");
         return runtime.Invoke("Python", CreateDelegate("System.Func`2[System.Object[], System.Object]", func));
@@ -119,12 +119,12 @@ public class CLRRuntime
         return (CLRObject)CLRRuntime.GetClass("Python.Runtime.Py").Invoke("Import", name);
     }
 
-    public static Object InvokeDelegate(CLRObject clrFunc, Object[] args)
+    public static synchronized Object InvokeDelegate(CLRObject clrFunc, Object[] args)
     {
         return nativeInvokeFunc(clrFunc.hashCode(), args.length, args);
     }
 
-    public static Object InvokeDelegate(int hashCode, Object[] args)
+    public static synchronized Object InvokeDelegate(int hashCode, Object[] args)
     {
         return Functions.get(hashCode).apply(args);
     }
