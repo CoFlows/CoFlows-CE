@@ -22,29 +22,33 @@ import collection.JavaConverters._
 class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[String, Any] {
     lazy val fields = mutable.Map.empty[String, Any]
 
-    val runtime = CLRRuntime.GetClass("QuantApp.Kernel.JVM.Runtime")
-    val sig = runtime.Invoke("Signature", clrObject).asInstanceOf[Array[String]]
-    sig.foreach(signature => {
-    
-        if(signature.startsWith("M/") || signature.startsWith("S-M/")){
-            val isStatic = signature.startsWith("S-")
-            var name = signature.replaceAll("M/","").replaceAll("S-","")
-            name = name.substring(0, name.indexOf("-"))
-            val argsSignature = signature.substring(signature.indexOf("(") + 1, signature.lastIndexOf(")"))
-            val returnSignature = signature.substring(signature.indexOf(")") + 1)
+    if(clrObject != null){
+        val runtime = CLRRuntime.GetClass("QuantApp.Kernel.JVM.Runtime")
+        val sig = runtime.Invoke("Signature", clrObject).asInstanceOf[Array[String]]
+        if(sig != null) {
+            sig.foreach(signature => {
+            
+                if(signature.startsWith("M/") || signature.startsWith("S-M/")){
+                    val isStatic = signature.startsWith("S-")
+                    var name = signature.replaceAll("M/","").replaceAll("S-","")
+                    name = name.substring(0, name.indexOf("-"))
+                    val argsSignature = signature.substring(signature.indexOf("(") + 1, signature.lastIndexOf(")"))
+                    val returnSignature = signature.substring(signature.indexOf(")") + 1)
 
-            updateDynamic(name + argsSignature)((x:Array[Any]) => { 
-                val args = 
-                x.map(_ match { 
-                    case null => null
-                    case o: CLRObject => o.asInstanceOf[CLRObject]
-                    case o: AnyRef => o.asInstanceOf[Object]
-                })
+                    updateDynamic(name + argsSignature)((x:Array[Any]) => { 
+                        val args = 
+                        x.map(_ match { 
+                            case null => null
+                            case o: CLRObject => o.asInstanceOf[CLRObject]
+                            case o: AnyRef => o.asInstanceOf[Object]
+                        })
 
-                clrObject.InvokeArr(name, args)
+                        clrObject.InvokeArr(name, args)
+                    })
+                }
             })
         }
-    })
+    }
   
     def CLRObject : CLRObject = clrObject
 
