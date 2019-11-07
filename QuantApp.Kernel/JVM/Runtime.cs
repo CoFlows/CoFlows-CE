@@ -3278,6 +3278,8 @@ namespace QuantApp.Kernel.JVM
         {
             lock(objLock_Signature)
             {
+                if(obj == null) return new string[]{};
+
                 MethodInfo[] methodInfos = (obj is Type ? obj as Type : obj.GetType()).GetMethods();
 
                 var arr = new List<string>();
@@ -3687,7 +3689,7 @@ namespace QuantApp.Kernel.JVM
                                                     getJavaParameters(ref ar_newInstance, args_object);
                                                     
                                                     if(NewObjectP( pEnv, pClass, "(" + argSig + ")V", args.Length, ar_newInstance, &pObj ) != 0)
-                                                        throw new Exception(GetException(pEnv));
+                                                        throw new Exception("CreateInstancePtr / NewObjectP: " + GetException(pEnv));
                                                 }
                                                 ObjectPtr = new IntPtr(pObj);
                                             }
@@ -3740,13 +3742,13 @@ namespace QuantApp.Kernel.JVM
                                                                                     {
                                                                                         bool _res;
                                                                                         if(GetStaticBooleanField( _pEnv, _pClass, pField, &_res) != 0)
-                                                                                            throw new Exception(GetException(_pEnv));
+                                                                                            throw new Exception("CreateInstancePtr / GetStaticBooleanField: " + GetException(_pEnv));
                                                                                         return _res;
                                                                                     }
                                                                                     else
-                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                        throw new Exception("CreateInstancePtr / GetStaticBooleanFieldID: " + GetException(_pEnv));
                                                                                 else
-                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                    throw new Exception("CreateInstancePtr / GetStaticBooleanField Class: " + GetException(_pEnv));
                                                                             } 
                                                                             else  
                                                                             { 
@@ -3754,15 +3756,15 @@ namespace QuantApp.Kernel.JVM
                                                                                 {
                                                                                     bool _res;
                                                                                     if(GetBooleanField( _pEnv, _pObj, pField, &_res) != 0)
-                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                        throw new Exception("CreateInstancePtr / GetBooleanField: " + GetException(_pEnv));
                                                                                     return _res;
                                                                                 }
                                                                                 else
-                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                    throw new Exception("CreateInstancePtr / GetBooleanFieldID: " + GetException(_pEnv));
                                                                             }
                                                                         }
                                                                         else
-                                                                            throw new Exception(GetException(_pEnv));
+                                                                            throw new Exception("CreateInstancePtr / GetBooleanField Class: " + GetException(_pEnv));
                                                                     }),
                                                                     (wrapSetProperty)((val) => {
                                                                         void*  _pEnv;
@@ -3778,20 +3780,20 @@ namespace QuantApp.Kernel.JVM
                                                                                     if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
                                                                                         SetStaticBooleanField( _pEnv, _pClass, pField, (bool) val);
                                                                                     else
-                                                                                        throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        throw new Exception("CreateInstancePtr / SetStaticBooleanFieldID: " + GetException(_pEnv));
                                                                                 else
-                                                                                    throw new Exception("Runtime Class not found: " + name);
+                                                                                    throw new Exception("CreateInstancePtr / SetStaticBooleanField Class: " + GetException(_pEnv));
                                                                             } 
                                                                             else  
                                                                             { 
                                                                                 if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
                                                                                     SetBooleanField( _pEnv, _pObj, pField, (bool) val);
                                                                                 else
-                                                                                    throw new Exception("Runtime Field not found: " + name);
+                                                                                    throw new Exception("CreateInstancePtr / SetBooleanField: " + GetException(_pEnv));
                                                                             }
                                                                         }
                                                                         else
-                                                                            throw new Exception("Runtime Object not found: " + name);
+                                                                            new Exception("CreateInstancePtr / SetBooleanField NULL: " + GetException(_pEnv));
                                                                     })
                                                                 ));
                                                             break;
@@ -3814,13 +3816,13 @@ namespace QuantApp.Kernel.JVM
                                                                                     {
                                                                                         byte _res;
                                                                                         if(GetStaticByteField( _pEnv, _pClass, pField, &_res) != 0)
-                                                                                            throw new Exception(GetException(_pEnv));
+                                                                                            throw new Exception("CreateInstancePtr / GetStaticByteField: " + GetException(_pEnv));
                                                                                         return _res;
                                                                                     }
                                                                                     else
-                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                        throw new Exception("CreateInstancePtr / GetStaticByteFieldID: " + GetException(_pEnv));
                                                                                 else
-                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                    throw new Exception("CreateInstancePtr / GetStaticByteField Class: " + GetException(_pEnv));
                                                                             } 
                                                                             else  
                                                                             { 
@@ -3828,16 +3830,16 @@ namespace QuantApp.Kernel.JVM
                                                                                 {
                                                                                     byte _res;
                                                                                     if(GetByteField( _pEnv, _pObj, pField, &_res) != 0)
-                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                        throw new Exception("CreateInstancePtr / GetByteField: " + GetException(_pEnv));
                                                                                     return _res;
 
                                                                                 }
                                                                                 else
-                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                    throw new Exception("CreateInstancePtr / GetByteFieldID: " + GetException(_pEnv));
                                                                             }
                                                                         }
                                                                         else
-                                                                            throw new Exception(GetException(_pEnv));
+                                                                            throw new Exception("CreateInstancePtr / GetByteField NULL: " + GetException(_pEnv));
                                                                     }),
                                                                     (wrapSetProperty)((val) => {
                                                                         void*  _pEnv;
@@ -3853,20 +3855,20 @@ namespace QuantApp.Kernel.JVM
                                                                                     if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
                                                                                         SetStaticByteField( _pEnv, _pClass, pField, (byte) val);
                                                                                     else
-                                                                                        throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        throw new Exception("CreateInstancePtr / SetStaticByteFieldID: " + GetException(_pEnv));
                                                                                 else
-                                                                                    throw new Exception("Runtime Class not found: " + name);
+                                                                                    throw new Exception("CreateInstancePtr / SetStaticByteFieldID Class: " + GetException(_pEnv));
                                                                             } 
                                                                             else  
                                                                             { 
                                                                                 if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
                                                                                     SetByteField( _pEnv, _pObj, pField, (byte) val);
                                                                                 else
-                                                                                    throw new Exception("Runtime Field not found: " + name);
+                                                                                    throw new Exception("CreateInstancePtr / SetByteFieldID: " + GetException(_pEnv));
                                                                             }
                                                                         }
                                                                         else
-                                                                            throw new Exception("Runtime Object not found: " + name);
+                                                                            throw new Exception("CreateInstancePtr / SetByteField NULL: " + GetException(_pEnv));
                                                                     })
                                                                 ));
                                                             break;
@@ -3890,13 +3892,13 @@ namespace QuantApp.Kernel.JVM
                                                                                     {
                                                                                         char _res;
                                                                                         if(GetStaticCharField( _pEnv, _pClass, pField, &_res) != 0)
-                                                                                            throw new Exception(GetException(_pEnv));
+                                                                                            throw new Exception("CreateInstancePtr / GetStaticCharField: " + GetException(_pEnv));
                                                                                         return _res;
                                                                                     }
                                                                                     else
-                                                                                        throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        throw new Exception("CreateInstancePtr / GetStaticCharFieldID: " + GetException(_pEnv));
                                                                                 else
-                                                                                    throw new Exception("Runtime Class not found: " + name);
+                                                                                    throw new Exception("CreateInstancePtr / GetStaticCharField Class: " + GetException(_pEnv));
                                                                             } 
                                                                             else  
                                                                             { 
@@ -3904,15 +3906,15 @@ namespace QuantApp.Kernel.JVM
                                                                                 {
                                                                                     char _res;
                                                                                     if(GetCharField( _pEnv, _pObj, pField, &_res) != 0)
-                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                        throw new Exception("CreateInstancePtr / GetCharField: " + GetException(_pEnv));
                                                                                     return _res;
                                                                                 }
                                                                                 else
-                                                                                    throw new Exception("Runtime Field not found: " + name);
+                                                                                    throw new Exception("CreateInstancePtr / GetCharFieldID: " + GetException(_pEnv));
                                                                             }
                                                                         }
                                                                         else
-                                                                            throw new Exception("Runtime Object not found: " + name);
+                                                                            throw new Exception("CreateInstancePtr / GetCharField NULL: " + GetException(_pEnv));
                                                                     }),
                                                                     (wrapSetProperty)((val) => {
                                                                         void*  _pEnv;
@@ -3928,20 +3930,20 @@ namespace QuantApp.Kernel.JVM
                                                                                     if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
                                                                                         SetStaticCharField( _pEnv, _pClass, pField, (char) val);
                                                                                     else
-                                                                                        throw new Exception("Runtime Static Field not found: " + name);
+                                                                                        throw new Exception("CreateInstancePtr / SetStaticCharFieldID : " + GetException(_pEnv));
                                                                                 else
-                                                                                    throw new Exception("Runtime Class not found: " + name);
+                                                                                    throw new Exception("CreateInstancePtr / SetStaticCharField Class: " + GetException(_pEnv));
                                                                             } 
                                                                             else  
                                                                             { 
                                                                                 if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
                                                                                     SetCharField( _pEnv, _pObj, pField, (char) val);
                                                                                 else
-                                                                                    throw new Exception("Runtime Field not found: " + name);
+                                                                                    throw new Exception("CreateInstancePtr / SetStaticCharFieldID: " + GetException(_pEnv));
                                                                             }
                                                                         }
                                                                         else
-                                                                            throw new Exception("Runtime Object not found: " + name);
+                                                                            throw new Exception("CreateInstancePtr / SetCharField NULL: " + GetException(_pEnv));
                                                                     })
                                                                 ));
                                                             break;
@@ -3965,13 +3967,13 @@ namespace QuantApp.Kernel.JVM
                                                                                     {
                                                                                         short _res;
                                                                                         if(GetStaticShortField( _pEnv, _pClass, pField, &_res) != 0)
-                                                                                            throw new Exception(GetException(_pEnv));
+                                                                                            throw new Exception("CreateInstancePtr / GetStaticShortield: " + GetException(_pEnv));
                                                                                         return _res;
                                                                                     }
                                                                                     else
-                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                        throw new Exception("CreateInstancePtr / GetStaticShortFieldID: " + GetException(_pEnv));
                                                                                 else
-                                                                                    throw new Exception(GetException(_pEnv));
+                                                                                    throw new Exception("CreateInstancePtr / GetStaticShortField Class: " + GetException(_pEnv));
                                                                             } 
                                                                             else  
                                                                             { 
@@ -3979,15 +3981,15 @@ namespace QuantApp.Kernel.JVM
                                                                                 {
                                                                                     short _res;
                                                                                     if(GetShortField( _pEnv, _pObj, pField, &_res) != 0)
-                                                                                        throw new Exception(GetException(_pEnv));
+                                                                                        throw new Exception("CreateInstancePtr / GetShortField: " + GetException(_pEnv));
                                                                                     return _res;
                                                                                 }
                                                                                 else
-                                                                                    throw new Exception("Runtime Field not found: " + name);
+                                                                                    throw new Exception("CreateInstancePtr / GetShortField ID: " + GetException(_pEnv));
                                                                             }
                                                                         }
                                                                         else
-                                                                            throw new Exception("Runtime Object not found: " + name);
+                                                                            throw new Exception("CreateInstancePtr / GetSShortField NULL: " + GetException(_pEnv));
                                                                     }),
                                                                     (wrapSetProperty)((val) => {
                                                                         void*  _pEnv;
@@ -5518,10 +5520,11 @@ namespace QuantApp.Kernel.JVM
                     }
                     else 
                         throw new Exception("JVM Engine not loaded");
-                    }
+                }
                 catch(Exception e)
                 {
-                    Console.WriteLine(e);
+                    Console.WriteLine("CreateInstancePtr: " + e);
+                    Console.WriteLine(e.StackTrace);
                     return null;
                 }
             }
