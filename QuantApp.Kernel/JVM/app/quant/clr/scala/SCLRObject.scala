@@ -58,9 +58,9 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
 
     def get(k: String): Option[Any] = fields get k 
 
-
+    val lockApply = 0
     // def applyDynamic[R >: Null <: Any](namep: String)(args: Any*): R = {    
-    def applyDynamic[R <: Any](namep: String)(args: Any*): R = {
+    def applyDynamic[R <: Any](namep: String)(args: Any*): R = this.lockApply.synchronized {
         val argSig = args.map(x => if(x == null) null else x.getClass).map(CLRRuntime.TransformType(_)).map(x => x.replaceAll("app/quant/clr/CLRObject", "java/lang/Object").replaceAll("app/quant/clr/scala/SCLRObject", "java/lang/Object")).mkString
         
         val name = namep + argSig

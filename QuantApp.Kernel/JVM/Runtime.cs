@@ -3273,30 +3273,34 @@ namespace QuantApp.Kernel.JVM
             }
         }
 
+        private readonly static object objLock_Signature = new object();
         public static string[] Signature(object obj)
         {
-            MethodInfo[] methodInfos = (obj is Type ? obj as Type : obj.GetType()).GetMethods();
-
-            var arr = new List<string>();
-
-            for(int i = 0; i < methodInfos.Length; i++)
+            lock(objLock_Signature)
             {
-                var m = methodInfos[i];
+                MethodInfo[] methodInfos = (obj is Type ? obj as Type : obj.GetType()).GetMethods();
 
-                if(m.IsPublic)
+                var arr = new List<string>();
+
+                for(int i = 0; i < methodInfos.Length; i++)
                 {
-                    string sig = (m.IsStatic ? "S-" : "") + "M/" + m.Name + "-(";
-                    foreach(var p in m.GetParameters())
-                        sig += TransformType(p.ParameterType);
-                    sig += ")" + TransformType(m.ReturnType);
+                    var m = methodInfos[i];
+
+                    if(m.IsPublic)
+                    {
+                        string sig = (m.IsStatic ? "S-" : "") + "M/" + m.Name + "-(";
+                        foreach(var p in m.GetParameters())
+                            sig += TransformType(p.ParameterType);
+                        sig += ")" + TransformType(m.ReturnType);
 
 
-                    arr.Add(sig);
+                        arr.Add(sig);
+                    }
+
                 }
 
+                return arr.ToArray();
             }
-
-            return arr.ToArray();
         }
         public unsafe static void RegisterJVMObject(int hashCode, void* pObj)
         {
