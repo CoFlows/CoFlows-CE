@@ -10,6 +10,7 @@ package app.quant.clr;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.*;
 
 import javax.lang.model.util.ElementScanner6;
@@ -97,7 +98,7 @@ public class CLRRuntime
     }
 
 
-    public static HashMap<Integer, Function<Object[], Object>> Functions = new HashMap<Integer, Function<Object[], Object>>();
+    public static ConcurrentHashMap<Integer, Function<Object[], Object>> Functions = new ConcurrentHashMap<Integer, Function<Object[], Object>>();
 
     public static synchronized CLRObject CreateDelegate(String classname, Function<Object[], Object> func)
     {
@@ -105,6 +106,8 @@ public class CLRRuntime
 
         if(!Functions.containsKey(hash))
             Functions.put(hash, func);
+        else
+            System.out.println("Java CreateDelegate ERROR exists: " + hash);
         return (CLRObject)nativeRegisterFunc(classname, hash);
     }
 

@@ -159,7 +159,7 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
 
 object SCLRObject {
     def apply(name : String, args : Any*) = { 
-      val vargs = 
+        val vargs = 
             args.map(_ match { 
               case null => null
               case o: CLRObject => o.asInstanceOf[CLRObject]

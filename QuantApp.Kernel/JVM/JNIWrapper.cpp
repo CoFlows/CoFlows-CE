@@ -23,6 +23,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include <mutex>
+
 using namespace std;
 extern "C" {
 
@@ -362,13 +364,17 @@ extern "C" {
     //Methods
     int GetStaticMethodID(JNIEnv* pEnv, jclass pClass, const char* szName, const char* szArgs, jmethodID* pMid)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pMid = pEnv->GetStaticMethodID( pClass, szName, szArgs);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         if( *pMid != NULL )
             return 0;
         else
@@ -377,6 +383,9 @@ extern "C" {
 
     int GetMethodID(JNIEnv* pEnv, jobject pObj, const char* szName, const char* szArgs, jmethodID*  pMid)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jclass cls = pEnv->GetObjectClass(pObj);
 
         *pMid = pEnv->GetMethodID(cls, szName, szArgs);
@@ -384,8 +393,11 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+
+        mutex.unlock();
 
         if( *pMid != NULL )
             return 0;
@@ -396,13 +408,18 @@ extern "C" {
     //Fields
     int GetStaticFieldID(JNIEnv* pEnv, jclass pClass, const char* szName, const char* sig, jfieldID* pFid)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pFid = pEnv->GetStaticFieldID( pClass, szName, sig);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( *pFid != NULL )
             return 0;
         else
@@ -411,9 +428,13 @@ extern "C" {
 
     int GetFieldID(JNIEnv* pEnv, jobject pObj, const char* szName, const char* sig, jfieldID*  pFid)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jclass cls = pEnv->GetObjectClass(pObj);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
@@ -422,8 +443,11 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+
+        mutex.unlock();
 
         if( *pFid != NULL )
             return 0;
@@ -435,6 +459,9 @@ extern "C" {
     //void
     int CallStaticVoidMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs)
     { 
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -445,15 +472,20 @@ extern "C" {
         {
             // //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
         
         free(args);
+        mutex.unlock();
         return 0;
     }
 
     int CallVoidMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -462,11 +494,13 @@ extern "C" {
         pEnv->CallVoidMethodA( pClass, pMid, (const jvalue*)args);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
+            mutex.unlock();
             // //pEnv->ExceptionDescribe();
             return -1;
         }
 
         free(args);
+        mutex.unlock();
         return 0;
     }
 
@@ -474,6 +508,9 @@ extern "C" {
 
     int GetObjectClass(JNIEnv* pEnv, jobject pobj, jclass* cls, jstring* clsname)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jclass _cls = pEnv->GetObjectClass(pobj);
 
         void** args = (void**)malloc(sizeof(void *) * 1);
@@ -483,6 +520,7 @@ extern "C" {
             // //pEnv->ExceptionDescribe();
 
             free(args);
+            mutex.unlock();
             return -1;
         }
         jobject jcls = pEnv->CallObjectMethodA(_cls, pMid, (const jvalue*)args);
@@ -490,6 +528,7 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
 
@@ -497,6 +536,7 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
 
@@ -504,6 +544,7 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
 
@@ -513,17 +554,22 @@ extern "C" {
         {
             // //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
 
         *cls = _cls;
         *clsname = (jstring)jclsName;
         free(args);
+        mutex.unlock();
         return 0;
     }
     
     int CallStaticObjectMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, jobject* pobj, int len, void** pArgs)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -534,14 +580,19 @@ extern "C" {
         {
             // //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
         *pobj = val;
         free(args);
+        mutex.unlock();
         return 0;
     }
     int CallObjectMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, jobject* pobj, int len, void** pArgs)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -553,69 +604,94 @@ extern "C" {
         {
             // //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
         
         *pobj = val;
         free(args);
+        mutex.unlock();
         return 0;
     }
 
     int GetStaticObjectField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jobject val = pEnv->GetStaticObjectField(pClass, pMid);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
+            mutex.unlock();
             // //pEnv->ExceptionDescribe();
             return -1;
         }
         
         *pobj = val;
+        mutex.unlock();
         return 0;
     }
 
     int GetObjectField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jobject val = pEnv->GetObjectField( pObject, pMid);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         
         *pobj = val;
+        mutex.unlock();
         return 0;
     }
 
     int SetStaticObjectField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, jobject val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetStaticObjectField(pClass, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     int SetObjectField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, jobject val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetObjectField( pObject, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     //int
     int CallStaticIntMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, int* res)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -624,15 +700,20 @@ extern "C" {
         *res = pEnv->CallStaticIntMethodA(pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         free(args);
+        mutex.unlock();
         return 0;
 
     }
 
     int CallIntMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, int* res)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -643,24 +724,34 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
         free(args);
+        mutex.unlock();
         return 0;
     }
 
     int GetStaticIntField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, int* res)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *res = pEnv->GetStaticIntField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     int GetIntField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, int* res)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *res = pEnv->GetIntField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
@@ -671,26 +762,35 @@ extern "C" {
 
     int SetStaticIntField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, int val)
     {
-        
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetStaticIntField(pClass, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     int SetIntField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, int val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetIntField( pObject, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
@@ -698,6 +798,9 @@ extern "C" {
     //long
     int CallStaticLongMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, long* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -707,14 +810,19 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
         free(args);
+        mutex.unlock();
         return 0;
     }
 
     int CallLongMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, long* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -724,61 +832,88 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         return 0;
     }
 
     int GetStaticLongField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, long* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetStaticLongField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         return 0;
     }
 
     int GetLongField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, long* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetLongField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         return 0;
     }
 
     int SetStaticLongField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, long val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetStaticLongField(pClass, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+
+        mutex.unlock();
         return 0;
     }
 
     int SetLongField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, long val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetLongField( pObject, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+
+        mutex.unlock();
         return 0;
     }
 
     //float
     int CallStaticFloatMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, float* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -788,14 +923,21 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
+        free(args);
         return 0;
     }
 
     int CallFloatMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, float* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -806,60 +948,85 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
-            // return -666;
+            mutex.unlock();
             return -1;
         }
 
-        // return val;
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int GetStaticFloatField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, float *val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetStaticFloatField(pClass, pMid);
-        if(pEnv->ExceptionCheck() == JNI_TRUE)
+        if(pEnv->ExceptionCheck() == JNI_TRUE){        
+            mutex.unlock();
             return -1;
+        }
+
+        mutex.unlock();
         return 0;
     }
 
     int GetFloatField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, float *val)
     {
+        std::mutex mutex;
+        mutex.lock();
 
         *val = pEnv->GetFloatField(pObject, pMid);
-        if(pEnv->ExceptionCheck() == JNI_TRUE)
-            return -11;
+        if(pEnv->ExceptionCheck() == JNI_TRUE){
+            mutex.unlock();
+            return -1;
+        }
+
+        mutex.unlock();
         return 0;
     }
 
     int SetStaticFloatField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, float val)
     {
-        
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetStaticFloatField(pClass, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+
+        mutex.unlock();
         return 0;
     }
 
     int SetFloatField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, float val)
     {
-        
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetFloatField( pObject, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     //double
     int CallStaticDoubleMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, double* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -868,14 +1035,19 @@ extern "C" {
         *val = pEnv->CallStaticDoubleMethodA(pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             free(args);
+            mutex.unlock();
             return -1;
         }
-
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int CallDoubleMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, double* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -884,63 +1056,86 @@ extern "C" {
         *val = pEnv->CallDoubleMethodA( pObject, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             free(args);
+            mutex.unlock();
             return -1;
         }
 
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int GetStaticDoubleField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, double* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetStaticDoubleField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         return 0;
     }
 
     int GetDoubleField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, double* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetDoubleField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         return 0;
     }
 
     int SetStaticDoubleField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, double val)
     {
-        
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetStaticDoubleField(pClass, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     int SetDoubleField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, double val)
     {
-        
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetDoubleField( pObject, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     //bool
     int CallStaticBooleanMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, bool* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -950,14 +1145,19 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
-
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int CallBooleanMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, bool* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -967,64 +1167,86 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
-
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int GetStaticBooleanField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, bool* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetStaticBooleanField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         return 0;
     }
 
     int GetBooleanField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, bool* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetBooleanField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
-            
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         return 0;
     }
 
     int SetStaticBooleanField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, bool val)
     {
-        
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetStaticBooleanField(pClass, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     int SetBooleanField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, bool val)
     {
-        
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetBooleanField( pObject, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     //byte
     int CallStaticByteMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, jbyte* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -1034,14 +1256,20 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
 
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int CallByteMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, jbyte* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -1051,61 +1279,85 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
-
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int GetStaticByteField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, jbyte* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetStaticByteField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         return 0;
     }
 
     int GetByteField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, jbyte* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetByteField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         return 0;
     }
 
     int SetStaticByteField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, jbyte val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetStaticByteField(pClass, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     int SetByteField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, jbyte val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetByteField( pObject, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     //char
     int CallStaticCharMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, char* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -1115,14 +1367,19 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
-
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int CallCharMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, char* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -1132,59 +1389,75 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
-
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int GetStaticCharField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, char* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetStaticCharField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
-            
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         return 0;
     }
 
     int GetCharField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, char* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetCharField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
-            
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         return 0;
     }
 
     int SetStaticCharField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, char val)
     {
-        
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetStaticCharField(pClass, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     int SetCharField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, char val)
     {
-        
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetCharField( pObject, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
@@ -1192,6 +1465,9 @@ extern "C" {
     //short
     int CallStaticShortMethod(JNIEnv* pEnv, jclass pClass, jmethodID pMid, int len, void** pArgs, short* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -1201,14 +1477,20 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
 
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int CallShortMethod(JNIEnv* pEnv, jobject pObject, jmethodID pMid, int len, void** pArgs, short* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         void** args = (void**)malloc(sizeof(void *) * len);
 
         for(int i = 0; i < len; i++)
@@ -1218,56 +1500,78 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
 
+        free(args);
+        mutex.unlock();
         return 0;
     }
 
     int GetStaticShortField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, short* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetStaticShortField(pClass, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         return 0;
     }
 
     int GetShortField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, short* val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *val = pEnv->GetShortField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         return 0;
     }
 
     int SetStaticShortField(JNIEnv* pEnv, jclass pClass, jfieldID pMid, short val)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetStaticShortField(pClass, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
     int SetShortField(JNIEnv* pEnv, jobject pObject, jfieldID pMid, short val)
     {
-        
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetShortField( pObject, pMid, val);
         
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
@@ -1741,12 +2045,17 @@ extern "C" {
 
     JNIEXPORT jint JNICALL Java_app_quant_clr_CLRRuntime_nativeCreateInstance(JNIEnv* pEnv, jclass cls, jstring classname, jint len, jobjectArray args)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         const char* _classname = GetNetString(pEnv, classname);
         int val = fnCreateInstance(_classname, len, (void**)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return val;
     }
 
@@ -1759,12 +2068,18 @@ extern "C" {
 
     JNIEXPORT jobject JNICALL Java_app_quant_clr_CLRRuntime_nativeInvoke(JNIEnv* pEnv, jclass cls, jint ptr, jstring funcname, jint len, jobjectArray args)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         const char* _funcname = GetNetString(pEnv, funcname);
         jobject val = fnInvoke(ptr, _funcname, len, (void**)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return NULL;
         }
+
+        mutex.unlock();
         return val;
     }
 
@@ -1777,12 +2092,17 @@ extern "C" {
 
     JNIEXPORT jobject JNICALL Java_app_quant_clr_CLRRuntime_nativeGetProperty(JNIEnv* pEnv, jclass cls, jint ptr, jstring name)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         const char* _name = GetNetString(pEnv, name);
         jobject val = fnGetProperty(ptr, _name);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return NULL;
         }
+        mutex.unlock();
         return val;
     }
 
@@ -1795,8 +2115,13 @@ extern "C" {
 
     JNIEXPORT void JNICALL Java_app_quant_clr_CLRRuntime_nativeSetProperty(JNIEnv* pEnv, jclass cls, jint ptr, jstring name, jobjectArray value)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         const char* _name = GetNetString(pEnv, name);
         fnSetProperty(ptr, _name, (void**)value);
+
+        mutex.unlock();
     }
 
 
@@ -1810,13 +2135,18 @@ extern "C" {
 
     JNIEXPORT jobject JNICALL Java_app_quant_clr_CLRRuntime_nativeRegisterFunc(JNIEnv* pEnv, jclass cls, jstring funcname, jint hash)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         const char* _funcname = GetNetString(pEnv, funcname);
         
         jobject val = fnRegisterFunc(_funcname, hash);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return NULL;
         }
+        mutex.unlock();
         return val;
     }
 
@@ -1830,11 +2160,16 @@ extern "C" {
 
     JNIEXPORT jobject JNICALL Java_app_quant_clr_CLRRuntime_nativeInvokeFunc(JNIEnv* pEnv, jclass cls, jint ptr, jint len, jobjectArray args)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jobject val = fnInvokeFunc(ptr, len, (void**)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return NULL;
         }
+        mutex.unlock();
         return val;
     }
 
