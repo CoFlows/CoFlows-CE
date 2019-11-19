@@ -15,7 +15,8 @@ namespace QuantApp.Kernel.JVM
     
     public class JVMIEnumerable : JVMObject, IEnumerable<object>
     {
-        public JVMIEnumerable(JVMObject obj):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass){}
+        // public JVMIEnumerable(JVMObject obj):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass){}
+        public JVMIEnumerable(JVMObject obj):base(obj.JavaHashCode, obj.JavaClass){}
 
         public IEnumerator<object> GetEnumerator()
         {

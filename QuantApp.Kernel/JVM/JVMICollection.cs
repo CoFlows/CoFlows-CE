@@ -13,7 +13,8 @@ namespace QuantApp.Kernel.JVM
 {
     public class JVMICollection : JVMObject, ICollection<object>
     {
-        public JVMICollection(JVMObject obj):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass){}
+        // public JVMICollection(JVMObject obj):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass){}
+        public JVMICollection(JVMObject obj):base(obj.JavaHashCode, obj.JavaClass){}
         public void CopyTo(object[] keyPairs, int index)
         {
         }

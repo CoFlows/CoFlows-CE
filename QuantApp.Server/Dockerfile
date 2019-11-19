@@ -15,6 +15,13 @@ RUN ln -s /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so
 
 RUN apt-get install -y libomp-dev
 
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get -y install msodbcsql17 && \
+    apt-get -y install unixodbc-dev
+
+
 # Python 3.7 Install
 RUN cd /usr/src && \
     wget https://www.python.org/ftp/python/3.7.4/Python-3.7.4.tgz && \
@@ -121,6 +128,8 @@ RUN pip install jupyterlab
 RUN pip install dash
 RUN pip install dash-daq
 RUN pip install requests
+
+RUN pip install pyodbc
 
 RUN mv /App/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kernel.json
 

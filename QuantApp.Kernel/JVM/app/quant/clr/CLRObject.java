@@ -9,10 +9,11 @@
 package app.quant.clr;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 public class CLRObject
 {
-    public static Map<Integer, CLRObject> DB = new HashMap<Integer, CLRObject>();
+    public static ConcurrentHashMap<Integer, CLRObject> DB = new ConcurrentHashMap<Integer, CLRObject>();
 
     public int Pointer;
     public String ClassName;
@@ -21,26 +22,27 @@ public class CLRObject
     {
         this.Pointer = ptr;
         this.ClassName = classname;
-        if(!DB.containsKey(ptr))
-            DB.put(ptr, this);
+        // if(!DB.containsKey(ptr))
+        DB.put(ptr, this);
+        // System.out.println("JAVA CLRObject: " + ptr + " " + classname);
     }
 
-    public Object Invoke(String funcname, Object... args)
+    public synchronized Object Invoke(String funcname, Object... args)
     {
         return CLRRuntime.Invoke(Pointer, funcname, args);
     }
 
-    public Object InvokeArr(String funcname, Object[] args)
+    public synchronized Object InvokeArr(String funcname, Object[] args)
     {
         return CLRRuntime.Invoke(Pointer, funcname, args);
     }
 
-    public Object GetProperty(String name)
+    public synchronized Object GetProperty(String name)
     {
         return CLRRuntime.GetProperty(Pointer, name);
     }
 
-    public void SetProperty(String name, Object value)
+    public synchronized void SetProperty(String name, Object value)
     {
         CLRRuntime.SetProperty(Pointer, name, value);
     }

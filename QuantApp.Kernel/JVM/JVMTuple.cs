@@ -28,7 +28,8 @@ namespace QuantApp.Kernel.JVM
     {
         internal JVMObject jVMObject;
         internal IJVMTuple jVMTuple;
-        public JVMTuple(JVMObject obj, IJVMTuple tuple):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass)
+        // public JVMTuple(JVMObject obj, IJVMTuple tuple):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass)
+        public JVMTuple(JVMObject obj, IJVMTuple tuple):base(obj.JavaHashCode, obj.JavaClass)
         {
             this.jVMObject = obj;
             this.jVMTuple = tuple;

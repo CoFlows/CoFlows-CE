@@ -24,7 +24,10 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
 
     if(clrObject != null){
         val runtime = CLRRuntime.GetClass("QuantApp.Kernel.JVM.Runtime")
-        val sig = runtime.Invoke("Signature", clrObject).asInstanceOf[Array[String]]
+        var _sig = runtime.Invoke("Signature", clrObject)
+        // println("SCALA(" + clrObject.hashCode()  + "): " + clrObject + " " + runtime.hashCode() + " " + _sig.hashCode() + " " + _sig)
+        // val sig = runtime.Invoke("Signature", clrObject).asInstanceOf[Array[String]]
+        val sig = _sig.asInstanceOf[Array[String]]
         if(sig != null) {
             sig.foreach(signature => {
             
@@ -37,11 +40,11 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
 
                     updateDynamic(name + argsSignature)((x:Array[Any]) => { 
                         val args = 
-                        x.map(_ match { 
-                            case null => null
-                            case o: CLRObject => o.asInstanceOf[CLRObject]
-                            case o: AnyRef => o.asInstanceOf[Object]
-                        })
+                            x.map(_ match { 
+                                case null => null
+                                case o: CLRObject => o.asInstanceOf[CLRObject]
+                                case o: AnyRef => o.asInstanceOf[Object]
+                            })
 
                         clrObject.InvokeArr(name, args)
                     })
@@ -52,7 +55,8 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
   
     def CLRObject : CLRObject = clrObject
 
-    override def hashCode() : Int = clrObject.hashCode()
+    // override def hashCode() : Int = clrObject.hashCode()
+    override def hashCode() : Int = CLRRuntime.GetID(clrObject)
 
     def -=(k: String): this.type = { fields -= k; this }
 

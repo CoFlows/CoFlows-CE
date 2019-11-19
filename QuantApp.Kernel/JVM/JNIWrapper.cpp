@@ -81,13 +81,19 @@ extern "C" {
 
     int FindClass(JNIEnv* pEnv, const char* szClass, jclass* pClass )
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pClass = pEnv->FindClass( szClass );
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+
+        mutex.unlock();
         if(*pClass != NULL)
             return 0;
         else
@@ -97,26 +103,39 @@ extern "C" {
 
     int AttacheThread(JavaVM* pVM, void** pEnv)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         int getEnvStat = pVM->GetEnv((void **)pEnv, JNI_VERSION_1_6);
         
 
         if (getEnvStat == JNI_EDETACHED) 
         {
-            if (pVM->AttachCurrentThread((void **)pEnv, NULL) != 0) 
+            if (pVM->AttachCurrentThread((void **)pEnv, NULL) != 0) {
+                mutex.unlock();
                 return -2;
-            else
+            }
+            else{
+                mutex.unlock();
                 return 0;            
+            }
         } 
-        else if (getEnvStat == JNI_OK) 
+        else if (getEnvStat == JNI_OK) {
+            mutex.unlock();
             return 0;
-        else if (getEnvStat == JNI_EVERSION) 
+        }
+        else if (getEnvStat == JNI_EVERSION) {
+            mutex.unlock();
             return -3;
-
+        }
+        
+        mutex.unlock();
         return -1;
     }
 
     int DetacheThread(JavaVM* pVM)
     {
+        // cout << "--DEATACHED" << endl;
         return pVM->DetachCurrentThread();
     }
 
@@ -124,9 +143,13 @@ extern "C" {
     //object
     int NewObjectP(JNIEnv* pEnv, jclass cls, const char* szArgs, int len, void** pArgs, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jmethodID methodID = pEnv->GetMethodID(cls, "<init>", szArgs);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
@@ -140,11 +163,12 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
 
         free(args);
-
+        mutex.unlock();
         if( pobj != NULL )
             return 0;
         else
@@ -153,10 +177,14 @@ extern "C" {
 
     int NewObject(JNIEnv* pEnv, const char* szType, const char* szArgs, int len, void** pArgs, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jclass cls = pEnv->FindClass( szType );
         jmethodID methodID = pEnv->GetMethodID(cls, "<init>", szArgs);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
@@ -170,11 +198,12 @@ extern "C" {
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
             free(args);
+            mutex.unlock();
             return -1;
         }
 
         free(args);
-
+        mutex.unlock();
         if( pobj != NULL )
             return 0;
         else
@@ -184,18 +213,24 @@ extern "C" {
     //bool object
     int NewBooleanObject(JNIEnv* pEnv, bool val, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Boolean" ), "<init>", "(Z)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Boolean" ), methodID, val);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pobj != NULL )
             return 0;
         else
@@ -205,9 +240,14 @@ extern "C" {
     //bool object
     int NewByteObject(JNIEnv* pEnv, jbyte val, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
+
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Byte" ), "<init>", "(B)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         
@@ -215,9 +255,10 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         if( pobj != NULL )
             return 0;
         else
@@ -227,9 +268,13 @@ extern "C" {
     //char object
     int NewCharacterObject(JNIEnv* pEnv, char val, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Character" ), "<init>", "(C)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         
@@ -237,9 +282,10 @@ extern "C" {
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         if( pobj != NULL )
             return 0;
         else
@@ -249,9 +295,13 @@ extern "C" {
     //short object
     int NewShortObject(JNIEnv* pEnv, short val, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Short" ), "<init>", "(S)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         
@@ -259,9 +309,11 @@ extern "C" {
         
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pobj != NULL )
             return 0;
         else
@@ -271,9 +323,13 @@ extern "C" {
     //int object
     int NewIntegerObject(JNIEnv* pEnv, int val, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Integer" ), "<init>", "(I)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         
@@ -281,9 +337,11 @@ extern "C" {
         
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pobj != NULL )
             return 0;
         else
@@ -293,9 +351,13 @@ extern "C" {
     //long object
     int NewLongObject(JNIEnv* pEnv, long val, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Long" ), "<init>", "(J)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         
@@ -303,9 +365,11 @@ extern "C" {
         
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pobj != NULL )
             return 0;
         else
@@ -315,19 +379,22 @@ extern "C" {
     //float object
     int NewFloatObject(JNIEnv* pEnv, float val, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Float" ), "<init>", "(F)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Float" ), methodID, val);
         
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         if( pobj != NULL )
             return 0;
         else
@@ -339,18 +406,24 @@ extern "C" {
     //double object
     int NewDoubleObject(JNIEnv* pEnv, double val, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jmethodID methodID = pEnv->GetMethodID(pEnv->FindClass( "java/lang/Double" ), "<init>", "(D)V");
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
         *pobj = pEnv->NewObject(pEnv->FindClass( "java/lang/Double" ), methodID, val);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             // //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pobj != NULL )
             return 0;
         else
@@ -494,8 +567,8 @@ extern "C" {
         pEnv->CallVoidMethodA( pClass, pMid, (const jvalue*)args);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
+            free(args);
             mutex.unlock();
-            // //pEnv->ExceptionDescribe();
             return -1;
         }
 
@@ -700,6 +773,7 @@ extern "C" {
         *res = pEnv->CallStaticIntMethodA(pClass, pMid, (const jvalue*)args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            free(args);
             mutex.unlock();
             return -1;
         }
@@ -755,8 +829,10 @@ extern "C" {
         *res = pEnv->GetIntField(pObject, pMid);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return 0;
     }
 
@@ -836,6 +912,7 @@ extern "C" {
             return -1;
         }
 
+        free(args);
         mutex.unlock();
         return 0;
     }
@@ -928,8 +1005,8 @@ extern "C" {
             return -1;
         }
 
-        mutex.unlock();
         free(args);
+        mutex.unlock();
         return 0;
     }
 
@@ -1585,14 +1662,19 @@ extern "C" {
 
     const char* GetNetString(JNIEnv* pEnv, jstring jString)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         if(jString == (jstring)0){
+            mutex.unlock();
             return "";
         }
-        
         const char* res = pEnv->GetStringUTFChars(jString, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
+            mutex.unlock();
             return "";
         }
+        mutex.unlock();
         return res;
     }
 
@@ -1639,13 +1721,18 @@ extern "C" {
 
     int NewObjectArrayP(JNIEnv* pEnv, int nDimension, jclass cls, jobjectArray* pArray )
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pArray = pEnv->NewObjectArray( nDimension, cls, NULL);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pArray != NULL )
             return 0;
         else
@@ -1655,13 +1742,18 @@ extern "C" {
     
     int NewObjectArray(JNIEnv* pEnv, int nDimension, const char* szType, jobjectArray* pArray )
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pArray = pEnv->NewObjectArray( nDimension, pEnv->FindClass( szType ), NULL);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pArray != NULL )
             return 0;
         else
@@ -1671,38 +1763,57 @@ extern "C" {
 
     int SetObjectArrayElement(JNIEnv* pEnv, jobjectArray pArray, int index, jobject value)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         pEnv->SetObjectArrayElement(pArray, index, value);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         else
+        {
+            mutex.unlock();
             return 0;
+        }
     }
 
     int GetObjectArrayElement(JNIEnv* pEnv, jobjectArray pArray, int index, jobject* pobj)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jobject val = pEnv->GetObjectArrayElement(pArray, index);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
         else
             *pobj = val;
-            return 0;
+
+        mutex.unlock();
+        return 0;
     }
 
     //int array
     int NewIntArray(JNIEnv* pEnv, int nDimension, jintArray* pArray )
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pArray = pEnv->NewIntArray(nDimension);
         
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+
+        mutex.unlock();
         if( pArray != NULL )
             return 0;
         else
@@ -1712,15 +1823,20 @@ extern "C" {
 
     int SetIntArrayElement(JNIEnv* pEnv, jintArray pArray, int index, int value)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         const jint elements[] = { value };
         pEnv->SetIntArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-        else
-            return 0;
+        
+        mutex.unlock();
+        return 0;
     }
 
     int GetIntArrayElement(JNIEnv* pEnv, jintArray pArray, int index)
@@ -1732,14 +1848,18 @@ extern "C" {
     //long array
     int NewLongArray(JNIEnv* pEnv, int nDimension, jlongArray* pArray )
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pArray = pEnv->NewLongArray( nDimension);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         if( pArray != NULL )
             return 0;
         else
@@ -1749,38 +1869,53 @@ extern "C" {
 
     int SetLongArrayElement(JNIEnv* pEnv, jlongArray pArray, int index, long value)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         const jlong elements[] = { value };
         pEnv->SetLongArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-        else
-            return 0;
+        mutex.unlock();
+        return 0;
     }
 
     long GetLongArrayElement(JNIEnv* pEnv, jlongArray pArray, int index)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jlong *val = pEnv->GetLongArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -666;
         }
+
+        mutex.unlock();
         return val[index];
     }
 
     //float array
     int NewFloatArray(JNIEnv* pEnv, int nDimension, jfloatArray* pArray )
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pArray = pEnv->NewFloatArray( nDimension);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pArray != NULL )
             return 0;
         else
@@ -1790,38 +1925,52 @@ extern "C" {
 
     int SetFloatArrayElement(JNIEnv* pEnv, jfloatArray pArray, int index, float value)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         float elements[] = { value };
         pEnv->SetFloatArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-        else
-            return 0;
+        mutex.unlock();
+        return 0;
     }
 
     float GetFloatArrayElement(JNIEnv* pEnv, jfloatArray pArray, int index)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         float *val = pEnv->GetFloatArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -666;
         }
+        mutex.unlock();
         return val[index];
     }
 
     //double array
     int NewDoubleArray(JNIEnv* pEnv, int nDimension, jdoubleArray* pArray )
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pArray = pEnv->NewDoubleArray( nDimension);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pArray != NULL )
             return 0;
         else
@@ -1831,38 +1980,51 @@ extern "C" {
 
     int SetDoubleArrayElement(JNIEnv* pEnv, jdoubleArray pArray, int index, double value)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         double elements[] = { value };
         pEnv->SetDoubleArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-        else
-            return 0;
+        mutex.unlock();
+        return 0;
     }
 
     double GetDoubleArrayElement(JNIEnv* pEnv, jdoubleArray pArray, int index)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         double *val = pEnv->GetDoubleArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -666;
         }
+        mutex.unlock();
         return val[index];
     }
 
     //boolean array
     int NewBooleanArray(JNIEnv* pEnv, int nDimension, jbooleanArray* pArray )
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pArray = pEnv->NewBooleanArray( nDimension);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         if( pArray != NULL )
             return 0;
         else
@@ -1872,24 +2034,32 @@ extern "C" {
 
     int SetBooleanArrayElement(JNIEnv* pEnv, jbooleanArray pArray, int index, bool value)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jboolean elements[] = { value };
         pEnv->SetBooleanArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-        else
-            return 0;
+        mutex.unlock();
+        return 0;
     }
 
     bool GetBooleanArrayElement(JNIEnv* pEnv, jbooleanArray pArray, int index)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jboolean *val = pEnv->GetBooleanArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return false;
         }
+        mutex.unlock();
         return (bool)val[index];
     }
 
@@ -1897,14 +2067,18 @@ extern "C" {
     //byte array
     int NewByteArray(JNIEnv* pEnv, int nDimension, jbyteArray* pArray )
     {
+        std::mutex mutex;
+        mutex.lock();
         *pArray = pEnv->NewByteArray( nDimension);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pArray != NULL )
             return 0;
         else
@@ -1914,24 +2088,32 @@ extern "C" {
 
     int SetByteArrayElement(JNIEnv* pEnv, jbyteArray pArray, int index, jbyte value)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jbyte elements[] = { value };
         pEnv->SetByteArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
             //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-        else
-            return 0;
+        mutex.unlock();
+        return 0;
     }
 
     jbyte GetByteArrayElement(JNIEnv* pEnv, jbyteArray pArray, int index)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jbyte *val = pEnv->GetByteArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
+        mutex.unlock();
         return val[index];
     }
 
@@ -1939,14 +2121,17 @@ extern "C" {
     //short array
     int NewShortArray(JNIEnv* pEnv, int nDimension, jshortArray* pArray )
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pArray = pEnv->NewShortArray( nDimension);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-
+        mutex.unlock();
         if( pArray != NULL )
             return 0;
         else
@@ -1956,22 +2141,28 @@ extern "C" {
 
     int SetShortArrayElement(JNIEnv* pEnv, jshortArray pArray, int index, short value)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         short elements[] = { value };
         pEnv->SetShortArrayRegion(pArray, index, 1, elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-        else
-            return 0;
+        mutex.unlock();
+        return 0;
     }
 
     short GetShortArrayElement(JNIEnv* pEnv, jshortArray pArray, int index)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         short *val = pEnv->GetShortArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -666;
         }
         return val[index];
@@ -1980,14 +2171,18 @@ extern "C" {
     //char array
     int NewCharArray(JNIEnv* pEnv, int nDimension, jcharArray* pArray )
     {
+        std::mutex mutex;
+        mutex.lock();
+
         *pArray = pEnv->NewCharArray( nDimension);
 
         if(pEnv->ExceptionCheck() == JNI_TRUE)
         {
-            //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
 
+        mutex.unlock();
         if( pArray != NULL )
             return 0;
         else
@@ -1997,24 +2192,31 @@ extern "C" {
 
     int SetCharArrayElement(JNIEnv* pEnv, jcharArray pArray, int index, char value)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         char elements[] = { value };
         pEnv->SetCharArrayRegion(pArray, index, 1, (jchar *)elements);
         if( pEnv->ExceptionCheck() == JNI_TRUE )
         {
-            //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return -1;
         }
-        else
-            return 0;
+        mutex.unlock();
+        return 0;
     }
 
     char GetCharArrayElement(JNIEnv* pEnv, jcharArray pArray, int index)
     {
+        std::mutex mutex;
+        mutex.lock();
+
         jchar *val = pEnv->GetCharArrayElements(pArray, 0);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
-            //pEnv->ExceptionDescribe();
+            mutex.unlock();
             return (char)-1;
         }
+        mutex.unlock();
         return val[index];
     }
 
@@ -2036,11 +2238,11 @@ extern "C" {
 
 
     
-    int (*fnCreateInstance)(const char*, int, void**);
+    int (*fnCreateInstance)(void*, const char*, int, void**);
 
     void SetfnCreateInstance(void* cb)
     {
-        fnCreateInstance = (int (*)(const char*, int, void**))cb;
+        fnCreateInstance = (int (*)(void*, const char*, int, void**))cb;
     }
 
     JNIEXPORT jint JNICALL Java_app_quant_clr_CLRRuntime_nativeCreateInstance(JNIEnv* pEnv, jclass cls, jstring classname, jint len, jobjectArray args)
@@ -2048,22 +2250,28 @@ extern "C" {
         std::mutex mutex;
         mutex.lock();
 
+        void** _args = (void**)malloc(sizeof(void *) * len);
+        for(int i = 0; i < len; i++)
+            _args[i] = (void*)((void**)args)[i];
+
         const char* _classname = GetNetString(pEnv, classname);
-        int val = fnCreateInstance(_classname, len, (void**)args);
+        int val = fnCreateInstance(pEnv, _classname, len, _args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            free(_args);
             mutex.unlock();
             return -1;
         }
+        free(_args);
         mutex.unlock();
         return val;
     }
 
-    jobject (*fnInvoke)(int, const char*, int, void**);
+    jobject (*fnInvoke)(void*, int, const char*, int, void**);
 
     void SetfnInvoke(void* cb)
     {
-        fnInvoke = (jobject (*)(int, const char*, int, void**))cb;
+        fnInvoke = (jobject (*)(void*, int, const char*, int, void**))cb;
     }
 
     JNIEXPORT jobject JNICALL Java_app_quant_clr_CLRRuntime_nativeInvoke(JNIEnv* pEnv, jclass cls, jint ptr, jstring funcname, jint len, jobjectArray args)
@@ -2071,23 +2279,29 @@ extern "C" {
         std::mutex mutex;
         mutex.lock();
 
+        void** _args = (void**)malloc(sizeof(void *) * len);
+        for(int i = 0; i < len; i++)
+            _args[i] = (void*)((void**)args)[i];
+            // _args[i] = args[i];
+
         const char* _funcname = GetNetString(pEnv, funcname);
-        jobject val = fnInvoke(ptr, _funcname, len, (void**)args);
+        jobject val = fnInvoke(pEnv, ptr, _funcname, len, _args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            free(_args);
             mutex.unlock();
             return NULL;
         }
-
+        free(_args);
         mutex.unlock();
         return val;
     }
 
-    jobject (*fnGetProperty)(int, const char*);
+    jobject (*fnGetProperty)(void*, int, const char*);
 
     void SetfnGetProperty(void* cb)
     {
-        fnGetProperty = (jobject (*)(int, const char*))cb;
+        fnGetProperty = (jobject (*)(void*, int, const char*))cb;
     }
 
     JNIEXPORT jobject JNICALL Java_app_quant_clr_CLRRuntime_nativeGetProperty(JNIEnv* pEnv, jclass cls, jint ptr, jstring name)
@@ -2096,7 +2310,7 @@ extern "C" {
         mutex.lock();
 
         const char* _name = GetNetString(pEnv, name);
-        jobject val = fnGetProperty(ptr, _name);
+        jobject val = fnGetProperty(pEnv, ptr, _name);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             mutex.unlock();
@@ -2106,11 +2320,11 @@ extern "C" {
         return val;
     }
 
-    jobject (*fnSetProperty)(int, const char*, void**);
+    jobject (*fnSetProperty)(void*, int, const char*, void**);
 
     void SetfnSetProperty(void* cb)
     {
-        fnSetProperty = (jobject (*)(int, const char*, void**))cb;
+        fnSetProperty = (jobject (*)(void*, int, const char*, void**))cb;
     }
 
     JNIEXPORT void JNICALL Java_app_quant_clr_CLRRuntime_nativeSetProperty(JNIEnv* pEnv, jclass cls, jint ptr, jstring name, jobjectArray value)
@@ -2119,18 +2333,18 @@ extern "C" {
         mutex.lock();
 
         const char* _name = GetNetString(pEnv, name);
-        fnSetProperty(ptr, _name, (void**)value);
+        fnSetProperty(pEnv, ptr, _name, (void**)value);
 
         mutex.unlock();
     }
 
 
 
-    jobject (*fnRegisterFunc)(const char*, int);
+    jobject (*fnRegisterFunc)(void*, const char*, int);
 
     void SetfnRegisterFunc(void* cb)
     {
-        fnRegisterFunc = (jobject (*)(const char*, int))cb;
+        fnRegisterFunc = (jobject (*)(void*, const char*, int))cb;
     }
 
     JNIEXPORT jobject JNICALL Java_app_quant_clr_CLRRuntime_nativeRegisterFunc(JNIEnv* pEnv, jclass cls, jstring funcname, jint hash)
@@ -2140,7 +2354,7 @@ extern "C" {
 
         const char* _funcname = GetNetString(pEnv, funcname);
         
-        jobject val = fnRegisterFunc(_funcname, hash);
+        jobject val = fnRegisterFunc(pEnv, _funcname, hash);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
             mutex.unlock();
@@ -2151,24 +2365,33 @@ extern "C" {
     }
 
 
-    jobject (*fnInvokeFunc)(int, int, void**);
+    jobject (*fnInvokeFunc)(void*, int, int, void**);
 
     void SetfnInvokeFunc(void* cb)
     {
-        fnInvokeFunc = (jobject (*)(int, int, void**))cb;
+        fnInvokeFunc = (jobject (*)(void*, int, int, void**))cb;
     }
 
     JNIEXPORT jobject JNICALL Java_app_quant_clr_CLRRuntime_nativeInvokeFunc(JNIEnv* pEnv, jclass cls, jint ptr, jint len, jobjectArray args)
+    // JNIEXPORT jobject JNICALL Java_app_quant_clr_CLRRuntime_nativeInvokeFunc(JNIEnv* pEnv, jclass cls, jint ptr, jint len, void** args)
     {
         std::mutex mutex;
         mutex.lock();
 
-        jobject val = fnInvokeFunc(ptr, len, (void**)args);
+        void** _args = (void**)malloc(sizeof(void *) * len);
+        for(int i = 0; i < len; i++)
+            _args[i] = (void*)((void**)args)[i];
+            // _args[i] = args[i];
+
+
+        jobject val = fnInvokeFunc(pEnv, ptr, len, _args);
         if(pEnv->ExceptionCheck() == JNI_TRUE){
             //pEnv->ExceptionDescribe();
+            free(_args);
             mutex.unlock();
             return NULL;
         }
+        free(_args);
         mutex.unlock();
         return val;
     }

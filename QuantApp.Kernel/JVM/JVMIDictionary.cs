@@ -16,7 +16,8 @@ namespace QuantApp.Kernel.JVM
     public class JVMIDictionary : JVMObject, IDictionary<object, object>
     {
         private JVMObject jhashMap;
-        public JVMIDictionary(JVMObject obj):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass)
+        // public JVMIDictionary(JVMObject obj):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass)
+        public JVMIDictionary(JVMObject obj):base(obj.JavaHashCode, obj.JavaClass)
         {
             this.jhashMap = this;
         }

@@ -5,6 +5,9 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+ // NEED TO IMPLEMENT https://docs.oracle.com/javase/7/docs/api/java/util/WeakHashMap.html
+ 
 package app.quant.clr;
 
 import java.io.*;
@@ -12,8 +15,6 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
-
-import javax.lang.model.util.ElementScanner6;
 
 import java.net.*;
 
@@ -39,48 +40,131 @@ public class CLRRuntime
         return errors.toString();
     }
 
-    public static synchronized CLRObject CreateInstance(String classname, Object... args)
+    // public static synchronized CLRObject CreateInstance(String classname, Object... args)
+    public static CLRObject CreateInstance(String classname, Object... args)
     {
-        int len = args.length;
-        int ptr = nativeCreateInstance(classname, len, (Object[])args);
+        Object[] oa = (Object[])args;
+        int len = oa.length;
+        int ptr = nativeCreateInstance(classname, len, oa);
         return new CLRObject(classname, ptr);
     }
 
-    public static synchronized CLRObject CreateInstanceArr(String classname, Object[] args)
+    // public static synchronized CLRObject CreateInstanceArr(String classname, Object[] args)
+    public static CLRObject CreateInstanceArr(String classname, Object[] args)
     {
         int len = args.length;
         int ptr = nativeCreateInstance(classname, len, args);
         return new CLRObject(classname, ptr);
     }
 
-    public static synchronized CLRObject GetClass(String classname)
+    // public static synchronized CLRObject GetClass(String classname)
+    public static CLRObject GetClass(String classname)
     {
         int ptr = nativeCreateInstance(classname, 0, new Object[0]);
         return new CLRObject(classname, ptr);
     }
 
-    public static synchronized Object Invoke(int ptr, String funcname, Object... args)
+    public static Object Invoke(int ptr, String funcname, Object... args)
+    // public static Object Invoke(int ptr, String funcname, Object... args)
     {
-        int len = args.length;
-        return nativeInvoke(ptr, funcname, len, (Object[])args);
+        try
+        {
+            Object[] oa = (Object[])args;
+            int len = oa.length;
+            Object res = nativeInvoke(ptr, funcname, len, oa);
+
+            // System.out.println("JAVA Invoke(" + ptr + "): " + (res != null ? res.hashCode() : "") + " " + res);
+            
+            // if(args != null)
+            //     for (Object object : args) 
+            //     {
+            //         System.out.println("----------arg(" + (object != null ? object.hashCode() : "") + "): " + object);
+            //     }
+
+            int id = GetID(res);
+
+            if(res instanceof CLRObject)
+                CLRObject.DB.put(id, (CLRObject)res);
+            return res;
+        }
+        catch(Exception e)
+        {
+            System.out.println("JAVA Invoke(" + ptr + "): " + e + " " + args);
+            // if(args != null)
+            //     for (Object object : args) 
+            //     {
+            //         System.out.println("----------arg(" + (object != null ? object.hashCode() : "") + "): " + object);
+            //     }
+            e.printStackTrace(System.out);
+            // throw e;
+            return null;
+        }
     }
 
-    public static synchronized Object GetProperty(int ptr, String name)
+    // public static synchronized Object GetProperty(int ptr, String name)
+    public static Object GetProperty(int ptr, String name)
     {
         Object res = nativeGetProperty(ptr, name);
         return res;
     }
 
-    public static synchronized void SetProperty(int ptr, String name, Object value)
+    // public static synchronized void SetProperty(int ptr, String name, Object value)
+    public static void SetProperty(int ptr, String name, Object value)
     {
         nativeSetProperty(ptr, name, new Object[]{ value });
     }
 
+    // public synchronized static CLRObject GetCLRObject(int ptr)
     public static CLRObject GetCLRObject(int ptr)
     {
         if(CLRObject.DB.containsKey(ptr))
-            return CLRObject.DB.get(ptr);
+        {
+            CLRObject res = CLRObject.DB.get(ptr);
+            // System.out.println("JAVA GetCLRObject (" + ptr + "): " + res);
+            return res;
+        }
         return null;
+    }
+
+    public static Map<Object, Integer> DBID = new HashMap<Object, Integer>();
+    public static Map<Integer, Integer> _DBID = new HashMap<Integer, Integer>();
+    public static int GetID(Object obj)
+    {
+        if(obj == null)
+            return 0;
+
+        else if(obj instanceof CLRObject)
+        {
+            // System.out.println("JAVA --GETID(" + obj +  ")" + ((CLRObject)obj).Pointer);
+            return ((CLRObject)obj).Pointer;
+            // return obj.hashCode();
+        }
+        
+        else if(!DBID.containsKey(obj))
+        {
+            for(int i = 0; i < 100; i++)
+            {
+                UUID uuid = UUID.randomUUID();
+                // String randomUUIDString = uuid.toString();
+                // int id = randomUUIDString.hashCode();
+                // int id = uuid.clockSequence();
+                int id = obj.hashCode();
+                // if(!_DBID.containsKey(id))
+                {
+                    _DBID.put(id, id);
+                    DBID.put(obj, id);
+                    // System.out.println("JAVA 2 GETID(" + uuid +  ") = " + id);
+                    return id;
+                    // break;
+                }
+            }
+        }
+
+        // System.out.println("JAVA GETID(" + obj +  ")" + DBID.get(obj));
+            
+        return DBID.get(obj);
+        
+        // return obj.hashCode();
     }
 
     public static Map<Integer, Object> DB = new HashMap<Integer, Object>();
@@ -91,27 +175,53 @@ public class CLRRuntime
         
         return null;
     }
-    public static void RegisterObject(int ptr, Object obj)
+    public static void RegisterObject(int _ptr, Object obj)
+    // public static void RegisterObject(Object obj)
     {
-        if(!DB.containsKey(ptr))
-            DB.put(ptr, obj);
+        // int ptr = obj.hashCode();
+        int id = GetID(obj);
+
+        // if(_ptr != ptr)
+        //     System.out.println("------------------------------------JAVA RegisterObject ERROR: " + " " + obj + " " + ptr + "" + _ptr);
+        // if(!DB.containsKey(ptr))
+        // DB.put(ptr, obj);
+        DB.put(id, obj);
+
+        if(obj instanceof CLRObject)
+            CLRObject.DB.put(id, (CLRObject)obj);
+        // else
+            // System.out.println("-------JAVA RegisterObject ERROR: " + " " + obj + " " + ptr);
     }
 
 
-    public static ConcurrentHashMap<Integer, Function<Object[], Object>> Functions = new ConcurrentHashMap<Integer, Function<Object[], Object>>();
+    // public static ConcurrentHashMap<Integer, Function<Object[], Object>> Functions = new ConcurrentHashMap<Integer, Function<Object[], Object>>();
+    public static ConcurrentHashMap<Integer, CLRDelegate> Functions = new ConcurrentHashMap<Integer, CLRDelegate>();
 
-    public static synchronized CLRObject CreateDelegate(String classname, Function<Object[], Object> func)
+    // public static synchronized CLRObject CreateDelegate(String classname, Function<Object[], Object> func)
+    public static CLRObject CreateDelegate(String classname, Function<Object[], Object> func)
     {
-        int hash = func.hashCode();
+        CLRDelegate del = new CLRDelegate(classname, func);
+        // int hash = func.hashCode();
+        // int hash = del.hashCode();
+        int hash = GetID(del);
+        // int hash = nativeCreateInstance(classname, 0, new Object[0]);
+
+        CLRObject clr = new CLRObject(classname, hash);
+
+        // System.out.println("Java CreateDelegate: " + classname + " --> " + hash);
 
         if(!Functions.containsKey(hash))
-            Functions.put(hash, func);
+            // Functions.put(hash, func);
+            Functions.put(hash, del);
         else
             System.out.println("Java CreateDelegate ERROR exists: " + hash);
-        return (CLRObject)nativeRegisterFunc(classname, hash);
+
+        nativeRegisterFunc(classname, hash);
+        return clr;//(CLRObject)nativeRegisterFunc(classname, hash);
     }
 
-    public static synchronized Object Python(Function<Object[], Object> func)
+    // public static synchronized Object Python(Function<Object[], Object> func)
+    public static Object Python(Function<Object[], Object> func)
     {
         CLRObject runtime = CLRRuntime.GetClass("QuantApp.Kernel.JVM.Runtime");
         return runtime.Invoke("Python", CreateDelegate("System.Func`2[System.Object[], System.Object]", func));
@@ -122,15 +232,69 @@ public class CLRRuntime
         return (CLRObject)CLRRuntime.GetClass("Python.Runtime.Py").Invoke("Import", name);
     }
 
-    public static synchronized Object InvokeDelegate(CLRObject clrFunc, Object[] args)
+    // public static synchronized Object InvokeDelegate(CLRObject clrFunc, Object[] args)
+    public static Object InvokeDelegate(CLRObject clrFunc, Object[] args)
     {
-        return nativeInvokeFunc(clrFunc.hashCode(), args.length, args);
+        // System.out.println("JV InvokeDelegate 1");
+        try
+        {
+            int id = GetID(clrFunc);
+            Object res = nativeInvokeFunc(id, args.length, args);
+
+            // System.out.println("JAVA InvokeFunc(" + clrFunc.hashCode() + "): " + (res != null ? res.hashCode() : "") + " " + res);
+            // if(args != null)
+            //     for (Object object : args) 
+            //     {
+            //         System.out.println("----------arg(" + (object != null ? object.hashCode() : "") + "): " + object);
+            //     }
+
+            int rid = GetID(res);
+            if(res instanceof CLRObject)
+                CLRObject.DB.put(rid, (CLRObject)res);
+            return res;
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
     }
 
-    public static synchronized Object InvokeDelegate(int hashCode, Object[] args)
+    // public static synchronized Object InvokeDelegate(int hashCode, Object[] args)
+    public static Object InvokeDelegate(int hashCode, Object[] args)
     {
-        return Functions.get(hashCode).apply(args);
+        try
+        {
+            // System.out.println("JV InvokeDelegate 2: " + hashCode);
+
+            Object res = Functions.get(hashCode).func.apply(args);
+
+            int rid = GetID(res); 
+
+            if(res instanceof CLRObject)
+                CLRObject.DB.put(rid, (CLRObject)res);
+            return res;
+        }
+        catch (Exception e) 
+        {
+            System.out.println("JAVA InvokeDelegate(" + hashCode + "): " + e + " " + args);
+            // if(args != null)
+            //     for (Object object : args) 
+            //     {
+            //         System.out.println("----------arg(" + object.hashCode() + "): " + object);
+            //     }
+            e.printStackTrace(System.out);
+            // throw e;
+            return null;
+        }
     }
+
+    // public static synchronized native int nativeCreateInstance(String classname, int len, Object[] args);
+    // public static synchronized native Object nativeInvoke(int ptr, String funcname, int len, Object[] args);
+    // public static synchronized native Object nativeRegisterFunc(String classname, int ptr);
+    // public static synchronized native Object nativeInvokeFunc(int ptr, int len, Object[] args);
+
+    // public static synchronized native Object nativeGetProperty(int ptr, String name);
+    // public static synchronized native void nativeSetProperty(int ptr, String name, Object[] value);
 
     public static native int nativeCreateInstance(String classname, int len, Object[] args);
     public static native Object nativeInvoke(int ptr, String funcname, int len, Object[] args);
@@ -353,7 +517,7 @@ public class CLRRuntime
             }
         }
             
-        
+        // System.out.println("JAVA ARRAYCLASSES: " + arr.length + " " + classes.length);
         return classes;
     }
 
