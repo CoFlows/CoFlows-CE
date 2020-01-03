@@ -20,7 +20,8 @@ namespace QuantApp.Kernel.JVM
 {
     public class JVMDelegate
     {
-        public static ConcurrentDictionary<int, JVMDelegate> DB = new ConcurrentDictionary<int, JVMDelegate>();
+        // public static ConcurrentDictionary<int, JVMDelegate> DB = new ConcurrentDictionary<int, JVMDelegate>();
+        public static ConcurrentDictionary<int, WeakReference> DB = new ConcurrentDictionary<int, WeakReference>();
         public int Pointer;
         public Delegate func;
 
@@ -108,9 +109,9 @@ namespace QuantApp.Kernel.JVM
                     func = typeof(JVMDelegate).GetMethod((isVoid ? "a" : "f") + argLen).MakeGenericMethod(targs).CreateDelegate(ct, this);
                 }
 
-                // if(!DB.ContainsKey(pointer))
-                    // DB.TryAdd(pointer, this);
-                    DB[pointer] = this;
+                
+                // DB[pointer] = this;
+                DB[pointer] = new WeakReference(this);
             }
         }
 
@@ -121,6 +122,61 @@ namespace QuantApp.Kernel.JVM
             {
                 return fx(args);
             }
+        }
+
+        ~JVMDelegate() 
+        {
+            // Console.WriteLine("JVMDelegate DISPOSE 2: " + this);
+            int hsh = Pointer;
+            if(DB.ContainsKey(hsh))
+            {
+                WeakReference ot;
+                DB.TryRemove(hsh, out ot);
+                // if(DB.TryRemove(hsh, out ot))
+                    // Console.WriteLine("REMOVED!: " + ot);
+                // else
+                    // Console.WriteLine("NOT REMOVED 1");
+            }
+            // else
+                // Console.WriteLine("NOT REMOVED 2");
+
+            if(Runtime.__DB.ContainsKey(hsh))
+            {
+                object _o;
+                Runtime.__DB.TryRemove(hsh, out _o);
+            }
+
+            this.Dispose();
+            
+
+                // Runtime.RegisterJVMObject(hsh, _pointer.ToPointer());
+
+                // if(!DB.ContainsKey(hsh))
+                {
+                    // DB.TryAdd(hsh, this);
+                    // __DB[hsh] = this;
+                    
+                    
+                }
+            // if (Ptr != IntPtr.Zero) 
+            // {
+            //     Marshal.FreeHGlobal(Ptr);
+            //     Ptr = IntPtr.Zero;
+            // }
+        }
+
+        public void Dispose() 
+        {
+            int hsh = Pointer;
+
+            object ou;
+            if(Runtime.__DB.ContainsKey(hsh))
+                Runtime.__DB.TryRemove(hsh, out ou);
+
+            // Console.WriteLine("JVMDelegate DISPOSE: " + this);
+            // Marshal.FreeHGlobal(Ptr);
+            // Ptr = IntPtr.Zero;
+            // GC.SuppressFinalize(this);
         }
 
         private readonly object objLock_fx = new object();

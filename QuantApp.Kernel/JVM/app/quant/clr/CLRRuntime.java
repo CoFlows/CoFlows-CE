@@ -11,6 +11,7 @@
 package app.quant.clr;
 
 import java.io.*;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -46,7 +47,7 @@ public class CLRRuntime
         Object[] oa = (Object[])args;
         int len = oa.length;
         int ptr = nativeCreateInstance(classname, len, oa);
-        return new CLRObject(classname, ptr);
+        return new CLRObject(classname, ptr, false);
     }
 
     // public static synchronized CLRObject CreateInstanceArr(String classname, Object[] args)
@@ -54,14 +55,14 @@ public class CLRRuntime
     {
         int len = args.length;
         int ptr = nativeCreateInstance(classname, len, args);
-        return new CLRObject(classname, ptr);
+        return new CLRObject(classname, ptr, false);
     }
 
     // public static synchronized CLRObject GetClass(String classname)
     public static CLRObject GetClass(String classname)
     {
         int ptr = nativeCreateInstance(classname, 0, new Object[0]);
-        return new CLRObject(classname, ptr);
+        return new CLRObject(classname, ptr, false);
     }
 
     public static Object Invoke(int ptr, String funcname, Object... args)
@@ -81,10 +82,15 @@ public class CLRRuntime
             //         System.out.println("----------arg(" + (object != null ? object.hashCode() : "") + "): " + object);
             //     }
 
-            int id = GetID(res);
+            int id = GetID(res, false);
+            GCInterceptor.RegisterGCEvent(res, id);
 
             if(res instanceof CLRObject)
-                CLRObject.DB.put(id, (CLRObject)res);
+                // CLRObject.DB.put(id, (CLRObject)res);
+                CLRObject.DB.put(id, new WeakReference(res));
+
+            // if(res != null && CLRObject.__DB.containsKey(id))
+            //     CLRObject.__DB.remove(id);
             return res;
         }
         catch(Exception e)
@@ -119,42 +125,135 @@ public class CLRRuntime
     {
         if(CLRObject.DB.containsKey(ptr))
         {
-            CLRObject res = CLRObject.DB.get(ptr);
+            // CLRObject res = CLRObject.DB.get(ptr);
+            CLRObject res = (CLRObject)CLRObject.DB.get(ptr).get();
             // System.out.println("JAVA GetCLRObject (" + ptr + "): " + res);
+
             return res;
         }
         return null;
     }
 
-    public static Map<Object, Integer> DBID = new HashMap<Object, Integer>();
+    
+    public static WeakHashMap<Object, Integer> DBID = new WeakHashMap<Object, Integer>();
+    // public static Map<Object, Integer> DBID = new HashMap<Object, Integer>();
     public static Map<Integer, Integer> _DBID = new HashMap<Integer, Integer>();
-    public static int GetID(Object obj)
-    {
-        if(obj == null)
-            return 0;
 
-        else if(obj instanceof CLRObject)
+    public static WeakHashMap<Object, Integer> SDBID = new WeakHashMap<Object, Integer>();
+    // public static Map<Object, Integer> SDBID = new HashMap<Object, Integer>();
+    public static Map<Integer, Integer> _SDBID = new HashMap<Integer, Integer>();
+    
+
+    public synchronized static int GetID(Object obj, boolean cache)
+    {
+        if(obj == null || obj.hashCode() == 0)
         {
-            // System.out.println("JAVA --GETID(" + obj +  ")" + ((CLRObject)obj).Pointer);
-            return ((CLRObject)obj).Pointer;
-            // return obj.hashCode();
+            // System.out.println("JVM GetID null object: " + obj);
+            return 0;
         }
-        
+
+        if(obj instanceof CLRObject)
+        {
+            return ((CLRObject)obj).Pointer;
+        }
+
+        else if(SDBID.containsKey(obj))
+            return SDBID.get(obj);
+
         else if(!DBID.containsKey(obj))
+        {
+            int id = CreateID();
+            GCInterceptor.RegisterGCEvent(obj, id);
+
+            // _DBID.put(id, id);
+            DBID.put(obj, id);
+            DB.put(id, new WeakReference(obj));
+            if(cache) //NEED TO CHECK... IMPORTANT!
+                __DB.put(id, obj);
+            return id;
+
+            // for(int i = 0; i < 100; i++)
+            // {
+            //     UUID uuid = UUID.randomUUID();
+            //     String randomUUIDString = uuid.toString();
+            //     int id = randomUUIDString.hashCode();
+            //     if(!_DBID.containsKey(id))
+            //     {
+            //         GCInterceptor.RegisterGCEvent(obj, id);
+
+            //         _DBID.put(id, id);
+            //         DBID.put(obj, id);
+            //         DB.put(id, new WeakReference(obj));
+            //         __DB.put(id, obj);
+            //         return id;
+            //     }
+            // }
+        }
+        return DBID.get(obj);
+    }
+
+    public synchronized static int CreateID()
+    {
+        // else if(!DBID.containsKey(obj))
         {
             for(int i = 0; i < 100; i++)
             {
                 UUID uuid = UUID.randomUUID();
+                String randomUUIDString = uuid.toString();
+                int id = randomUUIDString.hashCode();
+                if(!_DBID.containsKey(id))
+                {
+                    _DBID.put(id, id);
+                    return id;
+                }
+            }
+
+            System.out.println("JVM ERROR CREATEID");
+            return 0;
+        }
+        // return DBID.get(obj);
+    }
+
+    public static void RemoveID(int id)
+    {
+        // if(CLRObject.__DB.containsKey(id))
+        // {
+        //     System.out.println("JAVA REMOVE ID " + id);
+        //     CLRObject.__DB.remove(id);
+        // }
+        // else
+        //     System.out.println("JAVA NOT FOUND REMOVE ID " + id);
+
+        if(__DB.containsKey(id))
+        {
+            // System.out.println("JAVA REMOVE ID " + id);
+            __DB.remove(id);
+        }
+
+    }
+
+    public static void SetID(Object obj, int id)
+    {
+        if(!SDBID.containsKey(obj))
+        {
+            // for(int i = 0; i < 100; i++)
+            {
+                // UUID uuid = UUID.randomUUID();
                 // String randomUUIDString = uuid.toString();
                 // int id = randomUUIDString.hashCode();
                 // int id = uuid.clockSequence();
-                int id = obj.hashCode();
-                // if(!_DBID.containsKey(id))
+                // int id = obj.hashCode();
+                if(!_SDBID.containsKey(id))
                 {
-                    _DBID.put(id, id);
-                    DBID.put(obj, id);
-                    // System.out.println("JAVA 2 GETID(" + uuid +  ") = " + id);
-                    return id;
+                    _SDBID.put(id, id);
+                    SDBID.put(obj, id);
+                    // __DB.put(id, obj);
+                    DB.put(id, new WeakReference(obj));
+
+
+                    GCInterceptor.RegisterGCEvent(obj, id);
+                    // System.out.println("JAVA 2 GETID(" + uuid +  ") = " + id + " <--> " + obj.hashCode());
+                    // return id;
                     // break;
                 }
             }
@@ -162,40 +261,51 @@ public class CLRRuntime
 
         // System.out.println("JAVA GETID(" + obj +  ")" + DBID.get(obj));
             
-        return DBID.get(obj);
+        // return DBID.get(obj);
         
         // return obj.hashCode();
     }
 
-    public static Map<Integer, Object> DB = new HashMap<Integer, Object>();
+    // public static WeakHashMap<Integer, Object> DB = new WeakHashMap<Integer, Object>();
+    public static Map<Integer, Object> __DB = new HashMap<Integer, Object>();
+    public static Map<Integer, WeakReference> DB = new HashMap<Integer, WeakReference>();
     public static Object GetObject(int ptr)
     {
-        if(DB.containsKey(ptr))
-            return DB.get(ptr);
+        if(DB.containsKey(ptr) && DB.get(ptr).get() != null)
+        {
+            Object obj = DB.get(ptr).get();
+            // return DB.get(ptr);
+            if(!__DB.containsKey(ptr))
+                __DB.put(ptr, obj); //IMPORTANT CHECK... NOT SURE YET
+
+            GCInterceptor.RegisterGCEvent(obj, ptr);
+            return obj;
+        }
         
+        System.out.println("------------------------------------JAVA GetObject ERROR: " + " " + ptr);
         return null;
     }
     public static void RegisterObject(int _ptr, Object obj)
     // public static void RegisterObject(Object obj)
     {
-        // int ptr = obj.hashCode();
-        int id = GetID(obj);
+        // int id = GetID(obj, false);
+        // System.out.println("JAVA RegisterObject: " + " " + obj + " " + id + "" + _ptr);
+        GCInterceptor.RegisterGCEvent(obj, _ptr);
+        // int id = GetID(obj);
 
-        // if(_ptr != ptr)
-        //     System.out.println("------------------------------------JAVA RegisterObject ERROR: " + " " + obj + " " + ptr + "" + _ptr);
-        // if(!DB.containsKey(ptr))
-        // DB.put(ptr, obj);
-        DB.put(id, obj);
+        // if(_ptr != id)
+        //     System.out.println("------------------------------------JAVA RegisterObject ERROR: " + " " + obj + " " + id + "" + _ptr);
+        // DB.put(id, obj);
 
-        if(obj instanceof CLRObject)
-            CLRObject.DB.put(id, (CLRObject)obj);
-        // else
-            // System.out.println("-------JAVA RegisterObject ERROR: " + " " + obj + " " + ptr);
+        // if(obj instanceof CLRObject)
+        //     CLRObject.DB.put(id, (CLRObject)obj);
     }
 
 
     // public static ConcurrentHashMap<Integer, Function<Object[], Object>> Functions = new ConcurrentHashMap<Integer, Function<Object[], Object>>();
-    public static ConcurrentHashMap<Integer, CLRDelegate> Functions = new ConcurrentHashMap<Integer, CLRDelegate>();
+    // public static ConcurrentHashMap<Integer, CLRDelegate> Functions = new ConcurrentHashMap<Integer, CLRDelegate>();
+    public static ConcurrentHashMap<Integer, WeakReference> Functions = new ConcurrentHashMap<Integer, WeakReference>();
+    
 
     // public static synchronized CLRObject CreateDelegate(String classname, Function<Object[], Object> func)
     public static CLRObject CreateDelegate(String classname, Function<Object[], Object> func)
@@ -203,16 +313,18 @@ public class CLRRuntime
         CLRDelegate del = new CLRDelegate(classname, func);
         // int hash = func.hashCode();
         // int hash = del.hashCode();
-        int hash = GetID(del);
+        int hash = GetID(del, true);
         // int hash = nativeCreateInstance(classname, 0, new Object[0]);
 
-        CLRObject clr = new CLRObject(classname, hash);
+        CLRObject clr = new CLRObject(classname, hash, false);
+
+        GCInterceptor.RegisterGCEvent(del, hash); //TEST REMOVE DELEGATE!
 
         // System.out.println("Java CreateDelegate: " + classname + " --> " + hash);
 
         if(!Functions.containsKey(hash))
-            // Functions.put(hash, func);
-            Functions.put(hash, del);
+            // Functions.put(hash, del);
+            Functions.put(hash, new WeakReference(del));
         else
             System.out.println("Java CreateDelegate ERROR exists: " + hash);
 
@@ -238,8 +350,14 @@ public class CLRRuntime
         // System.out.println("JV InvokeDelegate 1");
         try
         {
-            int id = GetID(clrFunc);
+            int id = GetID(clrFunc, false);
+            GCInterceptor.RegisterGCEvent(clrFunc, id);
             Object res = nativeInvokeFunc(id, args.length, args);
+            
+            
+
+            if(res == null)
+                return null;
 
             // System.out.println("JAVA InvokeFunc(" + clrFunc.hashCode() + "): " + (res != null ? res.hashCode() : "") + " " + res);
             // if(args != null)
@@ -248,13 +366,23 @@ public class CLRRuntime
             //         System.out.println("----------arg(" + (object != null ? object.hashCode() : "") + "): " + object);
             //     }
 
-            int rid = GetID(res);
+            int rid = GetID(res, false);
+            GCInterceptor.RegisterGCEvent(res, rid);
+
             if(res instanceof CLRObject)
-                CLRObject.DB.put(rid, (CLRObject)res);
+                // CLRObject.DB.put(rid, (CLRObject)res);
+                CLRObject.DB.put(rid, new WeakReference(res));
+
+            // if(CLRObject.__DB.containsKey(rid))
+            //     CLRObject.__DB.remove(rid);
             return res;
         }
         catch(Exception e)
         {
+            // int id = GetID(clrFunc);
+            System.out.println("JAVA InvokeDelegate(" + clrFunc + "): " + e + " " + args);
+            e.printStackTrace(System.out);
+
             return null;
         }
     }
@@ -266,12 +394,15 @@ public class CLRRuntime
         {
             // System.out.println("JV InvokeDelegate 2: " + hashCode);
 
-            Object res = Functions.get(hashCode).func.apply(args);
+            Object res = ((CLRDelegate)Functions.get(hashCode).get()).func.apply(args);
 
-            int rid = GetID(res); 
+            int rid = GetID(res, false); 
+
+            GCInterceptor.RegisterGCEvent(res, rid);
 
             if(res instanceof CLRObject)
-                CLRObject.DB.put(rid, (CLRObject)res);
+                // CLRObject.DB.put(rid, (CLRObject)res);
+                CLRObject.DB.put(rid, new WeakReference(res));
             return res;
         }
         catch (Exception e) 
@@ -303,6 +434,7 @@ public class CLRRuntime
 
     public static native Object nativeGetProperty(int ptr, String name);
     public static native void nativeSetProperty(int ptr, String name, Object[] value);
+    public static native void nativeRemoveObject(int ptr);
 
      
     public CLRRuntime() {}
@@ -411,88 +543,101 @@ public class CLRRuntime
 
     public static String[] Signatures(String clsName) throws Exception
     {
-        List<String> signatures = new ArrayList<String>();  
-
-        Class cls = null;
-
         try
         {
-            cls = Class.forName(clsName);
-        }
-        catch(Exception e)
-        {
-            cls = ClassLoaders.containsKey(clsName) ? ClassLoaders.get(clsName).loadClass(clsName) : baseLoader.loadClass(clsName);
-        }
+            List<String> signatures = new ArrayList<String>();  
 
-        for (Class c = cls; c != null; c = c.getSuperclass()) 
-        {
-            for (Constructor constructor : c.getDeclaredConstructors()) 
+            Class cls = null;
+
+            try
             {
-                if(constructor.getName() == clsName)
+                cls = Class.forName(clsName);
+            }
+            catch(Exception e)
+            {
+                cls = ClassLoaders.containsKey(clsName) ? ClassLoaders.get(clsName).loadClass(clsName) : baseLoader.loadClass(clsName);
+            }
+
+            for (Class c = cls; c != null; c = c.getSuperclass()) 
+            {
+                for (Constructor constructor : c.getDeclaredConstructors()) 
                 {
-                    String signature = "C/" + constructor.getName() + "(";
+                    if(constructor.getName() == clsName)
+                    {
+                        String signature = "C/" + constructor.getName() + "(";
+                        
+                        Class<?>[] pType  = constructor.getParameterTypes();
+                        for (int i = 0; i < pType.length; i++) 
+                            signature += TransformType(pType[i]);
+                        signature += ")";
+                        signatures.add(signature);
+                    }
+                }
+
+                // for(Class ci : c.getInterfaces())
+                // {
+                //     // if(ci.getName() == clsName)
+                //     {
+                //         for (Method method : ci.getDeclaredMethods()) 
+                //         {
+                //             boolean isStatic = java.lang.reflect.Modifier.isStatic(method.getModifiers());
+                //             String signature = (isStatic ? "S-" : "") + "M/" + method.getName()+ "(";
+                            
+                //             Class<?>[] pType  = method.getParameterTypes();
+                //             for (int i = 0; i < pType.length; i++) 
+                //                 signature += TransformType(pType[i]);
+                //             signature += ")" + TransformType(method.getReturnType());
+                //             signatures.add(signature);
+                //             System.out.println("JAVA INTERFACE: " + ci.getName() + " " + signature);
+                //         }
+
+                //         for (Field field : ci.getFields()) 
+                //         {
+                //             boolean isStatic = java.lang.reflect.Modifier.isStatic(field.getModifiers());
+                //             String signature = (isStatic ? "S-" : "") + "F/" + field.getName() + "-" + TransformType(field.getType());
+                //             signatures.add(signature);
+                //         }
+                //     }
+
+                // }
+
+                for (Method method : c.getDeclaredMethods()) 
+                {
+                    boolean isStatic = java.lang.reflect.Modifier.isStatic(method.getModifiers());
+                    String signature = (isStatic ? "S-" : "") + "M/" + method.getName()+ "(";
                     
-                    Class<?>[] pType  = constructor.getParameterTypes();
+                    Class<?>[] pType  = method.getParameterTypes();
                     for (int i = 0; i < pType.length; i++) 
                         signature += TransformType(pType[i]);
-                    signature += ")";
+                    signature += ")" + TransformType(method.getReturnType());
+                    signatures.add(signature);
+                }
+
+                for (Field field : c.getFields()) 
+                {
+                    boolean isStatic = java.lang.reflect.Modifier.isStatic(field.getModifiers());
+                    String signature = (isStatic ? "S-" : "") + "F/" + field.getName() + "-" + TransformType(field.getType());
                     signatures.add(signature);
                 }
             }
 
-            // for(Class ci : c.getInterfaces())
-            // {
-            //     // if(ci.getName() == clsName)
-            //     {
-            //         for (Method method : ci.getDeclaredMethods()) 
-            //         {
-            //             boolean isStatic = java.lang.reflect.Modifier.isStatic(method.getModifiers());
-            //             String signature = (isStatic ? "S-" : "") + "M/" + method.getName()+ "(";
-                        
-            //             Class<?>[] pType  = method.getParameterTypes();
-            //             for (int i = 0; i < pType.length; i++) 
-            //                 signature += TransformType(pType[i]);
-            //             signature += ")" + TransformType(method.getReturnType());
-            //             signatures.add(signature);
-            //             System.out.println("JAVA INTERFACE: " + ci.getName() + " " + signature);
-            //         }
-
-            //         for (Field field : ci.getFields()) 
-            //         {
-            //             boolean isStatic = java.lang.reflect.Modifier.isStatic(field.getModifiers());
-            //             String signature = (isStatic ? "S-" : "") + "F/" + field.getName() + "-" + TransformType(field.getType());
-            //             signatures.add(signature);
-            //         }
-            //     }
-
-            // }
-
-            for (Method method : c.getDeclaredMethods()) 
-            {
-                boolean isStatic = java.lang.reflect.Modifier.isStatic(method.getModifiers());
-                String signature = (isStatic ? "S-" : "") + "M/" + method.getName()+ "(";
-                
-                Class<?>[] pType  = method.getParameterTypes();
-                for (int i = 0; i < pType.length; i++) 
-                    signature += TransformType(pType[i]);
-                signature += ")" + TransformType(method.getReturnType());
-                signatures.add(signature);
-            }
-
-            for (Field field : c.getFields()) 
-            {
-                boolean isStatic = java.lang.reflect.Modifier.isStatic(field.getModifiers());
-                String signature = (isStatic ? "S-" : "") + "F/" + field.getName() + "-" + TransformType(field.getType());
-                signatures.add(signature);
-            }
+            String signaturesArr[] = new String[signatures.size()];
+            return signatures.toArray(signaturesArr);
         }
+        catch(Exception e)
+        {
+            System.out.println("JVM Signature(" + clsName + "): " + e);
+            return null;
 
-        String signaturesArr[] = new String[signatures.size()];
-        return signatures.toArray(signaturesArr);
+        }
     }
 
     public static String[] ArrayClasses(Object[] arr)
     {
+        if(arr == null)
+        {
+            System.out.println("JAVA ARRAY CLASSES ERROR");
+        }
         String[] classes = new String[arr.length];
         for (int i = 0; i < arr.length; i++) 
         {
@@ -584,16 +729,25 @@ public class CLRRuntime
 
     public static boolean isIterable(Object obj) 
     {
+        if(obj == null)
+            System.out.println("JAVA ERROR isIterable NULL");
+
         return isClass(Iterable.class, obj.getClass().getGenericSuperclass()) || isClass(scala.collection.Iterable.class, obj.getClass().getGenericSuperclass());
     }
 
     public static boolean isMap(Object obj) 
     {
+        if(obj == null)
+            System.out.println("JAVA ERROR isMap NULL");
+
         return isClass(Map.class, obj.getClass().getGenericSuperclass());
     }
 
     public static boolean isCollection(Object obj) 
     {
+        if(obj == null)
+            System.out.println("JAVA ERROR isCollection NULL");
+
         return isClass(Collection.class, obj.getClass().getGenericSuperclass());
     }
 

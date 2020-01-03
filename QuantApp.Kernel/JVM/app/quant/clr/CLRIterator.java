@@ -16,7 +16,7 @@ public class CLRIterator extends CLRObject implements Iterator<Object>
 {
     public CLRIterator(String classname, int ptr)
     {
-        super(classname, ptr);
+        super(classname, ptr, false);
     }
 
     public boolean hasNext()

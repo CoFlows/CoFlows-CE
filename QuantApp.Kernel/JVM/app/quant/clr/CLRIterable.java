@@ -16,7 +16,7 @@ public class CLRIterable extends CLRObject implements Iterable<Object>
 {
     public CLRIterable(String classname, int ptr)
     {
-        super(classname, ptr);
+        super(classname, ptr, false);
     }
 
     public Iterator<Object> iterator()

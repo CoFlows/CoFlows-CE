@@ -1680,6 +1680,8 @@ extern "C" {
 
     const char* GetException(JNIEnv* pEnv)
     {
+        // return "error when getting error !";
+
         jthrowable exception = pEnv->ExceptionOccurred();
 
         pEnv->ExceptionClear();
@@ -2394,6 +2396,26 @@ extern "C" {
         free(_args);
         mutex.unlock();
         return val;
+    }
+
+
+
+    jobject (*fnRemoveObject)(void*, int);
+
+    void SetfnRemoveObject(void* cb)
+    {
+        fnRemoveObject = (jobject (*)(void*, int))cb;
+    }
+
+    JNIEXPORT void JNICALL Java_app_quant_clr_CLRRuntime_nativeRemoveObject(JNIEnv* pEnv, jclass cls, jint ptr)
+    {
+        std::mutex mutex;
+        mutex.lock();
+
+        // const char* _name = GetNetString(pEnv, name);
+        fnRemoveObject(pEnv, ptr);
+
+        mutex.unlock();
     }
 
 }

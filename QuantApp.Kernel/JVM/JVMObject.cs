@@ -32,6 +32,7 @@ namespace QuantApp.Kernel.JVM
         public int JavaHashCode;
         public string JavaClass;
 
+        private string mess;
         // public unsafe IntPtr Pointer1
         // {
         //     get
@@ -57,7 +58,8 @@ namespace QuantApp.Kernel.JVM
         public ConcurrentDictionary<string,Delegate> Members = new ConcurrentDictionary<string, Delegate>();
 
 
-        public static ConcurrentDictionary<int, JVMObject> DB = new ConcurrentDictionary<int, JVMObject>();
+        public static ConcurrentDictionary<int, JVMObject> __DB = new ConcurrentDictionary<int, JVMObject>();
+        public static ConcurrentDictionary<int, WeakReference> DB = new ConcurrentDictionary<int, WeakReference>();
 
         private readonly object objLock_ctor = new object();
         /// <summary>
@@ -67,10 +69,11 @@ namespace QuantApp.Kernel.JVM
         /// Note you can subclass Expando.
         /// </summary>
         // public unsafe JVMObject(IntPtr _pointer, int jHashCode, string jClass) 
-        public unsafe JVMObject(int jHashCode, string jClass) 
+        public JVMObject(int jHashCode, string jClass, bool cache, string mess) 
         {
             // lock(objLock_ctor)
             {
+                // Console.WriteLine("JVMOBject: " + jHashCode + " " + jClass);
                 this.JavaClass = jClass;
                 this.JavaHashCode = jHashCode;
                 
@@ -78,13 +81,22 @@ namespace QuantApp.Kernel.JVM
 
                 int hsh = this.JavaHashCode;
 
-                // Runtime.RegisterJVMObject(hsh, _pointer.ToPointer());
+                this.mess = mess;
 
-                // if(!DB.ContainsKey(hsh))
-                {
-                    // DB.TryAdd(hsh, this);
-                    DB[hsh] = this;
+                //if(cache) // NEED TO CACHE ALL **** MUST RUN THIS NOW... No BATTERY
+                {   
+                    // Console.WriteLine("JVMOBject ADDING : " + jHashCode + " " + jClass);
+                    // __DB[hsh] = this;
                 }
+                // else
+                //     Console.WriteLine("JVMOBject NOT ADDING : " + jHashCode + " " + jClass);
+                DB[hsh] = new WeakReference(this);
+
+                // this.RegisterGCEvent(hsh, delegate(object _obj, int _id)
+                // {
+                //     dynamic dyn = _obj;
+                //     Console.WriteLine("KILL: " + dyn.toString());
+                // });
             }
         }
 
@@ -117,7 +129,7 @@ namespace QuantApp.Kernel.JVM
             }
             catch
             {
-                return this.JavaHashCode == Runtime.GetID(obj);
+                return this.JavaHashCode == Runtime.GetID(obj, false);
             }
         }
 
@@ -378,6 +390,7 @@ namespace QuantApp.Kernel.JVM
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
             // lock(objLock_TryInvokeMember)
+            try
             {
                 string signature = binder.Name + "-";            
                 
@@ -398,12 +411,19 @@ namespace QuantApp.Kernel.JVM
                 result = null;
                 return false;
             }
+            catch(Exception e)
+            {
+                Console.WriteLine("CLR JVMObject TryInvokeMember: " + e);
+                result = null;
+                return false;
+            }
         }
 
         private readonly object objLock_InvokeMember = new object();
         public object InvokeMember(string name, object[] args)
         {
-            lock(objLock_InvokeMember)
+            // lock(objLock_InvokeMember)
+            try
             {
                 string signature = name + "-";
                 
@@ -421,6 +441,12 @@ namespace QuantApp.Kernel.JVM
                         return Members[signature].DynamicInvoke((object)null);
                     }
                 }
+                return null;
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("CLR JVMObject InvokeMember: " + e);
+                
                 return null;
             }
         }
@@ -539,6 +565,7 @@ namespace QuantApp.Kernel.JVM
         protected bool InvokeMethod(object instance, string name, object[] args, out object result)
         {
             // lock(objLock_InvokeMethod)
+            try
             {
                 if (instance == null)
                     instance = this;
@@ -554,6 +581,12 @@ namespace QuantApp.Kernel.JVM
                     return true;
                 }
 
+                result = null;
+                return false;
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("CLR JVMObject InvokeMethod: " + e);
                 result = null;
                 return false;
             }
@@ -609,6 +642,69 @@ namespace QuantApp.Kernel.JVM
                 // else
                 //     Properties[key] = value;
             }
+        }
+
+        ~JVMObject() 
+        {
+            // Console.WriteLine("JVMOBJECT DISPOSE 2: " + this);
+            int hsh = this.JavaHashCode;
+
+            // if(__DB.Count > 10 || Runtime.__DB.Count > 1000)//  || Runtime.DB.Count > 1000)
+            // {   
+            //     var en = Runtime.__DB.Values.GetEnumerator();
+            //     en.MoveNext();
+            //     var dd = en.Current;
+            //     Console.WriteLine("JVMOBJECT DISPOSE: " + dd + " --> "  + Runtime.__DB.Count + " "  + Runtime.DB.Count + " "  + Runtime.MethodDB.Count + " " + Runtime.__DB);
+            // }
+
+            if(DB.ContainsKey(hsh))
+            {
+                WeakReference ot;
+                DB.TryRemove(hsh, out ot);
+                // if(DB.TryRemove(hsh, out ot))
+                //     Console.WriteLine("REMOVED!: " + ot);
+                // else
+                //     Console.WriteLine("NOT REMOVED 1");
+            }
+            // else
+            //     Console.WriteLine("NOT REMOVED 2");
+
+            this.Dispose();
+            
+
+                // Runtime.RegisterJVMObject(hsh, _pointer.ToPointer());
+
+                // if(!DB.ContainsKey(hsh))
+                {
+                    // DB.TryAdd(hsh, this);
+                    // __DB[hsh] = this;
+                    
+                    
+                }
+            // if (Ptr != IntPtr.Zero) 
+            // {
+            //     Marshal.FreeHGlobal(Ptr);
+            //     Ptr = IntPtr.Zero;
+            // }
+        }
+
+        public void Dispose() 
+        {
+            int hsh = this.JavaHashCode;
+
+            Runtime.RemoveID(hsh);
+
+            JVMObject ou;
+            if(__DB.ContainsKey(hsh))
+                __DB.TryRemove(hsh, out ou);
+
+            // int _i;
+            // if(Runtime._DBID.ContainsKey(hsh))
+            //     Runtime._DBID.TryRemove(hsh, out _i);
+
+            WeakReference _wo;
+            if(Runtime.DB.ContainsKey(hsh))
+                Runtime.DB.TryRemove(hsh, out _wo);
         }
     }
 }

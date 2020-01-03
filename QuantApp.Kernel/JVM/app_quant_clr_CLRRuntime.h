@@ -55,6 +55,10 @@ JNIEXPORT jobject JNICALL Java_app_quant_clr_CLRRuntime_nativeGetProperty
 JNIEXPORT void JNICALL Java_app_quant_clr_CLRRuntime_nativeSetProperty
   (JNIEnv *, jclass, jint, jstring, jobjectArray);
 
+
+JNIEXPORT void JNICALL Java_app_quant_clr_CLRRuntime_nativeRemoveObject
+  (JNIEnv *, jclass, jint);
+
 #ifdef __cplusplus
 }
 #endif

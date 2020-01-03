@@ -29,10 +29,11 @@ namespace QuantApp.Kernel.JVM
         internal JVMObject jVMObject;
         internal IJVMTuple jVMTuple;
         // public JVMTuple(JVMObject obj, IJVMTuple tuple):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass)
-        public JVMTuple(JVMObject obj, IJVMTuple tuple):base(obj.JavaHashCode, obj.JavaClass)
+        public JVMTuple(JVMObject obj, IJVMTuple tuple):base(obj.JavaHashCode, obj.JavaClass, true, "JVMTuple")
         {
             this.jVMObject = obj;
             this.jVMTuple = tuple;
+            JVMObject.DB[obj.JavaHashCode] = new WeakReference(this);
         }
 
         public override int GetHashCode()
@@ -59,6 +60,11 @@ namespace QuantApp.Kernel.JVM
         public JVMTuple1(JVMObject obj, object item1) : base(item1) { jVMObject = obj; }
 
         public JVMObject JVMObject { get { return jVMObject; } }
+
+        public override string ToString()
+        {
+            return "JVMTuple - " + jVMObject.ToString();
+        }
     }
 
     public class JVMTuple2 : Tuple<object, object>, IJVMTuple
@@ -67,6 +73,11 @@ namespace QuantApp.Kernel.JVM
         public JVMTuple2(JVMObject obj, object item1, object item2) : base(item1, item2) { jVMObject = obj; }
 
         public JVMObject JVMObject { get { return jVMObject; } }
+
+        public override string ToString()
+        {
+            return "JVMTuple - " + jVMObject.ToString();
+        }
     }
 
     public class JVMTuple3 : Tuple<object, object, object>, IJVMTuple
@@ -75,6 +86,11 @@ namespace QuantApp.Kernel.JVM
         public JVMTuple3(JVMObject obj, object item1, object item2, object item3) : base(item1, item2, item3) { jVMObject = obj; }
 
         public JVMObject JVMObject { get { return jVMObject; } }
+
+        public override string ToString()
+        {
+            return "JVMTuple - " + jVMObject.ToString();
+        }
     }
 
     public class JVMTuple4 : Tuple<object, object, object, object>, IJVMTuple
@@ -83,6 +99,11 @@ namespace QuantApp.Kernel.JVM
         public JVMTuple4(JVMObject obj, object item1, object item2, object item3, object item4) : base(item1, item2, item3, item4) { jVMObject = obj; }
 
         public JVMObject JVMObject { get { return jVMObject; } }
+
+        public override string ToString()
+        {
+            return "JVMTuple - " + jVMObject.ToString();
+        }
     }
 
     public class JVMTuple5 : Tuple<object, object, object, object, object>, IJVMTuple
@@ -91,6 +112,11 @@ namespace QuantApp.Kernel.JVM
         public JVMTuple5(JVMObject obj, object item1, object item2, object item3, object item4, object item5) : base(item1, item2, item3, item4, item5) { jVMObject = obj; }
 
         public JVMObject JVMObject { get { return jVMObject; } }
+
+        public override string ToString()
+        {
+            return "JVMTuple - " + jVMObject.ToString();
+        }
     }
 
     public class JVMTuple6 : Tuple<object, object, object, object, object, object>, IJVMTuple
@@ -99,6 +125,11 @@ namespace QuantApp.Kernel.JVM
         public JVMTuple6(JVMObject obj, object item1, object item2, object item3, object item4, object item5, object item6) : base(item1, item2, item3, item4, item5, item6) { jVMObject = obj; }
 
         public JVMObject JVMObject { get { return jVMObject; } }
+
+        public override string ToString()
+        {
+            return "JVMTuple - " + jVMObject.ToString();
+        }
     }
 
     public class JVMTuple7 : Tuple<object, object, object, object, object, object, object>, IJVMTuple
@@ -107,6 +138,11 @@ namespace QuantApp.Kernel.JVM
         public JVMTuple7(JVMObject obj, object item1, object item2, object item3, object item4, object item5, object item6, object item7) : base(item1, item2, item3, item4, item5, item6, item7) { jVMObject = obj; }
 
         public JVMObject JVMObject { get { return jVMObject; } }
+
+        public override string ToString()
+        {
+            return "JVMTuple - " + jVMObject.ToString();
+        }
     }
 
     public class JVMTuple8 : Tuple<object, object, object, object, object, object, object, object>, IJVMTuple
@@ -115,5 +151,10 @@ namespace QuantApp.Kernel.JVM
         public JVMTuple8(JVMObject obj, object item1, object item2, object item3, object item4, object item5, object item6, object item7, object item8) : base(item1, item2, item3, item4, item5, item6, item7, item8) { jVMObject = obj; }
 
         public JVMObject JVMObject { get { return jVMObject; } }
+
+        public override string ToString()
+        {
+            return "JVMTuple - " + jVMObject.ToString();
+        }
     }
 }
