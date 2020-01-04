@@ -20,43 +20,38 @@ namespace QuantApp.Kernel.JVM
 {
     public class JVMDelegate
     {
-        public static ConcurrentDictionary<int, JVMDelegate> DB = new ConcurrentDictionary<int, JVMDelegate>();
+        // public static ConcurrentDictionary<int, JVMDelegate> DB = new ConcurrentDictionary<int, JVMDelegate>();
+        public static ConcurrentDictionary<int, WeakReference> DB = new ConcurrentDictionary<int, WeakReference>();
         public int Pointer;
         public Delegate func;
 
         public string ClassName;
+        private readonly object objLock_JVMDelegate = new object();
         public JVMDelegate(string classname, int pointer)
         {
-            this.Pointer = pointer;
-
-            Type ct = null;
-            Assembly asm = System.Reflection.Assembly.GetEntryAssembly();
-            ct = asm.GetType(classname);
-
-            this.ClassName = classname;
-
-            if(ct == null)
+            // lock(objLock_JVMDelegate)
             {
-                asm = System.Reflection.Assembly.GetExecutingAssembly();
-                ct = asm.GetType(classname);
-            }
+                this.Pointer = pointer;
 
-            if(ct == null)
-            {
-                asm = System.Reflection.Assembly.GetCallingAssembly();
+                Type ct = null;
+                Assembly asm = System.Reflection.Assembly.GetEntryAssembly();
                 ct = asm.GetType(classname);
-            }
 
-            foreach(AssemblyName assemblyName in System.Reflection.Assembly.GetEntryAssembly().GetReferencedAssemblies())
-            {
-                asm = System.Reflection.Assembly.Load(assemblyName);
-                ct = asm.GetType(classname);
-                if(ct != null)
-                    break;
-            }
+                this.ClassName = classname;
 
-            if(ct == null)
-                foreach(AssemblyName assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
+                if(ct == null)
+                {
+                    asm = System.Reflection.Assembly.GetExecutingAssembly();
+                    ct = asm.GetType(classname);
+                }
+
+                if(ct == null)
+                {
+                    asm = System.Reflection.Assembly.GetCallingAssembly();
+                    ct = asm.GetType(classname);
+                }
+
+                foreach(AssemblyName assemblyName in System.Reflection.Assembly.GetEntryAssembly().GetReferencedAssemblies())
                 {
                     asm = System.Reflection.Assembly.Load(assemblyName);
                     ct = asm.GetType(classname);
@@ -64,64 +59,145 @@ namespace QuantApp.Kernel.JVM
                         break;
                 }
 
+                if(ct == null)
+                    foreach(AssemblyName assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
+                    {
+                        asm = System.Reflection.Assembly.Load(assemblyName);
+                        ct = asm.GetType(classname);
+                        if(ct != null)
+                            break;
+                    }
 
-            if(ct == null)
-                foreach(AssemblyName assemblyName in System.Reflection.Assembly.GetCallingAssembly().GetReferencedAssemblies())
+
+                if(ct == null)
+                    foreach(AssemblyName assemblyName in System.Reflection.Assembly.GetCallingAssembly().GetReferencedAssemblies())
+                    {
+                        asm = System.Reflection.Assembly.Load(assemblyName);
+                        ct = asm.GetType(classname);
+                        if(ct != null)
+                            break;
+                    }
+
+                if(ct == null)
                 {
-                    asm = System.Reflection.Assembly.Load(assemblyName);
-                    ct = asm.GetType(classname);
-                    if(ct != null)
-                        break;
+                    Console.WriteLine("Error loading type: " + classname);
+                    return;
                 }
 
-            if(ct == null)
-            {
-                Console.WriteLine("Error loading type: " + classname);
-                return;
-            }
+                MethodInfo method = ct.GetMethod("Invoke");
 
-            MethodInfo method = ct.GetMethod("Invoke");
+                ParameterInfo[] pinfo = method.GetParameters();
+                int argLen = pinfo.Length;
 
-            ParameterInfo[] pinfo = method.GetParameters();
-            int argLen = pinfo.Length;
+                bool isVoid = method.ReturnType.ToString() == "System.Void";
+                Type[] targs = new Type[argLen + (isVoid ? 0 : 1)];
+                
 
-            bool isVoid = method.ReturnType.ToString() == "System.Void";
-            Type[] targs = new Type[argLen + (isVoid ? 0 : 1)];
-            
-
-            for(int i = 0; i < argLen; i++)
-                targs[i] = pinfo[i].ParameterType;
-            
-            if(isVoid)
-            {
-                if(argLen == 0)
-                    func = typeof(JVMDelegate).GetMethod((isVoid ? "a" : "f") + argLen).CreateDelegate(ct, this);
+                for(int i = 0; i < argLen; i++)
+                    targs[i] = pinfo[i].ParameterType;
+                
+                if(isVoid)
+                {
+                    if(argLen == 0)
+                        func = typeof(JVMDelegate).GetMethod((isVoid ? "a" : "f") + argLen).CreateDelegate(ct, this);
+                    else
+                        func = typeof(JVMDelegate).GetMethod((isVoid ? "a" : "f") + argLen).MakeGenericMethod(targs).CreateDelegate(ct, this);
+                }
                 else
+                {
+                    targs[argLen] = method.ReturnType;
                     func = typeof(JVMDelegate).GetMethod((isVoid ? "a" : "f") + argLen).MakeGenericMethod(targs).CreateDelegate(ct, this);
-            }
-            else
-            {
-                targs[argLen] = method.ReturnType;
-                func = typeof(JVMDelegate).GetMethod((isVoid ? "a" : "f") + argLen).MakeGenericMethod(targs).CreateDelegate(ct, this);
-            }
+                }
 
-            if(!DB.ContainsKey(pointer))
-                DB.TryAdd(pointer, this);
+                
+                // DB[pointer] = this;
+                DB[pointer] = new WeakReference(this);
+            }
         }
+
+        private readonly object objLock_Invoke = new object();
         public object Invoke(params object[] args)
         {
-            return fx(args);
+            // lock(objLock_Invoke)
+            {
+                return fx(args);
+            }
         }
 
+        ~JVMDelegate() 
+        {
+            // Console.WriteLine("JVMDelegate DISPOSE 2: " + this);
+            int hsh = Pointer;
+            if(DB.ContainsKey(hsh))
+            {
+                WeakReference ot;
+                DB.TryRemove(hsh, out ot);
+                // if(DB.TryRemove(hsh, out ot))
+                    // Console.WriteLine("REMOVED!: " + ot);
+                // else
+                    // Console.WriteLine("NOT REMOVED 1");
+            }
+            // else
+                // Console.WriteLine("NOT REMOVED 2");
+
+            if(Runtime.__DB.ContainsKey(hsh))
+            {
+                object _o;
+                Runtime.__DB.TryRemove(hsh, out _o);
+            }
+
+            this.Dispose();
+            
+
+                // Runtime.RegisterJVMObject(hsh, _pointer.ToPointer());
+
+                // if(!DB.ContainsKey(hsh))
+                {
+                    // DB.TryAdd(hsh, this);
+                    // __DB[hsh] = this;
+                    
+                    
+                }
+            // if (Ptr != IntPtr.Zero) 
+            // {
+            //     Marshal.FreeHGlobal(Ptr);
+            //     Ptr = IntPtr.Zero;
+            // }
+        }
+
+        public void Dispose() 
+        {
+            int hsh = Pointer;
+
+            object ou;
+            if(Runtime.__DB.ContainsKey(hsh))
+                Runtime.__DB.TryRemove(hsh, out ou);
+
+            // Console.WriteLine("JVMDelegate DISPOSE: " + this);
+            // Marshal.FreeHGlobal(Ptr);
+            // Ptr = IntPtr.Zero;
+            // GC.SuppressFinalize(this);
+        }
+
+        private readonly object objLock_fx = new object();
         public object fx(params object[] args)
         {
-            try
+            // lock(objLock_fx)
             {
-                return Runtime.InvokeFunc(Pointer, args);
-            }
-            catch(Exception e)
-            {
-                return null;
+                try
+                {
+                    return Runtime.InvokeFunc(Pointer, args);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("JVMDelevate fx(" + Pointer + "): " + e + " " + args);
+                    if(args != null)
+                        foreach (var item in args)
+                        {
+                            Console.WriteLine("-------(" + item.GetHashCode() + "): " + item);
+                        }
+                    return null;
+                }
             }
         }
         public T f0<T>()

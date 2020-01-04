@@ -15,9 +15,12 @@ namespace QuantApp.Kernel.JVM
 
     public class JVMIDictionary : JVMObject, IDictionary<object, object>
     {
+        private JVMObject _obj;
         private JVMObject jhashMap;
-        public JVMIDictionary(JVMObject obj):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass)
+        // public JVMIDictionary(JVMObject obj):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass)
+        public JVMIDictionary(JVMObject obj):base(obj.JavaHashCode, obj.JavaClass, true, "JVMIDictionary")
         {
+            this._obj = obj;
             this.jhashMap = this;
         }
 
@@ -219,7 +222,7 @@ namespace QuantApp.Kernel.JVM
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
+            // GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)

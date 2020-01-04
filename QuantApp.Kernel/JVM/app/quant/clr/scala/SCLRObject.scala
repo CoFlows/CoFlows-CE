@@ -22,33 +22,59 @@ import collection.JavaConverters._
 class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[String, Any] {
     lazy val fields = mutable.Map.empty[String, Any]
 
-    val runtime = CLRRuntime.GetClass("QuantApp.Kernel.JVM.Runtime")
-    val sig = runtime.Invoke("Signature", clrObject).asInstanceOf[Array[String]]
-    sig.foreach(signature => {
-    
-        if(signature.startsWith("M/") || signature.startsWith("S-M/")){
-            val isStatic = signature.startsWith("S-")
-            var name = signature.replaceAll("M/","").replaceAll("S-","")
-            name = name.substring(0, name.indexOf("-"))
-            val argsSignature = signature.substring(signature.indexOf("(") + 1, signature.lastIndexOf(")"))
-            val returnSignature = signature.substring(signature.indexOf(")") + 1)
+    if(clrObject != null){
+        CLRRuntime.SetID(this, clrObject.Pointer)
+        val runtime = CLRRuntime.GetClass("QuantApp.Kernel.JVM.Runtime")
+        var _sig = runtime.Invoke("Signature", clrObject)
+        
+        // println("SCALA(" + clrObject.hashCode()  + "): " + clrObject + " <--> " + _sig)
+        // val sig = runtime.Invoke("Signature", clrObject).asInstanceOf[Array[String]]
+        
+        if(_sig != null) {
+            val sig = _sig.asInstanceOf[Array[String]]
+            if(sig != null) {
+                sig.foreach(signature => {
+                
+                    if(signature.startsWith("M/") || signature.startsWith("S-M/")){
+                        val isStatic = signature.startsWith("S-")
+                        var name = signature.replaceAll("M/","").replaceAll("S-","")
+                        name = name.substring(0, name.indexOf("-"))
+                        val argsSignature = signature.substring(signature.indexOf("(") + 1, signature.lastIndexOf(")"))
+                        val returnSignature = signature.substring(signature.indexOf(")") + 1)
 
-            updateDynamic(name + argsSignature)((x:Array[Any]) => { 
-                val args = 
-                x.map(_ match { 
-                    case null => null
-                    case o: CLRObject => o.asInstanceOf[CLRObject]
-                    case o: AnyRef => o.asInstanceOf[Object]
+                        // println("SCALA: " + name + argsSignature)
+
+                        updateDynamic(name + argsSignature)((x:Array[Any]) => { 
+                            val args = 
+                                x.map(_ match { 
+                                    case null => null
+                                    case o: CLRObject => o.asInstanceOf[CLRObject]
+                                    case o: AnyRef => o.asInstanceOf[Object]
+                                })
+
+                            clrObject.InvokeArr(name, args)
+                        })
+                    }
                 })
-
-                clrObject.InvokeArr(name, args)
-            })
+            }
+            else {
+                println("JVM SCLRObject sig null")
+            }
         }
-    })
+        else {
+            println("JVM SCLRObject _sig null")
+        }
+    }
   
     def CLRObject : CLRObject = clrObject
 
-    override def hashCode() : Int = clrObject.hashCode()
+    // override def hashCode() : Int = clrObject.hashCode()
+    override def hashCode() : Int = {
+        // println("SCALA HASHCODE: " + clrObject.Pointer )//+ " " + CLRRuntime.GetID(clrObject) + " " + CLRRuntime.GetID(this))
+        // CLRRuntime.GetID(clrObject)
+        clrObject.Pointer
+    }
+    // override def hashCode() : Int = clrObject.Pointer
 
     def -=(k: String): this.type = { fields -= k; this }
 
@@ -58,10 +84,12 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
 
     def get(k: String): Option[Any] = fields get k 
 
-
+    val lockApply = 0
     // def applyDynamic[R >: Null <: Any](namep: String)(args: Any*): R = {    
-    def applyDynamic[R <: Any](namep: String)(args: Any*): R = {
+    def applyDynamic[R <: Any](namep: String)(args: Any*): R = this.lockApply.synchronized {
         val argSig = args.map(x => if(x == null) null else x.getClass).map(CLRRuntime.TransformType(_)).map(x => x.replaceAll("app/quant/clr/CLRObject", "java/lang/Object").replaceAll("app/quant/clr/scala/SCLRObject", "java/lang/Object")).mkString
+
+        // println("SCALA APPLYDYNAMIC: " + namep)
         
         val name = namep + argSig
         val func = this.getOrElse(name, null)
@@ -155,7 +183,8 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
 
 object SCLRObject {
     def apply(name : String, args : Any*) = { 
-      val vargs = 
+        // println("SCALA APPLY: " + name + " " + this.hashCode())
+        val vargs = 
             args.map(_ match { 
               case null => null
               case o: CLRObject => o.asInstanceOf[CLRObject]

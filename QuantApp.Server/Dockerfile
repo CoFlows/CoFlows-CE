@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.0
 
-WORKDIR /App
+WORKDIR /app
 
 # install python and wheels
 ENV DEBIAN_FRONTEND noninteractive
@@ -14,6 +14,13 @@ RUN apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqli
 RUN ln -s /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so
 
 RUN apt-get install -y libomp-dev
+
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get -y install msodbcsql17 && \
+    apt-get -y install unixodbc-dev
+
 
 # Python 3.7 Install
 RUN cd /usr/src && \
@@ -96,20 +103,20 @@ EXPOSE 80/tcp
 
 COPY ${source:-obj/lnx/publish} ./
 
-RUN chmod +x /App/lab
-RUN chmod +x /App/coflows
+RUN chmod +x /app/lab
+RUN chmod +x /app/coflows
 
 # RUN g++ -shared -o libJNIWrapper.so -L/usr/java/openjdk-12/lib/server  -I/usr/java/openjdk-12/include -I/usr/java/openjdk-12/include/linux JNIWrapper.cpp -ljvm -fPIC  -ldl -lpthread
 RUN g++ -shared -o libJNIWrapper.so  -I/usr/java/openjdk-8/include -I/usr/java/openjdk-8/include/linux JNIWrapper.cpp -fPIC -lpthread
 
 RUN \
-    mkdir /App/jars && \
-    cp /App/app.quant.clr.jar /App/jars && \
-    cp /usr/share/scala/lib/*.jar /App/jars
+    mkdir /app/jars && \
+    cp /app/app.quant.clr.jar /app/jars && \
+    cp /usr/share/scala/lib/*.jar /app/jars
 
 
 ENV LD_LIBRARY_PATH /usr/local/lib/
-ENV PYTHONPATH $PATH:/usr/local/lib/python3.7:/App/mnt/pip/
+ENV PYTHONPATH $PATH:/usr/local/lib/python3.7:/app/mnt/pip/
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
@@ -122,11 +129,13 @@ RUN pip install dash
 RUN pip install dash-daq
 RUN pip install requests
 
-RUN mv /App/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kernel.json
+RUN pip install pyodbc
+
+RUN mv /app/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kernel.json
 
 RUN apt-get update && apt-get install -y procps
 RUN apt-get install -y git
 
-ENV PATH /App:$PATH
+ENV PATH /app:$PATH
 
 ENTRYPOINT ["dotnet", "QuantApp.Server.lnx.dll"]

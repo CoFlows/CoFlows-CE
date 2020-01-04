@@ -16,6 +16,8 @@ export class DashboardComponent {
     functions = []
     workbooks = []
 
+    workspaces = []
+    
     wid = ""
     permission = -1
 
@@ -31,204 +33,383 @@ export class DashboardComponent {
     constructor(private quantapp: QuantAppComponent) {
 
         this.quantapp.Get("m/servicedworkspaces", data => {
-            this.wid = data[0].ID//params['id'];
+            // console.log(data)
+            this.workspaces = data
 
-            let wiid = this.wid + "--Workbook"
-
-            this.quantapp.LinkAction(this.wid,
-
-            
-            data => { //Load
-                
-                this.workspace = data[0].Value
-                
-                
-
-                
-                this.workspace.Permissions.forEach(x => {
-                    if(x.ID == this.quantapp.quser.User.Email) this.permission = x.Permission
-                })
-                
-                
-
-                this.functions = []
-                data[0].Value.Functions.forEach(x => {
-
-                    let fid = x + "-F-MetaData";
-                    // console.log(fid)
-                    this.quantapp.LinkAction(fid,
-                        data => { //Load
-                            // console.log(data)
-                            
-                            data.forEach(x => {
-                                this.functions.push(x.Value)
-                            })
-                        },
-                        data => { //Add
-                            // console.log("add", data)
-                            this.functions.push(data)
-                            this.functions = [...  this.functions]
-                        },
-                        data => { //Exchange
-                            // console.log("exchange",data)
-                            let id = this.functions.findIndex(x => x.ID == data.Value.ID)
-                            
-                            if(id > -1){
-                                this.functions[id] = data.Value
-                            }
-                            this.functions = [...  this.functions]
-                            
-                        },
-                        data => { //Remove
-                            //console.log("exchange",data)
-                            let id = this.functions.findIndex(x => x.ID == data.Value.ID)
-                            
-                            if(id > -1){
-                                this.functions.splice(id, 1)
-                                //this.functions[id] = data
-                            }
-                            this.functions = [...  this.functions]
-                        }
-                    );
-                });
-
-                // this.qastrategies.SetStrategies(data[0].Value.Strategies)
-                
-                this.quantapp.LinkAction(wiid,
+            this.workspaces.forEach(workspace => {
+                let wiid = workspace.ID + "--Workbook"
+                this.quantapp.LinkAction(workspace.ID,
                     data => { //Load
-                        this.workbooks = data
+                        
+                        workspace.workspace = data[0].Value
+                        
+                        workspace.workspace.Permissions.forEach(x => {
+                            if(x.ID == this.quantapp.quser.User.Email) this.permission = x.Permission
+                        })
+    
+                        workspace.functions = []
+                        workspace.activeFunctions = []
+                        workspace.inActiveFunctions = []
+                        data[0].Value.Functions.forEach(x => {
+    
+                            let fid = x + "-F-MetaData";
+                            // console.log(fid)
+                            this.quantapp.LinkAction(fid,
+                                data => { //Load
+                                    // console.log(data)
+                                    
+                                    data.forEach(x => {
+                                        workspace.functions.push(x.Value)
+                                        if(x.Value.Started)
+                                            workspace.activeFunctions.push(x.Value)
+                                        else
+                                            workspace.inActiveFunctions.push(x.Value)
+                                    })
+                                },
+                                data => { //Add
+                                    // console.log("add", data)
+                                    workspace.functions.push(data)
+                                    workspace.functions = [...  workspace.functions]
+
+                                    workspace.activeFunctions = []
+                                    workspace.inActiveFunctions = []
+                                    workspace.functions.forEach(x => {
+                                        if(x.Value.Started)
+                                            workspace.activeFunctions.push(x.Value)
+                                        else
+                                            workspace.inActiveFunctions.push(x.Value)
+                                    })
+                                },
+                                data => { //Exchange
+                                    // console.log("exchange",data)
+                                    let id = workspace.functions.findIndex(x => x.ID == data.Value.ID)
+                                    
+                                    if(id > -1){
+                                        workspace.functions[id] = data.Value
+                                    }
+                                    workspace.functions = [...  workspace.functions]
+
+                                    workspace.activeFunctions = []
+                                    workspace.inActiveFunctions = []
+                                    workspace.functions.forEach(x => {
+                                        if(x.Value.Started)
+                                            workspace.activeFunctions.push(x.Value)
+                                        else
+                                            workspace.inActiveFunctions.push(x.Value)
+                                    })
+                                    
+                                },
+                                data => { //Remove
+                                    //console.log("exchange",data)
+                                    let id = workspace.functions.findIndex(x => x.ID == data.Value.ID)
+                                    
+                                    if(id > -1){
+                                        workspace.functions.splice(id, 1)
+                                        //this.functions[id] = data
+                                    }
+                                    workspace.functions = [...  workspace.functions]
+
+                                    workspace.activeFunctions = []
+                                    workspace.inActiveFunctions = []
+                                    workspace.functions.forEach(x => {
+                                        if(x.Value.Started)
+                                            workspace.activeFunctions.push(x.Value)
+                                        else
+                                            workspace.inActiveFunctions.push(x.Value)
+                                    })
+                                }
+                            );
+                        });
+    
+                        // this.qastrategies.SetStrategies(data[0].Value.Strategies)
+
+                        console.log(this.workspaces)
+                        
+                        this.quantapp.LinkAction(wiid,
+                            data => { //Load
+                                workspace.workbooks = data
+                            },
+                            data => { //Add
+                                // console.log(data)
+                            },
+                            data => { //Exchange
+    
+                                // console.log('Exchange', data)
+                                
+                                let counter = -1
+                                for(let i = 0; i < workspace.workbooks.length; i++){
+                                    // console.log(this.workbooks[i])
+                                    if(workspace.workbooks[i].Key == data.Key){                
+                                        counter = i
+                                    }
+                                }
+                                
+                                if(counter > -1)
+                                workspace.workbooks[counter] = data
+                                // console.log(data)
+                            },
+                            data => { //Remove
+                                // console.log(data)
+    
+                                let counter = -1
+                                for(let i = 0; i < workspace.workbooks.length; i++){
+                                    if(workspace.workbooks[i].Key == data.Key){
+                                        counter = i
+                                    }
+                                }
+                                if(counter > -1)
+                                workspace.workbooks.splice(counter,1)
+                            }
+                        );
                     },
                     data => { //Add
-                        // console.log(data)
                     },
                     data => { //Exchange
-
-                        // console.log('Exchange', data)
-                        
-                        let counter = -1
-                        for(let i = 0; i < this.workbooks.length; i++){
-                            // console.log(this.workbooks[i])
-                            if(this.workbooks[i].Key == data.Key){                
-                                counter = i
+                        workspace.workspace = data.Value
+    
+                        workspace.functions = []
+                        data.Value.Functions.forEach(x => {
+    
+                            let fid = x + "-F-MetaData";
+                            this.quantapp.LinkAction(fid,
+                                data => { //Load                                
+                                    data.forEach(x => {
+                                        workspace.functions.push(x.Value)
+                                    })
+                                },
+                                data => { //Add
+                                    workspace.functions.push(data)
+                                    workspace.functions = [...  workspace.functions]
+                                },
+                                data => { //Exchange
+                                    let id = workspace.functions.findIndex(x => x.ID = data.Value.ID)
+                                    
+                                    if(id > -1){
+                                        workspace.functions[id] = data.Value
+                                    }
+                                    workspace.functions = [...  workspace.functions]
+                                    
+                                },
+                                data => { //Remove
+                                    let id = workspace.functions.findIndex(x => x.ID = data.Value.ID)
+                                    
+                                    if(id > -1){
+                                        workspace.functions.splice(id, 1)
+                                    }
+                                    workspace.functions = [...  workspace.functions]
+                                }
+                            );
+                        });
+                        // this.qastrategies.SetStrategies(data.Value.Strategies)
+                        this.quantapp.LinkAction(wiid,
+                            data => { //Load
+                                workspace.workbooks = data
+                            },
+                            data => { //Add
+                            },
+                            data => { //Exchange
+                                let counter = -1
+                                for(let i = 0; i < workspace.workbooks.length; i++){
+                                    if(workspace.workbooks[i].Key == data.Key){
+                                        counter = i
+                                    }
+                                }
+                                
+                                workspace.workbooks[counter] = data
+                                console.log(data)
+                            },
+                            data => { //Remove
+                                let counter = -1
+                                for(let i = 0; i < workspace.workbooks.length; i++){
+                                    if(workspace.workbooks[i].Key == data.Key){                
+                                        counter = i
+                                    }
+                                }
+                                if(counter > -1)
+                                workspace.workbooks.splice(counter,1)
                             }
-                        }
-                        
-                        if(counter > -1)
-                            this.workbooks[counter] = data
-                        // console.log(data)
+                        );
                     },
                     data => { //Remove
-                        // console.log(data)
-
-                        let counter = -1
-                        for(let i = 0; i < this.workbooks.length; i++){
-                            if(this.workbooks[i].Key == data.Key){
-                                counter = i
-                            }
-                        }
-                        if(counter > -1)
-                            this.workbooks.splice(counter,1)
                     }
-                );
-            },
-            data => { //Add
+                )
+            })
 
-            },
-            data => { //Exchange
-                // console.log(data)
-                this.workspace = data.Value
+            // this.wid = data[0].ID//params['id'];
 
+            // let wiid = this.wid + "--Workbook"
 
-                this.functions = []
-                data.Value.Functions.forEach(x => {
+            // this.quantapp.LinkAction(this.wid,
+            //     data => { //Load
+                    
+            //         this.workspace = data[0].Value
+                    
+            //         this.workspace.Permissions.forEach(x => {
+            //             if(x.ID == this.quantapp.quser.User.Email) this.permission = x.Permission
+            //         })
+                    
+                    
 
-                    let fid = x + "-F-MetaData";
-                    // console.log(fid)
-                    this.quantapp.LinkAction(fid,
-                        data => { //Load
-                            // console.log(data)
+            //         this.functions = []
+            //         data[0].Value.Functions.forEach(x => {
+
+            //             let fid = x + "-F-MetaData";
+            //             // console.log(fid)
+            //             this.quantapp.LinkAction(fid,
+            //                 data => { //Load
+            //                     // console.log(data)
+                                
+            //                     data.forEach(x => {
+            //                         this.functions.push(x.Value)
+            //                     })
+            //                 },
+            //                 data => { //Add
+            //                     // console.log("add", data)
+            //                     this.functions.push(data)
+            //                     this.functions = [...  this.functions]
+            //                 },
+            //                 data => { //Exchange
+            //                     // console.log("exchange",data)
+            //                     let id = this.functions.findIndex(x => x.ID == data.Value.ID)
+                                
+            //                     if(id > -1){
+            //                         this.functions[id] = data.Value
+            //                     }
+            //                     this.functions = [...  this.functions]
+                                
+            //                 },
+            //                 data => { //Remove
+            //                     //console.log("exchange",data)
+            //                     let id = this.functions.findIndex(x => x.ID == data.Value.ID)
+                                
+            //                     if(id > -1){
+            //                         this.functions.splice(id, 1)
+            //                         //this.functions[id] = data
+            //                     }
+            //                     this.functions = [...  this.functions]
+            //                 }
+            //             );
+            //         });
+
+            //         // this.qastrategies.SetStrategies(data[0].Value.Strategies)
+                    
+            //         this.quantapp.LinkAction(wiid,
+            //             data => { //Load
+            //                 this.workbooks = data
+            //             },
+            //             data => { //Add
+            //                 // console.log(data)
+            //             },
+            //             data => { //Exchange
+
+            //                 // console.log('Exchange', data)
                             
-                            data.forEach(x => {
-                                this.functions.push(x.Value)
-                            })
-                        },
-                        data => { //Add
-                            // console.log("add", data)
-                            this.functions.push(data)
-                            this.functions = [...  this.functions]
-                        },
-                        data => { //Exchange
-                            // console.log("exchange",data)
-                            let id = this.functions.findIndex(x => x.ID = data.Value.ID)
+            //                 let counter = -1
+            //                 for(let i = 0; i < this.workbooks.length; i++){
+            //                     // console.log(this.workbooks[i])
+            //                     if(this.workbooks[i].Key == data.Key){                
+            //                         counter = i
+            //                     }
+            //                 }
                             
-                            if(id > -1){
-                                this.functions[id] = data.Value
-                            }
-                            this.functions = [...  this.functions]
+            //                 if(counter > -1)
+            //                     this.workbooks[counter] = data
+            //                 // console.log(data)
+            //             },
+            //             data => { //Remove
+            //                 // console.log(data)
+
+            //                 let counter = -1
+            //                 for(let i = 0; i < this.workbooks.length; i++){
+            //                     if(this.workbooks[i].Key == data.Key){
+            //                         counter = i
+            //                     }
+            //                 }
+            //                 if(counter > -1)
+            //                     this.workbooks.splice(counter,1)
+            //             }
+            //         );
+            //     },
+            //     data => { //Add
+            //     },
+            //     data => { //Exchange
+            //         this.workspace = data.Value
+
+            //         this.functions = []
+            //         data.Value.Functions.forEach(x => {
+
+            //             let fid = x + "-F-MetaData";
+            //             this.quantapp.LinkAction(fid,
+            //                 data => { //Load                                
+            //                     data.forEach(x => {
+            //                         this.functions.push(x.Value)
+            //                     })
+            //                 },
+            //                 data => { //Add
+            //                     this.functions.push(data)
+            //                     this.functions = [...  this.functions]
+            //                 },
+            //                 data => { //Exchange
+            //                     let id = this.functions.findIndex(x => x.ID = data.Value.ID)
+                                
+            //                     if(id > -1){
+            //                         this.functions[id] = data.Value
+            //                     }
+            //                     this.functions = [...  this.functions]
+                                
+            //                 },
+            //                 data => { //Remove
+            //                     let id = this.functions.findIndex(x => x.ID = data.Value.ID)
+                                
+            //                     if(id > -1){
+            //                         this.functions.splice(id, 1)
+            //                     }
+            //                     this.functions = [...  this.functions]
+            //                 }
+            //             );
+            //         });
+            //         // this.qastrategies.SetStrategies(data.Value.Strategies)
+            //         this.quantapp.LinkAction(wiid,
+            //             data => { //Load
+            //                 this.workbooks = data
+            //             },
+            //             data => { //Add
+            //             },
+            //             data => { //Exchange
+            //                 let counter = -1
+            //                 for(let i = 0; i < this.workbooks.length; i++){
+            //                     if(this.workbooks[i].Key == data.Key){
+            //                         counter = i
+            //                     }
+            //                 }
                             
-                        },
-                        data => { //Remove
-                            let id = this.functions.findIndex(x => x.ID = data.Value.ID)
-                            
-                            if(id > -1){
-                                this.functions.splice(id, 1)
-                            }
-                            this.functions = [...  this.functions]
-                        }
-                    );
-                });
-            
+            //                 this.workbooks[counter] = data
+            //                 console.log(data)
+            //             },
+            //             data => { //Remove
+            //                 let counter = -1
+            //                 for(let i = 0; i < this.workbooks.length; i++){
+            //                     if(this.workbooks[i].Key == data.Key){                
+            //                         counter = i
+            //                     }
+            //                 }
+            //                 if(counter > -1)
+            //                     this.workbooks.splice(counter,1)
+            //             }
+            //         );
+            //     },
+            //     data => { //Remove
+            //     }
+            // )
 
-                // this.qastrategies.SetStrategies(data.Value.Strategies)
-
-                this.quantapp.LinkAction(wiid,
-                    data => { //Load
-                        this.workbooks = data
-                    },
-                    data => { //Add
-                        // console.log(data)
-                    },
-                    data => { //Exchange
-
-                        // console.log('Exchange', data)
-                        
-                        let counter = -1
-                        for(let i = 0; i < this.workbooks.length; i++){
-                            if(this.workbooks[i].Key == data.Key){
-                                counter = i
-                            }
-                        }
-                        
-                        this.workbooks[counter] = data
-                        console.log(data)
-                    },
-                    data => { //Remove
-                        // console.log(data)
-
-                        let counter = -1
-                        for(let i = 0; i < this.workbooks.length; i++){
-                            if(this.workbooks[i].Key == data.Key){                
-                                counter = i
-                            }
-                        }
-                        if(counter > -1)
-                            this.workbooks.splice(counter,1)
-                    }
-                );
-            },
-            data => { //Remove
-
-            });
-
-        });
+        })
     }
 
     onChangeActiveFunction(id, item){     
         this.quantapp.Get('m/activetoggle?id=' + id ,
             data => {
                 // console.log(data)
-
-            });
+            })
     }
 
     tabBeforeChange(event){

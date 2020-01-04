@@ -8,39 +8,56 @@
 
 package app.quant.clr;
 
+import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class CLRObject
 {
-    public static Map<Integer, CLRObject> DB = new HashMap<Integer, CLRObject>();
+    public static ConcurrentHashMap<Integer, CLRObject> __DB = new ConcurrentHashMap<Integer, CLRObject>();
+    public static ConcurrentHashMap<Integer, WeakReference> DB = new ConcurrentHashMap<Integer, WeakReference>();
 
     public int Pointer;
     public String ClassName;
+    Boolean __cache = false;
+
+    public CLRObject(String classname, int ptr, boolean cache)
+    {
+        this.Pointer = ptr;
+        this.ClassName = classname;
+        // if(cache)
+            // __DB.put(ptr, this);
+        DB.put(ptr, new WeakReference(this));
+        //GCInterceptor.RegisterGCEvent(this, ptr); //TESTING
+    }
 
     public CLRObject(String classname, int ptr)
     {
         this.Pointer = ptr;
         this.ClassName = classname;
-        if(!DB.containsKey(ptr))
-            DB.put(ptr, this);
+        // if(cache)
+        __DB.put(ptr, this);
+        __cache = true;
+        System.out.println("CLR OBJECT: " + classname + "  --> " + ptr);
+        DB.put(ptr, new WeakReference(this));
     }
 
-    public Object Invoke(String funcname, Object... args)
+    public synchronized Object Invoke(String funcname, Object... args)
     {
         return CLRRuntime.Invoke(Pointer, funcname, args);
     }
 
-    public Object InvokeArr(String funcname, Object[] args)
+    public synchronized Object InvokeArr(String funcname, Object[] args)
     {
         return CLRRuntime.Invoke(Pointer, funcname, args);
     }
 
-    public Object GetProperty(String name)
+    public synchronized Object GetProperty(String name)
     {
         return CLRRuntime.GetProperty(Pointer, name);
     }
 
-    public void SetProperty(String name, Object value)
+    public synchronized void SetProperty(String name, Object value)
     {
         CLRRuntime.SetProperty(Pointer, name, value);
     }
@@ -55,6 +72,17 @@ public class CLRObject
     public String toString() 
     {
 		return "CLRObject: " + ClassName;// + " ( Ptr = " + Pointer + " | jhash = " + this.hashCode() + ")";
-	}
+    }
+    
+    @Override
+    protected void finalize() throws Throwable 
+    {
+        // if(__cache)
+            // System.out.println("JAVA FINALISE(" + Pointer + "): " + this + " " + CLRRuntime.__DB.size());
+        if(__DB.containsKey(Pointer))
+            __DB.remove(Pointer);
+        CLRRuntime.nativeRemoveObject(Pointer);
+        super.finalize();
+    }
 
 }

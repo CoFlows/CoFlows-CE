@@ -1,2 +1,2 @@
 cd ..
-docker run -v $(pwd)/mnt:/App/mnt coflows/ce cloud deploy
+docker run -v $(pwd)/mnt:/app/mnt coflows/ce cloud deploy

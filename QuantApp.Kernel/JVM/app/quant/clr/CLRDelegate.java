@@ -9,23 +9,17 @@
 package app.quant.clr;
 
 import java.util.*;
+import java.util.function.*;
 
 import app.quant.clr.CLRObject;
 
-public class CLRIterator extends CLRObject implements Iterator<Object>
+public class CLRDelegate
 {
-    public CLRIterator(String classname, int ptr)
+    public String classname;
+    public Function<Object[], Object> func;
+    public CLRDelegate(String classname, Function<Object[], Object> func)
     {
-        super(classname, ptr, false);
-    }
-
-    public boolean hasNext()
-    {
-        return (boolean)this.Invoke("MoveNext");
-    }
-
-    public Object next()
-    {
-        return this.GetProperty("Current");
+        this.classname = classname;
+        this.func = func;
     }
 }

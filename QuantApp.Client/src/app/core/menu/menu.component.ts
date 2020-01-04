@@ -72,19 +72,17 @@ export class MenuComponent {
 
     private quantapp: QuantAppComponent,
     public translate: TranslateService) {
-      
-      this.quantapp.Get("m/servicedworkspaces", data => {
-        let wp = []
-        data.forEach(element => {
-          wp.push({
-            state: 'workspace',
-            parameters: [element.ID],
-            name: element.Name
-          });
-          
-        });
+        this.quantapp.Get("m/servicedworkspaces", data => {
+            let wp = []
+            data.forEach(element => {
+                wp.push({
+                    state: 'workspace',
+                    parameters: [element.ID],
+                    name: element.Name
+                });
+            });
 
-        this.menu = this.menu_function(wp)
-      })
-  }
+            this.menu = this.menu_function(wp)
+        })
+    }
 }

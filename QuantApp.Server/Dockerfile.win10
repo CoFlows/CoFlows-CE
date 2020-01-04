@@ -6,7 +6,7 @@ ARG CYGWIN_HOME=C:\\tools\\cygwin
 ARG SPARK_HOME=C:\\spark
 ARG PYTHONPATH=C:\\App\\mnt\\pip
 
-FROM mcr.microsoft.com/windows/servercore:1607 as builder
+FROM mcr.microsoft.com/windows as builder
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
@@ -85,13 +85,19 @@ RUN $url = ('https://www.python.org/ftp/python/{0}/python-{1}-amd64.exe' -f $env
 	Write-Host 'Complete.'
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 19.3
+ENV PYTHON_PIP_VERSION 19.2.3
 # https://github.com/pypa/get-pip
-ENV PYTHON_GET_PIP_URL https://bootstrap.pypa.io/get-pip.py
+ENV PYTHON_GET_PIP_URL https://github.com/pypa/get-pip/raw/309a56c5fd94bd1134053a541cb4657a4e47e09d/get-pip.py
+ENV PYTHON_GET_PIP_SHA256 57e3643ff19f018f8a00dfaa6b7e4620e3c1a7a2171fd218425366ec006b3bfe
 
 RUN Write-Host ('Downloading get-pip.py ({0}) ...' -f $env:PYTHON_GET_PIP_URL); \
 	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
 	Invoke-WebRequest -Uri $env:PYTHON_GET_PIP_URL -OutFile 'get-pip.py'; \
+	Write-Host ('Verifying sha256 ({0}) ...' -f $env:PYTHON_GET_PIP_SHA256); \
+	if ((Get-FileHash 'get-pip.py' -Algorithm sha256).Hash -ne $env:PYTHON_GET_PIP_SHA256) { \
+		Write-Host 'FAILED!'; \
+		exit 1; \
+	}; \
 	\
 	Write-Host ('Installing pip=={0} ...' -f $env:PYTHON_PIP_VERSION); \
 	python get-pip.py \
@@ -171,8 +177,8 @@ RUN $newPath = ('{0};{1}' -f $env:NET_HOME, $env:PATH); \
 	setx /M PATH $newPath
 
 RUN $newPath = ('{0}\bin;{1}' -f $env:SPARK_HOME, $env:PATH); \
-    Write-Host ('Updating PATH: {0}' -f $newPath); \
-    setx /M PATH $newPath
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
 
 # No SSL
 ENV ASPNETCORE_URLS http://+:80
@@ -182,40 +188,8 @@ WORKDIR /App
 RUN mkdir pip
 
 RUN $newPath = ('{0}\Scripts;{0};{1}' -f $env:PYTHON_HOME, $env:PYTHONPATH); \
-    Write-Host ('Updating PATH: {0}' -f $newPath); \
-    setx /M PYTHONPATH $newPath
-
-RUN pip install dash
-RUN pip install dash-daq
-RUN pip install requests
-
-# RUN winutils chmod -R 777 C:\Users\ContainerAdministrator\AppData\Local\Temp
- 
-RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-    Invoke-WebRequest -OutFile winutils.exe http://public-repo-1.hortonworks.com/hdp-win-alpha/winutils.exe; \
-    mv winutils.exe C:\\spark\\bin;
-
-RUN $newPath = ('{0};{0};{1}' -f $env:SPARK_HOME, $env:PATH); \
-    Write-Host ('Updating HADOOP_HOME: {0}' -f $newPath); \
-    setx /M HADOOP_HOME $newPath
-
-ENV HADOOP_HOME=C:\\spark
-ENV SPARK_HOME=C:\\spark
-
-#RUN icacls.exe C:\\spark\\bin\\winutils.exe /grant BUILTIN\Users:F /t
-#RUN icacls.exe C:\\spark\\bin\\winutils.exe /grant Everyone:F /t
-#RUN icacls.exe C:\\spark /inheritance:r /grant Everyone:F /t
-RUN c:\\spark\\bin\\winutils.exe chmod -R 7777 c:\\spark\\bin
-#RUN c:\\spark\\bin\\winutils.exe chmod -R 7777 c:\\spark\\bin\\winutils.exe
-
-RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-     Invoke-WebRequest -OutFile sql.tgz https://download.microsoft.com/download/0/2/A/02AAE597-3865-456C-AE7F-613F99F850A8/sqljdbc_6.0.8112.200_enu.tar.gz; \
-     tar xzf sql.tgz; \
-     Remove-Item -Force sql.tgz; \
-     cp sqljdbc_6.0/enu/jre8/sqljdbc42.jar /app/mnt/jars
- 	mv sqljdbc_6.0/enu/auth/sqljdbc_auth.dll /App
-
-RUN c:\\spark\\bin\\winutils.exe chmod -R 7777 c:\\App\\sqljdbc_auth.dll
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PYTHONPATH $newPath
 
 COPY ${source:-obj/win/publish} ./
 

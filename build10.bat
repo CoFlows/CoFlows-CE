@@ -22,9 +22,9 @@ cp ./QuantApp.Kernel/JVM/app_quant_clr_CLRRuntime.h ./QuantApp.Server/obj/win/pu
 
 cd QuantApp.Server
 
-docker build -t coflows/ce-win -f Dockerfile.win .
-docker tag coflows/ce-win coflows/ce-win:latest
-docker push coflows/ce-win:latest
+docker build -t coflows/ce-win10 -f Dockerfile.win10 .
+docker tag coflows/ce-win10 coflows/ce-win10:latest
+docker push coflows/ce-win10:latest
 
 REM g++ -D__int64="long long" -shared -I"C:\Program Files\Java\jdk1.8.0_221\include" -I"C:\Program Files\Java\jdk1.8.0_221\include\win32" -fPIC ..\QuantApp.Kernel\JVM\JNIWrapper.cpp -o JNIWrapper.dll
 REM g++ -D__int64="long long" -shared -o JNIWrapper.dll -L"C:\Program Files\Java\jdk1.8.0_221\jre\bin\server\jvm.dll" -I"C:\Program Files\Java\jdk1.8.0_221\include" -I"C:\Program Files\Java\jdk1.8.0_221\include\win32" -fPIC ..\QuantApp.Kernel\JVM\JNIWrapper.cpp

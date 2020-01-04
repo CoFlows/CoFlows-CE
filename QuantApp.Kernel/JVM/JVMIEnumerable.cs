@@ -15,7 +15,12 @@ namespace QuantApp.Kernel.JVM
     
     public class JVMIEnumerable : JVMObject, IEnumerable<object>
     {
-        public JVMIEnumerable(JVMObject obj):base(obj.Pointer, obj.JavaHashCode, obj.JavaClass){}
+        private JVMObject _obj;
+        // public JVMIEnumerable(JVMObject obj):base(obj.JavaHashCode, obj.JavaClass, true)
+        public JVMIEnumerable(JVMObject obj):base(obj.JavaHashCode, obj.JavaClass, true, "JVMIEnumerable")
+        {
+            this._obj = obj;
+        }
 
         public IEnumerator<object> GetEnumerator()
         {
@@ -95,7 +100,7 @@ namespace QuantApp.Kernel.JVM
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
+            // GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)

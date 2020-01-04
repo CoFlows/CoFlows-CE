@@ -55,7 +55,7 @@ namespace QuantApp.Server
             #if NET461
             Console.Write("CoFlows CE - Net Framework 461... ");
             #endif
-            
+
             Console.Write("Python starting... ");
             PythonEngine.Initialize();
 
@@ -423,7 +423,7 @@ namespace QuantApp.Server
                         #if MONO_LINUX || MONO_OSX
                         if(useJupyter)
                         {
-                            var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/App/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
+                            var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/app/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
                             
                             var th = new System.Threading.Thread(() => {
                                 using (Py.GIL())
