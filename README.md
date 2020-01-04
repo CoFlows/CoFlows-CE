@@ -79,7 +79,7 @@ Download a **CoFlows** package from a sample repo or create your own package. If
 ## Running  
 To run the local server you first need a workspace. Either create your own or download a template. Then just execute the server.sh script of your workspace's _bin_ folder or type:  
 
-    docker run -v $(pwd)/mnt:/App/mnt -p 80:80 -t coflows/ce
+    docker run -v $(pwd)/mnt:/app/mnt -p 80:80 -t coflows/ce
 
 when logging in please use:  
 

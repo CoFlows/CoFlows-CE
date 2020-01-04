@@ -1,2 +1,2 @@
 cd ..
-docker run -v $(pwd)/mnt:/App/mnt coflows/ce cloud remove
+docker run -v $(pwd)/mnt:/app/mnt coflows/ce cloud remove

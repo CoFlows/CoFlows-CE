@@ -306,12 +306,12 @@ module Code =
                 "   print('Pip package: " + packageName + " exists.')\n" +
                 "except: \n" +
                 "   print('Installing Pip package: " + packageName + "...')\n" +
-                "   subprocess.check_call(['pip', 'install', '--target=/App/mnt/pip/', '" + packageName + "'])"
+                "   subprocess.check_call(['pip', 'install', '--target=/app/mnt/pip/', '" + packageName + "'])"
             code |> PythonEngine.Exec)
 
     let InitializeCodeTypes(types : Type[]) =
 
-        using (Py.GIL()) (fun _ -> "/App/mnt/pip/" |> setPythonImportPath |> PythonEngine.RunSimpleString)
+        using (Py.GIL()) (fun _ -> "/app/mnt/pip/" |> setPythonImportPath |> PythonEngine.RunSimpleString)
         
         let sys_names = System.Collections.Generic.Dictionary<string, int>()        
         types
