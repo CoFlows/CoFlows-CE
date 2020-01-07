@@ -184,7 +184,7 @@ RUN $newPath = ('{0}\bin;{1}' -f $env:SPARK_HOME, $env:PATH); \
 ENV ASPNETCORE_URLS http://+:80
 EXPOSE 80/tcp
 
-WORKDIR /App
+WORKDIR /app
 RUN mkdir pip
 
 RUN $newPath = ('{0}\Scripts;{0};{1}' -f $env:PYTHON_HOME, $env:PYTHONPATH); \
