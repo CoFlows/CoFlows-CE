@@ -564,19 +564,18 @@ module Code =
                     resdb |> Seq.toList
                 
                 let compileFS (codes : (string * string) list) =
-                    
                     let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
-                    
                     let hash = str |> GetMd5Hash
                     if hash |> CompiledAssemblies.ContainsKey |> not then
 
-                        let compileFS (codes : (string * string) list) =
+                        let _compileFS (codes : (string * string) list) =
                             let checker = FSharpChecker.Create()
                             let fn = Path.GetTempFileName()
                             let dllFile = Path.ChangeExtension(fn, ".dll")
                             let fsFiles =
                                 codes
                                 |> List.map(fun (name, code) ->
+                                    let name = name.Replace("/","_")
                                     let fn = Path.GetTempFileName() + "-" + name
                                     let fsFile = Path.ChangeExtension(fn, ".fs")
                                     File.WriteAllText(fsFile, code)
@@ -619,7 +618,7 @@ module Code =
                             else
                                 null
 
-                        let assembly = codes |> compileFS
+                        let assembly = codes |> _compileFS
                         if assembly |> isNull |> not then
                             (hash, assembly) |> CompiledAssemblies.TryAdd |> ignore
                             assembly |> executeAssembly |> ignore
@@ -638,7 +637,11 @@ module Code =
                                                        
                             let asname = System.Guid.NewGuid().ToString()
                             let compilation = 
-                                let stree = codes |> List.map(fun (name, code) -> CSharpSyntaxTree.ParseText(code, null, name, null)) |> List.toArray
+                                let stree = 
+                                    codes 
+                                    |> List.map(fun (name, code) -> 
+                                        CSharpSyntaxTree.ParseText(code, null, name, null)) 
+                                    |> List.toArray
                                 let asms : MetadataReference[] = 
                                     [| 
                                         for lib in libs() do yield MetadataReference.CreateFromFile(Uri.UnescapeDataString(lib))
