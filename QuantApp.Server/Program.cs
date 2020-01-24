@@ -33,6 +33,13 @@ using QuantApp.Kernel.JVM;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+//Azure Dependencies
+using Microsoft.Azure.Management.ContainerInstance.Fluent;
+using Microsoft.Azure.Management.Fluent;
+using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+
 
 namespace QuantApp.Server
 {
@@ -64,7 +71,9 @@ namespace QuantApp.Server
                 typeof(Jint.Native.Array.ArrayConstructor)
                 });
 
-            JObject config = (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/quantapp_config.json")));
+            var config_env = Environment.GetEnvironmentVariable("coflows_config");
+
+            JObject config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/quantapp_config.json"))) : (JObject)JToken.Parse(config_env);
             workspace_name = config["Workspace"].ToString();
             hostName = config["Server"]["Host"].ToString();
             var secretKey = config["Server"]["SecretKey"].ToString();
@@ -287,6 +296,7 @@ namespace QuantApp.Server
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(OnExit);
                 _closing.WaitOne();
             }
+            //Local
             else if(args != null && args.Length > 1 && args[0] == "local" && args[1] == "build")
             {
                 PythonEngine.BeginAllowThreads();
@@ -298,7 +308,10 @@ namespace QuantApp.Server
 
                 var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
                 var res = Code.BuildRegisterPackage(pkg);
-                Console.WriteLine(res);
+                if(string.IsNullOrEmpty(res))
+                    Console.WriteLine("Success!!!");
+                else
+                    Console.WriteLine(res);
             }
             else if(args != null && args.Length > 2 && args[0] == "local" && args[1] == "query")
             {
@@ -344,6 +357,62 @@ namespace QuantApp.Server
                 Console.WriteLine("Result: ");
                 Console.WriteLine(result);
             }
+            //Azure Container Instance
+            else if(args != null && args.Length > 1 && args[0] == "azure" && args[1] == "deploy")
+            {
+                AzureCredentials credentials = SdkContext.AzureCredentialsFactory.FromFile(config["AzureContainerInstance"]["AuthFile"].ToString());
+
+                var azure = Azure
+                    .Configure()
+                    .WithLogLevel(HttpLoggingDelegatingHandler.Level.Basic)
+                    .Authenticate(credentials)
+                    .WithDefaultSubscription();
+
+                //=============================================================
+                // Create a container group with one container instance of default CPU core count and memory size
+                //   using public Docker image "seanmckenna/aci-hellofiles" which mounts the file share created previously
+                //   as read/write shared container volume.
+
+                string rgName = SdkContext.RandomResourceName(workspace_name + "_rgACI", 15);
+                string aciName = SdkContext.RandomResourceName(workspace_name, 20);
+                string shareName = SdkContext.RandomResourceName("fileshare", 20);
+                string containerImageName = "coflows/ce";
+                string volumeMountName = "aci-coFlowsShare";
+
+                Region region = Region.UKSouth;
+                
+                IContainerGroup containerGroup = azure.ContainerGroups.Define(aciName)
+                    .WithRegion(region)
+                    .WithNewResourceGroup(rgName)
+                    .WithLinux()
+                    .WithPublicImageRegistryOnly()
+                    .WithNewAzureFileShareVolume(volumeMountName, shareName)
+                    .DefineContainerInstance(aciName)
+                        .WithImage(containerImageName)
+                        .WithExternalTcpPort(sslFlag ? 443 : 80)
+                        .WithVolumeMountSetting(volumeMountName, "/aci/logs/")
+                        .WithCpuCoreCount(Int32.Parse(config["AzureContainerInstance"]["Cores"].ToString()))
+                        .WithMemorySizeInGB(Int32.Parse(config["AzureContainerInstance"]["Mem"].ToString()))
+                        // .WithGpuResource(0, GpuSku.V100)
+                        .WithEnvironmentVariables(new Dictionary<string,string>(){ 
+                            {"coflows_config", File.ReadAllText(@"mnt/quantapp_config.json")}, 
+                            {"coflows_package", File.ReadAllText(workspace_name)}
+                            })
+                        .WithStartingCommandLine("dotnet QuantApp.Server.lnx.dll server")
+                        .Attach()
+                    .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
+                    .Create();
+
+                Console.WriteLine(containerGroup);
+
+                SdkContext.DelayProvider.Delay(20000);
+                Console.WriteLine("Container instance IP address: " + containerGroup.IPAddress);
+                Console.WriteLine("Container instance Ports: " + containerGroup.ExternalTcpPorts);
+                Console.WriteLine("Container instance DNS Config: " + containerGroup.DnsConfig);
+                Console.WriteLine("Container instance DNS Prefix: " + containerGroup.DnsPrefix);
+
+            }
+            
             else
                 Console.WriteLine("Wrong argument");
 
