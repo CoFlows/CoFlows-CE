@@ -269,9 +269,18 @@ namespace QuantApp.Server
 
                 Console.WriteLine("Local deployment");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
-                Code.ProcessPackageJSON(pkg);
-                SetDefaultWorkSpaces(new string[]{ pkg.ID });
+                // var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                // Code.ProcessPackageJSON(pkg);
+                // SetDefaultWorkSpaces(new string[]{ pkg.ID });
+                if(string.IsNullOrEmpty(config_env))
+                {
+                    var pkg = Code.ProcessPackageFile(workspace_name);
+                    Code.ProcessPackageJSON(pkg);
+                    SetDefaultWorkSpaces(new string[]{ pkg.ID });
+                    Console.WriteLine(pkg.Name + " started");
+                }
+                else
+                    Console.WriteLine("Empty server...");
 
 
                 #if NETCOREAPP3_0
@@ -358,8 +367,21 @@ namespace QuantApp.Server
                 Console.WriteLine(result);
             }
             //Azure Container Instance
+            //Azure Container Instance
             else if(args != null && args.Length > 1 && args[0] == "azure" && args[1] == "deploy")
             {
+                PythonEngine.BeginAllowThreads();
+
+                Console.WriteLine("Local build");
+
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var res = Code.BuildRegisterPackage(pkg);
+
+                if(string.IsNullOrEmpty(res))
+                    Console.WriteLine("Success!!!");
+                else
+                    Console.WriteLine(res);
+
                 AzureCredentials credentials = SdkContext.AzureCredentialsFactory.FromFile(config["AzureContainerInstance"]["AuthFile"].ToString());
 
                 var azure = Azure
@@ -373,13 +395,20 @@ namespace QuantApp.Server
                 //   using public Docker image "seanmckenna/aci-hellofiles" which mounts the file share created previously
                 //   as read/write shared container volume.
 
-                string rgName = SdkContext.RandomResourceName(workspace_name + "_rgACI", 15);
-                string aciName = SdkContext.RandomResourceName(workspace_name, 20);
-                string shareName = SdkContext.RandomResourceName("fileshare", 20);
-                string containerImageName = "coflows/ce";
-                string volumeMountName = "aci-coFlowsShare";
+                string rgName = pkg.Name.ToLower() + "-rg";//SdkContext.RandomResourceName("rgACI", 15);
+                string aciName = pkg.Name.ToLower(); //SdkContext.RandomResourceName(config["AzureContainerInstance"]["Dns"].ToString(), 20);
+                string shareName = pkg.Name.ToLower() + "-fileshare";//SdkContext.RandomResourceName("fileshare", 20);
+                string containerImageName = "coflows/quant";
+                string volumeMountName = "aci-coflows-volume";
 
-                Region region = Region.UKSouth;
+                Console.WriteLine("aciName: " + aciName);
+                Console.WriteLine("rgName: " + rgName);
+                Console.WriteLine("shareName: " + shareName);
+
+
+                // Region region = Region.UKSouth;
+
+                Region region = (Region)Enum.Parse(typeof(Region), config["AzureContainerInstance"]["Region"].ToString());
                 
                 IContainerGroup containerGroup = azure.ContainerGroups.Define(aciName)
                     .WithRegion(region)
@@ -396,9 +425,8 @@ namespace QuantApp.Server
                         // .WithGpuResource(0, GpuSku.V100)
                         .WithEnvironmentVariables(new Dictionary<string,string>(){ 
                             {"coflows_config", File.ReadAllText(@"mnt/quantapp_config.json")}, 
-                            {"coflows_package", File.ReadAllText(workspace_name)}
                             })
-                        .WithStartingCommandLine("dotnet QuantApp.Server.lnx.dll server")
+                        .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")//"dotnet QuantApp.Server.quant.lnx.dll server")
                         .Attach()
                     .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
                     .Create();
@@ -407,10 +435,30 @@ namespace QuantApp.Server
 
                 SdkContext.DelayProvider.Delay(20000);
                 Console.WriteLine("Container instance IP address: " + containerGroup.IPAddress);
-                Console.WriteLine("Container instance Ports: " + containerGroup.ExternalTcpPorts);
-                Console.WriteLine("Container instance DNS Config: " + containerGroup.DnsConfig);
-                Console.WriteLine("Container instance DNS Prefix: " + containerGroup.DnsPrefix);
+                Console.WriteLine("Container instance Ports: " + string.Join(",", containerGroup.ExternalTcpPorts));
 
+                string serverUrl = config["AzureContainerInstance"]["Dns"].ToString() + "." + config["AzureContainerInstance"]["Region"].ToString().ToLower() + ".azurecontainer.io";
+                Console.WriteLine("Container instance DNS Prefix: " + serverUrl);
+
+                Connection.Client.Init(serverUrl, sslFlag);
+
+                if(!Connection.Client.Login(config["Server"]["SecretKey"].ToString()))
+                    throw new Exception("CoFlows Not connected!");
+
+                Connection.Client.Connect();
+                Console.Write("server connected! ");
+
+                QuantApp.Kernel.M.Factory = new MFactory();
+
+                Console.Write("Starting azure deployment... ");
+
+                Code.UpdatePackageFile(workspace_name);
+                var t0 = DateTime.Now;
+                Console.WriteLine("Started: " + t0);
+                var resDeploy = Connection.Client.PublishPackage(workspace_name);
+                var t1 = DateTime.Now;
+                Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
+                Console.Write("Result: " + resDeploy);
             }
             
             else
