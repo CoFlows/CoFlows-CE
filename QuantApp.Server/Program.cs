@@ -424,7 +424,7 @@ namespace QuantApp.Server
                         .WithEnvironmentVariables(new Dictionary<string,string>(){ 
                             {"coflows_config", File.ReadAllText(@"mnt/quantapp_config.json")}, 
                             })
-                        .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")
+                        .WithStartingCommandLine("dotnet", "QuantApp.Server.lnx.dll", "server")
                         .Attach()
                     .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
                     .CreateAsync()
