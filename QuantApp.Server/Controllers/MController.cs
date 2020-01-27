@@ -17,6 +17,8 @@ using QuantApp.Server.Utils;
 
 using System.Net;
 using System.IO;
+using System.IO.Compression;
+using System.IO.Compression;
 using System.Text;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -202,9 +204,74 @@ namespace QuantApp.Server.Controllers
 
             QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
 
+            try
+            {
+                var wsp = QuantApp.Kernel.M.Base(data.ID)[x => true][0] as WorkSpace;
+                
+                var _pkg = QuantApp.Engine.Code.ProcessPackageWorkspace(wsp);
+                if(Directory.Exists("/app/mnt/Agents"))
+                    Directory.Delete("/app/mnt/Agents", true);
+                if(Directory.Exists("/app/mnt/Base"))
+                    Directory.Delete("/app/mnt/Base", true);
+                if(Directory.Exists("/app/mnt/Files"))
+                    Directory.Delete("/app/mnt/Files", true);
+                if(Directory.Exists("/app/mnt/Queries"))
+                    Directory.Delete("/app/mnt/Queries", true);
+
+                var bytes = QuantApp.Engine.Code.ProcessPackageToZIP(_pkg);
+
+                var archive = new ZipArchive(new MemoryStream(bytes));
+                
+                foreach(var entry in archive.Entries)
+                {
+                    var entryStream = entry.Open();
+                    var streamReader = new StreamReader(entryStream);
+                    var content = streamReader.ReadToEnd();
+                    var filePath = "/app/mnt/" + entry.FullName;
+
+                    System.IO.FileInfo file = new System.IO.FileInfo(filePath);
+                    file.Directory.Create(); // If the directory already exists, this method does nothing.
+                    System.IO.File.WriteAllText(file.FullName, content);
+
+                    // var entryStream = entry.Open();
+                    // var streamReader = new StreamReader(entryStream);
+                    // var content = streamReader.ReadToEnd();
+                    // var filePath = "/Workspace/" + entry.FullName;
+
+                    // System.IO.FileInfo file = new System.IO.FileInfo(filePath);
+                    // file.Directory.Create(); // If the directory already exists, this method does nothing.
+                    // System.IO.File.WriteAllText(file.FullName, content);
+                }
+
+                foreach(var fid in wsp.Functions)
+                {
+                    var cfid = fid.Replace("$WID$", data.ID);
+                    var f = F.Find(cfid).Value;
+                    f.Start();
+                }
+
+                // var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/app/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + data.ID + "'])";
+
+
+                // var th = new System.Threading.Thread(() => {
+                //     using (Py.GIL())
+                //     {
+                //         Console.WriteLine("Starting Jupyter...");
+                //         Console.WriteLine(code);
+                //         PythonEngine.Exec(code);
+                //     }
+                // });
+                // th.Start();
+
+                Program.AddServicedWorkSpaces(wsp.ID);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
             return Ok(new {Result = res});
         }
-
         
         [HttpPost]
         public async Task<IActionResult> CompileFromJSON([FromBody] PKG data)
