@@ -82,6 +82,8 @@ namespace QuantApp.Server.Controllers
             string id = null;
             QuantApp.Kernel.User user = null;
 
+            bool secretLogin = false;
+
             if(model.Username != null)
             {
                 id = "QuantAppSecure_" + model.Username.ToLower().Replace('@', '.').Replace(':', '.');
@@ -91,7 +93,10 @@ namespace QuantApp.Server.Controllers
             {
                 user = QuantApp.Kernel.User.FindUserBySecret(model.Code);
                 if(user != null)
+                {
                     id = user.ID;
+                    secretLogin = true;
+                }
             }
             else
                 return BadRequest("Could not verify user");
@@ -100,7 +105,7 @@ namespace QuantApp.Server.Controllers
 
             var permission = user == null ? QuantApp.Kernel.AccessType.Denied : group == null ? QuantApp.Kernel.AccessType.Read : group.Permission(null, user);
 
-            if (user != null && permission != QuantApp.Kernel.AccessType.Denied && user.VerifyPassword(model.Password))
+            if (user != null && permission != QuantApp.Kernel.AccessType.Denied && (secretLogin ? true : user.VerifyPassword(model.Password)))
             {
                 var remoteIpAddress = Request.HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress;
                 string ip = remoteIpAddress.ToString();
