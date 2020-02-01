@@ -39,8 +39,8 @@ CREATE TABLE Users (
     NameIdentifier NVarchar(150) Not Null,
     Email Text,
     TenantName NVarchar(150),
-    Hash Text,
-    Secret Text,
+    Hash NVarchar(150),
+    Secret NVarchar(150),
     GroupID NVarchar(50),
     StripeID NVarchar(150),
     MetaData Text,
@@ -48,7 +48,7 @@ CREATE TABLE Users (
     );
 
 INSERT INTO Users (FirstName, LastName, IdentityProvider, NameIdentifier, Email, TenantName, Hash, Secret, GroupID, StripeID, MetaData) Values ('anonymous', '', 'QuantAppSecure', '3eaac093-9bd8-4bb5-a0a5-423b616cbcd7', 'anonymous', 'QuantAppSecure_anonymous', '8a9eccdf27c279700b10f8d89079bb6f', '', 'Public', '', '');
-INSERT INTO Users (FirstName, LastName, IdentityProvider, NameIdentifier, Email, TenantName, Hash, Secret, GroupID, StripeID, MetaData) Values ('root', '', 'QuantAppSecure', 'dd554db4-b969-44d8-98ad-28575be368e5', 'root', 'QuantAppSecure_root', '202cb962ac59075b964b07152d234b70', '', '', '', '');
+INSERT INTO Users (FirstName, LastName, IdentityProvider, NameIdentifier, Email, TenantName, Hash, Secret, GroupID, StripeID, MetaData) Values ('root', '', 'QuantAppSecure', 'dd554db4-b969-44d8-98ad-28575be368e5', 'root', 'QuantAppSecure_root', '202cb962ac59075b964b07152d234b70', '26499e5e555e9957725f51cc4d400384', '', '', '');
 
 CREATE TABLE UserLoginRepository (
     UserID NVarchar(150) Not Null,
