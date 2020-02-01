@@ -90,6 +90,59 @@ when logging in please use:
 Link your **CoFlows** server to automatically pull changes to a project hosted on a GitHub repo by following the instructions of the following link [GitHub](docs/GitLink.md "GitHub").
 
 
+## CoFlows CLI
+
+            Cloud:
+
+                -Deploy a container to the cloud
+                 unix: bin/cloud_deploy.sh cloud
+                 win:  bin/bat/cloud_deploy.bat cloud
+
+                -Buid the in the cloud
+                 unix: bin/build.sh cloud
+                 win:  bin/bat/build.bat cloud
+
+                -Print logs of container in the cloud
+                 unix: bin/cloud_log.sh
+                 win: bin/bat/cloud_log.bat
+
+                -Restart container in the cloud
+                 unix: bin/cloud_restart.sh
+                 win: bin/bat/cloud_restart.bat
+
+                -Remove container in the cloud
+                 unix: bin/cloud_remove.sh
+                 win: bin/bat/cloud_remove.bat
+
+                -Execute query in the cloud
+                 unix: bin/query.sh local query_id function_name  parameters[0] ... parameters[n]
+                 win:  bin/bat/query.bat local query_id function_name  parameters[0] ... parameters[n]
+            
+            Local:
+
+                -Buid the code locally
+                 unix: bin/build.sh local
+                 win:  bin/bat/build.bat local
+
+                -Execute query locally
+                 unix: bin/query.sh local query_id function_name  parameters[0] ... parameters[n]
+                 win:  bin/bat/query.bat local query_id function_name  parameters[0] ... parameters[n]
+
+                -Server
+                 unix: bin/server.sh
+                 win: bin/bat/server.bat
+
+            Azure Container Instances:
+
+                -Deploy to an Azure Container Instance
+                 unix: bin/azure_deploy.sh local
+                 win:  bin/bat/azure_deploy.bat local
+
+                -Remove an Azure Container Instance
+                 unix: bin/azure_remove.sh
+                 win:  bin/bat/azure_remove.bat
+
+
 ## License 
 The MIT License (MIT)
 Copyright (c) 2007-2019, Arturo Rodriguez All rights reserved.

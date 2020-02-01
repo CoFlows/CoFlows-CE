@@ -72,8 +72,12 @@ namespace QuantApp.Server
                 });
 
             var config_env = Environment.GetEnvironmentVariable("coflows_config");
+            var config_file = Environment.GetEnvironmentVariable("config_file");
 
-            JObject config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/quantapp_config.json"))) : (JObject)JToken.Parse(config_env);
+            if(string.IsNullOrEmpty(config_file))
+                config_file = "quantapp_config.json";
+
+            JObject config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
             workspace_name = config["Workspace"].ToString();
             hostName = config["Server"]["Host"].ToString();
             var secretKey = config["Server"]["SecretKey"].ToString();
@@ -371,13 +375,13 @@ namespace QuantApp.Server
             {
                 PythonEngine.BeginAllowThreads();
 
-                Console.WriteLine("Local build");
+                Console.WriteLine("Azure Container Instance start...");
 
                 var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(string.IsNullOrEmpty(res))
-                    Console.WriteLine("Success!!!");
+                    Console.WriteLine("Build Success!!!");
                 else
                     Console.WriteLine(res);
 
@@ -394,7 +398,7 @@ namespace QuantApp.Server
                 //   using public Docker image "seanmckenna/aci-hellofiles" which mounts the file share created previously
                 //   as read/write shared container volume.
 
-                string rgName = pkg.Name.ToLower() + "-rg";//SdkContext.RandomResourceName("rgACI", 15);
+                string rgName = pkg.ID.ToLower() + "-rg";//SdkContext.RandomResourceName("rgACI", 15);
                 string aciName = pkg.Name.ToLower(); //SdkContext.RandomResourceName(config["AzureContainerInstance"]["Dns"].ToString(), 20);
                 // string shareName = pkg.Name.ToLower() + "-fileshare";//SdkContext.RandomResourceName("fileshare", 20);
                 string containerImageName = "coflows/quant";
@@ -424,7 +428,7 @@ namespace QuantApp.Server
                         .WithEnvironmentVariables(new Dictionary<string,string>(){ 
                             {"coflows_config", File.ReadAllText(@"mnt/quantapp_config.json")}, 
                             })
-                        .WithStartingCommandLine("dotnet", "QuantApp.Server.lnx.dll", "server")
+                        .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")
                         .Attach()
                     .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
                     .CreateAsync()
@@ -479,7 +483,39 @@ namespace QuantApp.Server
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + resDeploy);
             }
-            
+            else if(args != null && args.Length > 1 && args[0] == "azure" && args[1] == "remove")
+            {
+                PythonEngine.BeginAllowThreads();
+
+                Console.WriteLine("Azure Container Instance remove start");
+
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var res = Code.BuildRegisterPackage(pkg);
+
+                if(!string.IsNullOrEmpty(res))
+                    Console.WriteLine(res);
+
+                AzureCredentials credentials = SdkContext.AzureCredentialsFactory.FromFile(config["AzureContainerInstance"]["AuthFile"].ToString());
+
+                var azure = Azure
+                    .Configure()
+                    .WithLogLevel(HttpLoggingDelegatingHandler.Level.Basic)
+                    .Authenticate(credentials)
+                    .WithDefaultSubscription();
+
+                string rgName = pkg.ID.ToLower() + "-rg";
+
+                try
+                {
+                    Console.WriteLine("Deleting Resource Group: " + rgName);
+                    azure.ResourceGroups.BeginDeleteByName(rgName);
+                    Console.WriteLine("Deleted Resource Group: " + rgName);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Did not create any resources in Azure. No clean up is necessary");
+                }
+            }
             else
                 Console.WriteLine("Wrong argument");
 
