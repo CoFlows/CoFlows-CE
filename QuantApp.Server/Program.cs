@@ -406,6 +406,35 @@ namespace QuantApp.Server
 
                 Console.WriteLine("aciName: " + aciName);
                 Console.WriteLine("rgName: " + rgName);
+
+
+                // string rgName = pkg.ID.ToLower() + "-rg";
+
+                try
+                {
+                    Console.WriteLine("Cleaning Resource Group: " + rgName);
+                    azure.ResourceGroups.BeginDeleteByName(rgName);
+                    
+
+                    IResourceGroup resGroup = azure.ResourceGroups.GetByName(rgName);
+                    while(resGroup != null)
+                    {
+                        resGroup = azure.ResourceGroups.GetByName(rgName);
+
+                        Console.Write(".");
+
+                        SdkContext.DelayProvider.Delay(1000);
+                    }
+                    Console.WriteLine();
+
+                    Console.WriteLine("Cleaned Resource Group: " + rgName);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Did not create any resources in Azure. No clean up is necessary");
+                }
+
+
                 
                 Region region = Region.Create(config["AzureContainerInstance"]["Region"].ToString());
                 Console.WriteLine("region: " + region);
@@ -426,7 +455,7 @@ namespace QuantApp.Server
                         .WithMemorySizeInGB(Int32.Parse(config["AzureContainerInstance"]["Mem"].ToString()))
                         // .WithGpuResource(0, GpuSku.V100)
                         .WithEnvironmentVariables(new Dictionary<string,string>(){ 
-                            {"coflows_config", File.ReadAllText(@"mnt/quantapp_config.json")}, 
+                            {"coflows_config", File.ReadAllText(@"mnt/" + config_file)}, 
                             })
                         .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")
                         .Attach()
@@ -509,6 +538,19 @@ namespace QuantApp.Server
                 {
                     Console.WriteLine("Deleting Resource Group: " + rgName);
                     azure.ResourceGroups.BeginDeleteByName(rgName);
+                    
+
+                    IResourceGroup resGroup = azure.ResourceGroups.GetByName(rgName);
+                    while(resGroup != null)
+                    {
+                        resGroup = azure.ResourceGroups.GetByName(rgName);
+
+                        Console.Write(".");
+
+                        SdkContext.DelayProvider.Delay(1000);
+                    }
+                    Console.WriteLine();
+
                     Console.WriteLine("Deleted Resource Group: " + rgName);
                 }
                 catch (Exception)
