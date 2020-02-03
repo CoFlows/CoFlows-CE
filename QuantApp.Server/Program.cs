@@ -51,7 +51,7 @@ namespace QuantApp.Server
         private static string hostName = null;
         private static string ssl_cert = null;
         private static string ssl_password = null;
-        private static bool useJupyter = false;
+        public static bool useJupyter = false;
 
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)

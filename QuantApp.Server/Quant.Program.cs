@@ -44,7 +44,7 @@ namespace QuantApp.Server.Quant
         private static string ssl_cert = null;
         private static string ssl_password = null;
 
-        private static bool useJupyter = false;
+        // private static bool useJupyter = false;
 
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
@@ -88,7 +88,7 @@ namespace QuantApp.Server.Quant
             var cloudKey = config["Cloud"]["SecretKey"].ToString();
             var cloudSSL = config["Cloud"]["SSL"].ToString();
 
-            useJupyter = config["Jupyter"].ToString().ToLower() == "true";
+            QuantApp.Server.Program.useJupyter = config["Jupyter"].ToString().ToLower() == "true";
 
             if(args != null && args.Length > 0 && args[0] == "lab")
             {
@@ -291,19 +291,19 @@ namespace QuantApp.Server.Quant
                     SetDefaultWorkSpaces(new string[]{ pkg.ID });
                     Console.WriteLine(pkg.Name + " started");
 
-                    if(config["Jupyter"].ToString().ToLower() == "true")
-                    {
-                        var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/app/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + pkg.ID + "'])";
-                        var th = new System.Threading.Thread(() => {
-                            using (Py.GIL())
-                            {
-                                Console.WriteLine("Starting Jupyter...");
-                                Console.WriteLine(code);
-                                PythonEngine.Exec(code);
-                            }
-                        });
-                        th.Start();
-                    }
+                    // if(config["Jupyter"].ToString().ToLower() == "true")
+                    // {
+                    //     var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/app/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + pkg.ID + "'])";
+                    //     var th = new System.Threading.Thread(() => {
+                    //         using (Py.GIL())
+                    //         {
+                    //             Console.WriteLine("Starting Jupyter...");
+                    //             Console.WriteLine(code);
+                    //             PythonEngine.Exec(code);
+                    //         }
+                    //     });
+                    //     th.Start();
+                    // }
                 }
                 else
                     Console.WriteLine("Empty server...");
