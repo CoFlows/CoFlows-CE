@@ -73,6 +73,17 @@ Download a **CoFlows** package from a sample repo or create your own package. If
             "Host": "coflows.quant.app", //Set the cloud host name
             "SecretKey": "xxx", //Set your cloud secret key (login to CoFlows Cloud, then at the top right click on your name, profile and your secret key will appear)
             "SSL": true
+        },
+        "AzureContainerInstance": {
+            "AuthFile":"mnt/Files/my.azureauth",
+            "Dns": "coflows-container",
+            "Region": "UKSouth",
+            "Cores": 4,
+            "Mem": 4,
+            "Gpu": {
+                "SKU": "",
+                "Cores": 1
+            }
         }
     }
 
@@ -117,7 +128,11 @@ Link your **CoFlows** server to automatically pull changes to a project hosted o
                 -Execute query in the cloud
                  unix: bin/query.sh local query_id function_name  parameters[0] ... parameters[n]
                  win:  bin/bat/query.bat local query_id function_name  parameters[0] ... parameters[n]
-            
+
+                -Execute query locally (custom quantapp_config.json file)
+                 unix: bin/query_customg.sh {custom_quantapp_config.json} cloud query_id function_name  parameters[0] ... parameters[n]
+                 win:  bin/bat/query_custom.bat {custom_quantapp_config.json} cloud query_id function_name  parameters[0] ... parameters[n]
+
             Local:
 
                 -Buid the code locally
@@ -127,6 +142,11 @@ Link your **CoFlows** server to automatically pull changes to a project hosted o
                 -Execute query locally
                  unix: bin/query.sh local query_id function_name  parameters[0] ... parameters[n]
                  win:  bin/bat/query.bat local query_id function_name  parameters[0] ... parameters[n]
+
+                -Execute query locally (custom quantapp_config.json file)
+                 unix: bin/query_customg.sh {custom_quantapp_config.json} local query_id function_name  parameters[0] ... parameters[n]
+                 win:  bin/bat/query_custom.bat {custom_quantapp_config.json} local query_id function_name  parameters[0] ... parameters[n]
+
 
                 -Server
                  unix: bin/server.sh

@@ -39,6 +39,7 @@ using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Azure.Management.ContainerInstance.Fluent.Models;
 
 
 namespace QuantApp.Server
@@ -375,7 +376,11 @@ namespace QuantApp.Server
             {
                 PythonEngine.BeginAllowThreads();
 
+                Console.WriteLine();
                 Console.WriteLine("Azure Container Instance start...");
+                var t0 = DateTime.Now;
+                Console.WriteLine("Started: " + t0);
+
 
                 var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
                 var res = Code.BuildRegisterPackage(pkg);
@@ -393,22 +398,12 @@ namespace QuantApp.Server
                     .Authenticate(credentials)
                     .WithDefaultSubscription();
 
-                //=============================================================
-                // Create a container group with one container instance of default CPU core count and memory size
-                //   using public Docker image "seanmckenna/aci-hellofiles" which mounts the file share created previously
-                //   as read/write shared container volume.
-
-                string rgName = pkg.ID.ToLower() + "-rg";//SdkContext.RandomResourceName("rgACI", 15);
-                string aciName = pkg.Name.ToLower(); //SdkContext.RandomResourceName(config["AzureContainerInstance"]["Dns"].ToString(), 20);
-                // string shareName = pkg.Name.ToLower() + "-fileshare";//SdkContext.RandomResourceName("fileshare", 20);
-                string containerImageName = "coflows/quant";
-                // string volumeMountName = "aci-coflows-volume";
-
-                Console.WriteLine("aciName: " + aciName);
-                Console.WriteLine("rgName: " + rgName);
-
-
-                // string rgName = pkg.ID.ToLower() + "-rg";
+                string rgName = pkg.ID.ToLower() + "-rg";
+                string aciName = pkg.Name.ToLower();
+                string containerImageName = "coflows/ce";
+                
+                Console.WriteLine("Container Name: " + aciName);
+                Console.WriteLine("Resource Group Name: " + rgName);
 
                 try
                 {
@@ -429,39 +424,74 @@ namespace QuantApp.Server
 
                     Console.WriteLine("Cleaned Resource Group: " + rgName);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Did not create any resources in Azure. No clean up is necessary");
                 }
-
-
                 
                 Region region = Region.Create(config["AzureContainerInstance"]["Region"].ToString());
-                Console.WriteLine("region: " + region);
+                Console.WriteLine("Region: " + region);
+
                 
-                Task.Run(() =>
-                    azure.ContainerGroups.Define(aciName)
-                    .WithRegion(region)
-                    .WithNewResourceGroup(rgName)
-                    .WithLinux()
-                    .WithPublicImageRegistryOnly()
-                    // .WithNewAzureFileShareVolume(volumeMountName, shareName)
-                    .WithoutVolume()
-                    .DefineContainerInstance(aciName)
-                        .WithImage(containerImageName)
-                        .WithExternalTcpPort(sslFlag ? 443 : 80)
-                        // .WithVolumeMountSetting(volumeMountName, "/aci/logs/")
-                        .WithCpuCoreCount(Int32.Parse(config["AzureContainerInstance"]["Cores"].ToString()))
-                        .WithMemorySizeInGB(Int32.Parse(config["AzureContainerInstance"]["Mem"].ToString()))
-                        // .WithGpuResource(0, GpuSku.V100)
-                        .WithEnvironmentVariables(new Dictionary<string,string>(){ 
-                            {"coflows_config", File.ReadAllText(@"mnt/" + config_file)}, 
-                            })
-                        .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")
-                        .Attach()
-                    .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
-                    .CreateAsync()
-                );
+                
+                if(config["AzureContainerInstance"]["Gpu"] != null && config["AzureContainerInstance"]["Gpu"]["Cores"].ToString() != "" && config["AzureContainerInstance"]["Gpu"]["Cores"].ToString() != "0" && config["AzureContainerInstance"]["Gpu"]["SKU"].ToString() != "")
+                {
+                    Console.WriteLine("Creating a GPU container...");
+                    Task.Run(() =>
+                        azure.ContainerGroups.Define(aciName)
+                        .WithRegion(region)
+                        .WithNewResourceGroup(rgName)
+                        .WithLinux()
+                        .WithPublicImageRegistryOnly()
+                        // .WithNewAzureFileShareVolume(volumeMountName, shareName)
+                        .WithoutVolume()
+                        .DefineContainerInstance(aciName)
+                            .WithImage(containerImageName)
+                            .WithExternalTcpPort(sslFlag ? 443 : 80)
+                            // .WithVolumeMountSetting(volumeMountName, "/aci/logs/")
+                            .WithCpuCoreCount(Int32.Parse(config["AzureContainerInstance"]["Cores"].ToString()))
+                            .WithMemorySizeInGB(Int32.Parse(config["AzureContainerInstance"]["Mem"].ToString()))
+                            .WithGpuResource(
+                                Int32.Parse(config["AzureContainerInstance"]["Gpu"]["Cores"].ToString()), 
+                                config["AzureContainerInstance"]["Gpu"]["SKU"].ToString().ToLower() == "k80" ? GpuSku.K80 : config["AzureContainerInstance"]["Gpu"]["SKU"].ToString().ToLower() == "p100" ? GpuSku.P100 : GpuSku.V100
+                                )
+                            .WithEnvironmentVariables(new Dictionary<string,string>(){ 
+                                {"coflows_config", File.ReadAllText(@"mnt/" + config_file)}, 
+                                })
+                            .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")
+                            .Attach()
+                        .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
+                        .CreateAsync()
+                    );
+                }
+                else
+                {
+                    Console.WriteLine("Creating a standard container...");
+                    Task.Run(() =>
+                        azure.ContainerGroups.Define(aciName)
+                        .WithRegion(region)
+                        .WithNewResourceGroup(rgName)
+                        .WithLinux()
+                        .WithPublicImageRegistryOnly()
+                        // .WithNewAzureFileShareVolume(volumeMountName, shareName)
+                        .WithoutVolume()
+                        .DefineContainerInstance(aciName)
+                            .WithImage(containerImageName)
+                            .WithExternalTcpPort(sslFlag ? 443 : 80)
+                            // .WithVolumeMountSetting(volumeMountName, "/aci/logs/")
+                            .WithCpuCoreCount(Int32.Parse(config["AzureContainerInstance"]["Cores"].ToString()))
+                            .WithMemorySizeInGB(Int32.Parse(config["AzureContainerInstance"]["Mem"].ToString()))
+                            .WithEnvironmentVariables(new Dictionary<string,string>(){ 
+                                {"coflows_config", File.ReadAllText(@"mnt/" + config_file)}, 
+                                })
+                            .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")
+                            .Attach()
+                        .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
+                        .CreateAsync()
+                    );
+                }
+                
 
                 // Poll for the container group
                 IContainerGroup containerGroup = null;
@@ -474,17 +504,25 @@ namespace QuantApp.Server
                     SdkContext.DelayProvider.Delay(1000);
                 }
 
+                var lastContainerGroupState = containerGroup.Refresh().State;
+
                 Console.WriteLine();
                 Console.WriteLine($"Container group state: {containerGroup.Refresh().State}");
                 // Poll until the container group is running
                 while(containerGroup.State != "Running")
                 {
+                    var containerGroupState = containerGroup.Refresh().State;
+                    if(containerGroupState != lastContainerGroupState)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine(containerGroupState);
+                        lastContainerGroupState = containerGroupState;
+                    }
                     Console.Write(".");
                     
                     System.Threading.Thread.Sleep(1000);
                 }
-
-                
+                Console.WriteLine();
                 Console.WriteLine("Container instance IP address: " + containerGroup.IPAddress);
                 Console.WriteLine("Container instance Ports: " + string.Join(",", containerGroup.ExternalTcpPorts));
 
@@ -505,8 +543,6 @@ namespace QuantApp.Server
                 Console.Write("Starting azure deployment... ");
 
                 Code.UpdatePackageFile(workspace_name);
-                var t0 = DateTime.Now;
-                Console.WriteLine("Started: " + t0);
                 var resDeploy = Connection.Client.PublishPackage(workspace_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
