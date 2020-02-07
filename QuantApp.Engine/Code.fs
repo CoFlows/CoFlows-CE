@@ -295,19 +295,23 @@ module Code =
             M._compiledAssemblies.TryAdd(packageName + packageVersion.ToString(), assembly) |> ignore
             M._compiledAssemblyNames.TryAdd(packageName + packageVersion.ToString(), packageName + packageVersion.ToString()) |> ignore
 
+    let installedPip = System.Collections.Concurrent.ConcurrentDictionary<string, string>()
     let InstallPip (packageName : string) : unit =
-        using (Py.GIL()) (fun _ -> 
+        if packageName |> installedPip.ContainsKey |> not then
+            using (Py.GIL()) (fun _ -> 
 
-            setPythonOut |> PythonEngine.RunSimpleString
-            let code = 
-                "import subprocess \n" +
-                "try:\n" +
-                "   import " + packageName + "\n" +
-                "   print('Pip package: " + packageName + " exists.')\n" +
-                "except: \n" +
-                "   print('Installing Pip package: " + packageName + "...')\n" +
-                "   subprocess.check_call(['pip', 'install', '--target=/app/mnt/pip/', '" + packageName + "'])"
-            code |> PythonEngine.Exec)
+                setPythonOut |> PythonEngine.RunSimpleString
+                let code = 
+                    "import subprocess \n" +
+                    "try:\n" +
+                    "   import " + packageName + "\n" +
+                    "   print('Pip package: " + packageName + " exists.')\n" +
+                    "except: \n" +
+                    "   print('Installing Pip package: " + packageName + "...')\n" +
+                    "   subprocess.check_call(['pip', 'install', '--target=/app/mnt/pip/', '" + packageName + "'])"
+                code |> PythonEngine.Exec
+            )
+            installedPip.TryAdd(packageName, packageName) |> ignore
 
     let InitializeCodeTypes(types : Type[]) =
 
@@ -754,6 +758,8 @@ module Code =
 
                                 pathTemp |> setPythonImportPath |> PythonEngine.RunSimpleString
                                 pathTemp + Path.DirectorySeparatorChar.ToString() + "Base" |> setPythonImportPath |> PythonEngine.RunSimpleString
+                                
+                                "/app/mnt/Base" |> setPythonImportPath |> PythonEngine.RunSimpleString
 
                                 let modules = 
                                     codes 
@@ -805,14 +811,22 @@ module Code =
                                                 // This happens because Docker Engine on Linux leverages off
                                                 // the native kernel which is different to the VM used in Mac and Win.
                                                 
-                                                let pyMod = PythonEngine.CompileToModule(name, code, pyFile)
-                                                if pyMod |> isNull then 
-                                                    "Error loading: " + name |> Console.WriteLine
-                                                    null 
-                                                else 
-                                                    (hash, pyMod) |> CompiledPythonModules.TryAdd
-                                                    if modFlag |> not then (modName, modName) |> CompiledPythonModulesName.TryAdd |> ignore 
-                                                    pyMod
+                                                let namesplit = name.Split('/')
+                                                if name.Contains("Base") && namesplit.Length > 2 then
+                                                    
+                                                    let pkgName = namesplit.[1]
+                                                    pkgName |> InstallPip
+                                                    null
+                                                else
+                                                
+                                                    let pyMod = PythonEngine.CompileToModule(name, code, pyFile)
+                                                    if pyMod |> isNull then 
+                                                        "Error loading: " + name |> Console.WriteLine
+                                                        null 
+                                                    else
+                                                        (hash, pyMod) |> CompiledPythonModules.TryAdd
+                                                        if modFlag |> not then (modName, modName) |> CompiledPythonModulesName.TryAdd |> ignore 
+                                                        pyMod
                                         with
                                         | ex -> 
                                             ex |> Console.WriteLine
