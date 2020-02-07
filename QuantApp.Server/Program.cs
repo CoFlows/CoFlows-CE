@@ -274,29 +274,12 @@ namespace QuantApp.Server
 
                 Console.WriteLine("Local deployment");
 
-                // var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
-                // Code.ProcessPackageJSON(pkg);
-                // SetDefaultWorkSpaces(new string[]{ pkg.ID });
                 if(string.IsNullOrEmpty(config_env))
                 {
                     var pkg = Code.ProcessPackageFile(workspace_name);
                     Code.ProcessPackageJSON(pkg);
                     SetDefaultWorkSpaces(new string[]{ pkg.ID });
                     Console.WriteLine(pkg.Name + " started");
-
-                    // if(config["Jupyter"].ToString().ToLower() == "true")
-                    // {
-                    //     var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/app/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + pkg.ID + "'])";
-                    //     var th = new System.Threading.Thread(() => {
-                    //         using (Py.GIL())
-                    //         {
-                    //             Console.WriteLine("Starting Jupyter...");
-                    //             Console.WriteLine(code);
-                    //             PythonEngine.Exec(code);
-                    //         }
-                    //     });
-                    //     th.Start();
-                    // }
                 }
                 else
                     Console.WriteLine("Empty server...");
