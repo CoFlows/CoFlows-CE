@@ -22,4 +22,4 @@ cd QuantApp.Server
 
 docker build -t coflows/quant -f Dockerfile.quant .
 docker tag coflows/quant coflows/quant:latest
-# docker push coflows/quant:latest
+docker push coflows/quant:latest
