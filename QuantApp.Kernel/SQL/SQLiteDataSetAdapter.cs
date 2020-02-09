@@ -602,12 +602,26 @@ namespace QuantApp.Kernel.Adapters.SQL
                 using (SQLiteConnection _connectionInternal = new SQLiteConnection(ConnectString))
                 {
                     _connectionInternal.Open();
-                    SQLiteCommand com = new SQLiteCommand(command);
-                    com.CommandTimeout = 0 * 60 * 15;
-                    com.Connection = _connectionInternal;
-                    
-                    com.ExecuteNonQuery();
-
+                    var transaction = _connectionInternal.BeginTransaction();
+                    var commands = command.Split(';');
+                    foreach(var _com in commands)
+                    {
+                        try
+                        {
+                            SQLiteCommand com = new SQLiteCommand(_com, _connectionInternal, transaction);
+                            // SQLiteCommand com = new SQLiteCommand(_com);
+                            // com.CommandTimeout = 0 * 60 * 15;
+                            // com.Connection = _connectionInternal;
+                            com.ExecuteNonQuery();
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine("ERROR: " + _com);
+                            Console.WriteLine(e);
+                            throw e;
+                        }
+                    }
+                    transaction.Commit();
                     _connectionInternal.Close();
                 }
             }
