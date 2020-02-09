@@ -145,7 +145,7 @@ CREATE TABLE DataProvider (
     Description Text Not Null,
     PRIMARY KEY (ID)
     );
-INSERT INTO DataProvider (ID, Name, Description) Values (0, 'AQI', 'Default Provider');
+-- INSERT INTO DataProvider (ID, Name, Description) Values (0, 'AQI', 'Default Provider');
 
 CREATE TABLE Deposit (
     ID int Not Null,

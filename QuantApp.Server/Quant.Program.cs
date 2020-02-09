@@ -882,8 +882,14 @@ namespace QuantApp.Server.Quant
                 KernelDataAdapter.ConnectString = KernelConnectString;
                 QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
                 Console.WriteLine("Creating table structure in: " + sqliteFile);
-                var script = File.ReadAllText(@"create.sql");
-                QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(script);
+                var schema = File.ReadAllText(@"create.sql");
+                QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(schema);
+                Console.WriteLine("Adding calendar data in: " + sqliteFile);
+                var calendars = File.ReadAllText(@"calendars.sql");
+                QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(calendars);
+                Console.WriteLine("Adding fixed income and currency data in: " + sqliteFile);
+                var fic = File.ReadAllText(@"fic.sql");
+                QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(fic);
             }
 
             Databases(KernelConnectString, StrategyConnectString, CloudAppConnectString);
