@@ -285,7 +285,7 @@ namespace Python.Runtime
                     Runtime.PyTuple_SetItem(dateTimeArgs, 3, Runtime.PyInt_FromInt32(datetime.Hour));
                     Runtime.PyTuple_SetItem(dateTimeArgs, 4, Runtime.PyInt_FromInt32(datetime.Minute));
                     Runtime.PyTuple_SetItem(dateTimeArgs, 5, Runtime.PyInt_FromInt32(datetime.Second));
-                    Runtime.PyTuple_SetItem(dateTimeArgs, 6, Runtime.PyInt_FromInt32(datetime.Millisecond));
+                    Runtime.PyTuple_SetItem(dateTimeArgs, 6, Runtime.PyInt_FromInt32(1000 * datetime.Millisecond));
                     Runtime.PyTuple_SetItem(dateTimeArgs, 7, TzInfo(datetime.Kind));
 
                     return Runtime.PyObject_CallObject(dateTimeCtor, dateTimeArgs);
