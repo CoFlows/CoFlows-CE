@@ -2999,7 +2999,7 @@ INSERT INTO Currency (ID, Name, Description, CalendarID) VALUES (8, 'ZAR', 'Sout
 INSERT INTO Currency (ID, Name, Description, CalendarID) VALUES (9, 'JPY', 'Japan', 13);
 INSERT INTO Currency (ID, Name, Description, CalendarID) VALUES (10, 'CAD', 'Canada', 1);
 INSERT INTO Currency (ID, Name, Description, CalendarID) VALUES (11, 'BRL', 'Brazil', 2);
-INSERT INTO Currency (ID, Name, Description, CalendarID) VALUES (12, 'MX', 'Mexico', 44);
+INSERT INTO Currency (ID, Name, Description, CalendarID) VALUES (12, 'MXN', 'Mexico', 44);
 INSERT INTO Currency (ID, Name, Description, CalendarID) VALUES (13, 'KRW', 'South Korea', 15);
 INSERT INTO Currency (ID, Name, Description, CalendarID) VALUES (14, 'TWD', 'Taiwan', 12);
 INSERT INTO Currency (ID, Name, Description, CalendarID) VALUES (15, 'RUB', 'The Russian Federation *Wrong Calendar', 49);
