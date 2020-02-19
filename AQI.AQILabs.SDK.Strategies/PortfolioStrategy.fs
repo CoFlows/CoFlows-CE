@@ -1858,7 +1858,8 @@ type PortfolioStrategy =
         let days_back = (int)this.[t, (int)AQI.AQILabs.SDK.Strategies.MemoryType.DaysBack]
 
         let rec strategy_pkg (strategy : Strategy) : StrategyPkg_v1 =
-            let instruments = 
+            let instruments : InstrumentPkg_v1 list = 
+            // let instruments : InstrumentPkg_v1 seq = 
 
                 let positions = strategy.Portfolio.Positions(t, false) |> Seq.map(fun p -> (p.Instrument.ID, p)) |> Map.ofSeq
                 let virpos = strategy.Portfolio.PositionOrders(t, false)
@@ -1868,6 +1869,7 @@ type PortfolioStrategy =
                 |> Seq.filter(fun i -> not(strategy.Portfolio.IsReserve(i))) 
                 |> Seq.toList
                 |> List.map(fun i -> 
+                // |> Seq.map(fun i -> 
                     let minlev = strategy.[t, i.ID, (int)AQI.AQILabs.SDK.Strategies.MemoryType.IndividualMinimumLeverage, TimeSeriesRollType.Last]
                     let maxlev = strategy.[t, i.ID, (int)AQI.AQILabs.SDK.Strategies.MemoryType.IndividualMaximumLeverage, TimeSeriesRollType.Last]
                     let grouplev = strategy.[t, i.ID, (int)AQI.AQILabs.SDK.Strategies.MemoryType.GroupLeverage, TimeSeriesRollType.Last]
@@ -2031,7 +2033,7 @@ type PortfolioStrategy =
                             LiquidityDaysBack = liquidity_days_back; LiquidityThreshold = liquidity_threshold; LiquidityExecutionThreshold = liquidity_execution_threshold
                         })
                 SubStrategies = if substrategies |> List.length > 0 then Some(substrategies) else None                    
-                Instruments = if instruments |> List.length > 0 then Some([this.InitialDate, instruments]) else None
+                Instruments = if instruments |> List.length > 0 then Some([this.InitialDate, instruments ]) else None
                 MinimumExposure = glo_min_lev
                 MaximumExposure = glo_max_lev
                 
@@ -2940,10 +2942,10 @@ type PortfolioStrategy =
                 let t1 = DateTime.Now
                 Console.WriteLine("Adding Instruments: " + strategy.Description + " / " + t1.ToString())
                 strategy_pkg.Instruments.Value
-                |> List.iter(fun (date_pkg, instruments_list) ->
+                |> Seq.iter(fun (date_pkg, instruments_list) ->
                     strategy.RemoveInstruments(date_pkg)                     
                     instruments_list
-                    |> List.iteri(fun num instrument_pkg ->
+                    |> Seq.iteri(fun num instrument_pkg ->
                         let instrument = Instrument.FindInstrument(instrument_pkg.Name)
                         //Console.WriteLine("Adding Instrument (" + date_pkg.ToString() + "): " + instrument.Name + " to " + strategy.Description)
                         strategy.AddInstrument(instrument, date_pkg, num)

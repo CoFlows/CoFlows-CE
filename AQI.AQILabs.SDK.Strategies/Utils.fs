@@ -150,6 +150,10 @@ type public InstructionPkg =
         MinimumStep : float option
         Margin : float option
     }
+    // with
+    //     static member Some (x : InstructionPkg) = Some(x)
+    //     static member Some (x : float) = Some(x)
+    //     static member Some (x : string) = Some(x)
 
 type public GroupConstraint =
     {
@@ -157,6 +161,8 @@ type public GroupConstraint =
         MinimumExposure : float
         MaximumExposure : float
     }
+    // with
+    //     static member Some (x : GroupConstraint) = Some(x)
 
 type public Parameters =
     {
@@ -166,8 +172,10 @@ type public Parameters =
         Concentration : bool
         MeanVariance : bool
         Frequency : int
-        FXHedge : bool                       
+        FXHedge : bool
     }
+    // with
+    //     static member Some (x : Parameters) = Some(x)
 
 ///////////////// START V1
 type public Parameters_v1 =
@@ -184,6 +192,8 @@ type public Parameters_v1 =
         LiquidityThreshold : float
         LiquidityExecutionThreshold : float
     }
+    // with
+    //     static member Some (x : Parameters_v1) = Some(x)
 
 type public InstrumentMetaPkg_v1 =
     {
@@ -210,6 +220,9 @@ type public InstrumentMetaPkg_v1 =
         Return3M : float
         Return1Y : float
     }
+    // with
+    //     static member Some (x : InstrumentMetaPkg_v1) = Some(x)
+
 
 type public InstrumentPkg_v1 =
     {
@@ -225,6 +238,11 @@ type public InstrumentPkg_v1 =
 
         Meta : InstrumentMetaPkg_v1 option
     }
+    // with
+    //     static member Some (x : InstrumentPkg_v1) = Some(x)
+    //     static member Some (x : float) = Some(x)
+    //     static member Some (x : string) = Some(x)
+    //     static member Some (x : int) = Some(x)
 
 type StrategyMetaCashRatesPkg_v1 =
     {
@@ -237,6 +255,8 @@ type StrategyMetaCashRatesPkg_v1 =
         Rate3Y : float
         Rate5Y : float
     }
+    // with
+    //     static member Some (x : StrategyMetaCashRatesPkg_v1) = Some(x)
 
 type StrategyMetaCashPkg_v1 =
     {
@@ -246,6 +266,8 @@ type StrategyMetaCashPkg_v1 =
 
         Rates : StrategyMetaCashRatesPkg_v1
     }
+    // with
+    //     static member Some (x : StrategyMetaCashPkg_v1) = Some(x)
 
 
 type StrategyMetaCashTreePkg_v1 =
@@ -253,6 +275,9 @@ type StrategyMetaCashTreePkg_v1 =
         Total : StrategyMetaCashPkg_v1
         Currencies : List<StrategyMetaCashPkg_v1>
     }
+    // with
+    //     static member Some (x : StrategyMetaCashTreePkg_v1) = Some(x)
+
 
 type public StrategyMetaRiskPkg_v1 =
     {
@@ -261,6 +286,9 @@ type public StrategyMetaRiskPkg_v1 =
         InformationRatio : float        
         RiskNotional : float
     }
+    // with
+    //     static member Some (x : StrategyMetaRiskPkg_v1) = Some(x)
+
 
 type public StrategyMetaPkg_v1 =
     {
@@ -279,6 +307,9 @@ type public StrategyMetaPkg_v1 =
 
         Active : bool
     }
+    // with
+        // static member Some (x : StrategyMetaPkg_v1) = Some(x)
+
 
 type public StrategyPkg_v1 =
     {
@@ -304,8 +335,19 @@ type public StrategyPkg_v1 =
 
         ParentMemory : List<float * int> option
 
-        Meta : StrategyMetaPkg_v1 option        
+        Meta : StrategyMetaPkg_v1 option
     }
+    with
+        // static member Some (x : int) = Some(x)
+        // static member Some (x : string) = Some(x)
+        // static member Some (x : List<StrategyPkg_v1>) = Some(x)
+        static member SomeInstruments (x : System.Collections.Generic.IEnumerable<obj>) = 
+            Some(x |> Seq.map(fun x -> x :?> DateTime * System.Collections.Generic.List<InstrumentPkg_v1>) |> Seq.map(fun (d, x) -> (d, x |> Seq.toList)) |> Seq.toList)
+        // static member SomeList<'T> (x : System.Collections.Generic.IEnumerable<obj>) = 
+        //     Some(x |> Seq.map(fun _x -> _x :?> 'T) |> Seq.toList)
+        // // static member Some (x : List<GroupConstraint>) = Some(x)
+        // static member Some (x : List<float * int>) = Some(x)
+        
 
 type public MasterPkg_v1 =
     {        
@@ -322,6 +364,9 @@ type public MasterPkg_v1 =
 
         Instructions : List<InstructionPkg> option
     }
+    // with
+        // static member Some (x : string) = Some(x)
+        // static member Some (x : float) = Some(x)
 ///////////////// END V1
 
 ///////////////// START V0.6
@@ -439,10 +484,12 @@ type Vector = AQI.AQILabs.Kernel.Numerics.Math.LinearAlgebra.DenseVector
 /// </summary>
 module Utils =
 
-    let SetFunction(name : string, func: obj) =
-        QuantApp.Engine.Utils.SetFunction(name, func)
-        
-        
+    let Some<'T> (x : 'T) = Some(x)
+
+    let SomeList<'T> (x : System.Collections.Generic.IEnumerable<obj>) = Some(x |> Seq.map(fun _x -> _x :?> 'T) |> Seq.toList)
+
+    let SetFunction(name : string, func: obj) = QuantApp.Engine.Utils.SetFunction(name, func)
+
     let Time2TargetProbatilities (ref_date: DateTime) (targetReturn : float) (targetTime : float) (exposure : float option, minHoldingTime : float option) (days_back : int) (ts : TimeSeries) =
         
         let i = ts.GetClosestDateIndex(ref_date, TimeSeries.DateSearchType.Previous)
