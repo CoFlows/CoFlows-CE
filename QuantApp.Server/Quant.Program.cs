@@ -39,10 +39,10 @@ namespace QuantApp.Server.Quant
 {
     public class Program
     {
-        private static string workspace_name = null;
-        private static string hostName = null;
-        private static string ssl_cert = null;
-        private static string ssl_password = null;
+        // private static string workspace_name = null;
+        // private static string hostName = null;
+        // private static string ssl_cert = null;
+        // private static string ssl_password = null;
 
         // private static bool useJupyter = false;
 
@@ -77,22 +77,28 @@ namespace QuantApp.Server.Quant
             JObject config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
 
             // JObject config = (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/quantapp_config.json")));
-            workspace_name = config["Workspace"].ToString();
-            hostName = config["Server"]["Host"].ToString();
+            QuantApp.Server.Program.workspace_name = config["Workspace"].ToString();
+            QuantApp.Server.Program.hostName = config["Server"]["Host"].ToString();
             var secretKey = config["Server"]["SecretKey"].ToString();
-            ssl_cert = config["Server"]["SSL"]["Cert"].ToString();
-            ssl_password = config["Server"]["SSL"]["Password"].ToString();
-            var sslFlag = !string.IsNullOrWhiteSpace(ssl_cert);
+            // QuantApp.Server.Program.ssl_cert = config["Server"]["SSL"]["Cert"].ToString();
+            // QuantApp.Server.Program.ssl_password = config["Server"]["SSL"]["Password"].ToString();
+            // var sslFlag = !string.IsNullOrWhiteSpace(QuantApp.Server.Program.ssl_cert);
 
             var cloudHost = config["Cloud"]["Host"].ToString();
             var cloudKey = config["Cloud"]["SecretKey"].ToString();
             var cloudSSL = config["Cloud"]["SSL"].ToString();
 
+            QuantApp.Server.Program.letsEncryptEmail = config["Server"]["LetsEncrypt"]["Email"].ToString();
+            QuantApp.Server.Program.letsEncryptStaging = config["Server"]["LetsEncrypt"]["Staging"].ToString().ToLower() == "true";
+
+            var sslFlag = QuantApp.Server.Program.hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(QuantApp.Server.Program.letsEncryptEmail);
+
+
             QuantApp.Server.Program.useJupyter = config["Jupyter"].ToString().ToLower() == "true";
 
             if(args != null && args.Length > 0 && args[0] == "lab")
             {
-                Connection.Client.Init(hostName, sslFlag);
+                Connection.Client.Init(QuantApp.Server.Program.hostName, sslFlag);
 
                 if(!Connection.Client.Login(secretKey))
                     throw new Exception("CoFlows Not connected!");
@@ -126,10 +132,10 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("Starting cloud deployment... ");
 
-                Code.UpdatePackageFile(workspace_name);
+                Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name);
                 var t0 = DateTime.Now;
                 Console.WriteLine("Started: " + t0);
-                var res = Connection.Client.PublishPackage(workspace_name);
+                var res = Connection.Client.PublishPackage(QuantApp.Server.Program.workspace_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + res);
@@ -150,10 +156,10 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("CoFlows Cloud build... ");
 
-                Code.UpdatePackageFile(workspace_name);
+                Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name);
                 var t0 = DateTime.Now;
                 Console.WriteLine("Started: " + t0);
-                var res = Connection.Client.BuildPackage(workspace_name);
+                var res = Connection.Client.BuildPackage(QuantApp.Server.Program.workspace_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + res);
@@ -178,7 +184,7 @@ namespace QuantApp.Server.Quant
                 var funcName = args.Length > 3 ? args[3] : null;
                 var parameters = args.Length > 4 ? args.Skip(4).ToArray() : null;
 
-                var pkg = Code.ProcessPackageFile(workspace_name);
+                var pkg = Code.ProcessPackageFile(QuantApp.Server.Program.workspace_name);
                 Console.WriteLine("Workspace: " + pkg.Name);
 
                 Console.WriteLine("Query ID: " + queryID);
@@ -216,7 +222,7 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("CoFlows Cloud log... ");
 
-                var res = Connection.Client.RemoteLog(workspace_name);
+                var res = Connection.Client.RemoteLog(QuantApp.Server.Program.workspace_name);
                 Console.WriteLine("Result: ");
                 Console.WriteLine(res);
             }
@@ -236,7 +242,7 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("CoFlows Cloud log... ");
 
-                var res = Connection.Client.RemoteRemove(workspace_name);
+                var res = Connection.Client.RemoteRemove(QuantApp.Server.Program.workspace_name);
                 Console.WriteLine("Result: ");
                 Console.WriteLine(res);
             }
@@ -256,7 +262,7 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("CoFlows Cloud log... ");
 
-                var res = Connection.Client.RemoteRestart(workspace_name);
+                var res = Connection.Client.RemoteRestart(QuantApp.Server.Program.workspace_name);
                 Console.WriteLine("Result: ");
                 Console.WriteLine(res);
             }
@@ -286,7 +292,7 @@ namespace QuantApp.Server.Quant
 
                 if(string.IsNullOrEmpty(config_env))
                 {
-                    var pkg = Code.ProcessPackageFile(workspace_name);
+                    var pkg = Code.ProcessPackageFile(QuantApp.Server.Program.workspace_name);
                     Code.ProcessPackageJSON(pkg);
                     SetDefaultWorkSpaces(new string[]{ pkg.ID });
                     Console.WriteLine(pkg.Name + " started");
@@ -325,6 +331,7 @@ namespace QuantApp.Server.Quant
                 }
                 else
                     Console.WriteLine("Not saving timeseries");
+
                 /// QuantSpecific END
                 
                 #if NETCOREAPP3_0
@@ -368,7 +375,7 @@ namespace QuantApp.Server.Quant
 
                 Console.WriteLine("Local build");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name));
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(string.IsNullOrEmpty(res))
@@ -406,7 +413,7 @@ namespace QuantApp.Server.Quant
                 Console.WriteLine("Parameters: " + parameters);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name));
                 Code.ProcessPackageJSON(pkg);
                 
 
@@ -443,7 +450,7 @@ namespace QuantApp.Server.Quant
                 Console.WriteLine("Started: " + t0);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name));
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(string.IsNullOrEmpty(res))
@@ -603,8 +610,8 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("Starting azure deployment... ");
 
-                Code.UpdatePackageFile(workspace_name);
-                var resDeploy = Connection.Client.PublishPackage(workspace_name);
+                Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name);
+                var resDeploy = Connection.Client.PublishPackage(QuantApp.Server.Program.workspace_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + resDeploy);
@@ -615,7 +622,7 @@ namespace QuantApp.Server.Quant
                 Console.WriteLine();
                 Console.WriteLine("Azure Container Instance remove start");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name));
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(!string.IsNullOrEmpty(res))
