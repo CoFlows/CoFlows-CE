@@ -47,10 +47,10 @@ namespace QuantApp.Server
     public class Program
     {
         public static bool IsServer = false;
-        private static string workspace_name = null;
-        private static string hostName = null;
-        private static string ssl_cert = null;
-        private static string ssl_password = null;
+        public static string workspace_name = null;
+        public static string hostName = null;
+        public static string letsEncryptEmail = null;
+        public static bool letsEncryptStaging = false;
         public static bool useJupyter = false;
 
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
@@ -82,9 +82,11 @@ namespace QuantApp.Server
             workspace_name = config["Workspace"].ToString();
             hostName = config["Server"]["Host"].ToString();
             var secretKey = config["Server"]["SecretKey"].ToString();
-            ssl_cert = config["Server"]["SSL"]["Cert"].ToString();
-            ssl_password = config["Server"]["SSL"]["Password"].ToString();
-            var sslFlag = !string.IsNullOrWhiteSpace(ssl_cert);
+            
+            letsEncryptEmail = config["Server"]["LetsEncrypt"]["Email"].ToString();
+            letsEncryptStaging = config["Server"]["LetsEncrypt"]["Staging"].ToString().ToLower() == "true";
+
+            var sslFlag = hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(letsEncryptEmail);
 
             useJupyter = config["Jupyter"].ToString().ToLower() == "true";
 
@@ -756,30 +758,38 @@ namespace QuantApp.Server
         {
             QuantApp.Kernel.RTDEngine.Factory = new Realtime.WebSocketListner();
 
-            if (args == null || args.Length == 0)            
+            if (args == null || args.Length == 0 || args[0] == "server")
+            {
+                Console.WriteLine("Only accepts secure SSL connections...");
                 Host.CreateDefaultBuilder(args)
                     .ConfigureWebHostDefaults(webBuilder =>
                     {
-                        webBuilder.ConfigureKestrel(serverOptions =>
-                        {
-                            serverOptions.Listen(System.Net.IPAddress.Any, 443, listenOptions =>
-                            {
-                                listenOptions.UseHttps(ssl_cert, ssl_password);
-                            });
-                        })
+                        webBuilder.UseUrls(new string[] { "http://*", "https://*" });
+                        webBuilder
+                        // .ConfigureKestrel(serverOptions =>
+                        // {
+                        //     serverOptions.Listen(System.Net.IPAddress.Any, 80, listenOptions => {});
+                        //     serverOptions.Listen(System.Net.IPAddress.Any, 443, listenOptions =>
+                        //     {
+                        //         // listenOptions.UseHttps();//ssl_cert, ssl_password);
+                        //     });
+                        // })
                         .UseStartup<Startup>();
-                        
                     })
                     .Build()
                     .Run();
+            }
             else
+            {
+                Console.WriteLine("SSL encryption is not used....");
                 Host.CreateDefaultBuilder(args)
                     .ConfigureWebHostDefaults(webBuilder =>
                     {
                         webBuilder.UseStartup<Startup>();
                     })
                     .Build()
-                    .Run();            
+                    .Run();
+            }
         }
     }
 }

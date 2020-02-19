@@ -24,7 +24,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 
-
+using Microsoft.Extensions.DependencyInjection;
 
 using QuantApp.Server.Realtime;
 
@@ -68,7 +68,18 @@ namespace QuantApp.Server
 
             
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<RTDSocketManager>();            
+            services.AddSingleton<RTDSocketManager>();
+
+            if(Program.hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(Program.letsEncryptEmail))
+                services.AddLetsEncrypt(o =>
+                    {
+                        o.DomainNames = new[] { Program.hostName };
+                        o.UseStagingServer = Program.letsEncryptStaging; // <--- use staging
+
+                        o.AcceptTermsOfService = true;
+                        
+                        o.EmailAddress = Program.letsEncryptEmail;
+                    });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -80,6 +91,9 @@ namespace QuantApp.Server
                 httpContext.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.CacheControl] = "no-cache";
                 await next();
             });
+
+            app.UseHsts();
+            app.UseHttpsRedirection();
 
             app.UseStatusCodePagesWithReExecute("/");
             app.UseDefaultFiles();
