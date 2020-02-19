@@ -30,6 +30,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0"/>
     <PackageReference Include="Microsoft.Azure.Management.ContainerInstance.Fluent" Version="1.30.0"/>
     <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.30.0"/>
+    <PackageReference Include="McMaster.AspNetCore.LetsEncrypt" Version="0.2.0" />
   </ItemGroup>
 
   <ItemGroup>
