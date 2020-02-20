@@ -92,8 +92,12 @@ namespace QuantApp.Server
                 await next();
             });
 
-            app.UseHsts();
-            app.UseHttpsRedirection();
+            if(Program.hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(Program.letsEncryptEmail))
+            {
+                if(!Program.letsEncryptStaging)
+                    app.UseHsts();
+                app.UseHttpsRedirection();
+            }
 
             app.UseStatusCodePagesWithReExecute("/");
             app.UseDefaultFiles();
