@@ -9,7 +9,7 @@ Our **Community Edition** is a version of our commercial codebase that we have u
 * Global equity selection strategy simulations
 * Healthcare cost and clinical segmentation analysis on national data
 
-For more information visit https://www.quant.app
+For more information visit https://www.coflows.com
 
 This edition will be tightly coupled with the **CoFlows Cloud** making it much easier for developers to deploy and host their applications. More information on this coming soon.
 
