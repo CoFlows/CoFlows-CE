@@ -452,30 +452,52 @@ namespace QuantApp.Kernel.Adapters.SQL
 
                         for (int j = 0; j < rowLength; j++)
                         {
-                            string update = @"REMOVe " + table.TableName + " WHERE ";
+                            string update = @"DELETE FROM " + table.TableName + " WHERE ";
 
                             DataRow row = rows[j];
 
                             for (int i = 0; i < pl; i++)
                             {
+                                // var col = primary[i];
+                                // string name = col.ColumnName;
+                                // string value = "";
+
+                                // if (col.DataType == typeof(string) || col.DataType == typeof(char))
+                                //     value = "'" + row[col] + "' , ";
+
+                                // else if (col.DataType == typeof(bool))
+                                //     value = ((bool)row[col] ? 1 : 0).ToString();
+
+                                // else if (col.DataType == typeof(DateTime))
+                                //     value = string.IsNullOrWhiteSpace(row[col].ToString()) ? "null, " : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' ";
+
+                                // else
+                                //     value = (string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : row[col].ToString());
+
+                                // update += name + " = " + value + (i == pl - 1 ? ";" : " AND ");
+
                                 var col = primary[i];
                                 string name = col.ColumnName;
                                 string value = "";
 
                                 if (col.DataType == typeof(string) || col.DataType == typeof(char))
-                                    value = "'" + row[col] + "' , ";
+                                    value = "'" + row[col, DataRowVersion.Original] + "'";
 
                                 else if (col.DataType == typeof(bool))
-                                    value = ((bool)row[col] ? 1 : 0).ToString();
+                                    value = ((bool)row[col, DataRowVersion.Original] ? 1 : 0).ToString();
 
                                 else if (col.DataType == typeof(DateTime))
-                                    value = string.IsNullOrWhiteSpace(row[col].ToString()) ? "null, " : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' ";
+                                    value = string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null" : "'" + ((DateTime)row[col, DataRowVersion.Original]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' ";
 
                                 else
-                                    value = (string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : row[col].ToString());
+                                    value = (string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null" : row[col, DataRowVersion.Original].ToString());
 
                                 update += name + " = " + value + (i == pl - 1 ? ";" : " AND ");
                             }
+
+                            update = update.Trim();
+                            if (update.EndsWith(", ;"))
+                                update = update.Replace(", ;", ";");
 
 
                             SqlCommand command = new SqlCommand(update, _connectionInternal, transaction);
