@@ -123,7 +123,7 @@ export class DashboardComponent {
     
                         // this.qastrategies.SetStrategies(data[0].Value.Strategies)
 
-                        console.log(this.workspaces)
+                        // console.log(this.workspaces)
                         
                         this.quantapp.LinkAction(wiid,
                             data => { //Load

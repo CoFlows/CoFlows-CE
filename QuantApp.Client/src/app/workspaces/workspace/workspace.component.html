@@ -270,11 +270,29 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-sm-11 col-md-11">
+                            <div class="col-sm-2 col-md-2">
+                                    
+                                <select class="form-control  form-control-sm" #selectSG  (change)="viewGroup(selectSG.value)">
+                                    <option *ngFor="let item of subgroups" [value]="item.ID">{{item.Name}}</option>
+                                </select>
+                            </div>
+
+                            <div class="col-sm-6 col-md-6">
                                 <input type="filter" class="form-control mb-3" placeholder="Type to filter the column..." required (keyup)='updateUserFilter($event)' *ngIf="users_filtered.length > 0 || search != ''">
                             </div>
-                            <div class="col-sm-1 col-md-1">
-                                <button (click)="open(addpermission)" class="btn btn-secondary">New</button>
+                            
+                            <div class="col-sm-2 col-md-2">
+                                <button (click)="open(addpermission)" class="btn btn-secondary" style="width: 100%;">New User</button>
+                            </div>
+                            <div *ngIf="activeGroupID == wid" class="col-sm-2 col-md-2">
+                                <button (click)="open(addgroup)" class="btn btn-secondary" style="width: 100%;">New Group</button>
+                            </div>
+                            
+                            <div *ngIf="activeGroupID != wid" class="col-sm-1 col-md-1">
+                                <button (click)="open(addgroup)" class="btn btn-secondary" style="width: 100%;">New Group</button>
+                            </div>
+                            <div *ngIf="activeGroupID != wid" class="col-sm-1 col-md-1">
+                                <button (click)="open(removegroup)" class="btn btn-secondary" style="width: 100%;">Remove Group</button>
                             </div>
                         </div>
                         <div *ngIf="search != '' && users_filtered.length == 0">{{search}}</div>
@@ -483,6 +501,47 @@
     <div class="modal-footer">
             
         <button type="button" class="btn btn-warning" (click)="addPermission()">Submit</button>
+        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>
+    </div>
+</ng-template>
+
+<ng-template #addgroup let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h6 class="modal-title text-uppercase">Add Group</h6>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <fieldset class="form-group">
+            <label>
+                Name
+            </label>
+            <input type="text"  [(ngModel)]="newGroup" class="form-control" />
+        </fieldset>
+        <p *ngIf="addGroupMessage != ''">{{addGroupMessage}}&hellip;</p>
+    </div>
+    <div class="modal-footer">
+            
+        <button type="button" class="btn btn-warning" (click)="addGroup()">Submit</button>
+        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>
+    </div>
+</ng-template>
+
+<ng-template #removegroup let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h6 class="modal-title text-uppercase">Remove Group</h6>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p>Are you sure you want to remove the group</p>
+        <p *ngIf="removeGroupMessage != ''">{{removeGroupMessage}}&hellip;</p>
+    </div>
+    <div class="modal-footer">
+            
+        <button type="button" class="btn btn-danger" (click)="removeGroup()">Remove</button>
         <button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>
     </div>
 </ng-template>

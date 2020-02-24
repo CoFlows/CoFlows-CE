@@ -67,6 +67,8 @@ export class WorkspaceComponent {
     private newPermission = 0
     private newEmail = ''
 
+    private newGroup = ''
+
     selectedWB = {Name: "All", ID: ""}
     selectedFunc = {Name: "Workbook", ID: "Workbook"}
 
@@ -86,6 +88,9 @@ export class WorkspaceComponent {
     users = { items: [] }
     users_filtered = []
     search = 'Loading users...'
+
+    subgroups = []
+    activeGroupID = ''
 
     //groupId = 'Public'
 
@@ -107,6 +112,9 @@ export class WorkspaceComponent {
 
         this.activatedRoute.params.subscribe(params => {
             this.wid = params['id'];
+
+            this.subgroups = [ { Name: 'Master', ID: this.wid }]
+            this.activeGroupID = this.wid
             
             this.users = { items: [] }
             this.users_filtered = []
@@ -366,6 +374,7 @@ export class WorkspaceComponent {
 
             // let t0 = Date.now()
             this.quantapp.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
+                // console.log(data)
                 if(data == null){
                     this.users_filtered = []
                     this.search = 'no users found'
@@ -376,10 +385,11 @@ export class WorkspaceComponent {
                     if(this.users_filtered.length > 0)
                         this.search = ''
                 }
+            });
 
-                // console.log(data, (Date.now() - t0) / 1000)
-
-
+            this.quantapp.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
+                // console.log(data)
+                this.subgroups = this.subgroups.concat(data);
             });
 
         });
@@ -387,34 +397,34 @@ export class WorkspaceComponent {
 
     modalMessage = ""
     activeModal = null
-    // open(content) {
-    //     this.activeModal = content
-    //     this.modalService.open(content).result.then((result) => {
+    open(content) {
+        this.activeModal = content
+        this.modalService.open(content).result.then((result) => {
             
-    //         console.log(result)
-    //         if(result == 'restart'){
-    //             this.modalMessage = "Restarting..."
-    //             this.quantapp.Get('m/restartpod?id=' + this.wid ,
-    //             data => {
-    //                 // console.log(data)
-    //                 this.modalMessage = ''
-    //                 this.modalService.dismissAll(content)
-    //             });
-    //         }
-    //         else if(result == 'delete'){
-    //             this.modalMessage = "Removing..."
-    //             this.quantapp.Get('m/removepod?id=' + this.wid ,
-    //             data => {
-    //                 // console.log(data)
-    //                 this.modalMessage = ''
-    //                 this.modalService.dismissAll(content)
-    //             });
-    //         }
+            console.log(result)
+            // if(result == 'restart'){
+            //     this.modalMessage = "Restarting..."
+            //     this.quantapp.Get('m/restartpod?id=' + this.wid ,
+            //     data => {
+            //         // console.log(data)
+            //         this.modalMessage = ''
+            //         this.modalService.dismissAll(content)
+            //     });
+            // }
+            // else if(result == 'delete'){
+            //     this.modalMessage = "Removing..."
+            //     this.quantapp.Get('m/removepod?id=' + this.wid ,
+            //     data => {
+            //         // console.log(data)
+            //         this.modalMessage = ''
+            //         this.modalService.dismissAll(content)
+            //     });
+            // }
 
-    //     }, (reason) => {
-    //         console.log(reason)
-    //     });
-    // }
+        }, (reason) => {
+            console.log(reason)
+        });
+    }
 
     onChangeFile(item){
         this.fileidx = item
@@ -429,20 +439,40 @@ export class WorkspaceComponent {
 
             });
     }
+
+    viewGroup(sgid){
+        this.users_filtered = []
+        this.search = 'loading users...'
+        this.quantapp.Get("administration/UsersApp_contacts?groupid=" + sgid + "&agreements=false", data => {
+            // console.log(data)
+            this.activeGroupID = sgid
+            if(data == null){
+                this.users_filtered = []
+                this.search = 'no users found'
+            }
+            else{
+                this.users = data
+                this.users_filtered = this.users.items
+                if(this.users_filtered.length > 0)
+                    this.search = ''
+            }
+        });
+    }
     
     setPermission(id, permission_old, permission_new){
-        // console.log(id, permission_old, permission_new)
+        console.log(id, permission_old, permission_new)
         if(permission_old != permission_new){
-            this.quantapp.Get('administration/setpermission?userid=' + id + '&groupid=' + this.wid + '&accessType=' + permission_new,
+            this.quantapp.Get('administration/setpermission?userid=' + id + '&groupid=' + this.activeGroupID + '&accessType=' + permission_new,
                 data => {
                     // console.log(data)
+                    this.quantapp.showMessage('Permission updated')
                 });
         }
     }
 
     addPermissionMessage = ''
     addPermission(){
-        console.log(this.newEmail, this.newPermission)
+        // console.log(this.newEmail, this.newPermission)
         this.quantapp.Get('administration/addpermission?email=' + this.newEmail + '&groupid=' + this.wid + '&accessType=' + this.newPermission,
             data => {
                 if(data.Data == "ok"){
@@ -466,7 +496,72 @@ export class WorkspaceComponent {
                 else
                     this.addPermissionMessage = data.Data
 
-                // console.log(data)
+                console.log(data)
+            });
+        // AddPermission(string email, int accessType)
+    }
+
+    addGroupMessage = ''
+    addGroup(){
+        // console.log(this.newEmail, this.newPermission)
+        this.quantapp.Get('administration/newsubgroup?name=' + this.newGroup + '&parendid=' + this.wid,
+            data => {
+                if(data.Data == "ok"){
+                    this.modalService.dismissAll(this.activeModal)
+
+                    this.quantapp.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
+                        // console.log(data)
+                        this.subgroups = [ { Name: 'Master', ID: this.wid }]
+                        this.subgroups = this.subgroups.concat(data);
+                        this.activeGroupID = this.subgroups[0].ID;
+
+                        this.viewGroup(this.activeGroupID);
+                    });
+                }
+                else
+                    this.addGroupMessage = data.Data
+
+                console.log(data)
+            });
+        // AddPermission(string email, int accessType)
+    }
+
+    removeGroupMessage = ''
+    removeGroup(){
+        // console.log(this.newEmail, this.newPermission)
+        this.quantapp.Get('administration/RemoveGroup?id=' + this.activeGroupID,
+            data => {
+                if(data.Data == "ok"){
+
+                    // this.search = 'Reloading permissions...'
+                    this.modalService.dismissAll(this.activeModal)
+
+                    this.quantapp.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
+                        console.log(data)
+                        this.subgroups = [ { Name: 'Master', ID: this.wid }]
+                        this.subgroups = this.subgroups.concat(data);
+                        this.activeGroupID = this.subgroups[0].ID;
+
+                        this.viewGroup(this.activeGroupID);
+                    });
+
+                    // let t0 = Date.now()
+                    // this.users_filtered = []
+                    // this.quantapp.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
+                    //     // this.quantapp.Get("administration/UsersApp_contacts?groupid=00ab632b-b083-4204-bc82-6b50aa2ffb8d&agreements=false", data => {
+                    //     this.users = data
+                    //     this.users_filtered = this.users.items
+                    //     // console.log(data, (Date.now() - t0) / 1000)
+                    //     this.search = ''
+                        
+                    // });
+                    
+                    
+                }
+                else
+                    this.addGroupMessage = data.Data
+
+                console.log(data)
             });
         // AddPermission(string email, int accessType)
     }
