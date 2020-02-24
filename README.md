@@ -1,6 +1,6 @@
 # CoFlows - Polyglot Runtime (Interop)
 
-**CoFlows Community Edition** is a polyglot runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**.
+**CoFlows CE (Community Edition)** is a polyglot runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**.
 
 Our **Community Edition** is a version of our commercial codebase that we have used in various Data science projects including:
 * Algorithmic Trading
@@ -9,7 +9,7 @@ Our **Community Edition** is a version of our commercial codebase that we have u
 * Global equity selection strategy simulations
 * Healthcare cost and clinical segmentation analysis on national data
 
-For more information visit https://www.quant.app
+For more information visit https://www.coflows.com
 
 This edition will be tightly coupled with the **CoFlows Cloud** making it much easier for developers to deploy and host their applications. More information on this coming soon.
 

@@ -37,10 +37,12 @@ namespace QuantApp.Server.Controllers
             if(group == null)
                 group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_WorkSpace",""));
 
+            if(group == null)
+                group = QuantApp.Kernel.Group.CreateGroup(groupid, groupid);
 
             group.Add(user, typeof(QuantApp.Kernel.User), (AccessType)accessType);
 
-            return Ok("done");
+            return Ok(new { Data = "ok" });
         }
         public ActionResult RemovePermission(string userid, string groupid)
         {
@@ -56,7 +58,7 @@ namespace QuantApp.Server.Controllers
 
             group.Remove(user);
 
-            return Ok("done");
+            return Ok(new { Data = "ok" });
         }
 
         public ActionResult AddPermission(string groupid, string email, int accessType)
@@ -98,23 +100,26 @@ namespace QuantApp.Server.Controllers
 
             List<Group> sgroups = role.SubGroups(aggregated);
 
-
+            // Console.WriteLine("---+++++++++- " + role + " " + sgroups + " " + sgroups.Count);
 
             List<object> jres = new List<object>();
 
             foreach (Group group in sgroups)
             {
-                AccessType ac = group.Permission(null, user);
-                if (ac != AccessType.Denied)
+                // AccessType ac = group.Permission(null, user);
+                // Console.WriteLine("---- " + ac + " " + user + " " + group);
+                // if (ac != AccessType.Denied)
                 {
                     jres.Add(new
                     {
                         ID = group.ID,
                         Name = group.Name,
                         Description = group.Description,
-                        Permission = ac.ToString(),
+                        // Permission = ac.ToString(),
                     });
                 }
+                
+
             }
 
             return Ok(jres);
@@ -192,9 +197,12 @@ namespace QuantApp.Server.Controllers
                 role = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_WorkSpace",""));
 
             if(role == null)
-                return null;
+            {
+                role = QuantApp.Kernel.Group.CreateGroup(groupid, groupid);
+                // return null;
+            }
 
-            List<IPermissible> users = role.Master.List(user, typeof(QuantApp.Kernel.User), false);
+            List<IPermissible> users = role.Master.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false);
 
             Dictionary<string, List<string>> lastLogin = UserRepository.LastUserLogins(role);
 
@@ -203,7 +211,6 @@ namespace QuantApp.Server.Controllers
             foreach (QuantApp.Kernel.User user_mem in users)
             {
                 QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(user_mem.ID);
-
 
                 if (quser != null)
                 {
@@ -308,7 +315,7 @@ namespace QuantApp.Server.Controllers
             return "error";
         }
 
-        public string RemoveGroup(string id)
+        public ActionResult RemoveGroup(string id)
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -321,9 +328,29 @@ namespace QuantApp.Server.Controllers
             {
                 group.Remove();
 
-                return "ok";
+                return Ok(new { Data = "ok" });
             }
-            return "error";
+            return Ok(new { Data = "error" });
+        }
+
+        public ActionResult NewSubGroup(string name, string parendid)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
+
+            Group parent = QuantApp.Kernel.Group.FindGroup(parendid);
+
+            if (parent != null)
+            {
+                Group group = QuantApp.Kernel.Group.CreateGroup(name);
+                parent.Add(group);
+
+                return Ok(new { Data = "ok" });
+            }
+            return Ok(new { Data = "error" });
         }
 
         public class UpdateUserData
