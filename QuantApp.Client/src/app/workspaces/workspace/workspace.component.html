@@ -336,7 +336,7 @@
 
                             <ngx-datatable-column prop="Value.group" name="Remove" [width]="20">
                                 <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-                                    <a (click)="removePermission(row)" routerLinkActive="active" class="ff-headers text-color">
+                                    <a (click)="openRemovePermission(removepermission, row)"  class="ff-headers text-color">
                                         <div class="icon icon-arrows-circle-remove"></div>
                                     </a>
                                 </ng-template>
@@ -542,6 +542,25 @@
     <div class="modal-footer">
             
         <button type="button" class="btn btn-danger" (click)="removeGroup()">Remove</button>
+        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>
+    </div>
+</ng-template>
+
+
+<ng-template #removepermission let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h6 class="modal-title text-uppercase">Remove Permission</h6>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p>Are you sure you want to remove the permission</p>
+        <p *ngIf="removeGroupMessage != ''">{{removePermissionMessage}}&hellip;</p>
+    </div>
+    <div class="modal-footer">
+            
+        <button type="button" class="btn btn-danger" (click)="removePermission()">Remove</button>
         <button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>
     </div>
 </ng-template>

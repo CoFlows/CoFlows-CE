@@ -55,10 +55,13 @@ namespace QuantApp.Server.Controllers
             if(group == null)
                 group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_WorkSpace",""));
 
+            if(user != null)
+            {
+                group.Remove(user);
 
-            group.Remove(user);
-
-            return Ok(new { Data = "ok" });
+                return Ok(new { Data = "ok" });
+            }
+            return Ok(new { Data = "error" });
         }
 
         public ActionResult AddPermission(string groupid, string email, int accessType)
