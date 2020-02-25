@@ -382,8 +382,9 @@ export class WorkspaceComponent {
                 else{
                     this.users = data
                     this.users_filtered = this.users.items
-                    if(this.users_filtered.length > 0)
-                        this.search = ''
+                    if(this.users_filtered.length == 0)
+                        this.search = 'no users found'
+                        // this.search = ''
                 }
             });
 
@@ -422,7 +423,7 @@ export class WorkspaceComponent {
             // }
 
         }, (reason) => {
-            console.log(reason)
+            // console.log(reason)
         });
     }
 
@@ -496,7 +497,7 @@ export class WorkspaceComponent {
                 else
                     this.addPermissionMessage = data.Data
 
-                console.log(data)
+                // console.log(data)
             });
         // AddPermission(string email, int accessType)
     }
@@ -565,8 +566,45 @@ export class WorkspaceComponent {
             });
         // AddPermission(string email, int accessType)
     }
+     
+    activePermissionID = null
+    openRemovePermission(content, permission) {
+        // console.log(content, permission)
+        this.activeModal = content
+        this.activePermissionID = permission.ID
+        this.modalService.open(content).result.then((result) => {
+            
+            // console.log(result)
+            // if(result == 'restart'){
+            //     this.modalMessage = "Restarting..."
+            //     this.quantapp.Get('m/restartpod?id=' + this.wid ,
+            //     data => {
+            //         // console.log(data)
+            //         this.modalMessage = ''
+            //         this.modalService.dismissAll(content)
+            //     });
+            // }
+            // else if(result == 'delete'){
+            //     this.modalMessage = "Removing..."
+            //     this.quantapp.Get('m/removepod?id=' + this.wid ,
+            //     data => {
+            //         // console.log(data)
+            //         this.modalMessage = ''
+            //         this.modalService.dismissAll(content)
+            //     });
+            // }
+
+        }, (reason) => {
+            // console.log(reason)
+            // this.modalService.dismissAll(content)
+        });
+
+        // this.modalMessage = ''
         
-    removePermission(id){
+    }
+    removePermissionMessage = ''
+    removePermission(){
+        let id = this.activePermissionID
         // console.log(id)
         this.search = 'Reloading permissions...'
                 
@@ -580,6 +618,7 @@ export class WorkspaceComponent {
                     this.users_filtered = this.users.items
                     // console.log(data, (Date.now() - t0) / 1000)
                     this.search = ''
+                    this.modalService.dismissAll(this.activeModal)
                 });
             });
     
