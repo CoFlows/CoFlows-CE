@@ -374,7 +374,7 @@ export class WorkspaceComponent {
 
             // let t0 = Date.now()
             this.quantapp.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
-                console.log(data)
+                // console.log(data)
                 if(data == null){
                     this.users_filtered = []
                     this.search = 'no users found'
@@ -497,7 +497,7 @@ export class WorkspaceComponent {
                 else
                     this.addPermissionMessage = data.Data
 
-                console.log(data)
+                // console.log(data)
             });
         // AddPermission(string email, int accessType)
     }
