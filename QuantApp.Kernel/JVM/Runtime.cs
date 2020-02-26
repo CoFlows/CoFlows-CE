@@ -640,10 +640,9 @@ namespace QuantApp.Kernel.JVM
                     {
                         object obj = DB[hashCode].Target;
 
-                        // Console.WriteLine("CLR NATIVE INVOKE(" + hashCode + "): " + obj + " " + funcname);
-
                         if(obj is Type)
                         {
+                            // Console.WriteLine("CLR NATIVE INVOKE Type(" + hashCode + "): " + obj + " " + funcname);
                             var key = hashCode + funcname + len;
                             if(!MethodDB.ContainsKey(hashCode))
                                 MethodDB.TryAdd(hashCode, new ConcurrentDictionary<string,MethodInfo>());
@@ -670,7 +669,8 @@ namespace QuantApp.Kernel.JVM
                         }
                         else if(obj is DynamicObject)
                         {
-                            var res = Dynamic.InvokeMember(obj,funcname,classes_obj);
+                            // Console.WriteLine("CLR NATIVE INVOKE dynamic(" + hashCode + "): " + obj + " " + funcname + " --> " + classes_obj  + " --> " + (classes_obj == null));
+                            var res = classes_obj == null ? Dynamic.InvokeMember(obj,funcname) : Dynamic.InvokeMember(obj,funcname,classes_obj);
                             if(res == null)
                                 return IntPtr.Zero.ToPointer();
 
@@ -680,6 +680,7 @@ namespace QuantApp.Kernel.JVM
                         }
                         else
                         {
+                            // Console.WriteLine("CLR NATIVE INVOKE else(" + hashCode + "): " + obj + " " + funcname);
                             var key = hashCode + funcname + len;
 
                             if(!MethodDB.ContainsKey(hashCode))
