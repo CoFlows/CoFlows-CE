@@ -186,7 +186,6 @@ namespace Python.Runtime
             }
 
             string mod_name = Runtime.GetManagedString(py_mod_name);
-            // Console.WriteLine("----------IMPORT HOOK __import__: " + mod_name + " " + fromlist);
             // Check these BEFORE the built-in import runs; may as well
             // do the Incref()ed return here, since we've already found
             // the module.
@@ -249,14 +248,12 @@ namespace Python.Runtime
                 // There was an error
                 if (!Exceptions.ExceptionMatches(Exceptions.ImportError))
                 {
-                    // Console.WriteLine("----------IMPORT HOOK error: " + mod_name);
                     // and it was NOT an ImportError; bail out here.
                     return IntPtr.Zero;
                 }
 
                 if (mod_name == string.Empty)
                 {
-                    // Console.WriteLine("----------IMPORT HOOK empty name: " + mod_name);
                     // Most likely a missing relative import.
                     // For example site-packages\bs4\builder\__init__.py uses it to check if a package exists:
                     //     from . import _html5lib
@@ -267,8 +264,8 @@ namespace Python.Runtime
                 Exceptions.Clear();
             }
 
-            string[] names = realname.Split('.');
-
+            string[] names = realname.Contains(".") ? realname.Split('.') : new string[]{ realname };
+    
             // Now we need to decide if the name refers to a CLR module,
             // and may have to do an implicit load (for b/w compatibility)
             // using the AssemblyManager. The assembly manager tries
@@ -333,11 +330,9 @@ namespace Python.Runtime
 
             foreach (string name in names)
             {
-                // Console.WriteLine("----------IMPORT HOOK LOOKING: " + name);
                 ManagedType mt = tail.GetAttribute(name, true);
                 if (!(mt is ModuleObject))
                 {
-                    // Console.WriteLine("----------IMPORT HOOK ERROR: " + name);
                     Exceptions.SetError(Exceptions.ImportError, $"No module named {name}");
                     return IntPtr.Zero;
                 }

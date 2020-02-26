@@ -661,7 +661,6 @@ module Code =
                                 let assembly = if emitResult.Success then System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile) else null
 
                                 if emitResult.Success && (snd codes.[0]).ToLower().Contains("namespace") then 
-                                    
                                     M._compiledAssemblies.TryAdd(hash, assembly) |> ignore
                                     try
                                         assembly.GetTypes()

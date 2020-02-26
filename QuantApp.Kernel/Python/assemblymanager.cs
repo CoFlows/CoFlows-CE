@@ -204,9 +204,11 @@ namespace Python.Runtime
             {
                 assembly = Assembly.Load(name);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                //if (!(e is System.IO.FileNotFoundException))
+                
+                if (!(e is System.IO.FileNotFoundException))
+                    Console.WriteLine(e);
                 //{
                 //    throw;
                 //}
@@ -293,7 +295,8 @@ namespace Python.Runtime
         /// </remarks>
         public static bool LoadImplicit(string name, bool warn = true)
         {
-            string[] names = name.Split('.');
+            string[] names = name.Contains(".") ? name.Split('.') : new string[]{ name };
+            // string[] names = name.Split('.');
             var loaded = false;
             var s = "";
             Assembly lastAssembly = null;
@@ -301,6 +304,7 @@ namespace Python.Runtime
             for (var i = 0; i < names.Length; i++)
             {
                 s = i == 0 ? names[0] : s + "." + names[i];
+
                 if (!probed.ContainsKey(s))
                 {
                     if (assembliesSet == null)
@@ -308,6 +312,7 @@ namespace Python.Runtime
                         assembliesSet = new HashSet<Assembly>(AppDomain.CurrentDomain.GetAssemblies());
                     }
                     Assembly a = FindLoadedAssembly(s);
+
                     if (a == null)
                     {
                         a = LoadAssemblyPath(s);
@@ -321,6 +326,7 @@ namespace Python.Runtime
                         loaded = true;
                         lastAssembly = a;
                     }
+                    
                     probed[s] = 1;
                 }
             }
