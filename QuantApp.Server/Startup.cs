@@ -24,7 +24,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 
+// Lets Encrypt
 using Microsoft.Extensions.DependencyInjection;
+using Certes;
+using FluffySpoon.AspNet.LetsEncrypt.Certes;
+using FluffySpoon.AspNet.LetsEncrypt;
 
 using QuantApp.Server.Realtime;
 
@@ -71,15 +75,42 @@ namespace QuantApp.Server
             services.AddSingleton<RTDSocketManager>();
 
             if(Program.hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(Program.letsEncryptEmail))
-                services.AddLetsEncrypt(o =>
-                    {
-                        o.DomainNames = new[] { Program.hostName };
-                        o.UseStagingServer = Program.letsEncryptStaging; // <--- use staging
+            {
+                // services.AddLetsEncrypt(o =>
+                //     {
+                //         o.DomainNames = new[] { Program.hostName };
+                //         o.UseStagingServer = Program.letsEncryptStaging; // <--- use staging
 
-                        o.AcceptTermsOfService = true;
+                //         o.AcceptTermsOfService = true;
                         
-                        o.EmailAddress = Program.letsEncryptEmail;
+                //         o.EmailAddress = Program.letsEncryptEmail;
+                //     });
+                services.AddFluffySpoonLetsEncrypt(new LetsEncryptOptions()
+                {
+                    Email = Program.letsEncryptEmail,
+                    UseStaging = Program.letsEncryptStaging,
+                    Domains = new[] { Program.hostName },
+                    TimeUntilExpiryBeforeRenewal = TimeSpan.FromDays(30),
+                    CertificateSigningRequest = new CsrInfo()
+                    {
+                        CountryName = "Multiverse",
+                        Locality = "Universe",
+                        Organization = "GetStuffDone",
+                        OrganizationUnit = "ImportantStuffDone",
+                        State = "MilkyWay"
+                    }
+                });
+
+                // services.AddFluffySpoonLetsEncryptFileCertificatePersistence();
+                services.AddFluffySpoonLetsEncryptCertificatePersistence(
+                    async (key, bytes) => {
+                        File.WriteAllBytes(Program.hostName + "certificate_" + key, bytes)
+                    },
+                    async (key) => {
+                        File.ReadAllBytes(Program.hostName + "certificate_" + key, bytes)
                     });
+                services.AddFluffySpoonLetsEncryptFileChallengePersistence();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -97,6 +128,7 @@ namespace QuantApp.Server
                 if(!Program.letsEncryptStaging)
                     app.UseHsts();
                 app.UseHttpsRedirection();
+                app.UseFluffySpoonLetsEncrypt();
             }
 
             app.UseStatusCodePagesWithReExecute("/");
