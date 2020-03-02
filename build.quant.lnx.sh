@@ -1,9 +1,9 @@
-cd QuantApp.Client
-# # npm install
-# # npm install -g @angular/cli
+# cd QuantApp.Client
+# # # npm install
+# # # npm install -g @angular/cli
 # ng build --prod --aot
 
-cd ../
+# cd ../
 
 dotnet clean CoFlows.Quant.lnx.sln
 dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/lnx/publish QuantApp.Server/QuantApp.Server.quant.lnx.csproj
@@ -22,4 +22,4 @@ cd QuantApp.Server
 
 docker build -t coflows/quant -f Dockerfile.quant .
 docker tag coflows/quant coflows/quant:latest
-# docker push coflows/quant:latest
+docker push coflows/quant:latest
