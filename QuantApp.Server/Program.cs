@@ -56,8 +56,8 @@ namespace QuantApp.Server
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
         {
-            #if NETCOREAPP3_0
-            Console.Write("CoFlows CE - NetCoreApp 3.0... ");
+            #if NETCOREAPP3_1
+            Console.Write("CoFlows CE - NetCoreApp 3.1... ");
             #endif
 
             #if NET461
@@ -90,7 +90,7 @@ namespace QuantApp.Server
 
             useJupyter = config["Jupyter"].ToString().ToLower() == "true";
 
-            var connectionString = config["Database"].ToString();
+            // var connectionString = config["Database"].ToString();
 
             var cloudHost = config["Cloud"]["Host"].ToString();
             var cloudKey = config["Cloud"]["SecretKey"].ToString();
@@ -270,7 +270,14 @@ namespace QuantApp.Server
             {
                 PythonEngine.BeginAllowThreads();
 
-                Databases(connectionString);
+                // Databases(connectionString);
+                var connectionString = config["Database"]["Connection"].ToString();
+                var type = config["Database"]["Type"].ToString();
+                if(type.ToLower() == "mssql")
+                    DatabasesMssql(connectionString);
+                else
+                    DatabasesSqlite(connectionString);
+
                 Console.WriteLine("QuantApp Server " + DateTime.Now);
                 Console.WriteLine("DB Connected");
 
@@ -287,7 +294,7 @@ namespace QuantApp.Server
                     Console.WriteLine("Empty server...");
 
 
-                #if NETCOREAPP3_0
+                #if NETCOREAPP3_1
                 if(!sslFlag)
                     Init(new string[]{"--urls", "http://*:80"});
                 else
@@ -314,7 +321,14 @@ namespace QuantApp.Server
             {
                 PythonEngine.BeginAllowThreads();
 
-                Databases(connectionString);
+                // Databases(connectionString);
+                var connectionString = config["Database"]["Connection"].ToString();
+                var type = config["Database"]["Type"].ToString();
+                if(type.ToLower() == "mssql")
+                    DatabasesMssql(connectionString);
+                else
+                    DatabasesSqlite(connectionString);
+
                 Console.WriteLine("DB Connected");
 
                 Console.WriteLine("Local build");
@@ -330,7 +344,14 @@ namespace QuantApp.Server
             {
                 PythonEngine.BeginAllowThreads();
 
-                Databases(connectionString);
+                // Databases(connectionString);
+                var connectionString = config["Database"]["Connection"].ToString();
+                var type = config["Database"]["Type"].ToString();
+                if(type.ToLower() == "mssql")
+                    DatabasesMssql(connectionString);
+                else
+                    DatabasesSqlite(connectionString);
+
                 Console.WriteLine("Local Query " + DateTime.Now);
                 Console.WriteLine("DB Connected");
 
@@ -605,7 +626,7 @@ namespace QuantApp.Server
             Environment.Exit(0);
         }
 
-        private static void Databases(string sqliteFile)
+        private static void DatabasesSqlite(string sqliteFile)
         {
      
             string KernelConnectString = "Data Source=" + sqliteFile;
@@ -643,6 +664,41 @@ namespace QuantApp.Server
                 Console.WriteLine("Creating table structure in: " + sqliteFile);
                 var script = File.ReadAllText(@"create.sql");
                 QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(script);
+            }
+        }
+
+        private static void DatabasesMssql(string KernelConnectString)
+        {
+            if (QuantApp.Kernel.User.CurrentUser == null)
+                QuantApp.Kernel.User.CurrentUser = new QuantApp.Kernel.User("System");
+
+            if (QuantApp.Kernel.M.Factory == null)
+            {         
+                if(KernelConnectString.StartsWith("Server="))
+                {
+                    MSSQLDataSetAdapter KernelDataAdapter = new MSSQLDataSetAdapter();
+                    KernelDataAdapter.ConnectString = KernelConnectString;
+                    QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
+                }
+                else
+                {
+                    if(!QuantApp.Kernel.Database.DB.ContainsKey("Kernel"))
+                    {
+                        SQLiteDataSetAdapter KernelDataAdapter = new SQLiteDataSetAdapter();
+                        KernelDataAdapter.ConnectString = KernelConnectString;
+                        QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
+                    }
+                }
+
+
+                QuantApp.Kernel.M.Factory = new QuantApp.Kernel.Adapters.SQL.Factories.SQLMFactory();
+            }
+
+            if (!QuantApp.Kernel.Database.DB.ContainsKey("CloudApp"))
+            {
+                QuantApp.Kernel.Database.DB.Add("CloudApp", QuantApp.Kernel.Database.DB["Kernel"]);
+                QuantApp.Kernel.User.Factory = new QuantApp.Kernel.Adapters.SQL.Factories.SQLUserFactory();
+                Group.Factory = new QuantApp.Kernel.Adapters.SQL.Factories.SQLGroupFactory();
             }
         }
 

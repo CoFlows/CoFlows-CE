@@ -417,8 +417,8 @@ module Code =
                 let scFlag = "//scala"
 
                 let libs() =
-                    #if NETCOREAPP3_0
-                    let sysDir_base = Path.GetDirectoryName(@"ref/netcoreapp3.0/")
+                    #if NETCOREAPP3_1
+                    let sysDir_base = Path.GetDirectoryName(@"ref/netcoreapp3.1/")
                     #endif
 
                     #if NET461
