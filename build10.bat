@@ -6,7 +6,7 @@ REM ng build --prod --aot
 cd ../
 
 dotnet clean CoFlows.CE.win.sln
-dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/win/publish QuantApp.Server/QuantApp.Server.win.csproj
+dotnet publish -c Release -f netcoreapp3.1 -o QuantApp.Server/obj/win/publish QuantApp.Server/QuantApp.Server.win.csproj
 
 REM make
 javac -cp "jars/scalap-2.12.8.jar;jars/scala-library.jar;QuantApp.Kernel/JVM/app/quant/clr/" ./QuantApp.Kernel/JVM/app/quant/clr/*.java ./QuantApp.Kernel/JVM/app/quant/clr/function/*.java

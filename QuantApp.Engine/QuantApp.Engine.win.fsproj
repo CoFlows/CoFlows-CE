@@ -24,17 +24,16 @@
   </ItemGroup>
 
   <ItemGroup>   
-    <PackageReference Include="FSharp.Compiler.Service" Version="31.0.0" />
+    <PackageReference Include="FSharp.Compiler.Service" Version="34.1.0" />
     
-    
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.3.1" />
-    <PackageReference Include="Jint" Version="3.0.0-beta-1525" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.4.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.4.0" />
+    <PackageReference Include="Jint" Version="3.0.0-beta-1715" />
 
-    <PackageReference Include="FSharp.Interop.Dynamic" Version="5.0.0.250" />
+    <PackageReference Include="FSharp.Interop.Dynamic" Version="5.0.1.268" />
 
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 </Project>

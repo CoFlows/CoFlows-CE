@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <UserSecretsId>aspnet-QuantApp.Server-2AA057A6-1CB4-4720-BB1F-099CC90AA338</UserSecretsId>    
     <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
@@ -23,11 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>    
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0"/>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0"/>
-    <PackageReference Include="Microsoft.Azure.Management.ContainerInstance.Fluent" Version="1.30.0"/>
-    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.30.0"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.2"/>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2"/>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1"/>
+    <PackageReference Include="Microsoft.Azure.Management.ContainerInstance.Fluent" Version="1.31.1"/>
+    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.31.1"/>
     <PackageReference Include="FluffySpoon.AspNet.LetsEncrypt" Version="1.145.0" />
   </ItemGroup>
 
