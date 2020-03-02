@@ -29,11 +29,25 @@ using Microsoft.Extensions.DependencyInjection;
 using Certes;
 using FluffySpoon.AspNet.LetsEncrypt.Certes;
 using FluffySpoon.AspNet.LetsEncrypt;
+using System.IO;
 
 using QuantApp.Server.Realtime;
 
 namespace QuantApp.Server
 {
+    public class Certificate
+    {
+        public string Key { get; set; }
+        public string Data { get; set; }
+    }
+
+    public class Challenge
+    {
+        public string Token { get; set; }
+        public string Response { get; set; }
+        public string Domains { get; set; }
+    }
+
     public class Startup
     {
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -76,15 +90,6 @@ namespace QuantApp.Server
 
             if(Program.hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(Program.letsEncryptEmail))
             {
-                // services.AddLetsEncrypt(o =>
-                //     {
-                //         o.DomainNames = new[] { Program.hostName };
-                //         o.UseStagingServer = Program.letsEncryptStaging; // <--- use staging
-
-                //         o.AcceptTermsOfService = true;
-                        
-                //         o.EmailAddress = Program.letsEncryptEmail;
-                //     });
                 services.AddFluffySpoonLetsEncrypt(new LetsEncryptOptions()
                 {
                     Email = Program.letsEncryptEmail,
@@ -101,13 +106,51 @@ namespace QuantApp.Server
                     }
                 });
 
-                // services.AddFluffySpoonLetsEncryptFileCertificatePersistence();
                 services.AddFluffySpoonLetsEncryptCertificatePersistence(
                     async (key, bytes) => {
-                        File.WriteAllBytes(Program.hostName + "certificate_" + key, bytes)
+                        var mKey = "---LetsEncrypt--" + Program.hostName + "." + Program.letsEncryptEmail + "." + (Program.letsEncryptStaging ? "Staging" : "Production") + ".certificate_" + key;
+                        var m = QuantApp.Kernel.M.Base(mKey);
+
+                        var resList = m[x => QuantApp.Kernel.M.V<string>(x, "Key") == key.ToString()];
+                        if(resList != null && resList.Count > 0)
+                        {
+                            var strData = System.Convert.ToBase64String(bytes);
+                            m.Exchange(resList[0], new Certificate(){ Key = key.ToString(), Data = strData });
+
+                            Console.WriteLine("LetsEncrypt certificate UPDATED...");
+                        }
+                        else
+                        {
+                            var strData = System.Convert.ToBase64String(bytes);
+                            m += new Certificate(){ Key = key.ToString(), Data = strData };
+                            Console.WriteLine("LetsEncrypt certificate CREATED...");
+                        }
+                        m.Save();
                     },
                     async (key) => {
-                        File.ReadAllBytes(Program.hostName + "certificate_" + key, bytes)
+                        var mKey = "---LetsEncrypt--" + Program.hostName + "." + Program.letsEncryptEmail + "." + (Program.letsEncryptStaging ? "Staging" : "Production") + ".certificate_" + key;
+                        
+                        try
+                        {
+                            var m = QuantApp.Kernel.M.Base(mKey);
+                            var resList = m[x => QuantApp.Kernel.M.V<string>(x, "Key") == key.ToString()];
+                            if(resList != null && resList.Count > 0)
+                            {
+                                var data = QuantApp.Kernel.M.V<string>(resList[0], "Data");
+                                var bytes = System.Convert.FromBase64String(data);
+                                Console.WriteLine("LetsEncrypt found certificate...");
+                                return bytes;
+                            }
+
+                            Console.WriteLine("LetsEncrypt didn't find a certificate, attempting to create one...");
+
+                            return null;
+                        }
+                        catch (System.Exception e)
+                        {
+                            return null;
+                        }
+                        
                     });
                 services.AddFluffySpoonLetsEncryptFileChallengePersistence();
             }
@@ -125,10 +168,10 @@ namespace QuantApp.Server
 
             if(Program.hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(Program.letsEncryptEmail))
             {
+                app.UseFluffySpoonLetsEncrypt();
                 if(!Program.letsEncryptStaging)
                     app.UseHsts();
                 app.UseHttpsRedirection();
-                app.UseFluffySpoonLetsEncrypt();
             }
 
             app.UseStatusCodePagesWithReExecute("/");
