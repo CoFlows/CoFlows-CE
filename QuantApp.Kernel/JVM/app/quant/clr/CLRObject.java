@@ -38,7 +38,7 @@ public class CLRObject
         // if(cache)
         __DB.put(ptr, this);
         __cache = true;
-        System.out.println("CLR OBJECT: " + classname + "  --> " + ptr);
+        // System.out.println("CLR OBJECT: " + classname + "  --> " + ptr);
         DB.put(ptr, new WeakReference(this));
     }
 
