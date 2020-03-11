@@ -11,8 +11,10 @@ Furthermore, our aim with **CoFlows** is to offer simplicity for **Data Scientis
 * Scala 2.11.8
 * JupyterLab
 
-Additionally, **CoFlows** offers great security features including:
+Additionally, **CoFlows** offers great features including:
 * Free and automatically generated SSL certificates through an integrated _LetsEncrypt_ functionality
+* Integrated deployment to **Azure Container Instances**
+* Integrated deployment from **GitHub** repositories
 * Users and Permissions management
 * Storage through either SQLite for local persistence or Microsoft SQL Server for cloud persistence. We will add more connectors in the near future.
 
