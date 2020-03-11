@@ -1,9 +1,9 @@
-# cd QuantApp.Client
-# # npm install
-# # npm install -g @angular/cli
-# ng build --prod --aot
+cd QuantApp.Client
+# npm install
+# npm install -g @angular/cli
+ng build --prod --aot
 
-# cd ../
+cd ../
 
 dotnet clean CoFlows.CE.lnx.sln
 dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/lnx/publish QuantApp.Server/QuantApp.Server.lnx.csproj

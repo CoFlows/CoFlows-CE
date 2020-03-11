@@ -27,7 +27,7 @@ Our **Community Edition** is a version of our commercial codebase that we have u
 * Global equity selection strategy simulations
 * Healthcare cost and clinical segmentation analysis on national data
 
-For more information visit https://www.coflows.com
+For more information visit https://www.coflows.com.
 
 This edition will be tightly coupled with the **CoFlows Cloud** making it much easier for developers to deploy and host their applications. More information on this coming soon.
 
@@ -49,12 +49,16 @@ The link between the **JVM** and **CLR** is achieved through the [QuantApp.Kerne
 
 Javascript interpretation is achieved using the great [Jint](https://github.com/sebastienros/jint "Jint") library.
 
-For further details please read [Polyglot](docs/Polyglot/General.md "Polyglot")
+For further details please read [Polyglot](docs/Polyglot/General.md "Polyglot").
 
 
 ## Workspaces
 
 Projects in **CoFlows** are called Workspaces. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workspace depends on. For further information please read [sample repo from GitHub](https://github.com/QuantApp/CoFlows-DocSamples).
+
+## User Interface
+
+![login](docs/login.png)
 
 ## License 
 The MIT License (MIT)
