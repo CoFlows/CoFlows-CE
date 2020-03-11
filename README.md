@@ -31,8 +31,6 @@ For more information visit https://www.coflows.com.
 
 This edition will be tightly coupled with the **CoFlows Cloud** making it much easier for developers to deploy and host their applications. More information on this coming soon.
 
-
-
 ## Polygot
 Let's start with a definition. According to Wikipedia, in computing, a polyglot is a computer program or script written in a valid form of multiple programming languages, which performs the same operations or output independent of the programming language used to compile or interpret it.
 
@@ -64,24 +62,43 @@ To simplify your interaction with your **CoFlows** project, we have created a us
 2) In the bin folder, execute the server.sh or bat/server.bat scripts. Read more in the README of this repo.
 3) Open a browser and go to http://localhost
 
-![login](docs/login.png)
+![login](docs/images/login.png)
 
 4) Login with username "root" and password "123". After a successfully login, you will see a dashboard with a list of all workspaces hosted in the current runtime. In this example it is only 
 
-![dashboard](docs/dashboard.png)
+![dashboard](docs/images/create_user.png)
+
+4) Login with username "root" and password "123". After a successfully login, you will see a dashboard with a list of all workspaces hosted in the current runtime. In this example it is only 
+
+![dashboard](docs/images/profile.png)
+
+4) Login with username "root" and password "123". After a successfully login, you will see a dashboard with a list of all workspaces hosted in the current runtime. In this example it is only 
+
+![dashboard](docs/images/dashboard.png)
 
 5) Once logged in, click on the Workspace to enter it. This first view will let you see the Agents and Queries available in the workspace.
 
-![workspace](docs/workspace.png)
+![workspace](docs/images/workspace.png)
 
 6) The Source tab lets you browse the Base code of workspace. The base code can be thought of as libraries used by both Agents and Queries. For more information please see the documentation of the [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace). Please note that this code is read-only. To edit these libraries, you must do so outside of this UI.
 
-![workspace](docs/workspace_source.png)
+![workspace](docs/images/workspace_source.png)
 
 7) Permissions are set...
 
-![permissions](docs/workspace_permissions.png)
+![permissions](docs/images/workspace_permissions.png)
 
+8) New User Permissions are set...
+
+![permissions](docs/images/workspace_newuser.png)
+
+9) New SubGroup Permissions are set...
+
+![permissions](docs/images/workspace_newgroup.png)
+
+10) New SubGroup Permissions are set...
+
+![permissions](docs/images/workspace_subgroups.png)
 
 ## License 
 The MIT License (MIT)
