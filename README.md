@@ -1,6 +1,22 @@
 # CoFlows - Containerized Polyglot Runtime (Interop)
 
-**CoFlows CE (Community Edition)** is a containerized polyglot runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**.
+**CoFlows CE (Community Edition)** is a Containerized Polyglot Runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**.
+
+As a Containerized Polyglot Runtime, its functionality allows developers to build complex workflows leveraging off great open-source libraries written in various languages. The wealth of distributed computing libraries of Java / Scala together with Python's data science tools are all available in order to use the right tool for the right purpose in the same process!
+
+Furthermore, our aim with **CoFlows** is to offer simplicity for **Data Scientists** to quickly build self-contained projects while leveraging off popular tools. To this end, once a developer pulls the **CoFlows** image a range of tools are at their disposal as first class citizens of the **CoFlows** ecosystem:
+* DotNet Core 3.0
+* Python 3.7.4
+* Java 1.8
+* Scala 2.11.8
+* JupyterLab
+
+Additionally, **CoFlows** offers great security features including:
+* Free and automatically generated SSL certificates through an integrated _LetsEncrypt_ functionality
+* Users and Permissions management
+* Storage through either SQLite for local persistence or Microsoft SQL Server for cloud persistence. We will add more connectors in the near future.
+
+... and yes, it is a big image taking 900Mb to download and 1.9Gb of space during runtime.
 
 Our **Community Edition** is a version of our commercial codebase that we have used in various Data science projects including:
 * Algorithmic Trading
@@ -13,16 +29,7 @@ For more information visit https://www.coflows.com
 
 This edition will be tightly coupled with the **CoFlows Cloud** making it much easier for developers to deploy and host their applications. More information on this coming soon.
 
-**CoFlows'** polyglot functionality allows developers to build complex workflows leveraging off great open-source libraries written in various languages. The wealth of distributed computing libraries of Java / Scala together with Python's data science tools are all available in order to use the right tool for the right purpose in the same process!
 
-Furthermore, our aim with **CoFlows** is to offer simplicity for **Data Scientists** to quickly build self-contained projects while leveraging off popular tools. To this end, once a developer pulls the **CoFlows** image a range of tools are at their disposal as first class citizens of the **CoFlows** ecosystem:
-* DotNet Core 3.0
-* Python 3.7.4
-* Java 1.8
-* Scala 2.11.8
-* JupyterLab
-
-... and yes, it is a big image taking 900Mb to download and 1.9Gb of space during runtime.
 
 ## Polygot
 Let's start with a definition. According to Wikipedia, in computing, a polyglot is a computer program or script written in a valid form of multiple programming languages, which performs the same operations or output independent of the programming language used to compile or interpret it.
@@ -43,7 +50,7 @@ Javascript interpretation is achieved using the great [Jint](https://github.com/
 For further details please read [Polyglot](docs/Polyglot/General.md "Polyglot")
 
 
-## Workspaces & Installation
+## Workspaces
 
 Projects in **CoFlows** are called Workspaces. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workspace depends on. For further information please read [sample repo from GitHub](https://github.com/QuantApp/CoFlows-DocSamples).
 
