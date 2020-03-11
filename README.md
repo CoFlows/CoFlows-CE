@@ -54,11 +54,34 @@ For further details please read [Polyglot](docs/Polyglot/General.md "Polyglot").
 
 ## Workspaces
 
-Projects in **CoFlows** are called Workspaces. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workspace depends on. For further information please read [sample repo from GitHub](https://github.com/QuantApp/CoFlows-DocSamples).
+Projects in **CoFlows** are called Workspaces. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workspace depends on. For further information please read [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace).
 
 ## User Interface
 
+To simplify your interaction with your **CoFlows** project, we have created a user interface. Let's start with a few steps.
+
+1) Clone the CoFlows-Workspace repo from [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace).
+2) In the bin folder, execute the server.sh or bat/server.bat scripts. Read more in the README of this repo.
+3) Open a browser and go to http://localhost
+
 ![login](docs/login.png)
+
+4) Login with username "root" and password "123". After a successfully login, you will see a dashboard with a list of all workspaces hosted in the current runtime. In this example it is only 
+
+![dashboard](docs/dashboard.png)
+
+5) Once logged in, click on the Workspace to enter it. This first view will let you see the Agents and Queries available in the workspace.
+
+![workspace](docs/workspace.png)
+
+6) The Source tab lets you browse the Base code of workspace. The base code can be thought of as libraries used by both Agents and Queries. For more information please see the documentation of the [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace). Please note that this code is read-only. To edit these libraries, you must do so outside of this UI.
+
+![workspace](docs/workspace_source.png)
+
+7) Permissions are set...
+
+![permissions](docs/workspace_permissions.png)
+
 
 ## License 
 The MIT License (MIT)
