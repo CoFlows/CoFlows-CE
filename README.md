@@ -79,7 +79,13 @@ Please note that groups are arbitrary, you can create as many as you want. The m
 
 ## User Interface
 
-To simplify your interaction with your **CoFlows** project, we have created a user interface. Let's start with a few steps.
+To simplify your interaction with your **CoFlows** project, we have created a user interface. This UI has powerful visualization features that help you interact with dataset while you are designing them. For example, we worked on a GPS driven application where plotting points on a map was essential for correctly tuning the algorithms. This is a visual of this example
+
+| Code |  Map |  Table |
+:-------------------------:|:-------------------------:|:-------------------------: 
+![](docs/images/QA_python_agent.png)  | ![](docs/images/QA_vessels_map.png)  |  ![](docs/images/QA_table_query.png)
+
+More on how to visualize this type of data in the docs of the [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace). Let's start with a few steps.
 
 1) Clone the CoFlows-Workspace repo from [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace).
 
