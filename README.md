@@ -65,7 +65,7 @@ Projects in **CoFlows** are called Workspaces. They contain the logic that defin
 Authentication is done through **CoFlows** internal functionality. Users can either authenticate through the UI with a username and password. Alternatively, you can authenticate WebAPI calls using a secret key. This key can be accessed through the UI as explained below.
 
 ### Permissions
-There are two types, Fixed and Group permissions, in **CoFlows**. First is the Fixed type which is hardcoded in the definition of the Workspace. Fixed permissions enable developers to give access to certain users prior to setting up Group permissions. You can think of these permissions as system permissions which should not be used for standard users.
+There are two types of  in **CoFlows** called Fixed and Group. First is the Fixed type which is hardcoded in the definition of the Workspace. Fixed permissions enable developers to give access to certain users prior to setting up Group permissions. You can think of these permissions as system permissions which should not be used for standard users but rather for system users.
 
 Group permissions on the other hand are dynamic and related to groups. Groups are effectively sets of permissions that allow administrators to organize and control user access to internal features of the workspaces.
 
