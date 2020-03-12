@@ -31,8 +31,14 @@ For more information visit https://www.coflows.com.
 
 This edition will be tightly coupled with the **CoFlows Cloud** making it much easier for developers to deploy and host their applications. More information on this coming soon.
 
+---
+
 ## Polygot
 Let's start with a definition. According to Wikipedia, in computing, a polyglot is a computer program or script written in a valid form of multiple programming languages, which performs the same operations or output independent of the programming language used to compile or interpret it.
+
+The QuantApp Engine enables a polyglot environment where developers can code their functions in a variety of languages while allowing all languages to co-exist in the same process in memory. This mitigates the need for a TCP (SOAP, JSON WebAPI, Py4J) overhead which is usual when functions from different languages interact.
+
+Within a CoFlows workspace, three computing environments interact within the same process including the Core CLR (DotNet Core Language Runtime), JVM (Java Virtual Machine) and the Python interpreter. Javascript is interpreted within the CLR using the Jint package. Note: The CLR is the main execution environment which calls the JVM and and Python interpreter.
 
 There are multiple sources pushing both the pros and cons of polyglot systems and this is not the place to discuss it. We believe that the ability to express algorithms in the correct language and using the best libraries for the right task is essential. **CoFlows** uses the **QuantApp.Engine** and **QuantApp.Kernel** libraries to offer interop between:
 * CoreCLR: C#, F# & VB
@@ -49,38 +55,52 @@ Javascript interpretation is achieved using the great [Jint](https://github.com/
 
 For further details please read [Polyglot](docs/Polyglot/General.md "Polyglot").
 
+---
 
 ## Workspaces
 
 Projects in **CoFlows** are called Workspaces. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workspace depends on. For further information please read [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace).
+
+---
+
+## Security, Authentication and Permissions
+ssl
+
+login
+
+secret
+
+----
 
 ## User Interface
 
 To simplify your interaction with your **CoFlows** project, we have created a user interface. Let's start with a few steps.
 
 1) Clone the CoFlows-Workspace repo from [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace).
+
 2) In the bin folder, execute the server.sh or bat/server.bat scripts. Read more in the README of this repo.
-3) Open a browser and go to http://localhost
+
+3) Open a browser and go to http://localhost and login with username "root" and password "123".
 
 ![login](docs/images/login.png)
 
-4) Login with username "root" and password "123". After a successfully login, you will see a dashboard with a list of all workspaces hosted in the current runtime. In this example it is only 
+alternatively you could create a new user by clicking on "Create an account!"
 
-![dashboard](docs/images/create_user.png)
+![login](docs/images/create_user.png)
 
-4) Login with username "root" and password "123". After a successfully login, you will see a dashboard with a list of all workspaces hosted in the current runtime. In this example it is only 
-
-![dashboard](docs/images/profile.png)
-
-4) Login with username "root" and password "123". After a successfully login, you will see a dashboard with a list of all workspaces hosted in the current runtime. In this example it is only 
+4) Once logged in, you will see all the workspace hosted by this container. In this example, there is only one workspace called "Workspace". 
 
 ![dashboard](docs/images/dashboard.png)
 
-5) Once logged in, click on the Workspace to enter it. This first view will let you see the Agents and Queries available in the workspace.
+5) By click on the top right corner "root" you are able to logout, change password and see the user profile. In the user profile, you are able to change first and last names and most importantly see the User Secret. This Secret is used to authenticate user permissions when connecting through a WebAPI. 
+
+![dashboard](docs/images/profile.png)
+
+6) Closing the profile window and going back to the dashboard you can click on the Workspace to enter it. This first view will let you see the Agents and Queries available in the workspace. This view also has multiple tabs which are discussed below.
 
 ![workspace](docs/images/workspace.png)
 
-6) The Source tab lets you browse the Base code of workspace. The base code can be thought of as libraries used by both Agents and Queries. For more information please see the documentation of the [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace). Please note that this code is read-only. To edit these libraries, you must do so outside of this UI.
+7) The Source tab lets you browse the Base code of workspace. The base code can be thought of as libraries used by both Agents and Queries. For more information please see the documentation of the [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace). Please note that this code is read-only. To edit these libraries, you must do so outside of this UI.
 
 ![workspace](docs/images/workspace_source.png)
 
