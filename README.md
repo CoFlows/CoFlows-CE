@@ -64,6 +64,19 @@ Projects in **CoFlows** are called Workspaces. They contain the logic that defin
 ### Authentication through username/password and Secret Keys
 Authentication is done through **CoFlows** internal functionality. Users can either authenticate through the UI with a username and password. Alternatively, you can authenticate WebAPI calls using a secret key. This key can be accessed through the UI as explained below.
 
+### Permissions
+There are two types, Fixed and Group permissions, in **CoFlows**. First is the Fixed type which is hardcoded in the definition of the Workspace. Fixed permissions enable developers to give access to certain users prior to setting up Group permissions. You can think of these permissions as system permissions which should not be used for standard users.
+
+Group permissions on the other hand are dynamic and related to groups. Groups are effectively sets of permissions that allow administrators to organize and control user access to internal features of the workspaces.
+
+To manage user permissions you can create multiple groups and add users to these groups. For example, imagine you have a workspace with two types of users called Retail and Professional. Users added to these groups can have 1 of 4 possible permissions:
+1) Denied (-1) - Explicit no access to this group, perhaps think of this as black list.
+2) View (0) - Lowest level of access to this group. Perhaps users that are not paying for additional services but are having a free trial.
+3) Read (1) - Mid level access, perhaps access to read information that is not accessible to (View only) users but no permission to change data.
+4) Write (2) - Administrators or users with permissions to change data.
+
+Please note that groups are arbitrary, you can create as many as you want. The meaning of the groups and their permissions are for you to define. To understand how to check if a user is a member of a group and see their permission please refer to the docs in the [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace).
+
 ## User Interface
 
 To simplify your interaction with your **CoFlows** project, we have created a user interface. Let's start with a few steps.
@@ -96,19 +109,19 @@ alternatively you could create a new user by clicking on "Create an account!"
 
 ![workspace](docs/images/workspace_source.png)
 
-8) Permissions are set...
+8) View the permissions for this Workspace. As stated above, Fixed permissions are readonly and cannot be changed in the UI. The Group permissions are managed in the block below.
 
 ![permissions](docs/images/workspace_permissions.png)
 
-9) New User Permissions are set...
+9) To add a user to a Group you need to specify their email. The user must have an account on this container with the same email you specify.
 
 ![permissions](docs/images/workspace_newuser.png)
 
-10) New SubGroup Permissions are set...
+10) Groups can be added easily too.
 
 ![permissions](docs/images/workspace_newgroup.png)
 
-11) New SubGroup Permissions are set...
+11) Changing which group you want to manage can be done through select box like so. The Master group is the group for the entire Workspace. All users in the Workspace must be added to this group. Users can only be added to the "sub" groups once they are part of the master group.
 
 ![permissions](docs/images/workspace_subgroups.png)
 
