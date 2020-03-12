@@ -1,6 +1,12 @@
 # CoFlows - Containerized Polyglot Runtime (Interop)
 
-**CoFlows CE (Community Edition)** is a Containerized Polyglot Runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**.
+**CoFlows CE (Community Edition)** is a Containerized Polyglot Runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**. One implementation of **CoFlows** was a system to track ships and their import/exports between countries in order to predict supply and demand dynamics for various commodities. To this end, we worked on a GPS driven solutions where plotting points on a map was essential for correctly tuning the algorithms. This is a visual of this example
+
+| Code |  Map |  Table |
+:-------------------------:|:-------------------------:|:-------------------------: 
+![](docs/images/QA_python_agent.png)  | ![](docs/images/QA_vessels_map.png)  |  ![](docs/images/QA_table_query.png)
+
+More on how to visualize this type of data in the docs of the [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace). 
 
 As a Containerized Polyglot Runtime, its functionality allows developers to build complex workflows leveraging off great open-source libraries written in various languages. The wealth of distributed computing libraries of Java / Scala together with Python's data science tools are all available in order to use the right tool for the right purpose within the same process!
 
@@ -79,13 +85,7 @@ Please note that groups are arbitrary, you can create as many as you want. The m
 
 ## User Interface
 
-To simplify your interaction with your **CoFlows** project, we have created a user interface. This UI has powerful visualization features that help you interact with dataset while you are designing them. For example, we worked on a GPS driven application where plotting points on a map was essential for correctly tuning the algorithms. This is a visual of this example
-
-| Code |  Map |  Table |
-:-------------------------:|:-------------------------:|:-------------------------: 
-![](docs/images/QA_python_agent.png)  | ![](docs/images/QA_vessels_map.png)  |  ![](docs/images/QA_table_query.png)
-
-More on how to visualize this type of data in the docs of the [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace). Let's start with a few steps.
+To simplify your interaction with your **CoFlows** project, we have created a user interface. Let's start with a few steps.
 
 1) Clone the CoFlows-Workspace repo from [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace).
 
