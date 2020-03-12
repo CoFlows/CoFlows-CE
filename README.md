@@ -31,8 +31,6 @@ For more information visit https://www.coflows.com.
 
 This edition will be tightly coupled with the **CoFlows Cloud** making it much easier for developers to deploy and host their applications. More information on this coming soon.
 
----
-
 ## Polygot
 Let's start with a definition. According to Wikipedia, in computing, a polyglot is a computer program or script written in a valid form of multiple programming languages, which performs the same operations or output independent of the programming language used to compile or interpret it.
 
@@ -55,22 +53,16 @@ Javascript interpretation is achieved using the great [Jint](https://github.com/
 
 For further details please read [Polyglot](docs/Polyglot/General.md "Polyglot").
 
----
-
 ## Workspaces
 
 Projects in **CoFlows** are called Workspaces. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workspace depends on. For further information please read [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace).
 
----
-
 ## Security, Authentication and Permissions
-ssl
 
-login
+**CoFlows** has integrated LetsEncrypt functionality to simply the process to enable encrypted SSL connections. The standard process is to purchase an SSL certificate from CA, then transform the certificate into a PFX file which then should be stored securely while being accessible by the container. With LetsEncrypt, **CoFlows** now automatically generates a trusted SSL certificate if the domain name linked to the certificate is pointing to the container IP address. For more information please see the docs in the [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace).
 
-secret
-
-----
+### Authentication through username/password and Secret Keys
+Authentication is done through **CoFlows** internal functionality. Users can either authenticate through the UI with a username and password. Alternatively, you can authenticate WebAPI calls using a secret key. This key can be accessed through the UI as explained below.
 
 ## User Interface
 
@@ -104,19 +96,19 @@ alternatively you could create a new user by clicking on "Create an account!"
 
 ![workspace](docs/images/workspace_source.png)
 
-7) Permissions are set...
+8) Permissions are set...
 
 ![permissions](docs/images/workspace_permissions.png)
 
-8) New User Permissions are set...
+9) New User Permissions are set...
 
 ![permissions](docs/images/workspace_newuser.png)
 
-9) New SubGroup Permissions are set...
+10) New SubGroup Permissions are set...
 
 ![permissions](docs/images/workspace_newgroup.png)
 
-10) New SubGroup Permissions are set...
+11) New SubGroup Permissions are set...
 
 ![permissions](docs/images/workspace_subgroups.png)
 
