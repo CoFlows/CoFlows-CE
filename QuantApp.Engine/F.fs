@@ -405,6 +405,7 @@ type F =
                         }
 
                     let res = m.[fun x-> M.V<string>(x,"ID") = this.ID]
+
                     if res.Count = 0 then pkg |> m.Add |> ignore else m.Exchange(res.[0], pkg)
                     m.Save()
                 else
@@ -1111,6 +1112,9 @@ type F =
                     ""
 
         let f = F(uid)
+
+        Utils._fDB.[uid] <- f
+
         f.Initialize()
         
         if pkg.WorkspaceID.IsSome then
@@ -1222,8 +1226,9 @@ type F =
             if F.Find(pkg.ID.Value).IsSome then
                 let f = F.Find(pkg.ID.Value).Value
                 f.Stop()
-        
+
             let newF = F.Create(pkg, pkg.Code)
+
             // (fst newF).Start()
             newF
 

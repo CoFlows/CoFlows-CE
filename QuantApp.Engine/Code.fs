@@ -2107,7 +2107,7 @@ module Code =
                                     entry.Exe, [||])
                                 let fpkg = { fpkg with ID = fpkg.ID.Replace("$WID$", pkg_id); WorkspaceID = fpkg.WorkspaceID.Replace("$WID$", pkg_id) }
                                 F.CreatePKG(fpkg, code)
-                                    )
+                                )
                             |> List.map(fun (f, _)  -> f.ID)
 
                         Permissions = pkg_content.Permissions |> Seq.toList
