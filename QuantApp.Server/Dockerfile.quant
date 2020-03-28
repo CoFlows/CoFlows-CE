@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.0
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 
 WORKDIR /app
 
@@ -20,6 +20,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get update && \
     ACCEPT_EULA=Y apt-get -y install msodbcsql17 && \
     apt-get -y install unixodbc-dev
+
 
 # Python 3.7 Install
 RUN cd /usr/src && \
@@ -106,7 +107,7 @@ RUN chmod +x /app/lab
 RUN chmod +x /app/coflows
 
 # RUN g++ -shared -o libJNIWrapper.so -L/usr/java/openjdk-12/lib/server  -I/usr/java/openjdk-12/include -I/usr/java/openjdk-12/include/linux JNIWrapper.cpp -ljvm -fPIC  -ldl -lpthread
-RUN g++ -shared -o libJNIWrapper.so  -I/usr/java/openjdk-8/include -I/usr/java/openjdk-8/include/linux JNIWrapper.cpp -fPIC  -ldl -lpthread
+RUN g++ -shared -o libJNIWrapper.so  -I/usr/java/openjdk-8/include -I/usr/java/openjdk-8/include/linux JNIWrapper.cpp -fPIC -lpthread
 
 RUN \
     mkdir /app/jars && \
@@ -129,7 +130,6 @@ RUN pip install dash-daq
 RUN pip install requests
 
 RUN pip install pyodbc
-
 
 RUN mv /app/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kernel.json
 

@@ -6,7 +6,7 @@
 # cd ../
 
 dotnet clean CoFlows.CE.osx.sln
-dotnet publish -c Release -f netcoreapp3.0 -o QuantApp.Server/obj/osx/publish QuantApp.Server/QuantApp.Server.quant.osx.csproj
+dotnet publish -c Release -f netcoreapp3.1 -o QuantApp.Server/obj/osx/publish QuantApp.Server/QuantApp.Server.quant.osx.csproj
 
 # make
 javac -cp jars/scalap-2.12.8.jar:jars/scala-library.jar:./QuantApp.Kernel/JVM/app/quant/clr/ ./QuantApp.Kernel/JVM/app/quant/clr/*.java ./QuantApp.Kernel/JVM/app/quant/clr/function/*.java

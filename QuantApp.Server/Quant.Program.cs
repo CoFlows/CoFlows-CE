@@ -49,12 +49,12 @@ namespace QuantApp.Server.Quant
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
         {
-            #if NETCOREAPP3_0
-            Console.Write("NetCoreApp 3.0... ");
+            #if NETCOREAPP3_1
+            Console.Write("CoFlows Quant - NetCoreApp 3.1... ");
             #endif
 
             #if NET461
-            Console.Write("Net Framework 461... ");
+            Console.Write("CoFlows Quant - Net Framework 461... ");
             #endif
             
             Console.Write("Python starting... ");
@@ -334,7 +334,7 @@ namespace QuantApp.Server.Quant
 
                 /// QuantSpecific END
                 
-                #if NETCOREAPP3_0
+                #if NETCOREAPP3_1
                 if(!sslFlag)
                     QuantApp.Server.Program.Init(new string[]{"--urls", "http://*:80"});
                 else
