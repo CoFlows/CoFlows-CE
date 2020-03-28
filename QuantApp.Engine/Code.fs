@@ -600,17 +600,12 @@ module Code =
 
                             let errors, exitCode, assembly = 
                                 let errors, exitCode = args |> FSharpChecker.Create().Compile |> Async.RunSynchronously
-                                // let errors, exitCode, assembly = FSharpChecker.Create().CompileToDynamicAssembly(args, execute=None) |> Async.RunSynchronously
                                 
                                 errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
                                 #if MONO_LINUX || MONO_OSX
                                 errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
                                 #endif
                                 let assembly = System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile)
-                                // let assembly = assembly.Value
-
-                                // if assembly.IsSome then
-                                // let assembly = assembly.Value
 
                                 if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("namespace") then
                                     M._compiledAssemblies.TryAdd(hash, assembly) |> ignore
@@ -624,8 +619,6 @@ module Code =
                                     | _-> ()
                                 
                                 errors, exitCode, assembly
-                                // else
-                                    // errors, exitCode, null
 
                             if errors |> Seq.filter(fun e -> e.ToString().Contains("error")) |> Seq.isEmpty && (assembly |> isNull |> not)  then
                                 assembly
