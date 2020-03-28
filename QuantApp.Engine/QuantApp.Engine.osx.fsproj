@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>    
-    <TargetFrameworks>netcoreapp3.0;net461</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
     <NoWarn>FS0020;FS0025;FS0049;FS0058;FS0064;FS0760;FS0066;FS0104;MSB3243;MSB3245</NoWarn>  
     <!-- <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference> -->
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants>NETSTANDARD;MONO_OSX;TRACE;DEBUG;PYTHON3;PYTHON37;UCS4;PYTHON_WITH_PYMALLOC</DefineConstants>    
+    <DefineConstants>NETSTANDARD;MONO_OSX;TRACE;DEBUG;PYTHON3;PYTHON37;UCS4;PYTHON_WITH_PYMALLOC</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,21 +20,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.osx.csproj" />
+    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.lnx.csproj" />
   </ItemGroup>
 
   <ItemGroup>   
-    <PackageReference Include="FSharp.Compiler.Service" Version="31.0.0" />
+    <PackageReference Include="FSharp.Compiler.Service" Version="34.1.1" />
     
-    
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.3.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.5.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.5.0" />
     <PackageReference Include="Jint" Version="3.0.0-beta-1525" />
 
-    <PackageReference Include="FSharp.Interop.Dynamic" Version="5.0.0.250" />
+    <PackageReference Include="FSharp.Interop.Dynamic" Version="5.0.1.268" />
 
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+
+    <!-- <PackageReference Include="FSharp.Core" Version="4.7.1" /> -->
   </ItemGroup>
 </Project>

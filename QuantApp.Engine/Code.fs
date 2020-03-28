@@ -417,8 +417,8 @@ module Code =
                 let scFlag = "//scala"
 
                 let libs() =
-                    #if NETCOREAPP3_0
-                    let sysDir_base = Path.GetDirectoryName(@"ref/netcoreapp3.0/")
+                    #if NETCOREAPP3_1
+                    let sysDir_base = Path.GetDirectoryName(@"ref/netcoreapp3.1/")
                     #endif
 
                     #if NET461
@@ -518,7 +518,7 @@ module Code =
                                                 if functionName |> String.IsNullOrWhiteSpace |> not then
                                                     if functionName = name then
                                                         let t0 = DateTime.Now
-                                                        // "Executing: " + m.Name + " " + t0.ToString() |> Console.WriteLine
+                                                        "Executing: " + m.Name + " " + t0.ToString() |> Console.WriteLine
 
                                                         let res = m.Invoke(
                                                             null, 
@@ -573,7 +573,7 @@ module Code =
                     if hash |> CompiledAssemblies.ContainsKey |> not then
 
                         let _compileFS (codes : (string * string) list) =
-                            let checker = FSharpChecker.Create()
+                            // let checker = FSharpChecker.Create()
                             let fn = Path.GetTempFileName()
                             let dllFile = Path.ChangeExtension(fn, ".dll")
                             let fsFiles =
@@ -589,6 +589,9 @@ module Code =
                                     [|  
                                         yield "";//fsc.exe";
                                         yield "--noframework";
+                                        yield "--targetprofile:netcore" 
+                                        yield "--optimize-" 
+                                        yield "--target:library" 
                                         yield "-o"; yield dllFile; 
                                         yield "-a"; for r in fsFiles do yield " " + r
                                         for r in libs() do yield "-r:" + r
@@ -597,11 +600,17 @@ module Code =
 
                             let errors, exitCode, assembly = 
                                 let errors, exitCode = args |> FSharpChecker.Create().Compile |> Async.RunSynchronously
+                                // let errors, exitCode, assembly = FSharpChecker.Create().CompileToDynamicAssembly(args, execute=None) |> Async.RunSynchronously
+                                
                                 errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
                                 #if MONO_LINUX || MONO_OSX
                                 errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
                                 #endif
                                 let assembly = System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile)
+                                // let assembly = assembly.Value
+
+                                // if assembly.IsSome then
+                                // let assembly = assembly.Value
 
                                 if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("namespace") then
                                     M._compiledAssemblies.TryAdd(hash, assembly) |> ignore
@@ -614,9 +623,10 @@ module Code =
                                     with
                                     | _-> ()
                                 
-                                
                                 errors, exitCode, assembly
-                                
+                                // else
+                                    // errors, exitCode, null
+
                             if errors |> Seq.filter(fun e -> e.ToString().Contains("error")) |> Seq.isEmpty && (assembly |> isNull |> not)  then
                                 assembly
                             else

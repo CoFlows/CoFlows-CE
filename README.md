@@ -15,7 +15,7 @@ More on how to visualize this type of data in the docs of the [sample repo from 
 As a Containerized Polyglot Runtime, its functionality allows developers to build complex workflows leveraging off great open-source libraries written in various languages. The wealth of distributed computing libraries of Java / Scala together with Python's data science tools are all available in order to use the right tool for the right purpose within the same process!
 
 Furthermore, our aim with **CoFlows** is to offer simplicity for **Data Scientists** in order to quickly build self-contained projects while leveraging off popular tools. To this end, once a developer pulls the **CoFlows** image, a range of tools are at their disposal as first class citizens of the **CoFlows** ecosystem:
-* DotNet Core 3.0
+* DotNet Core 3.1
 * Python 3.7.4
 * Java 1.8
 * Scala 2.11.8
