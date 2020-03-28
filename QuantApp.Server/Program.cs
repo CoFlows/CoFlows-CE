@@ -56,8 +56,8 @@ namespace QuantApp.Server
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
         {
-            #if NETCOREAPP3_0
-            Console.Write("CoFlows CE - NetCoreApp 3.0... ");
+            #if NETCOREAPP3_1
+            Console.Write("CoFlows CE - NetCoreApp 3.1... ");
             #endif
 
             #if NET461
@@ -294,7 +294,7 @@ namespace QuantApp.Server
                     Console.WriteLine("Empty server...");
 
 
-                #if NETCOREAPP3_0
+                #if NETCOREAPP3_1
                 if(!sslFlag)
                     Init(new string[]{"--urls", "http://*:80"});
                 else
