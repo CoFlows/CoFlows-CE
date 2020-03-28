@@ -2106,7 +2106,9 @@ module Code =
                                     ],
                                     entry.Exe, [||])
                                 let fpkg = { fpkg with ID = fpkg.ID.Replace("$WID$", pkg_id); WorkspaceID = fpkg.WorkspaceID.Replace("$WID$", pkg_id) }
-                                F.CreatePKG(fpkg, code)
+                                let f, result = F.CreatePKG(fpkg, code)
+                                async { { Function = "Main"; Data = "Initial Execution" } |> Newtonsoft.Json.JsonConvert.SerializeObject |> f.Body |> ignore } |> Async.Start
+                                f, result
                                 )
                             |> List.map(fun (f, _)  -> f.ID)
 

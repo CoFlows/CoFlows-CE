@@ -2,9 +2,11 @@
 
 **CoFlows CE (Community Edition)** is a Containerized Polyglot Runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**. 
 
-To give a bit context, one implementation of **CoFlows** we developed was a system to track ships and the import/exports between countries in order to predict supply and demand dynamics for various commodities. To this end, we worked with GPS data where it was essential for us to quickly plot transformed data on a map for correctly tuning the algorithms. Below is a visual of this example:
+To get started please go to our [sample repo from GitHub](https://github.com/QuantApp/CoFlows-Workspace).
 
-| Code |  Map |  Table |
+For a bit context, one implementation of **CoFlows** is a system to track ships and the imports/exports between countries in order to predict supply and demand dynamics for various commodities. To this end, we worked with GPS data where it was essential for us to quickly plot transformed data on a map for correctly tuning the algorithms. Below is a visual of this example:
+
+| Code |  Visual |  Table |
 :-------------------------:|:-------------------------:|:-------------------------: 
 ![](docs/images/QA_python_agent.png)  | ![](docs/images/QA_vessels_map.png)  |  ![](docs/images/QA_table_query.png)
 
