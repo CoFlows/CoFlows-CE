@@ -136,6 +136,8 @@ RUN mv /app/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kernel.json
 RUN apt-get update && apt-get install -y procps
 RUN apt-get install -y git
 
+RUN apt-get install -y libpq-dev
+
 ENV PATH /app:$PATH
 
 ENTRYPOINT ["dotnet", "QuantApp.Server.lnx.dll"]
