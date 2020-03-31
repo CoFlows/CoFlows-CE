@@ -206,7 +206,7 @@ export class QAWorkbookComponent {
                             let data = result.Item2
 
                             result.IsDash = true
-                            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.quantapp.quantapp_server + 'dash/' + workbook.WorkspaceID + '/' + workbook.ID + '/')
+                            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.quantapp.quantapp_server + 'dash/' + workbook.WorkspaceID + '/' + workbook.ID + '?uid=' + this.quantapp.quser.User.Secret)
                         }
                         else if(result.Item1.indexOf('_map') >= 0){
                             let name = result.Item1
@@ -486,7 +486,7 @@ export class QAWorkbookComponent {
             let data = result.Item2
 
             result.IsDash = true
-            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.quantapp.quantapp_server + 'dash/' + this.selectedWB.WorkspaceID + '/' + this.selectedWB.ID + '/')
+            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.quantapp.quantapp_server + 'dash/' + this.selectedWB.WorkspaceID + '/' + this.selectedWB.ID + '?uid=' + this.quantapp.quser.User.Secret)
         }
         else if(result.Item1.indexOf('_map') >= 0){
             let name = this.selectedTab
@@ -572,7 +572,7 @@ export class QAWorkbookComponent {
     addItem(items, name, item){
         if(item.D_link != undefined || name == 'D_link'){
             this.quantapp.Get(
-                'm/getwb?workbook=' + this.selectedWB.WorkspaceID + '&id=' + this.selectedWB.ID + '&' + (item.D_link != undefined ? item.D_link : item), 
+                'm/getwb?workbook=' + this.selectedWB.WorkspaceID + '&id=' + this.selectedWB.ID + '&uid=' + this.quantapp.quser.User.Secret + '&' + (item.D_link != undefined ? item.D_link : item), 
                 data => { 
                     this.addItem_internal(items, name, data)
                  });

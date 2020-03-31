@@ -260,6 +260,9 @@ namespace QuantApp.Kernel
             if (Factory == null)
                 return AccessType.Write;
             var quser = User.FindUser(User.ContextUser.ID);
+            if(quser == null)
+                return AccessType.Denied;
+                
             return Factory.Permission(quser, this, quser);
         }
 

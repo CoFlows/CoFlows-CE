@@ -704,12 +704,18 @@ namespace QuantApp.Server.Controllers
                     
                     var execution_result = execution.Result;
                     if(execution_result.Length == 0)
+                    {
+                        QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                         return Ok(execution.Compilation);
+                    }
                         
                     foreach(var pair in execution_result)
                     {
                         if(pair.Item1 == name)
+                        {
+                            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                             return Ok(pair.Item2);
+                        }
                     }
                 }
             }
@@ -1437,8 +1443,7 @@ namespace QuantApp.Server.Controllers
 
             var _headers = headers;
 
-            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-
+            
             var handler = new HttpClientHandler()
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
