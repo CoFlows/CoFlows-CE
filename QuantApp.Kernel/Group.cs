@@ -263,6 +263,18 @@ namespace QuantApp.Kernel
             return Factory.Permission(quser, this, quser);
         }
 
+        public AccessType PermissionSecret(string secret)
+        {
+            if (Factory == null)
+                return AccessType.Write;
+
+            var quser = User.FindUserBySecret(secret);
+            if(quser == null)
+                return AccessType.Denied;
+
+            return Factory.Permission(quser, this, quser);
+        }
+
         private ConcurrentDictionary<string, ConcurrentDictionary<string, AccessType>> _db = new ConcurrentDictionary<string, ConcurrentDictionary<string, AccessType>>();
 
         public AccessType Permission(User user, IPermissible permissible)

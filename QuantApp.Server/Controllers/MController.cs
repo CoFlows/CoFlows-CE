@@ -662,13 +662,24 @@ namespace QuantApp.Server.Controllers
         }
 
         [HttpGet, AllowAnonymous]
-        public async Task<IActionResult> GetWB(string workbook, string id, string name, string[] p)
+        public async Task<IActionResult> GetWB(string workbook, string id, string name, string uid, string[] p)
         {
             string userId = this.User.QID();
-            if (userId != null)
+            if(!string.IsNullOrEmpty(uid))
+            {
+                QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUserBySecret(uid);
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+            }
+            else if (userId != null)
             {
                 QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
-                QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
             }
             else
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
