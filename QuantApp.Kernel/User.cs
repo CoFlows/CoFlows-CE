@@ -75,6 +75,22 @@ namespace QuantApp.Kernel
             }
         }
 
+
+        public static UserData ContextUserBySecret(string secret)
+        {
+            return FindUserBySecret(secret).ToUserData();
+        }
+
+        public void SetContextUser()
+        {
+            ContextUser = this.ToUserData();
+        }
+
+        public static void SetContextUserSecret(string secret)
+        {
+            ContextUser = FindUserBySecret(secret).ToUserData();
+        }
+
         public override string ToString()
         {
             return ID;

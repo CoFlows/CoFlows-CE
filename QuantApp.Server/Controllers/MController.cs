@@ -662,13 +662,24 @@ namespace QuantApp.Server.Controllers
         }
 
         [HttpGet, AllowAnonymous]
-        public async Task<IActionResult> GetWB(string workbook, string id, string name, string[] p)
+        public async Task<IActionResult> GetWB(string workbook, string id, string name, string uid, string[] p)
         {
             string userId = this.User.QID();
-            if (userId != null)
+            if(!string.IsNullOrEmpty(uid))
+            {
+                QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUserBySecret(uid);
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+            }
+            else if (userId != null)
             {
                 QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
-                QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
             }
             else
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
@@ -693,12 +704,18 @@ namespace QuantApp.Server.Controllers
                     
                     var execution_result = execution.Result;
                     if(execution_result.Length == 0)
+                    {
+                        QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                         return Ok(execution.Compilation);
+                    }
                         
                     foreach(var pair in execution_result)
                     {
                         if(pair.Item1 == name)
+                        {
+                            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                             return Ok(pair.Item2);
+                        }
                     }
                 }
             }
@@ -1426,8 +1443,7 @@ namespace QuantApp.Server.Controllers
 
             var _headers = headers;
 
-            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-
+            
             var handler = new HttpClientHandler()
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate

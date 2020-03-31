@@ -16,7 +16,7 @@
             </ng-template>
             <ng-template ngbTabContent>
                 <div class="col-sm-12 col-md-12">
-                    <a class="f-headers text-color"  target="_blank" href="{{quantapp.quantapp_server}}m/getwb?workbook={{selectedWB.WorkspaceID}}&id={{selectedWB.ID}}&name={{result.Item1}}">{{quantapp.quantapp_server}}m/getwb?workbook={{selectedWB.WorkspaceID}}&id={{selectedWB.ID}}&name={{result.Item1}}</a>
+                    <a class="f-headers text-color"  target="_blank" href="{{quantapp.quantapp_server}}m/getwb?workbook={{selectedWB.WorkspaceID}}&id={{selectedWB.ID}}&uid={{quantapp.quser.User.Secret}}&name={{result.Item1}}">{{quantapp.quantapp_server}}m/getwb?workbook={{selectedWB.WorkspaceID}}&id={{selectedWB.ID}}&uid={{quantapp.quser.User.Secret}}&name={{result.Item1}}</a>
                 </div>
                 <div *ngIf="result.IsDash" class="col-sm-12 col-md-12">
                     <a class="f-headers text-color"  target="_blank" [href]="result.URL">Dash Link</a>
