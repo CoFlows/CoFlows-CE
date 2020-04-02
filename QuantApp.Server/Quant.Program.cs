@@ -294,25 +294,19 @@ namespace QuantApp.Server.Quant
                 {
                     var pkg = Code.ProcessPackageFile(QuantApp.Server.Program.workspace_name);
                     Code.ProcessPackageJSON(pkg);
-                    SetDefaultWorkSpaces(new string[]{ pkg.ID });
+                    SetDefaultWorkSpaces(new string[]{ pkg.ID }, false);
                     Console.WriteLine(pkg.Name + " started");
-
-                    // if(config["Jupyter"].ToString().ToLower() == "true")
-                    // {
-                    //     var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/app/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + pkg.ID + "'])";
-                    //     var th = new System.Threading.Thread(() => {
-                    //         using (Py.GIL())
-                    //         {
-                    //             Console.WriteLine("Starting Jupyter...");
-                    //             Console.WriteLine(code);
-                    //             PythonEngine.Exec(code);
-                    //         }
-                    //     });
-                    //     th.Start();
-                    // }
                 }
                 else
+                {
                     Console.WriteLine("Empty server...");
+                    var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--WorkSpaces")[xe => true];
+                    foreach(var wsp in workspace_ids)
+                    {
+                        SetDefaultWorkSpaces(new string[]{ wsp.ToString() }, true);
+                        Console.WriteLine(wsp + " started");
+                    }
+                }
 
 
                 /// QuantSpecific START
@@ -334,16 +328,16 @@ namespace QuantApp.Server.Quant
 
                 /// QuantSpecific END
                 
-                #if NETCOREAPP3_1
-                if(!sslFlag)
-                    QuantApp.Server.Program.Init(new string[]{"--urls", "http://*:80"});
-                else
-                    QuantApp.Server.Program.Init(args);
-                #endif
+                // if(!sslFlag)
+                //     QuantApp.Server.Program.Init(new string[]{"--urls", "http://*:80"});
+                // else
+                //     QuantApp.Server.Program.Init(args);
 
-                #if NET461
-                QuantApp.Server.Program.Init(new string[]{"--urls", "http://*:80"});
-                #endif
+                if(!sslFlag)
+                    QuantApp.Server.Program.Init(new string[]{"--urls", "http://*:80"}, new Realtime.Quant.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.Quant.RTDSocketMiddleware>));
+                else
+                    QuantApp.Server.Program.Init(args, new Realtime.Quant.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.Quant.RTDSocketMiddleware>));
+                
             
             
                 Task.Factory.StartNew(() => {
@@ -1006,9 +1000,9 @@ namespace QuantApp.Server.Quant
             }
         }
 
-        public static IEnumerable<WorkSpace> SetDefaultWorkSpaces(string[] ids)
+        public static IEnumerable<WorkSpace> SetDefaultWorkSpaces(string[] ids, bool saveToDisk)
         {
-            return QuantApp.Server.Program.SetDefaultWorkSpaces(ids);
+            return QuantApp.Server.Program.SetDefaultWorkSpaces(ids, saveToDisk);
         }
 
 
