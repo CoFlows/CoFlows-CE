@@ -114,6 +114,8 @@ RUN \
     cp /app/app.quant.clr.jar /app/jars && \
     cp /usr/share/scala/lib/*.jar /app/jars
 
+RUN mkdir /app/mnt/
+RUN mkdir /app/mnt/pip/
 
 ENV LD_LIBRARY_PATH /usr/local/lib/
 ENV PYTHONPATH $PATH:/usr/local/lib/python3.7:/app/mnt/pip/
