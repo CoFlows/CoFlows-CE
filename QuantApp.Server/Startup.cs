@@ -48,7 +48,7 @@ namespace QuantApp.Server
         public string Domains { get; set; }
     }
 
-    public class Startup
+    public class Startup<T>
     {
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -185,7 +185,8 @@ namespace QuantApp.Server
                 );
 
             app.UseWebSockets();
-            app.UseMiddleware<RTDSocketMiddleware>();
+            // app.UseMiddleware<RTDSocketMiddleware>();
+            app.UseMiddleware<T>();
 
 
             app.UseAuthentication();
