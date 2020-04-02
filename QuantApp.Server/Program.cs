@@ -287,25 +287,26 @@ namespace QuantApp.Server
                 {
                     var pkg = Code.ProcessPackageFile(workspace_name);
                     Code.ProcessPackageJSON(pkg);
-                    SetDefaultWorkSpaces(new string[]{ pkg.ID });
+                    SetDefaultWorkSpaces(new string[]{ pkg.ID }, false);
                     Console.WriteLine(pkg.Name + " started");
                 }
                 else
+                {
                     Console.WriteLine("Empty server...");
+                    var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--WorkSpaces")[xe => true];
+                    foreach(var wsp in workspace_ids)
+                    {
+                        SetDefaultWorkSpaces(new string[]{ wsp.ToString() }, true);
+                        Console.WriteLine(wsp + " started");
+                    }
+                }
 
 
-                #if NETCOREAPP3_1
                 if(!sslFlag)
                     Init(new string[]{"--urls", "http://*:80"});
                 else
                     Init(args);
-                #endif
-
-                #if NET461
-                Init(new string[]{"--urls", "http://*:80"});
-                #endif
-            
-            
+                
                 Task.Factory.StartNew(() => {
                     while (true)
                     {
@@ -468,7 +469,7 @@ namespace QuantApp.Server
                         .WithoutVolume()
                         .DefineContainerInstance(aciName)
                             .WithImage(containerImageName)
-                            .WithExternalTcpPort(sslFlag ? 443 : 80)
+                            .WithExternalTcpPorts(new int[]{ 80, 443 })
                             // .WithVolumeMountSetting(volumeMountName, "/aci/logs/")
                             .WithCpuCoreCount(Int32.Parse(config["AzureContainerInstance"]["Cores"].ToString()))
                             .WithMemorySizeInGB(Int32.Parse(config["AzureContainerInstance"]["Mem"].ToString()))
@@ -479,7 +480,7 @@ namespace QuantApp.Server
                             .WithEnvironmentVariables(new Dictionary<string,string>(){ 
                                 {"coflows_config", File.ReadAllText(@"mnt/" + config_file)}, 
                                 })
-                            .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")
+                            .WithStartingCommandLine("dotnet", "QuantApp.Server.lnx.dll", "server")
                             .Attach()
                         .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
                         .CreateAsync()
@@ -498,14 +499,15 @@ namespace QuantApp.Server
                         .WithoutVolume()
                         .DefineContainerInstance(aciName)
                             .WithImage(containerImageName)
-                            .WithExternalTcpPort(sslFlag ? 443 : 80)
+                            .WithExternalTcpPorts(new int[]{ 80, 443 })
+                            // .WithExternalTcpPort(sslFlag ? 443 : 80)
                             // .WithVolumeMountSetting(volumeMountName, "/aci/logs/")
                             .WithCpuCoreCount(Int32.Parse(config["AzureContainerInstance"]["Cores"].ToString()))
                             .WithMemorySizeInGB(Int32.Parse(config["AzureContainerInstance"]["Mem"].ToString()))
                             .WithEnvironmentVariables(new Dictionary<string,string>(){ 
                                 {"coflows_config", File.ReadAllText(@"mnt/" + config_file)}, 
                                 })
-                            .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")
+                            .WithStartingCommandLine("dotnet", "QuantApp.Server.lnx.dll", "server")
                             .Attach()
                         .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
                         .CreateAsync()
@@ -703,7 +705,7 @@ namespace QuantApp.Server
         }
 
         private static List<string> _wspServicedList = new List<string>();
-        public static IEnumerable<WorkSpace> SetDefaultWorkSpaces(string[] ids)
+        public static IEnumerable<WorkSpace> SetDefaultWorkSpaces(string[] ids, bool saveToDisk)
         {
             foreach(var id in ids)
             {
@@ -717,6 +719,36 @@ namespace QuantApp.Server
                     {
                         QuantApp.Engine.Utils.ActiveWorkSpaceList.Add(wsp);
                         _wspServicedList.Add(id);
+
+                        if(saveToDisk)
+                        {
+                            Code.InstallNuGets(wsp.NuGets);
+                            Code.InstallPips(wsp.Pips);
+                            Code.InstallJars(wsp.Jars);
+
+                            var pkg = Code.ProcessPackageWorkspace(wsp);
+                            Code.ProcessPackageJSON(pkg);
+                            
+                            var bytes = QuantApp.Engine.Code.ProcessPackageToZIP(pkg);
+                            var archive = new ZipArchive(new MemoryStream(bytes));
+                            
+                            foreach(var entry in archive.Entries)
+                            {
+                                var entryStream = entry.Open();
+                                var streamReader = new StreamReader(entryStream);
+                                var content = streamReader.ReadToEnd();
+                                // var filePath = "/Workspace/" + entry.FullName;
+                                var filePath = "/app/mnt/" + entry.FullName;
+
+                                System.IO.FileInfo file = new System.IO.FileInfo(filePath);
+                                file.Directory.Create(); // If the directory already exists, this method does nothing.
+                                System.IO.File.WriteAllText(file.FullName, content);
+                            }
+                        }
+                        
+
+                        // QuantApp.Engine.Utils.ActiveWorkSpaceList.Add(wsp);
+                        // _wspServicedList.Add(id);
 
                         foreach(var fid in wsp.Functions)
                         {
@@ -740,6 +772,8 @@ namespace QuantApp.Server
                             th.Start();
                         }
                         #endif
+
+                        
                     }
                     else
                     {
@@ -773,13 +807,13 @@ namespace QuantApp.Server
             {
             
                 _wspServicedList.RemoveAll(x => x == id);
-                foreach(var fid in wsp.Functions)
-                {
-                    var cfid = fid.Replace("$WID$",id);
+                // foreach(var fid in wsp.Functions)
+                // {
+                //     var cfid = fid.Replace("$WID$",id);
 
-                    var f = F.Find(cfid).Value;
-                    f.Stop();
-                }
+                //     var f = F.Find(cfid).Value;
+                //     f.Stop();
+                // }
 
                 _wspServicedList.Add(id);
 
