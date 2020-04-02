@@ -39,13 +39,6 @@ namespace QuantApp.Server.Quant
 {
     public class Program
     {
-        // private static string workspace_name = null;
-        // private static string hostName = null;
-        // private static string ssl_cert = null;
-        // private static string ssl_password = null;
-
-        // private static bool useJupyter = false;
-
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
         {
@@ -76,13 +69,9 @@ namespace QuantApp.Server.Quant
 
             JObject config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
 
-            // JObject config = (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/quantapp_config.json")));
             QuantApp.Server.Program.workspace_name = config["Workspace"].ToString();
             QuantApp.Server.Program.hostName = config["Server"]["Host"].ToString();
             var secretKey = config["Server"]["SecretKey"].ToString();
-            // QuantApp.Server.Program.ssl_cert = config["Server"]["SSL"]["Cert"].ToString();
-            // QuantApp.Server.Program.ssl_password = config["Server"]["SSL"]["Password"].ToString();
-            // var sslFlag = !string.IsNullOrWhiteSpace(QuantApp.Server.Program.ssl_cert);
 
             var cloudHost = config["Cloud"]["Host"].ToString();
             var cloudKey = config["Cloud"]["SecretKey"].ToString();
@@ -328,11 +317,6 @@ namespace QuantApp.Server.Quant
 
                 /// QuantSpecific END
                 
-                // if(!sslFlag)
-                //     QuantApp.Server.Program.Init(new string[]{"--urls", "http://*:80"});
-                // else
-                //     QuantApp.Server.Program.Init(args);
-
                 if(!sslFlag)
                     QuantApp.Server.Program.Init(new string[]{"--urls", "http://*:80"}, new Realtime.Quant.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.Quant.RTDSocketMiddleware>));
                 else
