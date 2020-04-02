@@ -303,9 +303,9 @@ namespace QuantApp.Server
 
 
                 if(!sslFlag)
-                    Init(new string[]{"--urls", "http://*:80"});
+                    Init(new string[]{"--urls", "http://*:80"}, new Realtime.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.RTDSocketMiddleware>));
                 else
-                    Init(args);
+                    Init(args, new Realtime.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.RTDSocketMiddleware>));
                 
                 Task.Factory.StartNew(() => {
                     while (true)
@@ -630,7 +630,6 @@ namespace QuantApp.Server
 
         private static void DatabasesSqlite(string sqliteFile)
         {
-     
             string KernelConnectString = "Data Source=" + sqliteFile;
 
             bool dbExists = File.Exists(sqliteFile);
@@ -844,9 +843,10 @@ namespace QuantApp.Server
             return _wspServicedList;
         }
 
-        public static void Init(string[] args)
+        public static void Init(string[] args, QuantApp.Kernel.Factories.IRTDEngineFactory socketFactory, Type startup)
         {
-            QuantApp.Kernel.RTDEngine.Factory = new Realtime.WebSocketListner();
+            // QuantApp.Kernel.RTDEngine.Factory = new Realtime.WebSocketListner();
+            QuantApp.Kernel.RTDEngine.Factory = socketFactory;
 
             if (args == null || args.Length == 0 || args[0] == "server")
             {
@@ -864,7 +864,8 @@ namespace QuantApp.Server
                         //         // listenOptions.UseHttps();//ssl_cert, ssl_password);
                         //     });
                         // })
-                        .UseStartup<Startup>();
+                        // .UseStartup<Startup>();
+                        .UseStartup(startup);
                     })
                     .Build()
                     .Run();
@@ -875,7 +876,8 @@ namespace QuantApp.Server
                 Host.CreateDefaultBuilder(args)
                     .ConfigureWebHostDefaults(webBuilder =>
                     {
-                        webBuilder.UseStartup<Startup>();
+                        // webBuilder.UseStartup<Startup>();
+                        webBuilder.UseStartup(startup);
                     })
                     .Build()
                     .Run();
