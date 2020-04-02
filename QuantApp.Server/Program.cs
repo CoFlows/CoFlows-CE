@@ -838,6 +838,18 @@ namespace QuantApp.Server
                 Console.WriteLine("Add serviced workspace is null: " + id);
         }
 
+        public static void RemoveServicesWorkSpace(string id)
+        {
+            var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--WorkSpaces");
+            if(workspace_ids[x => true].Where(x => x.ToString() == id).Count() > 0)
+            {
+                workspace_ids.Remove(id);
+                workspace_ids.Save();
+            }
+
+            _wspServicedList.RemoveAll(x => x == id);
+        }
+
         public static IEnumerable<string> GetServicedWorkSpaces()
         {
             return _wspServicedList;
