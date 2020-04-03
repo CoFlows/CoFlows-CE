@@ -753,7 +753,7 @@ namespace QuantApp.Server.Controllers
                 request.Headers.Add(System.Net.HttpRequestHeader.Authorization, string.Concat("token ", token));
 
             request.Accept = "application/vnd.github.v3.raw";
-            request.UserAgent = "coflows.quant.app";
+            request.UserAgent = Program.hostName;
             var response = request.GetResponse();
             
 
