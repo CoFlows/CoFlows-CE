@@ -35,115 +35,11 @@ using QuantApp.Server.Utils;
 
 namespace QuantApp.Server.Realtime
 {    
-    public class ActiveToggleDataSub
-    {
-        public string ID { get; set; }
-    }
-    public class ActiveToggleData
-    {
-        public UserData User { get; set;}
-        public ActiveToggleDataSub Data { get; set; }
-    }
-
-
-    
-    public class GetFDataSub
-    {
-        public string ID { get; set; }
-        public string Parameters { get; set; }
-    }
-
-    public class GetFData
-    {
-        public UserData User { get; set;}
-        public GetFDataSub Data { get; set; }
-    }
-
-    public class FDataData
-    {
-        public UserData User { get; set;}
-        public Controllers.MController.FData Data { get; set; }
-    }
-
-    public class FMetaData
-    {
-        public UserData User { get; set;}
-        public FMeta Data { get; set; }
-    }
-
-    public class CallDataData
-    {
-        public UserData User { get; set;}
-        public Controllers.MController.CallData Data { get; set; }
-    }
-
-    public class CodeDataData
-    {
-        public UserData User { get; set;}
-        public CodeData Data { get; set; }
-    }
-
-    public class GetWBDataSub
-    {
-        public string Workbook { get; set; }
-        public string ID { get; set; }
-        public string Name { get; set; }
-
-        public string[] P { get; set; }
-    }
-
-    public class GetWBData
-    {
-        public UserData User { get; set;}
-        public GetWBDataSub Data { get; set; }
-    }
-
-
-    public class PKGData
-    {
-        public UserData User { get; set;}
-        public PKG Data { get; set; }
-    }
-
-    public class GitPKGData
-    {
-        public UserData User { get; set;}
-        public PKG Data { get; set; }
-        public string Zip { get; set; }
-    }
-
-    public class SaveM
-    {
-        public string ID { get; set; }
-    }
-
     public class HttpProxyRequest
     {
         public string Url { get; set; }
         public string Content { get; set;}
         public List<KeyValuePair<string, string>> Headers { get; set; }
-    }
-
-    
-    public class HttpProxyRequestData
-    {
-        public UserData User { get; set;}
-        public HttpProxyRequest Data { get; set; }
-    }
-
-    public class HttpProxyResponse
-    {
-        public List<KeyValuePair<string, string>> Headers { get; set; }
-        public int StatusCode { get; set; }
-        public string ContentType { get; set; }
-        public long ContentLength { get; set; }
-        public string Body { get; set;}
-    }
-
-    public class HttpProxyResponseData
-    {
-        public UserData User { get; set;}
-        public HttpProxyResponse Data { get; set; }
     }
 
     public class RTDSocketMiddleware
