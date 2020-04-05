@@ -1875,8 +1875,8 @@ module Code =
                 |> Seq.map(fun entry -> 
                     let name, content = 
                         try
-                            let name = if entry.Name |> String.IsNullOrEmpty then Path.GetFileName(pkg_path + Path.DirectorySeparatorChar.ToString() + entry.Content) else entry.Name
-                            let content = System.Convert.ToBase64String(File.ReadAllBytes(pkg_path + Path.DirectorySeparatorChar.ToString() + entry.Content))
+                            let name = if entry.Name |> String.IsNullOrEmpty then Path.GetFileName(pkg_path + Path.DirectorySeparatorChar.ToString() + "Bins" + Path.DirectorySeparatorChar.ToString() + entry.Content) else entry.Name
+                            let content = System.Convert.ToBase64String(File.ReadAllBytes(pkg_path + Path.DirectorySeparatorChar.ToString() + "Bins" + Path.DirectorySeparatorChar.ToString() + entry.Content))
                             name, content
                         with
                         | _ -> 
@@ -1892,11 +1892,12 @@ module Code =
                 |> Seq.map(fun entry -> 
                     let name, content = 
                         try
-                            let name = if entry.Name |> String.IsNullOrEmpty then Path.GetFileName(pkg_path + Path.DirectorySeparatorChar.ToString() + entry.Content) else entry.Name
-                            let content = System.Convert.ToBase64String(File.ReadAllBytes(pkg_path + Path.DirectorySeparatorChar.ToString() + entry.Content))
+                            let name = if entry.Name |> String.IsNullOrEmpty then Path.GetFileName(pkg_path + Path.DirectorySeparatorChar.ToString() + "Files" + Path.DirectorySeparatorChar.ToString() + entry.Content) else entry.Name
+                            let content = System.Convert.ToBase64String(File.ReadAllBytes(pkg_path + Path.DirectorySeparatorChar.ToString() + "Files" + Path.DirectorySeparatorChar.ToString() + entry.Content))
                             name, content
                         with
-                        | _ -> 
+                        | e ->
+                            e |> Console.WriteLine 
                             try
                                 (if entry.Name |> String.IsNullOrEmpty then Path.GetFileName(entry.Content) else entry.Name), System.Convert.ToBase64String(File.ReadAllBytes(entry.Content))
                             with
