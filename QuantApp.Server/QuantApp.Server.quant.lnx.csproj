@@ -23,6 +23,9 @@
     <Content Include="create.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="calendars.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="fic.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+
+    <Compile Remove="Realtime\RTDSocketMiddleware.cs" />
+
   </ItemGroup>
 
   <ItemGroup>    

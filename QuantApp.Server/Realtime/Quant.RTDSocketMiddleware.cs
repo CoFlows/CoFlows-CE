@@ -39,8 +39,14 @@ using Python.Runtime;
 using QuantApp.Server.Utils;
 using QuantApp.Server.Realtime;
 
-namespace QuantApp.Server.Realtime.Quant
+namespace QuantApp.Server.Realtime
 {
+    public class HttpProxyRequest
+    {
+        public string Url { get; set; }
+        public string Content { get; set;}
+        public List<KeyValuePair<string, string>> Headers { get; set; }
+    }
     public class RTDSocketMiddleware
     {
         private readonly RequestDelegate _next;
@@ -283,6 +289,8 @@ namespace QuantApp.Server.Realtime.Quant
         }
     }
 
+    public delegate System.Tuple<string, string> RTDMessageDelegate(string content);
+
     public class WebSocketListner : QuantApp.Kernel.Factories.IRTDEngineFactory
     {
         public static ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>> subscriptions = new ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>>();
@@ -306,6 +314,8 @@ namespace QuantApp.Server.Realtime.Quant
 
         private static System.Collections.Concurrent.ConcurrentDictionary<string, int> DashDB = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
         // private static int lastPort = 10000;
+
+        public static RTDMessageDelegate RTDMessageFunction = null;
 
         public static void appServer_NewMessageReceived(WebSocket session, string message_string, string path, List<KeyValuePair<string, string>> headers)
         {
@@ -712,6 +722,13 @@ namespace QuantApp.Server.Realtime.Quant
                                 {
                                     Console.WriteLine(e);
                                 }
+                            }
+
+                            else if(RTDMessageFunction != null)
+                            {
+                                var mess = RTDMessageFunction(message_string);
+                                if(mess != null)
+                                    Share(session, mess.Item1, mess.Item2);
                             }
                         }
 

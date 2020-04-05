@@ -318,9 +318,9 @@ namespace QuantApp.Server.Quant
                 /// QuantSpecific END
                 
                 if(!sslFlag)
-                    QuantApp.Server.Program.Init(new string[]{"--urls", "http://*:80"}, new Realtime.Quant.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.Quant.RTDSocketMiddleware>));
+                    QuantApp.Server.Program.Init(new string[]{"--urls", "http://*:80"}, new Realtime.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.RTDSocketMiddleware>));
                 else
-                    QuantApp.Server.Program.Init(args, new Realtime.Quant.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.Quant.RTDSocketMiddleware>));
+                    QuantApp.Server.Program.Init(args, new Realtime.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.RTDSocketMiddleware>));
                 
             
             
