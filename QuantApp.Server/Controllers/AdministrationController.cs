@@ -64,6 +64,23 @@ namespace QuantApp.Server.Controllers
             return Ok(new { Data = "error" });
         }
 
+        public ActionResult GetPermission(string userid, string groupid)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userid);
+            QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
+            if(group == null)
+                group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_WorkSpace",""));
+
+            if(user != null)
+                return Ok(new { Data = group.Permission(user) });
+
+            return Ok(new { Data = AccessType.Denied });
+        }
+
         public ActionResult AddPermission(string groupid, string email, int accessType)
         {
             if(email == null)
