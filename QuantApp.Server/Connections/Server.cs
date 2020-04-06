@@ -119,30 +119,30 @@ namespace QuantApp.Server
             {
                 Console.WriteLine("Exception: {0}", ex);
             }
-            finally
-            {
-                Console.WriteLine();
+            // finally
+            // {
+            //     Console.WriteLine();
 
-                lock (consoleLock)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("WebSocket closed @ " + DateTime.Now);
-                    Console.ResetColor();
-                }
+            //     lock (consoleLock)
+            //     {
+            //         Console.ForegroundColor = ConsoleColor.Red;
+            //         Console.WriteLine("WebSocket closed @ " + DateTime.Now);
+            //         Console.ResetColor();
+            //     }
 
-                Console.WriteLine("Attempting to reconnect...");
-                System.Threading.Thread.Sleep(25 * 1000);
-                Connect();//uri);
-                System.Threading.Thread.Sleep(1000);
-                foreach(var wsp in QuantApp.Engine.Utils.ActiveWorkSpaceList)
-                {
-                    var mess = new {
-                        Type = QuantApp.Kernel.RTDMessage.MessageType.RegisterWorkspace,
-                        Content= wsp.ID
-                    };
-                    Send(JsonConvert.SerializeObject(mess));
-                }
-            }
+            //     Console.WriteLine("Attempting to reconnect...");
+            //     System.Threading.Thread.Sleep(25 * 1000);
+            //     Connect();//uri);
+            //     System.Threading.Thread.Sleep(1000);
+            //     foreach(var wsp in QuantApp.Engine.Utils.ActiveWorkSpaceList)
+            //     {
+            //         var mess = new {
+            //             Type = QuantApp.Kernel.RTDMessage.MessageType.RegisterWorkspace,
+            //             Content= wsp.ID
+            //         };
+            //         Send(JsonConvert.SerializeObject(mess));
+            //     }
+            // }
         }
 
         private static object sendLock = new object();

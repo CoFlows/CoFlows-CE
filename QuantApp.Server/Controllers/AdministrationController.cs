@@ -101,28 +101,21 @@ namespace QuantApp.Server.Controllers
             QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
             QuantApp.Kernel.Group role = QuantApp.Kernel.Group.FindGroup(groupid);
 
+            if(role == null)
+                return null;
+
             List<Group> sgroups = role.SubGroups(aggregated);
-
-            // Console.WriteLine("---+++++++++- " + role + " " + sgroups + " " + sgroups.Count);
-
             List<object> jres = new List<object>();
 
             foreach (Group group in sgroups)
             {
-                // AccessType ac = group.Permission(null, user);
-                // Console.WriteLine("---- " + ac + " " + user + " " + group);
-                // if (ac != AccessType.Denied)
+                jres.Add(new
                 {
-                    jres.Add(new
-                    {
-                        ID = group.ID,
-                        Name = group.Name,
-                        Description = group.Description,
-                        // Permission = ac.ToString(),
-                    });
-                }
-                
-
+                    ID = group.ID,
+                    Name = group.Name,
+                    Description = group.Description,
+                    // Permission = ac.ToString(),
+                });
             }
 
             return Ok(jres);
