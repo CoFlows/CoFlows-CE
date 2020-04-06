@@ -75,6 +75,22 @@ namespace QuantApp.Kernel
             }
         }
 
+        public delegate AccessType PermissionContextDelegate(string userID, string groupID);
+        public static PermissionContextDelegate PermissionContextFunction = null;
+        public static AccessType PermissionContext(string groupID)
+        {
+            if(PermissionContextFunction == null)
+            {
+                var group = QuantApp.Kernel.Group.FindGroup(groupID);
+                if(group == null)
+                    return AccessType.Denied;
+
+                return group.PermissionContext();
+            }
+            
+            return PermissionContextFunction(ContextUser.ID, groupID);
+        }
+
 
         public static UserData ContextUserBySecret(string secret)
         {
