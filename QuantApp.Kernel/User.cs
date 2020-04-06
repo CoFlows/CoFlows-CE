@@ -75,6 +75,11 @@ namespace QuantApp.Kernel
             }
         }
 
+        public static UserData GetContextUser()
+        {
+            return ContextUser;
+        }
+
         public delegate AccessType PermissionContextDelegate(string userID, string groupID);
         public static PermissionContextDelegate PermissionContextFunction = null;
         public static AccessType PermissionContext(string groupID)
