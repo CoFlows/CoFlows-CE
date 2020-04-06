@@ -25,7 +25,6 @@
     <Content Include="fic.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
 
     <Compile Remove="Realtime\RTDSocketMiddleware.cs" />
-
   </ItemGroup>
 
   <ItemGroup>    
