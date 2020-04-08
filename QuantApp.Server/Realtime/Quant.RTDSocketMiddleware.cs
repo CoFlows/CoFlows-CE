@@ -68,30 +68,42 @@ namespace QuantApp.Server.Realtime
             {
                 if (!context.WebSockets.IsWebSocketRequest)
                 {
-                    await _next.Invoke(context);
+                    try
+                    {
+                        await _next.Invoke(context);
+                    }
+                    catch{}
                     return;
                 }
 
                 QuantApp.Kernel.User quser = null;
 
-                string key = context.Request.Cookies["coflows"]; 
-                if(key != null)
+                if(!context.User.Identity.IsAuthenticated)
                 {
-                    quser = QuantApp.Kernel.User.FindUserBySecret(key);
-                    if(quser == null)
+                    string cokey = context.Request.Cookies["coflows"]; 
+                    if(cokey != null)
+                    {
+                        if(QuantApp.Server.Controllers.AccountController.sessionKeys.ContainsKey(cokey))
+                        {
+                            quser = QuantApp.Kernel.User.FindUserBySecret(QuantApp.Server.Controllers.AccountController.sessionKeys[cokey]);
+                            if(quser == null)
+                            {
+                                await _next.Invoke(context);
+                                return;
+                            }                    
+                        }
+                        else
+                        {
+                            await _next.Invoke(context);
+                            return;
+                        }
+                    }
+                    else
                     {
                         await _next.Invoke(context);
                         return;
                     }
                 }
-                else
-                {
-                    // Console.WriteLine("WEBSOCKET NOT AUTHENTICATED");
-                    await _next.Invoke(context);
-                    return;
-                }
-
-
 
                 var queryString = context.Request.QueryString;
                 var path = context.Request.Path.ToString() + queryString;
@@ -105,17 +117,11 @@ namespace QuantApp.Server.Realtime
                     {
                         try
                         {
-
-                            // Console.WriteLine("KEY(" + head.Key + "): " + val.Replace("%7C", "|"));
                             headers.Add(new KeyValuePair<string, string>(head.Key, val.Replace("%7C", "|")));
                         }
                         catch{}
                     }
                 }
-
-                // var socket = await context.WebSockets.AcceptWebSocketAsync();
-                // var id = _socketManager.AddSocket(socket);
-                // var address = context.Connection.RemoteIpAddress;
 
                 if(path.StartsWith("/lab/"))
                 {
