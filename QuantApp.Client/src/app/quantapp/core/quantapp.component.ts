@@ -288,15 +288,21 @@ export class QuantAppComponent implements  CanActivate  {
     } 
     
     logout(navigate): void {
-        // console.log('logout')
-        this.quser = null
-        this.header = null
-        this.quser = null
-        localStorage.setItem('CoFlows-QuantAppJWT', null)
-        if(navigate){
-            this.router.navigate ( [ '/authentication/signin' ] )
-            location.reload()
-        }
+
+        this.http.get(this.quantapp_server + 'account/logout', { headers: this.header })
+        .toPromise().then(response => {  
+            this.quser = response;
+
+            this.quser = null
+            this.header = null
+            this.quser = null
+            localStorage.setItem('CoFlows-QuantAppJWT', null)
+            if(navigate){
+                this.router.navigate ( [ '/authentication/signin' ] )
+                location.reload()
+            }
+        });
+
     } 
 
     changePassword(oldPassword: string, newPassword: string, success, fail): void {

@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 using System.Security.Claims;
@@ -57,6 +58,17 @@ namespace QuantApp.Server.Controllers
         [HttpGet, HttpPost]
         public async Task<IActionResult> Logout()
         {
+            string key = Request.Cookies["coflows"]; 
+            if(key != null)
+            {
+                var outk = "";
+                if(sessionKeys.ContainsKey(key))
+                    sessionKeys.Remove(key, out outk);
+            }
+
+            Response.Cookies.Delete("coflows");  
+            Response.Cookies.Append("coflows", "", new CookieOptions() { Expires = DateTime.Now.AddMonths(-24) });  
+
             try
             {
                 string userName = this.User.QID();
@@ -71,10 +83,12 @@ namespace QuantApp.Server.Controllers
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
 
-            Response.Cookies.Delete("coflows");  
+            
 
             return Ok();
         }
+
+        public static ConcurrentDictionary<string, string> sessionKeys = new ConcurrentDictionary<string, string>();
 
         [HttpPost, AllowAnonymous]
         public async Task<ActionResult> Login([FromBody] SecureLogOnViewModel model)
@@ -133,13 +147,16 @@ namespace QuantApp.Server.Controllers
                     user.Secret = secret_key;
                 }
 
-                Response.Cookies.Append("coflows", user.Secret, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });  
+                var sessionKey = System.Guid.NewGuid().ToString();
+                sessionKeys.TryAdd(sessionKey, user.Secret);
+                Response.Cookies.Append("coflows", sessionKey, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });
 
                 return Ok(new
                 {
                     User = user.ToUserData(),
                     token = new JwtSecurityTokenHandler().WriteToken(token),
-                    Secret = user.Secret
+                    Secret = user.Secret,
+                    Session = sessionKey
                 });
             }
             return BadRequest("Could not verify user");
@@ -171,7 +188,9 @@ namespace QuantApp.Server.Controllers
                             user.Secret = _secrets[model.EncodedSecret];
                     }
 
-                    Response.Cookies.Append("coflows", user.Secret, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });  
+                    var sessionKey = System.Guid.NewGuid().ToString();
+                    sessionKeys.TryAdd(sessionKey, user.Secret);
+                    Response.Cookies.Append("coflows", sessionKey, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });  
 
                     var claims = new[]
                         {
@@ -202,7 +221,8 @@ namespace QuantApp.Server.Controllers
                     {
                         User = quser.ToUserData(),
                         token = new JwtSecurityTokenHandler().WriteToken(token),
-                        Secret = quser.Secret
+                        Secret = quser.Secret,
+                        Session = sessionKey
                     });
                 }
                 else
@@ -258,7 +278,7 @@ namespace QuantApp.Server.Controllers
 
                 secret = quser.Secret;
 
-                Response.Cookies.Append("coflows", quser.Secret, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });  
+                // Response.Cookies.Append("coflows", quser.Secret, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });  
 
                 var appCookie = Request.Cookies["QuantAppProfile"];
 
