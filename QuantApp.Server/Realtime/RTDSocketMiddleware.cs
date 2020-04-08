@@ -91,17 +91,9 @@ namespace QuantApp.Server.Realtime
                             await _next.Invoke(context);
                             return;
                         }
-                        // quser = QuantApp.Kernel.User.FindUserBySecret(key);
-
-                        // if(quser == null)
-                        // {
-                        //     await _next.Invoke(context);
-                        //     return;
-                        // }
                     }
                     else
                     {
-                        // Console.WriteLine("WEBSOCKET NOT AUTHENTICATED");
                         await _next.Invoke(context);
                         return;
                     }
@@ -371,28 +363,6 @@ namespace QuantApp.Server.Realtime
                                     Console.WriteLine("Subsribe Exception: " + e + " " + skey);
                                 }
                             }
-                            // else if (message.Type == QuantApp.Kernel.RTDMessage.MessageType.RegisterWorkspace)
-                            // {
-                            //     try
-                            //     {
-                                    
-                            //         string workspace = message.Content.ToString();
-                                    
-                            //         Program.AddServicedWorkSpaces(workspace);
-
-                            //         if (!registered_id_workspaces.ContainsKey(skey))
-                            //             registered_id_workspaces.TryAdd(skey, workspace);
-
-                            //         if (!registered_workspaces_id.ContainsKey(workspace))
-                            //             registered_workspaces_id.TryAdd(workspace, skey);
-
-                            //         Console.WriteLine("Register: " + skey + " -- " + workspace);
-                            //     }
-                            //     catch (Exception e)
-                            //     {
-                            //         Console.WriteLine("Register Exception: " + e + " " + skey);
-                            //     }
-                            // }
 
                             else if (message.Type == QuantApp.Kernel.RTDMessage.MessageType.SaveM)
                             {
