@@ -84,9 +84,9 @@ namespace QuantApp.Server
                 if(_token != null)
                     webSocket.Options.SetRequestHeader("Authorization", "Bearer " + _token);
 
-                webSocket.Options.Cookies = new CookieContainer();
+                // webSocket.Options.Cookies = new CookieContainer();
                 
-                webSocket.Options.Cookies.Add(new Cookie("coflows", _code){ Domain = this.server });
+                webSocket.Options.Cookies.Add(new Cookie("coflows", _session){ Domain = this.server });
 
                 var uriObject = this.wsQuantAppURL;
                 await webSocket.ConnectAsync(uriObject, CancellationToken.None);
@@ -117,7 +117,7 @@ namespace QuantApp.Server
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception: {0}", ex);
+                // Console.WriteLine("Exception: {0}", ex);
             }
             // finally
             // {

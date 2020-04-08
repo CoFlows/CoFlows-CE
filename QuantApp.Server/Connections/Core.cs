@@ -73,6 +73,7 @@ namespace QuantApp.Core
         public string token { get; set; }
 
         public string Secret { get; set; }
+        public string Session { get; set; }
     }
 
     public class Connection
@@ -356,6 +357,7 @@ namespace QuantApp.Core
         protected string _username = null;
         protected string _password = null;
         protected string _code = null;
+        protected string _session = null;
 
         public Boolean Login(string username, string password, string file = null)
         {
@@ -373,6 +375,8 @@ namespace QuantApp.Core
             _lastUpdate = timeKey;
 
             _token = logonRes.token;
+            _code = logonRes.Secret;
+            _session = logonRes.Session;
 
             if(file != null)
                 System.IO.File.WriteAllText(file, logonRes.Secret);
@@ -396,6 +400,7 @@ namespace QuantApp.Core
             _lastUpdate = timeKey;
 
             _token = logonRes.token;
+            _session = logonRes.Session;
 
             QuantApp.Kernel.User.ContextUser = logonRes.User;
 
