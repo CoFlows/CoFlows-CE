@@ -1529,10 +1529,19 @@ namespace QuantApp.Server.Controllers
                         {
                             var item = wb_res.FirstOrDefault() as CodeData;
                             codes.Add(new Tuple<string, string>(item.Name, item.Code));
+                            Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
+                            var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
                         }
-
-                        Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
-                        var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
+                        else
+                        {
+                            Console.WriteLine("DASH ERROR Workbook not found: " + qid);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("DASH ERROR Workspace not found: " + wid);
+                        return;
                     }
                 }
             }
@@ -1714,9 +1723,19 @@ namespace QuantApp.Server.Controllers
                         {
                             var item = wb_res.FirstOrDefault() as CodeData;
                             codes.Add(new Tuple<string, string>(item.Name, item.Code));
+                            Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
+                            var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
                         }
-                        Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
-                        var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
+                        else
+                        {
+                            Console.WriteLine("DASH ERROR Workbook not found: " + qid);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("DASH ERROR Workspace not found: " + wid);
+                        return;
                     }
                 }
             }
