@@ -2392,11 +2392,11 @@ module Code =
 
                             Bins =
                                 pkg.Bins
-                                |> Seq.map(fun entry -> { entry with Content = entry.Name })
+                                |> Seq.map(fun entry -> { entry with Content = "Bins/" + entry.Name })
 
                             Files =
                                 pkg.Files
-                                |> Seq.map(fun entry -> { entry with Content = entry.Name })
+                                |> Seq.map(fun entry -> { entry with Content = "Files/" + entry.Name })
 
                             ReadMe = "README.md"
                     }
