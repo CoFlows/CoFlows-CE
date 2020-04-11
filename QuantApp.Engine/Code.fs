@@ -2132,6 +2132,9 @@ module Code =
                     }
 
                 let work_books = pkg_id + "--Workbook" |> M.Base
+                work_books.[fun _ -> true] |> Seq.iter(work_books.Remove)
+                work_books.Save()
+                
                 pkg_content.Queries
                 |> Seq.toList
                 |> List.iter(fun entry ->
@@ -2392,11 +2395,11 @@ module Code =
 
                             Bins =
                                 pkg.Bins
-                                |> Seq.map(fun entry -> { entry with Content = entry.Name })
+                                |> Seq.map(fun entry -> { entry with Content = "Bins/" + entry.Name })
 
                             Files =
                                 pkg.Files
-                                |> Seq.map(fun entry -> { entry with Content = entry.Name })
+                                |> Seq.map(fun entry -> { entry with Content = "Files/" + entry.Name })
 
                             ReadMe = "README.md"
                     }

@@ -44,7 +44,8 @@ export class QuantAppComponent implements  CanActivate  {
         
         this.msService.onClose(event => {
             console.log('connection closed')
-            this.checkLogin(this.router.url)
+            // this.checkLogin(this.router.url)
+            this.logout(true)
         });
         
         interval(10000)

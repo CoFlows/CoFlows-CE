@@ -1483,6 +1483,7 @@ namespace QuantApp.Server.Controllers
     
         private static System.Collections.Concurrent.ConcurrentDictionary<string, int> DashDB = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
         private static int lastPort = 10000;
+        public readonly static object objLockDashGet = new object();
 
         [AllowAnonymous,HttpGet("/dash/{wid}/{qid}/{**url}")]
         public async Task DashGet(string wid, string qid, string url = "")
@@ -1504,37 +1505,53 @@ namespace QuantApp.Server.Controllers
 
             var dashID = wid + qid;
             var port = 0;
-            if(DashDB.ContainsKey(dashID))
-                port = DashDB[dashID];
-            else
+            lock(objLockDashGet)
             {
-                lastPort++;
-                port = lastPort;
-                DashDB.TryAdd(dashID, port);
-            }
-
-            var m = M.Base(wid);
-            var res = m[x => true];
-            if(res.Count > 0)
-            {
-                var workSpace = res.FirstOrDefault() as WorkSpace;
-                var codes = new List<Tuple<string, string>>();
-                
-                var wb = M.Base(wid + "--Workbook");
-                var wb_res = wb[x => M.V<string>(x, "ID") == qid];
-                if(wb_res.Count > 0)
+                if(DashDB.ContainsKey(dashID))
+                    port = DashDB[dashID];
+                else
                 {
-                    var item = wb_res.FirstOrDefault() as CodeData;
-                    codes.Add(new Tuple<string, string>(item.Name, item.Code));
-                }
+                    lastPort++;
+                    port = lastPort;
+                    DashDB.TryAdd(dashID, port);
+                
 
-                var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
+                    var m = M.Base(wid);
+                    var res = m[x => true];
+                    if(res.Count > 0)
+                    {
+                        var workSpace = res.FirstOrDefault() as WorkSpace;
+                        var codes = new List<Tuple<string, string>>();
+                        
+                        var wb = M.Base(wid + "--Workbook");
+                        var wb_res = wb[x => M.V<string>(x, "ID") == qid];
+                        if(wb_res.Count > 0)
+                        {
+                            var item = wb_res.FirstOrDefault() as CodeData;
+                            codes.Add(new Tuple<string, string>(item.Name, item.Code));
+                            Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
+                            var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
+                        }
+                        else
+                        {
+                            Console.WriteLine("DASH ERROR Workbook not found: " + qid);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("DASH ERROR Workspace not found: " + wid);
+                        return;
+                    }
+                }
             }
-            
-            
+
             if(url == null) url = "";
             var queryString = Request.QueryString;
-            url = "/dash/" + wid + "/" + qid + "/" + url + queryString.Value;
+            if(queryString != null && queryString.HasValue)
+                url = "/dash/" + wid + "/" + qid + "/" + url + queryString.Value;
+            else
+                url = "/dash/" + wid + "/" + qid + "/" + url;
 
             var headers = new List<KeyValuePair<string, string>>();
 
@@ -1657,6 +1674,7 @@ namespace QuantApp.Server.Controllers
             }
         }
 
+        public readonly static object objLockDashPost = new object();
         [AllowAnonymous,HttpPost("/dash/{wid}/{qid}/{**url}")]
         public async Task DashPost(string wid, string qid, string url = "")
         {
@@ -1675,38 +1693,59 @@ namespace QuantApp.Server.Controllers
 
             // }
 
+            
+
             var dashID = wid + qid;
             var port = 0;
-            if(DashDB.ContainsKey(dashID))
-                port = DashDB[dashID];
-            else
+            lock(objLockDashPost)
             {
-                lastPort++;
-                port = lastPort;
-                DashDB.TryAdd(dashID, port);
+                if(DashDB.ContainsKey(dashID))
+                    port = DashDB[dashID];
+                else
+                {
+                    lastPort++;
+                    port = lastPort;
+                    DashDB.TryAdd(dashID, port);
+
+                    
+                    
+
+                    var m = M.Base(wid);
+                    var res = m[x => true];
+                    if(res.Count > 0)
+                    {
+                        var workSpace = res.FirstOrDefault() as WorkSpace;
+                        var codes = new List<Tuple<string, string>>();
+                        
+                        var wb = M.Base(wid + "--Workbook");
+                        var wb_res = wb[x => M.V<string>(x, "ID") == qid];
+                        if(wb_res.Count > 0)
+                        {
+                            var item = wb_res.FirstOrDefault() as CodeData;
+                            codes.Add(new Tuple<string, string>(item.Name, item.Code));
+                            Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
+                            var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
+                        }
+                        else
+                        {
+                            Console.WriteLine("DASH ERROR Workbook not found: " + qid);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("DASH ERROR Workspace not found: " + wid);
+                        return;
+                    }
+                }
             }
 
             if(url == null) url = "";
             var queryString = Request.QueryString;
-            url = "/dash/" + wid + "/" + qid + "/" + url + queryString.Value;
-            
-
-            var m = M.Base(wid);
-            var res = m[x => true];
-            if(res.Count > 0)
-            {
-                var workSpace = res.FirstOrDefault() as WorkSpace;
-                var codes = new List<Tuple<string, string>>();
-                
-                var wb = M.Base(wid + "--Workbook");
-                var wb_res = wb[x => M.V<string>(x, "ID") == qid];
-                if(wb_res.Count > 0)
-                {
-                    var item = wb_res.FirstOrDefault() as CodeData;
-                    codes.Add(new Tuple<string, string>(item.Name, item.Code));
-                }
-                var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
-            }
+            if(queryString != null && queryString.HasValue)
+                url = "/dash/" + wid + "/" + qid + "/" + url + queryString.Value;
+            else
+                url = "/dash/" + wid + "/" + qid + "/" + url;
 
             var headers = new List<KeyValuePair<string, string>>();
 
