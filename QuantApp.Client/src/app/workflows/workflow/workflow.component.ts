@@ -33,11 +33,11 @@ export class WorkflowComponent {
     rows = []
     activeChoices = [true, false];
 
-    functions = []
+    agents = []
     workbooks = []
     
     workbooks_filtered = []
-    functions_filtered = []
+    agents_filtered = []
     
 
     wid = ""
@@ -74,7 +74,7 @@ export class WorkflowComponent {
 
     selectWBFunc(item){
         this.selectedWB = JSON.parse(item)
-        this.functions_filtered = []
+        this.agents_filtered = []
         this.selectedFunc = {Name: "Workbook", ID: "Workbook"}
         this.tabBeforeChange(4)
     }
@@ -120,7 +120,7 @@ export class WorkflowComponent {
             this.users_filtered = []
             this.search = 'Loading users...'
 
-            let wiid = this.wid + "--Workbook"
+            let wiid = this.wid + "--Queries"
 
             // console.log(quantapp)
 
@@ -154,9 +154,9 @@ export class WorkflowComponent {
                     i++
                 })
 
-                this.functions = []
-                data[0].Value.Functions.forEach(x => {
-                    //let fid = data.Functions[0] + "-F-MetaData";
+                this.agents = []
+                data[0].Value.Agents.forEach(x => {
+                    //let fid = data.Agents[0] + "-F-MetaData";
                     let fid = x + "-F-MetaData";
                     // console.log(fid)
                     this.quantapp.LinkAction(fid,
@@ -164,33 +164,33 @@ export class WorkflowComponent {
                             // console.log(data)
                             
                             data.forEach(x => {
-                                this.functions.push(x.Value)
+                                this.agents.push(x.Value)
                             })
                         },
                         data => { //Add
                             console.log("add", data)
-                            this.functions.push(data)
-                            this.functions = [...  this.functions]
+                            this.agents.push(data)
+                            this.agents = [...  this.agents]
                         },
                         data => { //Exchange
                             console.log("exchange",data)
-                            let id = this.functions.findIndex(x => x.ID == data.Value.ID)
+                            let id = this.agents.findIndex(x => x.ID == data.Value.ID)
                             
                             if(id > -1){
-                                this.functions[id] = data.Value
+                                this.agents[id] = data.Value
                             }
-                            this.functions = [...  this.functions]
+                            this.agents = [...  this.agents]
                             
                         },
                         data => { //Remove
                             //console.log("exchange",data)
-                            let id = this.functions.findIndex(x => x.ID == data.Value.ID)
+                            let id = this.agents.findIndex(x => x.ID == data.Value.ID)
                             
                             if(id > -1){
-                                this.functions.splice(id, 1)
-                                //this.functions[id] = data
+                                this.agents.splice(id, 1)
+                                //this.agents[id] = data
                             }
-                            this.functions = [...  this.functions]
+                            this.agents = [...  this.agents]
                         }
                     );
                 });
@@ -265,9 +265,9 @@ export class WorkflowComponent {
                     i++
                 })
 
-                this.functions = []
-                data.Value.Functions.forEach(x => {
-                    //let fid = data.Functions[0] + "-F-MetaData";
+                this.agents = []
+                data.Value.Agents.forEach(x => {
+                    //let fid = data.Agents[0] + "-F-MetaData";
                     let fid = x + "-F-MetaData";
                     // console.log(fid)
                     this.quantapp.LinkAction(fid,
@@ -275,33 +275,33 @@ export class WorkflowComponent {
                             console.log(data)
                             
                             data.forEach(x => {
-                                this.functions.push(x.Value)
+                                this.agents.push(x.Value)
                             })
                         },
                         data => { //Add
                             console.log("add", data)
-                            this.functions.push(data)
-                            this.functions = [...  this.functions]
+                            this.agents.push(data)
+                            this.agents = [...  this.agents]
                         },
                         data => { //Exchange
                             console.log("exchange",data)
-                            let id = this.functions.findIndex(x => x.ID = data.Value.ID)
+                            let id = this.agents.findIndex(x => x.ID = data.Value.ID)
                             
                             if(id > -1){
-                                this.functions[id] = data.Value
+                                this.agents[id] = data.Value
                             }
-                            this.functions = [...  this.functions]
+                            this.agents = [...  this.agents]
                             
                         },
                         data => { //Remove
                             //console.log("exchange",data)
-                            let id = this.functions.findIndex(x => x.ID = data.Value.ID)
+                            let id = this.agents.findIndex(x => x.ID = data.Value.ID)
                             
                             if(id > -1){
-                                this.functions.splice(id, 1)
-                                //this.functions[id] = data
+                                this.agents.splice(id, 1)
+                                //this.agents[id] = data
                             }
-                            this.functions = [...  this.functions]
+                            this.agents = [...  this.agents]
                         }
                     );
                 });
@@ -764,7 +764,7 @@ export class WorkflowComponent {
 
         //             let map = new Map<string, Map<string, object>>()
         //             let names = []
-        //             this.functions_filtered = []
+        //             this.agents_filtered = []
         //             data.forEach(x => {
                         
         //                 if(!map[x.WorkbookID]){
@@ -774,7 +774,7 @@ export class WorkflowComponent {
 
         //                 if(!(map[x.WorkbookID][x.FunctionID])){
         //                     if(this.selectedWB.ID == x.WorkbookID && x.FunctionID != "" && x.WorkbookID != ""){
-        //                         this.functions_filtered.push({ Value: {Name : x.FunctionID, ID: x.FunctionID }})
+        //                         this.agents_filtered.push({ Value: {Name : x.FunctionID, ID: x.FunctionID }})
         //                     }
 
         //                     map[x.WorkbookID][x.FunctionID] = []
@@ -791,8 +791,8 @@ export class WorkflowComponent {
         //                     }
         //                 })
         //             }
-        //             this.functions_filtered.push({ Value: {Name : "Workbook", ID: "Workbook" }})
-        //             // console.log(this.functions_filtered)
+        //             this.agents_filtered.push({ Value: {Name : "Workbook", ID: "Workbook" }})
+        //             // console.log(this.agents_filtered)
 
         //             // console.log(this.selectedFunc.ID)
 
@@ -1149,7 +1149,7 @@ export class WorkflowComponent {
             Name = "Hello F# Agent"
             Description = Some("Hello F# Analytics Agent Skeleton")
     
-            MID = None //ID of MultiVerse entry which this functions is linked to
+            MID = None //ID of MultiVerse entry which this agents is linked to
             Load = Some(Utils.SetFunction(
                     "Load", 
                     Load(fun data ->

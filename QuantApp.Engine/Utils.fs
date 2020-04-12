@@ -145,7 +145,7 @@ type Workflow =
         Name : string
         Strategies : int list
         Code : (string * string) list
-        Functions : string list
+        Agents : string list
         Permissions : Permission list
         NuGets : NuGetPackage list
         Pips : PipPackage list
@@ -166,7 +166,7 @@ type Job = delegate of DateTime * string -> unit
 
 
 /// <summary>
-/// Utility module with a set of functions used by all strategies in this namespace
+/// Utility module with a set of Agents used by all strategies in this namespace
 /// </summary>
 module Utils =
 

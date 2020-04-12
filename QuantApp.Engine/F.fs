@@ -56,24 +56,6 @@ type FunctionType =
         Data : string
     }
 
-/// <summary>
-/// Class representing a strategy that optimises a portfolio in a multistep process:
-/// 1) Target volatility for each underlying asset. This step sets an equal volatility weight to all assets.
-/// 2) Concentration risk and Information Ratio management. This step mitigates the risk of an over exposure to a set of highly correlated assets. 
-///    Furthermore, a tilt in the weight is also implemented based on the information ratios for each asset.
-///    This entire step is achieved through the implementation of a Mean-Variance optimisation where all volatilities are equal to 1.0, the expected returns are normalised and transformed to information ratios.
-/// 3) Target volatility for the entire portfolio. After steps 1 and 2, the portfolio will probably have a lower risk level than the target due to diversification.
-///    This step adjusts the strategy's overall exposure in order to achieve the desired target volatility for the entire portfolio.
-/// 4) Maximum individual exposure to each asset is implemented
-/// 5) Maximum exposure to the entire portfolio is implemented
-/// 6) Deleverage the portfolio if the portfolio's Value at Risk exceeds a given level. The exposure is changed linearly such that the new VaR given by the new weights is the limit VaR.
-///    The implemented VaR measure is the UCITS calculation based on the 99 percentile of the distribution of the 20 day rolling return for the entire portfolio where each return is based on the current weights.
-/// 7) Only rebalance if the notional exposure to a position changes by more than a given threshold.
-/// The class also allows developers to specify a number of custom functions:
-///     a) Risk: risk measure for each asset.
-///     b) Exposure: defines if the portfolio should have a long (1.0) / short (-1.0) or neutral (0.0) exposure to a given asset.
-///     c) InformationRatio: measure of risk-neutral expectation for each asset. This affectes the MV optimisation of the concentration risk management.
-/// </summary>
 type F = 
     val ID : string
     val mutable private _workflowID : string

@@ -247,7 +247,7 @@ namespace CoFlows.Server.Realtime
                     {
                         var wid = WebSocketListner.registered_id_workflows[id];
                         var wsp_ais = QuantApp.Kernel.M.Base(wid)[x => true].FirstOrDefault() as Workflow;
-                        foreach(var fid in wsp_ais.Functions)
+                        foreach(var fid in wsp_ais.Agents)
                         {
                             var f = F.Find(fid).Value;
                             f.RemoteStop();

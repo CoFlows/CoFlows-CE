@@ -1775,7 +1775,7 @@ module Code =
                         ""|>Console.WriteLine
                         ""|>Console.WriteLine
                         
-                        let work_books = pkgID + "--Workbook" |> M.Base
+                        let work_books = pkgID + "--Queries" |> M.Base
                         let wb_res = work_books.[fun x -> M.V<string>(x, "Name") = name]
                         if wb_res.Count > 0 then
                             let item = wb_res.[0] :?> CodeData
@@ -2107,7 +2107,7 @@ module Code =
                         ID = pkg_id
                         Name = pkg_content.Name
                         Strategies = []
-                        Functions = 
+                        Agents = 
                             pkg_content.Agents
                             |> Seq.toList
                             |> List.map(fun entry -> 
@@ -2182,7 +2182,7 @@ module Code =
                 files_m.Save()
                 bins_m.Save()
 
-                let work_books = pkg_id + "--Workbook" |> M.Base
+                let work_books = pkg_id + "--Queries" |> M.Base
                 work_books.[fun _ -> true] |> Seq.iter(work_books.Remove)
                 work_books.Save()
                 
@@ -2246,7 +2246,7 @@ module Code =
                         ID = pkg_id
                         Name = pkg_content.Name
                         Strategies = []
-                        Functions = 
+                        Agents = 
                             pkg_content.Agents
                             |> Seq.toList
                             |> List.map(fun entry -> 
@@ -2314,7 +2314,7 @@ module Code =
                         Container = pkg_content.Container
                     }
 
-                let work_books = M.Base(pkg_id + "--Workbook")
+                let work_books = M.Base(pkg_id + "--Queries")
                 pkg_content.Queries
                 |> Seq.toList
                 |> List.iter(fun entry ->
@@ -2342,7 +2342,7 @@ module Code =
                 ws
 
             if startAgents then
-                ws.Functions |> List.iter(fun id -> F.Find(id).Value.Start())
+                ws.Agents |> List.iter(fun id -> F.Find(id).Value.Start())
 
         build              
     
@@ -2351,7 +2351,7 @@ module Code =
         let pkg_id = wsp.ID
 
         let queries =
-            let work_books = M.Base(pkg_id + "--Workbook")
+            let work_books = M.Base(pkg_id + "--Queries")
             if work_books |> isNull |> not then
                 work_books.[fun _ -> true] 
                 |> Seq.map(
@@ -2367,7 +2367,7 @@ module Code =
                 null
 
         let agents = 
-            wsp.Functions
+            wsp.Agents
             |> List.map(fun id -> 
                 let m = id+ "-F-MetaData" |> M.Base
 

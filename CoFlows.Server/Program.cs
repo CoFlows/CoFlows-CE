@@ -749,7 +749,7 @@ namespace CoFlows.Server
                         // QuantApp.Engine.Utils.ActiveWorkflowList.Add(wsp);
                         // _wspServicedList.Add(id);
 
-                        foreach(var fid in wsp.Functions)
+                        foreach(var fid in wsp.Agents)
                         {
                             var cfid = fid.Replace("$WID$",id);
                             var f = F.Find(cfid).Value;
@@ -806,7 +806,7 @@ namespace CoFlows.Server
             {
             
                 _wspServicedList.RemoveAll(x => x == id);
-                // foreach(var fid in wsp.Functions)
+                // foreach(var fid in wsp.Agents)
                 // {
                 //     var cfid = fid.Replace("$WID$",id);
 

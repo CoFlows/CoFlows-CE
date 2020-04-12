@@ -1,6 +1,7 @@
-import {Component} from '@angular/core';
-
+import { Component, ViewChild } from '@angular/core';
 import { QuantAppComponent } from '../../quantapp/core/quantapp.component';
+import { QAWorkbookComponent } from '../../quantapp/workbook/qaworkbook.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ActivatedRoute } from '@angular/router';
 
@@ -10,29 +11,27 @@ import 'codemirror/mode/python/python.js';
 import 'codemirror/mode/vb/vb.js';
 import 'codemirror/mode/javascript/javascript.js';
 
-import 'codemirror/addon/fold/foldcode.js';
-import 'codemirror/addon/fold/foldgutter.js';
-
-import 'codemirror/addon/fold/brace-fold.js';
-import 'codemirror/addon/fold/comment-fold.js';
-import 'codemirror/addon/fold/indent-fold.js';
-import 'codemirror/addon/fold/markdown-fold.js';
-import 'codemirror/addon/fold/xml-fold.js';
 
 import * as CodeMirror from 'codemirror/lib/codemirror.js';
 
+
+import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
+
+
 @Component({
-  selector: 'function-view',
+  selector: 'code-test',
   styles: [`
   :host >>> .CodeMirror {
     height: auto;
   }
   `],
-  templateUrl: 'function.component.html'
+  templateUrl: 'query.component.html'
 })
-export class FunctionComponent{
-    
-    code = '...';
+export class QueryComponent {
+
+
+    selectedWB = this.cfquery.templaceWB
+
     editorOptionsFs = {
         lineWrapping: false,
         lineNumbers: true,
@@ -50,7 +49,7 @@ export class FunctionComponent{
                     return CodeMirror.Pass;
                 }
                 var spacesPerTab = cm.getOption("indentUnit");
-                console.log(spacesPerTab)
+                // console.log(spacesPerTab)
                 var spacesToInsert = spacesPerTab - (cm.doc.getCursor("start").ch % spacesPerTab);    
                 var spaces = Array(spacesToInsert + 1).join(" ");
                 cm.replaceSelection(spaces, "end", "+input");
@@ -76,7 +75,7 @@ export class FunctionComponent{
                     return CodeMirror.Pass;
                 }
                 var spacesPerTab = cm.getOption("indentUnit");
-                console.log(spacesPerTab)
+                // console.log(spacesPerTab)
                 var spacesToInsert = spacesPerTab - (cm.doc.getCursor("start").ch % spacesPerTab);    
                 var spaces = Array(spacesToInsert + 1).join(" ");
                 cm.replaceSelection(spaces, "end", "+input");
@@ -154,7 +153,7 @@ export class FunctionComponent{
                     return CodeMirror.Pass;
                 }
                 var spacesPerTab = cm.getOption("indentUnit");
-                console.log(spacesPerTab)
+                // console.log(spacesPerTab)
                 var spacesToInsert = spacesPerTab - (cm.doc.getCursor("start").ch % spacesPerTab);    
                 var spaces = Array(spacesToInsert + 1).join(" ");
                 cm.replaceSelection(spaces, "end", "+input");
@@ -180,7 +179,7 @@ export class FunctionComponent{
                     return CodeMirror.Pass;
                 }
                 var spacesPerTab = cm.getOption("indentUnit");
-                console.log(spacesPerTab)
+                // console.log(spacesPerTab)
                 var spacesToInsert = spacesPerTab - (cm.doc.getCursor("start").ch % spacesPerTab);    
                 var spaces = Array(spacesToInsert + 1).join(" ");
                 cm.replaceSelection(spaces, "end", "+input");
@@ -206,7 +205,7 @@ export class FunctionComponent{
                     return CodeMirror.Pass;
                 }
                 var spacesPerTab = cm.getOption("indentUnit");
-                console.log(spacesPerTab)
+                // console.log(spacesPerTab)
                 var spacesToInsert = spacesPerTab - (cm.doc.getCursor("start").ch % spacesPerTab);    
                 var spaces = Array(spacesToInsert + 1).join(" ");
                 cm.replaceSelection(spaces, "end", "+input");
@@ -215,31 +214,9 @@ export class FunctionComponent{
         
     };
 
-    pyCode = false
-    csCode = false
-    vbCode = false
-    jsCode = false
-    javaCode = false
-    scalaCode = false
+    workbooks = []
 
-    func = {
-        Add : '',
-        Body : '',
-        Description : '',
-        Exchange : '',
-        ID : '',
-        Job : '',
-        Load : '',
-        MID : '',
-        Name : '',
-        Remove : '',
-        ScheduleCommand : '',
-        Started : false,
-        Code: []
-    }
-
-    files = []
-    fileidx = 0
+    workflowID = ""
 
     workflow = {
         Permissions: []
@@ -248,15 +225,14 @@ export class FunctionComponent{
     permission = -1
     permissionSet = false
 
-    constructor(private activatedRoute: ActivatedRoute, private quantapp: QuantAppComponent){
+    constructor(private activatedRoute: ActivatedRoute, public quantapp: QuantAppComponent, private cfquery: QAWorkbookComponent, private modalService: NgbModal){
 
         this.activatedRoute.params.subscribe(params => {
-            let id = params['id']
             let wid = params['wid'];
+            let id = params['id'];
 
-        
-        //this.quantapp.Get('m/workflow?id=Freepoint_Workflow',
-        //    data =>
+            this.workflowID = wid
+
             this.quantapp.LinkAction(wid,
                 data => { //Load
 
@@ -287,86 +263,146 @@ export class FunctionComponent{
                 }
             )
             
-            let fid = id + "-F-MetaData";
-            console.log(fid)
-            this.quantapp.LinkAction(fid,
+            this.quantapp.LinkAction(wid + '--Queries', 
                 data => { //Load
-                    console.log(data)
-                    this.func = data[0].Value
-
-                    let i = 0
-                    this.func.Code.forEach(pkg => {
-                        let name = pkg.Item1
-                        let x = pkg.Item2
-                        this.files.push(i)
-                        i++
-                        // this.pyCode = x.startsWith('import clr')
-                        this.pyCode = x.startsWith('import clr') || x.startsWith('#py') || name.endsWith('.py')
-                        this.csCode = x.startsWith('//cs') || name.endsWith('.cs')
-                        this.vbCode = x.startsWith('\'vb') || name.endsWith('.vb')
-                        this.jsCode = x.startsWith('//js') || name.endsWith('.js')
-                        this.javaCode = x.startsWith('//java') || name.endsWith('.java')
-                        this.scalaCode = x.startsWith('//scala') || name.endsWith('.scala')
-                    })
-
-                    
+                    this.workbooks = data
+                    if(this.workbooks.length > 0){
+                        let tid = this.workbooks.findIndex(x => x.Value.ID == id)
+                        
+                        this.selectedWB = this.workbooks[Math.max(0, tid)].Value
+                        this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
+                        this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
+                        this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
+                        this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
+                        this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
+                        this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
+                    }
+                    else{
+                        this.selectedWB = JSON.parse(JSON.stringify(this.cfquery.templaceWB))
+                        this.selectedWB.WorkflowID = wid
+                        this.workbooks.push({Value : this.selectedWB })
+                        
+                        this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
+                        this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
+                        this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
+                        this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
+                        this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
+                        this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
+                    }
+                    //this.selectedWB = data[0]
+                    // console.log(data)
                 },
                 data => { //Add
+                    // console.log(data)
                 },
                 data => { //Exchange
-                    console.log("exchange",data)
+                    // console.log('EXCHANGE: ', data)
+                    let tid = this.workbooks.findIndex(x => x.Value.ID == data.Value.ID)
+                    
+                    this.workbooks[tid] = data//.Value
 
-                    this.func = data.Value
-                    let i = 0
-                    this.files = []
-                    this.func.Code.forEach(pkg => {
-                        let name = pkg.Item1
-                        let x = pkg.Item2
-                        
-                        this.files.push(i)
-                        this.pyCode = x.startsWith('import clr') || x.startsWith('#py') || name.endsWith('.py')
-                        this.csCode = x.startsWith('//cs') || name.endsWith('.cs')
-                        this.vbCode = x.startsWith('\'vb') || name.endsWith('.vb')
-                        this.jsCode = x.startsWith('//js') || name.endsWith('.js')
-                        this.javaCode = x.startsWith('//java') || name.endsWith('.java')
-                        this.scalaCode = x.startsWith('//scala') || name.endsWith('.scala')
-                        i++
-                    })
+                    if(this.selectedWB.ID == data.Value.ID)
+                        this.selectedWB = data.Value
+
+                    this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
+                    this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
+                    this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
+                    this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
+                    this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
+                    this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
+
                 },
                 data => { //Remove
+                    let tid = this.workbooks.findIndex(x => x.Value.ID == data.Value.ID)
+                        
+                    if(tid > -1)
+                        this.workbooks.splice(tid,1)
+
+                    if(this.workbooks.length > 0)
+                        this.selectedWB = this.workbooks[0].Value
+                    else
+                        this.selectedWB = JSON.parse(JSON.stringify(this.cfquery.templaceWB))//this.cfquery.templaceWB
+
+                    this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
+                    this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
+                    this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
+                    this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
+                    this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
+                    this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
                 }
             );
         });
 
     }
 
+    @ViewChild('tabs')
+    private tabs:NgbTabset;
+
  
-    onChangeActive(val){
-        //this.func.Started = val == "0"
+    selectedTab = ""
+   
+    chgName = false
 
-        this.quantapp.Get('m/activetoggle?id=' + this.func.ID ,
-        data => {
-            console.log(data)
 
+    pyCode = false
+    csCode = false
+    vbCode = false
+    jsCode = false
+    javaCode = false
+    scalaCode = false
+
+    selectWBFunc(item){
+        this.cfquery.resetExecution()
+        this.selectedWB = JSON.parse(item)
+
+        this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
+        this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
+        this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
+        this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
+        this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
+    }
+
+    changeName(){
+        this.chgName = !this.chgName
+    }
+     
+
+    modalMessage = ""
+    open(content, workbook) {
+        this.modalService.open(content).result.then((result) => {
+            
+            console.log(result)
+            if(result == 'delete'){
+                this.modalMessage = "Removing..."
+
+                this.cfquery.removeCode(workbook)
+
+                let idx = this.workbooks.findIndex(x => x.Value.ID == workbook.ID)
+                
+                this.workbooks.splice(idx,1)
+                this.selectedWB = this.workbooks[0].Value
+
+                this.modalMessage = ''
+                this.modalService.dismissAll(content)
+            }
+
+        }, (reason) => {
+            console.log(reason)
         });
-
-    
     }
+    // removeCode(workbook){
+    //     this.cfquery.removeCode(workbook)
 
-    onChangeFile(val){
-        this.fileidx = val
-    }
+    //     let idx = this.workbooks.findIndex(x => x.Value.ID == workbook.ID)
+        
+    //     this.workbooks.splice(idx,1)
+    //     this.selectedWB = this.workbooks[0].Value
+    // }
 
-    compilationResult = ''
-    submitCode(){
-        console.log(this.func)
-        this.quantapp.Post('m/createf', 
-        this.func,
-        data => {                        
-            this.compilationResult = data.Result;
-        });
+    newCode(){
+        this.selectedWB = JSON.parse(JSON.stringify(this.cfquery.templaceWB))
+        this.selectedWB.WorkflowID = this.workflowID
+        this.workbooks.push({ Value: this.selectedWB })
+        
     }
-    
-    onBlur() { }
-    onFocus() { }
 }

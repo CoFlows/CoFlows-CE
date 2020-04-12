@@ -13,7 +13,7 @@ import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
 })
 export class DashboardComponent {
 
-    functions = []
+    agents = []
     workbooks = []
 
     workflows = []
@@ -37,7 +37,7 @@ export class DashboardComponent {
             this.workflows = data
 
             this.workflows.forEach(workflow => {
-                let wiid = workflow.ID + "--Workbook"
+                let wiid = workflow.ID + "--Queries"
                 this.quantapp.LinkAction(workflow.ID,
                     data => { //Load
                         
@@ -47,10 +47,10 @@ export class DashboardComponent {
                             if(x.ID == this.quantapp.quser.User.Email) this.permission = x.Permission
                         })
     
-                        workflow.functions = []
-                        workflow.activeFunctions = []
-                        workflow.inActiveFunctions = []
-                        data[0].Value.Functions.forEach(x => {
+                        workflow.agents = []
+                        workflow.activeAgents = []
+                        workflow.inActiveAgents = []
+                        data[0].Value.Agents.forEach(x => {
     
                             let fid = x + "-F-MetaData";
                             // console.log(fid)
@@ -59,63 +59,63 @@ export class DashboardComponent {
                                     // console.log(data)
                                     
                                     data.forEach(x => {
-                                        workflow.functions.push(x.Value)
+                                        workflow.agents.push(x.Value)
                                         if(x.Value.Started)
-                                            workflow.activeFunctions.push(x.Value)
+                                            workflow.activeAgents.push(x.Value)
                                         else
-                                            workflow.inActiveFunctions.push(x.Value)
+                                            workflow.inActiveAgents.push(x.Value)
                                     })
                                 },
                                 data => { //Add
                                     // console.log("add", data)
-                                    workflow.functions.push(data)
-                                    workflow.functions = [...  workflow.functions]
+                                    workflow.agents.push(data)
+                                    workflow.agents = [...  workflow.agents]
 
-                                    workflow.activeFunctions = []
-                                    workflow.inActiveFunctions = []
-                                    workflow.functions.forEach(x => {
+                                    workflow.activeAgents = []
+                                    workflow.inActiveAgents = []
+                                    workflow.agents.forEach(x => {
                                         if(x.Value.Started)
-                                            workflow.activeFunctions.push(x.Value)
+                                            workflow.activeAgents.push(x.Value)
                                         else
-                                            workflow.inActiveFunctions.push(x.Value)
+                                            workflow.inActiveAgents.push(x.Value)
                                     })
                                 },
                                 data => { //Exchange
                                     // console.log("exchange",data)
-                                    let id = workflow.functions.findIndex(x => x.ID == data.Value.ID)
+                                    let id = workflow.agents.findIndex(x => x.ID == data.Value.ID)
                                     
                                     if(id > -1){
-                                        workflow.functions[id] = data.Value
+                                        workflow.agents[id] = data.Value
                                     }
-                                    workflow.functions = [...  workflow.functions]
+                                    workflow.agents = [...  workflow.agents]
 
-                                    workflow.activeFunctions = []
-                                    workflow.inActiveFunctions = []
-                                    workflow.functions.forEach(x => {
+                                    workflow.activeAgents = []
+                                    workflow.inActiveAgents = []
+                                    workflow.agents.forEach(x => {
                                         if(x.Value.Started)
-                                            workflow.activeFunctions.push(x.Value)
+                                            workflow.activeAgents.push(x.Value)
                                         else
-                                            workflow.inActiveFunctions.push(x.Value)
+                                            workflow.inActiveAgents.push(x.Value)
                                     })
                                     
                                 },
                                 data => { //Remove
                                     //console.log("exchange",data)
-                                    let id = workflow.functions.findIndex(x => x.ID == data.Value.ID)
+                                    let id = workflow.agents.findIndex(x => x.ID == data.Value.ID)
                                     
                                     if(id > -1){
-                                        workflow.functions.splice(id, 1)
-                                        //this.functions[id] = data
+                                        workflow.agents.splice(id, 1)
+                                        //this.agents[id] = data
                                     }
-                                    workflow.functions = [...  workflow.functions]
+                                    workflow.agents = [...  workflow.agents]
 
-                                    workflow.activeFunctions = []
-                                    workflow.inActiveFunctions = []
-                                    workflow.functions.forEach(x => {
+                                    workflow.activeAgents = []
+                                    workflow.inActiveAgents = []
+                                    workflow.agents.forEach(x => {
                                         if(x.Value.Started)
-                                            workflow.activeFunctions.push(x.Value)
+                                            workflow.activeAgents.push(x.Value)
                                         else
-                                            workflow.inActiveFunctions.push(x.Value)
+                                            workflow.inActiveAgents.push(x.Value)
                                     })
                                 }
                             );
@@ -167,36 +167,36 @@ export class DashboardComponent {
                     data => { //Exchange
                         workflow.workflow = data.Value
     
-                        workflow.functions = []
-                        data.Value.Functions.forEach(x => {
+                        workflow.agents = []
+                        data.Value.Agents.forEach(x => {
     
                             let fid = x + "-F-MetaData";
                             this.quantapp.LinkAction(fid,
                                 data => { //Load                                
                                     data.forEach(x => {
-                                        workflow.functions.push(x.Value)
+                                        workflow.agents.push(x.Value)
                                     })
                                 },
                                 data => { //Add
-                                    workflow.functions.push(data)
-                                    workflow.functions = [...  workflow.functions]
+                                    workflow.agents.push(data)
+                                    workflow.agents = [...  workflow.agents]
                                 },
                                 data => { //Exchange
-                                    let id = workflow.functions.findIndex(x => x.ID = data.Value.ID)
+                                    let id = workflow.agents.findIndex(x => x.ID = data.Value.ID)
                                     
                                     if(id > -1){
-                                        workflow.functions[id] = data.Value
+                                        workflow.agents[id] = data.Value
                                     }
-                                    workflow.functions = [...  workflow.functions]
+                                    workflow.agents = [...  workflow.agents]
                                     
                                 },
                                 data => { //Remove
-                                    let id = workflow.functions.findIndex(x => x.ID = data.Value.ID)
+                                    let id = workflow.agents.findIndex(x => x.ID = data.Value.ID)
                                     
                                     if(id > -1){
-                                        workflow.functions.splice(id, 1)
+                                        workflow.agents.splice(id, 1)
                                     }
-                                    workflow.functions = [...  workflow.functions]
+                                    workflow.agents = [...  workflow.agents]
                                 }
                             );
                         });
@@ -237,7 +237,7 @@ export class DashboardComponent {
 
             // this.wid = data[0].ID//params['id'];
 
-            // let wiid = this.wid + "--Workbook"
+            // let wiid = this.wid + "--Queries"
 
             // this.quantapp.LinkAction(this.wid,
             //     data => { //Load
@@ -250,8 +250,8 @@ export class DashboardComponent {
                     
                     
 
-            //         this.functions = []
-            //         data[0].Value.Functions.forEach(x => {
+            //         this.agents = []
+            //         data[0].Value.Agents.forEach(x => {
 
             //             let fid = x + "-F-MetaData";
             //             // console.log(fid)
@@ -260,33 +260,33 @@ export class DashboardComponent {
             //                     // console.log(data)
                                 
             //                     data.forEach(x => {
-            //                         this.functions.push(x.Value)
+            //                         this.agents.push(x.Value)
             //                     })
             //                 },
             //                 data => { //Add
             //                     // console.log("add", data)
-            //                     this.functions.push(data)
-            //                     this.functions = [...  this.functions]
+            //                     this.agents.push(data)
+            //                     this.agents = [...  this.agents]
             //                 },
             //                 data => { //Exchange
             //                     // console.log("exchange",data)
-            //                     let id = this.functions.findIndex(x => x.ID == data.Value.ID)
+            //                     let id = this.agents.findIndex(x => x.ID == data.Value.ID)
                                 
             //                     if(id > -1){
-            //                         this.functions[id] = data.Value
+            //                         this.agents[id] = data.Value
             //                     }
-            //                     this.functions = [...  this.functions]
+            //                     this.agents = [...  this.agents]
                                 
             //                 },
             //                 data => { //Remove
             //                     //console.log("exchange",data)
-            //                     let id = this.functions.findIndex(x => x.ID == data.Value.ID)
+            //                     let id = this.agents.findIndex(x => x.ID == data.Value.ID)
                                 
             //                     if(id > -1){
-            //                         this.functions.splice(id, 1)
-            //                         //this.functions[id] = data
+            //                         this.agents.splice(id, 1)
+            //                         //this.agents[id] = data
             //                     }
-            //                     this.functions = [...  this.functions]
+            //                     this.agents = [...  this.agents]
             //                 }
             //             );
             //         });
@@ -335,36 +335,36 @@ export class DashboardComponent {
             //     data => { //Exchange
             //         this.workflow = data.Value
 
-            //         this.functions = []
-            //         data.Value.Functions.forEach(x => {
+            //         this.agents = []
+            //         data.Value.Agents.forEach(x => {
 
             //             let fid = x + "-F-MetaData";
             //             this.quantapp.LinkAction(fid,
             //                 data => { //Load                                
             //                     data.forEach(x => {
-            //                         this.functions.push(x.Value)
+            //                         this.agents.push(x.Value)
             //                     })
             //                 },
             //                 data => { //Add
-            //                     this.functions.push(data)
-            //                     this.functions = [...  this.functions]
+            //                     this.agents.push(data)
+            //                     this.agents = [...  this.agents]
             //                 },
             //                 data => { //Exchange
-            //                     let id = this.functions.findIndex(x => x.ID = data.Value.ID)
+            //                     let id = this.agents.findIndex(x => x.ID = data.Value.ID)
                                 
             //                     if(id > -1){
-            //                         this.functions[id] = data.Value
+            //                         this.agents[id] = data.Value
             //                     }
-            //                     this.functions = [...  this.functions]
+            //                     this.agents = [...  this.agents]
                                 
             //                 },
             //                 data => { //Remove
-            //                     let id = this.functions.findIndex(x => x.ID = data.Value.ID)
+            //                     let id = this.agents.findIndex(x => x.ID = data.Value.ID)
                                 
             //                     if(id > -1){
-            //                         this.functions.splice(id, 1)
+            //                         this.agents.splice(id, 1)
             //                     }
-            //                     this.functions = [...  this.functions]
+            //                     this.agents = [...  this.agents]
             //                 }
             //             );
             //         });
@@ -465,7 +465,7 @@ export class DashboardComponent {
             Name = "Hello F# Agent"
             Description = Some("Hello F# Analytics Agent Skeleton")
     
-            MID = None //ID of MultiVerse entry which this functions is linked to
+            MID = None //ID of MultiVerse entry which this agents is linked to
             Load = Some(Utils.SetFunction(
                     "Load", 
                     Load(fun data ->

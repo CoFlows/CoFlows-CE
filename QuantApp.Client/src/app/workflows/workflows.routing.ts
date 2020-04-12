@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 
 import { WorkflowComponent } from './workflow/workflow.component';
-import { FunctionComponent } from './function/function.component';
-import { WorkbookComponent } from './workbook/workbook.component';
+import { AgentComponent } from './agent/agent.component';
+import { QueryComponent } from './query/query.component';
 
 export const WorkflowRoutes: Routes = [{
   path: '',
@@ -15,15 +15,15 @@ export const WorkflowRoutes: Routes = [{
       }
     },
     {
-      path: 'function/:wid/:id',
-      component: FunctionComponent,
+      path: 'agent/:wid/:id',
+      component: AgentComponent,
       data: {
           heading: 'Agents'
       }
     },
     {
-      path: 'workbook/:wid/:id',
-      component: WorkbookComponent,
+      path: 'query/:wid/:id',
+      component: QueryComponent,
       data: {
           heading: 'Queries'
       }

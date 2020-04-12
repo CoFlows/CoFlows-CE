@@ -9,7 +9,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 
 
 @Component({
-  selector: 'quantapp-workbook',
+  selector: 'coflows-query',
   templateUrl: './qaworkbook.component.html'
 })
 
@@ -572,7 +572,7 @@ export class QAWorkbookComponent {
     addItem(items, name, item){
         if(item.D_link != undefined || name == 'D_link'){
             this.quantapp.Get(
-                'm/getwb?workbook=' + this.selectedWB.WorkflowID + '&id=' + this.selectedWB.ID + '&uid=' + this.quantapp.quser.User.Secret + '&' + (item.D_link != undefined ? item.D_link : item), 
+                'm/getquery?wid=' + this.selectedWB.WorkflowID + '&qid=' + this.selectedWB.ID + '&uid=' + this.quantapp.quser.User.Secret + '&' + (item.D_link != undefined ? item.D_link : item), 
                 data => { 
                     this.addItem_internal(items, name, data)
                  });

@@ -162,7 +162,7 @@ namespace CoFlows.Server.Controllers
                                 w.Name, 
                                 w.Strategies,
                                 null,//w.Code,
-                                w.Functions, 
+                                w.Agents, 
                                 w.Permissions, 
                                 w.NuGets, 
                                 w.Pips, 
@@ -243,7 +243,7 @@ namespace CoFlows.Server.Controllers
                     // System.IO.File.WriteAllText(file.FullName, content);
                 }
 
-                foreach(var fid in wsp.Functions)
+                foreach(var fid in wsp.Agents)
                 {
                     var cfid = fid.Replace("$WID$", data.ID);
                     var f = F.Find(cfid).Value;
@@ -400,7 +400,7 @@ namespace CoFlows.Server.Controllers
                             w.Name, 
                             w.Strategies,
                             null,//w.Code,
-                            w.Functions, 
+                            w.Agents, 
                             w.Permissions, 
                             w.NuGets, 
                             w.Pips, 
@@ -523,7 +523,7 @@ namespace CoFlows.Server.Controllers
                     {
                         var workflow = mres.FirstOrDefault() as Workflow;
 
-                        var flist = workflow.Functions.ToEnumerable();
+                        var flist = workflow.Agents.ToEnumerable();
                         var nflist = new List<string>();
                         
                         foreach(var fl in flist)
@@ -605,7 +605,7 @@ namespace CoFlows.Server.Controllers
                     data.Code.ID = System.Guid.NewGuid().ToString();
 
 
-                var wb = M.Base(data.Code.WorkflowID + "--Workbook");
+                var wb = M.Base(data.Code.WorkflowID + "--Queries");
                 var wb_res = wb[x => M.V<string>(x, "ID") == data.Code.ID];
                 if(wb_res.Count > 0)
                 {
@@ -633,7 +633,7 @@ namespace CoFlows.Server.Controllers
                     codes.Add(new Tuple<string, string>(data.Code.Name, data.Code.Code));
                 else
                 {
-                    var wb = M.Base(data.Code.WorkflowID + "--Workbook");
+                    var wb = M.Base(data.Code.WorkflowID + "--Queries");
                     var wb_res = wb[x => M.V<string>(x, "ID") == data.Code.ID];
                     if(wb_res.Count > 0)
                     {
@@ -667,7 +667,7 @@ namespace CoFlows.Server.Controllers
             if(string.IsNullOrWhiteSpace(data.ID))
                 data.ID = System.Guid.NewGuid().ToString();
 
-            var wb = M.Base(data.WorkflowID + "--Workbook");
+            var wb = M.Base(data.WorkflowID + "--Queries");
             var wb_res = wb[x => M.V<string>(x, "ID") == data.ID];
             if(wb_res.Count > 0)
             {
@@ -682,7 +682,7 @@ namespace CoFlows.Server.Controllers
         }
 
         [HttpGet, AllowAnonymous]
-        public async Task<IActionResult> GetWB(string workbook, string id, string name, string uid, string[] p)
+        public async Task<IActionResult> GetQuery(string wid, string qid, string name, string uid, string[] p)
         {
             string userId = this.User.QID();
             if(!string.IsNullOrEmpty(uid))
@@ -704,14 +704,14 @@ namespace CoFlows.Server.Controllers
             else
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
 
-            var m = M.Base(workbook);
+            var m = M.Base(wid);
             var res = m[x => true];
             if(res.Count > 0)
             {
                 var workflow = res.FirstOrDefault() as Workflow;
 
-                var wb_m = M.Base(workbook + "--Workbook");
-                var wb_res = wb_m[x => M.V<string>(x, "ID") == id];
+                var wb_m = M.Base(wid + "--Queries");
+                var wb_res = wb_m[x => M.V<string>(x, "ID") == qid];
                 if(wb_res.Count > 0)
                 {
                     var wb = wb_res.FirstOrDefault() as CodeData;
@@ -1523,7 +1523,7 @@ namespace CoFlows.Server.Controllers
                         var workflow = res.FirstOrDefault() as Workflow;
                         var codes = new List<Tuple<string, string>>();
                         
-                        var wb = M.Base(wid + "--Workbook");
+                        var wb = M.Base(wid + "--Queries");
                         var wb_res = wb[x => M.V<string>(x, "ID") == qid];
                         if(wb_res.Count > 0)
                         {
@@ -1717,7 +1717,7 @@ namespace CoFlows.Server.Controllers
                         var workflow = res.FirstOrDefault() as Workflow;
                         var codes = new List<Tuple<string, string>>();
                         
-                        var wb = M.Base(wid + "--Workbook");
+                        var wb = M.Base(wid + "--Queries");
                         var wb_res = wb[x => M.V<string>(x, "ID") == qid];
                         if(wb_res.Count > 0)
                         {

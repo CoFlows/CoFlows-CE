@@ -11,7 +11,7 @@
                     <div class="card-header">
                         <div class="card-header-text w-100">
                             <div class="card-title">
-                                <!-- Functions -->
+                                <!-- Agents -->
 
                                 <div class="d-flex align-items-center">
                                     <div class="mr-3">
@@ -98,7 +98,7 @@
                         </div>
                     </div>
 
-                    <div class="card-body" *ngFor="let item of functions">
+                    <div class="card-body" *ngFor="let item of agents">
                         <div class="d-flex align-items-center">
                             <div class="mr-3">
                                 <label class="switch m-b">
@@ -110,7 +110,7 @@
                                 <span class="slide-toggle-content">{{ item.Started ? 'Active' : 'Inactive'}}</span>
                             </div>
                             <div class="mr-auto">
-                                <a routerLink="/workflows/function/{{wid}}/{{item.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a>        
+                                <a routerLink="/workflows/agent/{{wid}}/{{item.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a>        
                                 <div>{{ item.Description }}</div>
                             </div>
                         </div>
@@ -122,7 +122,7 @@
                         <div class="card-header-text w-100">
                             <div class="card-title">
                                 <!-- Scripts -->
-                                <a routerLink="/workflows/workbook/{{wid}}/0" routerLinkActive="active" class="ff-headers text-color">Queries</a>
+                                <a routerLink="/workflows/query/{{wid}}/0" routerLinkActive="active" class="ff-headers text-color">Queries</a>
                             </div>
                         </div>
                     </div>
@@ -135,14 +135,14 @@
                                     </a>
                                 </div>
                                 <div class="mr-auto">
-                                    <a routerLink="/workflows/workbook/{{wid}}/{{item.Value.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Value.Name }}</a>
+                                    <a routerLink="/workflows/query/{{wid}}/{{item.Value.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Value.Name }}</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <quantapp-workbook  #qawbook></quantapp-workbook>
+                <coflows-query  #cfquery></coflows-query>
 
             </div>
         </ng-template>
@@ -419,11 +419,11 @@
                     </div>
                 </div>
 
-                <div class="row" *ngIf="functions_filtered.length > 1">
+                <div class="row" *ngIf="agents_filtered.length > 1">
                     <div class="col-sm-12 col-md-12">
                         <div class="form-group">
                             <select class="form-control" #selectFunc  (change)="selectWBFuncFunc(selectFunc.value)">
-                                <option *ngFor="let wb of functions_filtered" [value]="quantapp.stringify(wb.Value)" [selected]="wb.Value.ID == selectedFunc.ID">{{wb.Value.Name}}</option>
+                                <option *ngFor="let wb of agents_filtered" [value]="quantapp.stringify(wb.Value)" [selected]="wb.Value.ID == selectedFunc.ID">{{wb.Value.Name}}</option>
                             </select>
                         </div>
                     </div>

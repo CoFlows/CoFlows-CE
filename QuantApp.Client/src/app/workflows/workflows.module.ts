@@ -17,8 +17,8 @@ import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
 import { WorkflowRoutes } from './workflows.routing';
 import { WorkflowComponent } from './workflow/workflow.component';
-import { FunctionComponent } from './function/function.component';
-import { WorkbookComponent } from './workbook/workbook.component';
+import { AgentComponent } from './agent/agent.component';
+import { QueryComponent } from './query/query.component';
 
 import { QuantAppModule } from '../quantapp/quantapp.module';
 
@@ -39,8 +39,8 @@ import { QuantAppModule } from '../quantapp/quantapp.module';
   ],
   declarations: [
     WorkflowComponent,
-    FunctionComponent,
-    WorkbookComponent
+    AgentComponent,
+    QueryComponent
   ]
 })
 

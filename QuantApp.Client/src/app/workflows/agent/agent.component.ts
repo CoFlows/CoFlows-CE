@@ -1,7 +1,6 @@
-import { Component, ViewChild } from '@angular/core';
+import {Component} from '@angular/core';
+
 import { QuantAppComponent } from '../../quantapp/core/quantapp.component';
-import { QAWorkbookComponent } from '../../quantapp/workbook/qaworkbook.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ActivatedRoute } from '@angular/router';
 
@@ -11,27 +10,29 @@ import 'codemirror/mode/python/python.js';
 import 'codemirror/mode/vb/vb.js';
 import 'codemirror/mode/javascript/javascript.js';
 
+import 'codemirror/addon/fold/foldcode.js';
+import 'codemirror/addon/fold/foldgutter.js';
+
+import 'codemirror/addon/fold/brace-fold.js';
+import 'codemirror/addon/fold/comment-fold.js';
+import 'codemirror/addon/fold/indent-fold.js';
+import 'codemirror/addon/fold/markdown-fold.js';
+import 'codemirror/addon/fold/xml-fold.js';
 
 import * as CodeMirror from 'codemirror/lib/codemirror.js';
 
-
-import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
-
-
 @Component({
-  selector: 'code-test',
+  selector: 'function-view',
   styles: [`
   :host >>> .CodeMirror {
     height: auto;
   }
   `],
-  templateUrl: 'workbook.component.html'
+  templateUrl: 'agent.component.html'
 })
-export class WorkbookComponent {
-
-
-    selectedWB = this.qawbook.templaceWB
-
+export class AgentComponent{
+    
+    code = '...';
     editorOptionsFs = {
         lineWrapping: false,
         lineNumbers: true,
@@ -49,7 +50,7 @@ export class WorkbookComponent {
                     return CodeMirror.Pass;
                 }
                 var spacesPerTab = cm.getOption("indentUnit");
-                // console.log(spacesPerTab)
+                console.log(spacesPerTab)
                 var spacesToInsert = spacesPerTab - (cm.doc.getCursor("start").ch % spacesPerTab);    
                 var spaces = Array(spacesToInsert + 1).join(" ");
                 cm.replaceSelection(spaces, "end", "+input");
@@ -75,7 +76,7 @@ export class WorkbookComponent {
                     return CodeMirror.Pass;
                 }
                 var spacesPerTab = cm.getOption("indentUnit");
-                // console.log(spacesPerTab)
+                console.log(spacesPerTab)
                 var spacesToInsert = spacesPerTab - (cm.doc.getCursor("start").ch % spacesPerTab);    
                 var spaces = Array(spacesToInsert + 1).join(" ");
                 cm.replaceSelection(spaces, "end", "+input");
@@ -153,7 +154,7 @@ export class WorkbookComponent {
                     return CodeMirror.Pass;
                 }
                 var spacesPerTab = cm.getOption("indentUnit");
-                // console.log(spacesPerTab)
+                console.log(spacesPerTab)
                 var spacesToInsert = spacesPerTab - (cm.doc.getCursor("start").ch % spacesPerTab);    
                 var spaces = Array(spacesToInsert + 1).join(" ");
                 cm.replaceSelection(spaces, "end", "+input");
@@ -179,7 +180,7 @@ export class WorkbookComponent {
                     return CodeMirror.Pass;
                 }
                 var spacesPerTab = cm.getOption("indentUnit");
-                // console.log(spacesPerTab)
+                console.log(spacesPerTab)
                 var spacesToInsert = spacesPerTab - (cm.doc.getCursor("start").ch % spacesPerTab);    
                 var spaces = Array(spacesToInsert + 1).join(" ");
                 cm.replaceSelection(spaces, "end", "+input");
@@ -205,7 +206,7 @@ export class WorkbookComponent {
                     return CodeMirror.Pass;
                 }
                 var spacesPerTab = cm.getOption("indentUnit");
-                // console.log(spacesPerTab)
+                console.log(spacesPerTab)
                 var spacesToInsert = spacesPerTab - (cm.doc.getCursor("start").ch % spacesPerTab);    
                 var spaces = Array(spacesToInsert + 1).join(" ");
                 cm.replaceSelection(spaces, "end", "+input");
@@ -214,9 +215,31 @@ export class WorkbookComponent {
         
     };
 
-    workbooks = []
+    pyCode = false
+    csCode = false
+    vbCode = false
+    jsCode = false
+    javaCode = false
+    scalaCode = false
 
-    workflowID = ""
+    func = {
+        Add : '',
+        Body : '',
+        Description : '',
+        Exchange : '',
+        ID : '',
+        Job : '',
+        Load : '',
+        MID : '',
+        Name : '',
+        Remove : '',
+        ScheduleCommand : '',
+        Started : false,
+        Code: []
+    }
+
+    files = []
+    fileidx = 0
 
     workflow = {
         Permissions: []
@@ -225,14 +248,15 @@ export class WorkbookComponent {
     permission = -1
     permissionSet = false
 
-    constructor(private activatedRoute: ActivatedRoute, public quantapp: QuantAppComponent, private qawbook: QAWorkbookComponent, private modalService: NgbModal){
+    constructor(private activatedRoute: ActivatedRoute, private quantapp: QuantAppComponent){
 
         this.activatedRoute.params.subscribe(params => {
+            let id = params['id']
             let wid = params['wid'];
-            let id = params['id'];
 
-            this.workflowID = wid
-
+        
+        //this.quantapp.Get('m/workflow?id=Freepoint_Workflow',
+        //    data =>
             this.quantapp.LinkAction(wid,
                 data => { //Load
 
@@ -263,146 +287,86 @@ export class WorkbookComponent {
                 }
             )
             
-            this.quantapp.LinkAction(wid + '--Workbook', 
+            let fid = id + "-F-MetaData";
+            console.log(fid)
+            this.quantapp.LinkAction(fid,
                 data => { //Load
-                    this.workbooks = data
-                    if(this.workbooks.length > 0){
-                        let tid = this.workbooks.findIndex(x => x.Value.ID == id)
-                        
-                        this.selectedWB = this.workbooks[Math.max(0, tid)].Value
-                        this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
-                        this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
-                        this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
-                        this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
-                        this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
-                        this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
-                    }
-                    else{
-                        this.selectedWB = JSON.parse(JSON.stringify(this.qawbook.templaceWB))
-                        this.selectedWB.WorkflowID = wid
-                        this.workbooks.push({Value : this.selectedWB })
-                        
-                        this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
-                        this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
-                        this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
-                        this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
-                        this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
-                        this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
-                    }
-                    //this.selectedWB = data[0]
-                    // console.log(data)
+                    console.log(data)
+                    this.func = data[0].Value
+
+                    let i = 0
+                    this.func.Code.forEach(pkg => {
+                        let name = pkg.Item1
+                        let x = pkg.Item2
+                        this.files.push(i)
+                        i++
+                        // this.pyCode = x.startsWith('import clr')
+                        this.pyCode = x.startsWith('import clr') || x.startsWith('#py') || name.endsWith('.py')
+                        this.csCode = x.startsWith('//cs') || name.endsWith('.cs')
+                        this.vbCode = x.startsWith('\'vb') || name.endsWith('.vb')
+                        this.jsCode = x.startsWith('//js') || name.endsWith('.js')
+                        this.javaCode = x.startsWith('//java') || name.endsWith('.java')
+                        this.scalaCode = x.startsWith('//scala') || name.endsWith('.scala')
+                    })
+
+                    
                 },
                 data => { //Add
-                    // console.log(data)
                 },
                 data => { //Exchange
-                    // console.log('EXCHANGE: ', data)
-                    let tid = this.workbooks.findIndex(x => x.Value.ID == data.Value.ID)
-                    
-                    this.workbooks[tid] = data//.Value
+                    console.log("exchange",data)
 
-                    if(this.selectedWB.ID == data.Value.ID)
-                        this.selectedWB = data.Value
-
-                    this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
-                    this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
-                    this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
-                    this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
-                    this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
-                    this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
-
+                    this.func = data.Value
+                    let i = 0
+                    this.files = []
+                    this.func.Code.forEach(pkg => {
+                        let name = pkg.Item1
+                        let x = pkg.Item2
+                        
+                        this.files.push(i)
+                        this.pyCode = x.startsWith('import clr') || x.startsWith('#py') || name.endsWith('.py')
+                        this.csCode = x.startsWith('//cs') || name.endsWith('.cs')
+                        this.vbCode = x.startsWith('\'vb') || name.endsWith('.vb')
+                        this.jsCode = x.startsWith('//js') || name.endsWith('.js')
+                        this.javaCode = x.startsWith('//java') || name.endsWith('.java')
+                        this.scalaCode = x.startsWith('//scala') || name.endsWith('.scala')
+                        i++
+                    })
                 },
                 data => { //Remove
-                    let tid = this.workbooks.findIndex(x => x.Value.ID == data.Value.ID)
-                        
-                    if(tid > -1)
-                        this.workbooks.splice(tid,1)
-
-                    if(this.workbooks.length > 0)
-                        this.selectedWB = this.workbooks[0].Value
-                    else
-                        this.selectedWB = JSON.parse(JSON.stringify(this.qawbook.templaceWB))//this.qawbook.templaceWB
-
-                    this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
-                    this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
-                    this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
-                    this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
-                    this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
-                    this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
                 }
             );
         });
 
     }
 
-    @ViewChild('tabs')
-    private tabs:NgbTabset;
-
  
-    selectedTab = ""
-   
-    chgName = false
+    onChangeActive(val){
+        //this.func.Started = val == "0"
 
+        this.quantapp.Get('m/activetoggle?id=' + this.func.ID ,
+        data => {
+            console.log(data)
 
-    pyCode = false
-    csCode = false
-    vbCode = false
-    jsCode = false
-    javaCode = false
-    scalaCode = false
+        });
 
-    selectWBFunc(item){
-        this.qawbook.resetExecution()
-        this.selectedWB = JSON.parse(item)
-
-        this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
-        this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
-        this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
-        this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
-        this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
+    
     }
 
-    changeName(){
-        this.chgName = !this.chgName
+    onChangeFile(val){
+        this.fileidx = val
     }
-     
 
-    modalMessage = ""
-    open(content, workbook) {
-        this.modalService.open(content).result.then((result) => {
-            
-            console.log(result)
-            if(result == 'delete'){
-                this.modalMessage = "Removing..."
-
-                this.qawbook.removeCode(workbook)
-
-                let idx = this.workbooks.findIndex(x => x.Value.ID == workbook.ID)
-                
-                this.workbooks.splice(idx,1)
-                this.selectedWB = this.workbooks[0].Value
-
-                this.modalMessage = ''
-                this.modalService.dismissAll(content)
-            }
-
-        }, (reason) => {
-            console.log(reason)
+    compilationResult = ''
+    submitCode(){
+        console.log(this.func)
+        this.quantapp.Post('m/createf', 
+        this.func,
+        data => {                        
+            this.compilationResult = data.Result;
         });
     }
-    // removeCode(workbook){
-    //     this.qawbook.removeCode(workbook)
-
-    //     let idx = this.workbooks.findIndex(x => x.Value.ID == workbook.ID)
-        
-    //     this.workbooks.splice(idx,1)
-    //     this.selectedWB = this.workbooks[0].Value
-    // }
-
-    newCode(){
-        this.selectedWB = JSON.parse(JSON.stringify(this.qawbook.templaceWB))
-        this.selectedWB.WorkflowID = this.workflowID
-        this.workbooks.push({ Value: this.selectedWB })
-        
-    }
+    
+    onBlur() { }
+    onFocus() { }
 }
