@@ -25,7 +25,7 @@ using QuantApp.Kernel;
 using QuantApp.Kernel.Adapters.SQL;
 using QuantApp.Engine;
 
-using QuantApp.Server.Utils;
+using CoFlows.Server.Utils;
 
 using Python.Runtime;
 using QuantApp.Kernel.JVM;
@@ -42,7 +42,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ContainerInstance.Fluent.Models;
 
 
-namespace QuantApp.Server
+namespace CoFlows.Server
 {
     public class Program
     {
@@ -303,9 +303,9 @@ namespace QuantApp.Server
 
 
                 if(!sslFlag)
-                    Init(new string[]{"--urls", "http://*:80"}, new Realtime.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.RTDSocketMiddleware>));
+                    Init(new string[]{"--urls", "http://*:80"}, new Realtime.WebSocketListner(), typeof(Startup<CoFlows.Server.Realtime.RTDSocketMiddleware>));
                 else
-                    Init(args, new Realtime.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.RTDSocketMiddleware>));
+                    Init(args, new Realtime.WebSocketListner(), typeof(Startup<CoFlows.Server.Realtime.RTDSocketMiddleware>));
                 
                 Task.Factory.StartNew(() => {
                     while (true)
@@ -480,7 +480,7 @@ namespace QuantApp.Server
                             .WithEnvironmentVariables(new Dictionary<string,string>(){ 
                                 {"coflows_config", File.ReadAllText(@"mnt/" + config_file)}, 
                                 })
-                            .WithStartingCommandLine("dotnet", "QuantApp.Server.lnx.dll", "server")
+                            .WithStartingCommandLine("dotnet", "CoFlows.Server.lnx.dll", "server")
                             .Attach()
                         .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
                         .CreateAsync()
@@ -507,7 +507,7 @@ namespace QuantApp.Server
                             .WithEnvironmentVariables(new Dictionary<string,string>(){ 
                                 {"coflows_config", File.ReadAllText(@"mnt/" + config_file)}, 
                                 })
-                            .WithStartingCommandLine("dotnet", "QuantApp.Server.lnx.dll", "server")
+                            .WithStartingCommandLine("dotnet", "CoFlows.Server.lnx.dll", "server")
                             .Attach()
                         .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
                         .CreateAsync()

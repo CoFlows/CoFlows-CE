@@ -142,4 +142,4 @@ RUN apt-get install -y libpq-dev
 
 ENV PATH /app:$PATH
 
-ENTRYPOINT ["dotnet", "QuantApp.Server.lnx.dll"]
+ENTRYPOINT ["dotnet", "CoFlows.Server.lnx.dll"]

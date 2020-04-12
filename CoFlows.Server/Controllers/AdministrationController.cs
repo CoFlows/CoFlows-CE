@@ -17,11 +17,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
-using QuantApp.Server.Utils;
+using CoFlows.Server.Utils;
 
 using QuantApp.Kernel;
 
-namespace QuantApp.Server.Controllers
+namespace CoFlows.Server.Controllers
 {
     [Authorize, Route("[controller]/[action]")]   
     public class AdministrationController : Controller

@@ -18,7 +18,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 
 
-namespace QuantApp.Server
+namespace CoFlows.Server
 {
     public class MFactory : IMFactory
     {

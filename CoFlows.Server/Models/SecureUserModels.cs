@@ -14,7 +14,7 @@ using System.Web;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace QuantApp.Server.Models
+namespace CoFlows.Server.Models
 {
     public class SecureUserModels
     {

@@ -31,9 +31,9 @@ using FluffySpoon.AspNet.LetsEncrypt.Certes;
 using FluffySpoon.AspNet.LetsEncrypt;
 using System.IO;
 
-using QuantApp.Server.Realtime;
+using CoFlows.Server.Realtime;
 
-namespace QuantApp.Server
+namespace CoFlows.Server
 {
     public class Certificate
     {

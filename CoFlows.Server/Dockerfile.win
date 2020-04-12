@@ -219,4 +219,4 @@ RUN c:\\spark\\bin\\winutils.exe chmod -R 7777 c:\\App\\sqljdbc_auth.dll
 
 COPY ${source:-obj/win/publish} ./
 
-ENTRYPOINT ["dotnet", "QuantApp.Server.win.dll"]
+ENTRYPOINT ["dotnet", "CoFlows.Server.win.dll"]

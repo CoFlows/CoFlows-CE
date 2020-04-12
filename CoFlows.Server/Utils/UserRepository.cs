@@ -22,7 +22,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 
 
-namespace QuantApp.Server.Utils
+namespace CoFlows.Server.Utils
 {
     public static class UserExtensions
     {

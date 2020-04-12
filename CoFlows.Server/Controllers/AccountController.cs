@@ -35,15 +35,15 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 
-using QuantApp.Server.Models;
-using QuantApp.Server.Utils;
+using CoFlows.Server.Models;
+using CoFlows.Server.Utils;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using QuantApp.Kernel;
 
-namespace QuantApp.Server.Controllers
+namespace CoFlows.Server.Controllers
 {
     public static class Extensions
     {

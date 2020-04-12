@@ -13,7 +13,7 @@ using System.Web;
 
 using Microsoft.FSharp.Collections;
 
-namespace QuantApp.Server.Utils
+namespace CoFlows.Server.Utils
 {
 
     public static class FSharpInteropExtensions

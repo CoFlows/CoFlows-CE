@@ -12,8 +12,8 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-using QuantApp.Server.Models;
-using QuantApp.Server.Utils;
+using CoFlows.Server.Models;
+using CoFlows.Server.Utils;
 
 using System.Net;
 using System.IO;
@@ -34,7 +34,7 @@ using QuantApp.Engine;
 
 using System.Net.Mail;
 
-namespace QuantApp.Server.Controllers
+namespace CoFlows.Server.Controllers
 {
     [Authorize, Route("[controller]/[action]")]
     public class MController : Controller
@@ -439,7 +439,7 @@ namespace QuantApp.Server.Controllers
                 var w = res.FirstOrDefault() as WorkSpace;
                 var up = QuantApp.Kernel.AccessType.Denied;
 
-                var actives = QuantApp.Server.Program.GetDefaultWorkSpaces();
+                var actives = CoFlows.Server.Program.GetDefaultWorkSpaces();
                 var ok = false;
                 foreach(var active in actives)
                     if(f.WorkspaceID == active.ID)

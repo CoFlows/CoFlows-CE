@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace QuantApp.Server.Realtime
+namespace CoFlows.Server.Realtime
 {
     public class RTDSocketManager
     {

@@ -7,7 +7,7 @@ Project("{9A19103R-16F7-4668-BE54-9A1E7A4F7556}") = "QuantApp.Kernel", "QuantApp
 EndProject
 Project("{9A19103E-16F7-4668-BE54-9A1E7A4F7556}") = "QuantApp.Engine", "QuantApp.Engine\QuantApp.Engine.win.fsproj", "{6A102363-8BF9-4CDD-9174-F88B66DDFF99}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantApp.Server", "QuantApp.Server/QuantApp.Server.win.csproj", "{06CFEB5E-6636-4D7B-A232-1EF5537E8E0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoFlows.Server", "CoFlows.Server/CoFlows.Server.win.csproj", "{06CFEB5E-6636-4D7B-A232-1EF5537E8E0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -474,7 +474,7 @@ module Code =
                             |> List.filter(fun f -> 
                                 let f = f |> Path.GetFileName
                                 (
-                                    not(f.Contains("QuantApp.Server.")) && 
+                                    not(f.Contains("CoFlows.Server.")) && 
                                     not(f.Contains("_")) && 
                                     not(f.Contains("-")) && 
                                     not(f.Contains("clr")) && 

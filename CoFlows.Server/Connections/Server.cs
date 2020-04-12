@@ -33,7 +33,7 @@ using QuantApp.Kernel.Adapters.SQL;
 
 using System.Data;
 
-namespace QuantApp.Server
+namespace CoFlows.Server
 {
     public class Connection : QuantApp.Core.Connection
     {
@@ -92,7 +92,7 @@ namespace QuantApp.Server
                 await webSocket.ConnectAsync(uriObject, CancellationToken.None);
 
 
-                QuantApp.Kernel.RTDEngine.Factory = new QuantApp.Server.Realtime.WebSocketListner(webSocket);
+                QuantApp.Kernel.RTDEngine.Factory = new CoFlows.Server.Realtime.WebSocketListner(webSocket);
                 
                 await Receive(webSocket, async (result, length, buffer) =>
                 {
@@ -105,7 +105,7 @@ namespace QuantApp.Server
                     {
                         string userMessage = Encoding.UTF8.GetString(buffer, 0, length);
 
-                        QuantApp.Server.Realtime.WebSocketListner.appServer_NewMessageReceived(webSocket, userMessage, uriObject.PathAndQuery, null);
+                        CoFlows.Server.Realtime.WebSocketListner.appServer_NewMessageReceived(webSocket, userMessage, uriObject.PathAndQuery, null);
 
                         return;
                     }

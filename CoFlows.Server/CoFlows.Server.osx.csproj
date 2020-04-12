@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <UserSecretsId>aspnet-QuantApp.Server-2AA057A6-1CB4-4720-BB1F-099CC90AA338</UserSecretsId>    
+    <UserSecretsId>aspnet-CoFlows.Server-2AA057A6-1CB4-4720-BB1F-099CC90AA338</UserSecretsId>    
     <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <DefaultItemExcludes>Client\**;ref\**;mnt\**</DefaultItemExcludes>

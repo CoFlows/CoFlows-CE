@@ -17,8 +17,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-using QuantApp.Server.Models;
-using QuantApp.Server.Utils;
+using CoFlows.Server.Models;
+using CoFlows.Server.Utils;
 
 using Microsoft.AspNetCore.Authorization;
 
@@ -26,7 +26,7 @@ using Newtonsoft.Json;
 using QuantApp.Kernel;
 using QuantApp.Engine;
 
-namespace QuantApp.Server.Controllers
+namespace CoFlows.Server.Controllers
 {
     public class GetDataTableModel
     {

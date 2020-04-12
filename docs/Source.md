@@ -17,7 +17,7 @@ Please note that the polyglot link happens during runtime so compilation of CLR,
 
 This library also contains the definitions of the Agents.
 
-## QuantApp.Server
+## CoFlows.Server
 Manages the executable application which fires up the web server and hosts the Web API endpoints.
 
 ## QuantApp.Client

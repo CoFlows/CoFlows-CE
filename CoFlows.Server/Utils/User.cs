@@ -14,7 +14,7 @@ using System.Web;
 using System.Data;
 using QuantApp.Kernel;
 
-namespace QuantApp.Server.Utils
+namespace CoFlows.Server.Utils
 {
     public class User
     {

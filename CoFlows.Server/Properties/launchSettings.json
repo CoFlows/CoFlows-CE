@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }      
     },
-    "QuantApp.Server": {
+    "CoFlows.Server": {
       "commandName": "Project",
       "launchBrowser": false,
       "launchUrl": "app",

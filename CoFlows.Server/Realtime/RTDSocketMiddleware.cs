@@ -31,9 +31,9 @@ using QuantApp.Kernel;
 using QuantApp.Engine;
 
 
-using QuantApp.Server.Utils;
+using CoFlows.Server.Utils;
 
-namespace QuantApp.Server.Realtime
+namespace CoFlows.Server.Realtime
 {    
     public class HttpProxyRequest
     {
@@ -77,9 +77,9 @@ namespace QuantApp.Server.Realtime
                     string cokey = context.Request.Cookies["coflows"]; 
                     if(cokey != null)
                     {
-                        if(QuantApp.Server.Controllers.AccountController.sessionKeys.ContainsKey(cokey))
+                        if(CoFlows.Server.Controllers.AccountController.sessionKeys.ContainsKey(cokey))
                         {
-                            quser = QuantApp.Kernel.User.FindUserBySecret(QuantApp.Server.Controllers.AccountController.sessionKeys[cokey]);
+                            quser = QuantApp.Kernel.User.FindUserBySecret(CoFlows.Server.Controllers.AccountController.sessionKeys[cokey]);
                             if(quser == null)
                             {
                                 await _next.Invoke(context);
