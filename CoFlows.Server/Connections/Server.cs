@@ -134,10 +134,10 @@ namespace CoFlows.Server
             //     System.Threading.Thread.Sleep(25 * 1000);
             //     Connect();//uri);
             //     System.Threading.Thread.Sleep(1000);
-            //     foreach(var wsp in QuantApp.Engine.Utils.ActiveWorkSpaceList)
+            //     foreach(var wsp in QuantApp.Engine.Utils.ActiveWorkflowList)
             //     {
             //         var mess = new {
-            //             Type = QuantApp.Kernel.RTDMessage.MessageType.RegisterWorkspace,
+            //             Type = QuantApp.Kernel.RTDMessage.MessageType.RegisterWorkflow,
             //             Content= wsp.ID
             //         };
             //         Send(JsonConvert.SerializeObject(mess));

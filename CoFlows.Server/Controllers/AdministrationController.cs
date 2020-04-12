@@ -35,7 +35,7 @@ namespace CoFlows.Server.Controllers
             QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userid);
             QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
             if(group == null)
-                group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_WorkSpace",""));
+                group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
 
             if(group == null)
                 group = QuantApp.Kernel.Group.CreateGroup(groupid, groupid);
@@ -53,7 +53,7 @@ namespace CoFlows.Server.Controllers
             QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userid);
             QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
             if(group == null)
-                group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_WorkSpace",""));
+                group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
 
             if(user != null)
             {
@@ -73,7 +73,7 @@ namespace CoFlows.Server.Controllers
             QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userid);
             QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
             if(group == null)
-                group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_WorkSpace",""));
+                group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
 
             if(user != null)
                 return Ok(new { Data = group.Permission(user) });
@@ -94,7 +94,7 @@ namespace CoFlows.Server.Controllers
             {
                 QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
                 if(group == null)
-                    group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_WorkSpace",""));
+                    group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
 
                 if(group == null)
                     group = QuantApp.Kernel.Group.CreateGroup(groupid, groupid);
@@ -207,7 +207,7 @@ namespace CoFlows.Server.Controllers
             QuantApp.Kernel.Group role = QuantApp.Kernel.Group.FindGroup(groupid);
 
             if(role == null)
-                role = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_WorkSpace",""));
+                role = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
 
             if(role == null)
             {

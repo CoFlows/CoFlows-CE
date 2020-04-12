@@ -47,7 +47,7 @@ namespace CoFlows.Server
     public class Program
     {
         public static bool IsServer = false;
-        public static string workspace_name = null;
+        public static string workflow_name = null;
         public static string hostName = null;
         public static string letsEncryptEmail = null;
         public static bool letsEncryptStaging = false;
@@ -68,7 +68,7 @@ namespace CoFlows.Server
             PythonEngine.Initialize();
 
             Code.InitializeCodeTypes(new Type[]{ 
-                typeof(QuantApp.Engine.WorkSpace),
+                typeof(QuantApp.Engine.Workflow),
                 typeof(Jint.Native.Array.ArrayConstructor)
                 });
 
@@ -79,7 +79,7 @@ namespace CoFlows.Server
                 config_file = "quantapp_config.json";
 
             JObject config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
-            workspace_name = config["Workspace"].ToString();
+            workflow_name = config["Workflow"].ToString();
             hostName = config["Server"]["Host"].ToString();
             var secretKey = config["Server"]["SecretKey"].ToString();
             
@@ -132,10 +132,10 @@ namespace CoFlows.Server
 
                 Console.Write("Starting cloud deployment... ");
 
-                Code.UpdatePackageFile(workspace_name);
+                Code.UpdatePackageFile(workflow_name);
                 var t0 = DateTime.Now;
                 Console.WriteLine("Started: " + t0);
-                var res = Connection.Client.PublishPackage(workspace_name);
+                var res = Connection.Client.PublishPackage(workflow_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + res);
@@ -156,10 +156,10 @@ namespace CoFlows.Server
 
                 Console.Write("CoFlows Cloud build... ");
 
-                Code.UpdatePackageFile(workspace_name);
+                Code.UpdatePackageFile(workflow_name);
                 var t0 = DateTime.Now;
                 Console.WriteLine("Started: " + t0);
-                var res = Connection.Client.BuildPackage(workspace_name);
+                var res = Connection.Client.BuildPackage(workflow_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + res);
@@ -184,8 +184,8 @@ namespace CoFlows.Server
                 var funcName = args.Length > 3 ? args[3] : null;
                 var parameters = args.Length > 4 ? args.Skip(4).ToArray() : null;
 
-                var pkg = Code.ProcessPackageFile(workspace_name);
-                Console.WriteLine("Workspace: " + pkg.Name);
+                var pkg = Code.ProcessPackageFile(workflow_name);
+                Console.WriteLine("Workflow: " + pkg.Name);
 
                 Console.WriteLine("Query ID: " + queryID);
                 Console.WriteLine("Function Name: " + funcName);
@@ -222,7 +222,7 @@ namespace CoFlows.Server
 
                 Console.Write("CoFlows Cloud log... ");
 
-                var res = Connection.Client.RemoteLog(workspace_name);
+                var res = Connection.Client.RemoteLog(workflow_name);
                 Console.WriteLine("Result: ");
                 Console.WriteLine(res);
             }
@@ -242,7 +242,7 @@ namespace CoFlows.Server
 
                 Console.Write("CoFlows Cloud log... ");
 
-                var res = Connection.Client.RemoteRemove(workspace_name);
+                var res = Connection.Client.RemoteRemove(workflow_name);
                 Console.WriteLine("Result: ");
                 Console.WriteLine(res);
             }
@@ -262,7 +262,7 @@ namespace CoFlows.Server
 
                 Console.Write("CoFlows Cloud log... ");
 
-                var res = Connection.Client.RemoteRestart(workspace_name);
+                var res = Connection.Client.RemoteRestart(workflow_name);
                 Console.WriteLine("Result: ");
                 Console.WriteLine(res);
             }
@@ -285,18 +285,18 @@ namespace CoFlows.Server
 
                 if(string.IsNullOrEmpty(config_env))
                 {
-                    var pkg = Code.ProcessPackageFile(workspace_name);
+                    var pkg = Code.ProcessPackageFile(workflow_name);
                     Code.ProcessPackageJSON(pkg);
-                    SetDefaultWorkSpaces(new string[]{ pkg.ID }, false);
+                    SetDefaultWorkflows(new string[]{ pkg.ID }, false);
                     Console.WriteLine(pkg.Name + " started");
                 }
                 else
                 {
                     Console.WriteLine("Empty server...");
-                    var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--WorkSpaces")[xe => true];
-                    foreach(var wsp in workspace_ids)
+                    var workflow_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows")[xe => true];
+                    foreach(var wsp in workflow_ids)
                     {
-                        SetDefaultWorkSpaces(new string[]{ wsp.ToString() }, true);
+                        SetDefaultWorkflows(new string[]{ wsp.ToString() }, true);
                         Console.WriteLine(wsp + " started");
                     }
                 }
@@ -334,7 +334,7 @@ namespace CoFlows.Server
 
                 Console.WriteLine("Local build");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name));
                 var res = Code.BuildRegisterPackage(pkg);
                 if(string.IsNullOrEmpty(res))
                     Console.WriteLine("Success!!!");
@@ -367,7 +367,7 @@ namespace CoFlows.Server
                 Console.WriteLine("Parameters: " + parameters);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name));
                 Code.ProcessPackageJSON(pkg);
                 
 
@@ -403,7 +403,7 @@ namespace CoFlows.Server
                 Console.WriteLine("Started: " + t0);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name));
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(string.IsNullOrEmpty(res))
@@ -564,8 +564,8 @@ namespace CoFlows.Server
 
                 Console.Write("Starting azure deployment... ");
 
-                Code.UpdatePackageFile(workspace_name);
-                var resDeploy = Connection.Client.PublishPackage(workspace_name);
+                Code.UpdatePackageFile(workflow_name);
+                var resDeploy = Connection.Client.PublishPackage(workflow_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + resDeploy);
@@ -576,7 +576,7 @@ namespace CoFlows.Server
 
                 Console.WriteLine("Azure Container Instance remove start");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name));
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(!string.IsNullOrEmpty(res))
@@ -704,19 +704,19 @@ namespace CoFlows.Server
         }
 
         private static List<string> _wspServicedList = new List<string>();
-        public static IEnumerable<WorkSpace> SetDefaultWorkSpaces(string[] ids, bool saveToDisk)
+        public static IEnumerable<Workflow> SetDefaultWorkflows(string[] ids, bool saveToDisk)
         {
             foreach(var id in ids)
             {
                 try
                 {
-                    //Workspace loading...
+                    //Workflow loading...
 
-                    var wsp = QuantApp.Kernel.M.Base(id)[x => true].FirstOrDefault() as WorkSpace;
+                    var wsp = QuantApp.Kernel.M.Base(id)[x => true].FirstOrDefault() as Workflow;
                     
                     if(wsp != null)
                     {
-                        QuantApp.Engine.Utils.ActiveWorkSpaceList.Add(wsp);
+                        QuantApp.Engine.Utils.ActiveWorkflowList.Add(wsp);
                         _wspServicedList.Add(id);
 
                         if(saveToDisk)
@@ -725,7 +725,7 @@ namespace CoFlows.Server
                             Code.InstallPips(wsp.Pips);
                             Code.InstallJars(wsp.Jars);
 
-                            var pkg = Code.ProcessPackageWorkspace(wsp);
+                            var pkg = Code.ProcessPackageWorkflow(wsp);
                             Code.ProcessPackageJSON(pkg);
                             
                             var bytes = QuantApp.Engine.Code.ProcessPackageToZIP(pkg);
@@ -736,7 +736,7 @@ namespace CoFlows.Server
                                 var entryStream = entry.Open();
                                 var streamReader = new StreamReader(entryStream);
                                 var content = streamReader.ReadToEnd();
-                                // var filePath = "/Workspace/" + entry.FullName;
+                                // var filePath = "/Workflow/" + entry.FullName;
                                 var filePath = "/app/mnt/" + entry.FullName;
 
                                 System.IO.FileInfo file = new System.IO.FileInfo(filePath);
@@ -746,7 +746,7 @@ namespace CoFlows.Server
                         }
                         
 
-                        // QuantApp.Engine.Utils.ActiveWorkSpaceList.Add(wsp);
+                        // QuantApp.Engine.Utils.ActiveWorkflowList.Add(wsp);
                         // _wspServicedList.Add(id);
 
                         foreach(var fid in wsp.Functions)
@@ -776,7 +776,7 @@ namespace CoFlows.Server
                     }
                     else
                     {
-                        Console.WriteLine("Default workspace is null: " + id);
+                        Console.WriteLine("Default workflow is null: " + id);
                         Environment.Exit(-1);
                     }
 
@@ -788,20 +788,20 @@ namespace CoFlows.Server
 
             }
 
-            return QuantApp.Engine.Utils.ActiveWorkSpaceList;
+            return QuantApp.Engine.Utils.ActiveWorkflowList;
         }
 
 
         private static readonly object logLock = new object();
-        public static IEnumerable<WorkSpace> GetDefaultWorkSpaces()
+        public static IEnumerable<Workflow> GetDefaultWorkflows()
         {
-            return QuantApp.Engine.Utils.ActiveWorkSpaceList;
+            return QuantApp.Engine.Utils.ActiveWorkflowList;
         }
 
-        public static void AddServicedWorkSpaces(string id)
+        public static void AddServicedWorkflows(string id)
         {
-            //Workspace loading...
-            var wsp = QuantApp.Kernel.M.Base(id)[x => true].FirstOrDefault() as WorkSpace;
+            //Workflow loading...
+            var wsp = QuantApp.Kernel.M.Base(id)[x => true].FirstOrDefault() as Workflow;
             if(wsp != null)
             {
             
@@ -835,22 +835,22 @@ namespace CoFlows.Server
                 
             }
             else
-                Console.WriteLine("Add serviced workspace is null: " + id);
+                Console.WriteLine("Add serviced workflow is null: " + id);
         }
 
-        public static void RemoveServicesWorkSpace(string id)
+        public static void RemoveServicesWorkflow(string id)
         {
-            var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--WorkSpaces");
-            if(workspace_ids[x => true].Where(x => x.ToString() == id).Count() > 0)
+            var workflow_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows");
+            if(workflow_ids[x => true].Where(x => x.ToString() == id).Count() > 0)
             {
-                workspace_ids.Remove(id);
-                workspace_ids.Save();
+                workflow_ids.Remove(id);
+                workflow_ids.Save();
             }
 
             _wspServicedList.RemoveAll(x => x == id);
         }
 
-        public static IEnumerable<string> GetServicedWorkSpaces()
+        public static IEnumerable<string> GetServicedWorkflows()
         {
             return _wspServicedList;
         }

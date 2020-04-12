@@ -19,9 +19,9 @@ import 'codemirror/mode/javascript/javascript.js';
 import * as CodeMirror from 'codemirror/lib/codemirror.js';
 
 @Component({
-  selector: 'workspace-component',
+  selector: 'workflow-component',
   
-  templateUrl: './workspace.component.html',
+  templateUrl: './workflow.component.html',
   styles: [
       `
   :host >>> .CodeMirror {
@@ -29,7 +29,7 @@ import * as CodeMirror from 'codemirror/lib/codemirror.js';
   }
   `]
 })
-export class WorkspaceComponent {
+export class WorkflowComponent {
     rows = []
     activeChoices = [true, false];
 
@@ -42,7 +42,7 @@ export class WorkspaceComponent {
 
     wid = ""
 
-    workspace = {
+    workflow = {
         Permissions: []
     }
 
@@ -128,10 +128,10 @@ export class WorkspaceComponent {
             this.quantapp.LinkAction(this.wid,
             data => { //Load
 
-                this.workspace = data[0].Value
-                // console.log(this.workspace)
+                this.workflow = data[0].Value
+                // console.log(this.workflow)
 
-                this.workspace.Permissions.forEach(x => {
+                this.workflow.Permissions.forEach(x => {
                     if(x.ID == this.quantapp.quser.User.Email) this.permission = x.Permission
                 })
 
@@ -257,7 +257,7 @@ export class WorkspaceComponent {
             },
             data => { //Exchange
                 console.log(data)
-                this.workspace = data.Value
+                this.workflow = data.Value
 
                 let i = 0
                 data.Value.Code.forEach(x => {
@@ -1110,7 +1110,7 @@ export class WorkspaceComponent {
 
     createNewFunctionFs(){
         let templateCode = {
-            WorkspaceID: this.wid,
+            WorkflowID: this.wid,
             ID: "",
             Name: "Hello F# Agent",
             Description: "Hello F# Analytics Agent Skeleton",
@@ -1144,7 +1144,7 @@ export class WorkspaceComponent {
     let master(): F_v01 =
         {
             ID = None
-            WorkspaceID = Some("` + this.wid + `")
+            WorkflowID = Some("` + this.wid + `")
             Code = None
             Name = "Hello F# Agent"
             Description = Some("Hello F# Analytics Agent Skeleton")
@@ -1212,7 +1212,7 @@ export class WorkspaceComponent {
 
     createNewFunctionPy(){
         let templateCode = {
-            WorkspaceID: this.wid,
+            WorkflowID: this.wid,
             ID: "",
             Name: "Hello Python Agent",
             Description: "Hello Python Analytics Agent Skeleton",
@@ -1260,7 +1260,7 @@ def Job(timestamp, data):
 def pkg():
     return qae.FPKG(
     None, #ID
-    "` + this.wid + `", #Workspace ID
+    "` + this.wid + `", #Workflow ID
     "Hello Python Agent", #Name
     "Hello Python Analytics Agent Sample", #Description
     None, #M ID Listener
@@ -1289,7 +1289,7 @@ def pkg():
 
     createNewFunctionCs(){
         let templateCode = {
-            WorkspaceID: this.wid,
+            WorkflowID: this.wid,
             ID: "",
             Name: "Hello C# Agent",
             Description: "Hello C# Analytics Agent Skeleton",
@@ -1318,7 +1318,7 @@ public class CSharpAgent
     {
         return new FPKG(
             null, //ID
-            "` + this.wid + `", //Workspace ID
+            "` + this.wid + `", //Workflow ID
             "Hello C# Agent", //Name
             "Hello C# Analytics Agent Sample", //Description
             null, //M ID Listener
@@ -1370,7 +1370,7 @@ public class CSharpAgent
 
     createNewFunctionVb(){
         let templateCode = {
-            WorkspaceID: this.wid,
+            WorkflowID: this.wid,
             ID: "",
             Name: "Hello VB Agent",
             Description: "Hello VB Analytics Agent Skeleton",
@@ -1424,7 +1424,7 @@ public class CSharpAgent
         public Shared Function pkg() As FPKG
             Return new FPKG(
                 Nothing, 'ID
-                "` + this.wid + `", 'Workspace ID
+                "` + this.wid + `", 'Workflow ID
                 "Hello VB Agent", 'Name
                 "Hello VB Analytics Agent Sample", 'Description
                 Nothing, 'M ID Listener
@@ -1455,7 +1455,7 @@ public class CSharpAgent
     
     createNewFunctionJs(){
         let templateCode = {
-            WorkspaceID: this.wid,
+            WorkflowID: this.wid,
             ID: "",
             Name: "Javascript Agent",
             Description: "Hello Javascript Analytics Agent Skeleton",
@@ -1481,7 +1481,7 @@ var qengine = importNamespace('QuantApp.Engine')
 
 let pkg = new qengine.FPKG(
     null, //ID
-    '` + this.wid + `', //Workspace ID
+    '` + this.wid + `', //Workflow ID
     'Hello Js Agent', //Name
     'Hello Js Analytics Agent Sample', //Description
     null, //M ID Listener

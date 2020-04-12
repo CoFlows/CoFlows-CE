@@ -1,7 +1,7 @@
 <ngb-tabset #tabsMain>
     <ngb-tab>
         <ng-template ngbTabTitle>
-            <div class="f-headers text-color" (click)="tabBeforeChange(0)">{{ workspace.Name }}</div>
+            <div class="f-headers text-color" (click)="tabBeforeChange(0)">{{ workflow.Name }}</div>
         </ng-template>
 
         <ng-template ngbTabContent>
@@ -37,7 +37,7 @@
                                     
                                     <div class="d-flex align-items-center" *ngIf="permission == 2">
                                         <div class="forum-stat">
-                                            <a class="f-headers text-color" href="{{quantapp.quantapp_server}}m/getzipfromworkspace?id={{wid}}"  routerLinkActive="active" >
+                                            <a class="f-headers text-color" href="{{quantapp.quantapp_server}}m/getzipfromworkflow?id={{wid}}"  routerLinkActive="active" >
                                                 <div class="icon icon-basic-elaboration-cloud-download"></div>
 
                                                 <small>Zip &nbsp;&nbsp;</small>
@@ -110,7 +110,7 @@
                                 <span class="slide-toggle-content">{{ item.Started ? 'Active' : 'Inactive'}}</span>
                             </div>
                             <div class="mr-auto">
-                                <a routerLink="/workspaces/function/{{wid}}/{{item.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a>        
+                                <a routerLink="/workflows/function/{{wid}}/{{item.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a>        
                                 <div>{{ item.Description }}</div>
                             </div>
                         </div>
@@ -122,7 +122,7 @@
                         <div class="card-header-text w-100">
                             <div class="card-title">
                                 <!-- Scripts -->
-                                <a routerLink="/workspaces/workbook/{{wid}}/0" routerLinkActive="active" class="ff-headers text-color">Queries</a>
+                                <a routerLink="/workflows/workbook/{{wid}}/0" routerLinkActive="active" class="ff-headers text-color">Queries</a>
                             </div>
                         </div>
                     </div>
@@ -135,7 +135,7 @@
                                     </a>
                                 </div>
                                 <div class="mr-auto">
-                                    <a routerLink="/workspaces/workbook/{{wid}}/{{item.Value.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Value.Name }}</a>
+                                    <a routerLink="/workflows/workbook/{{wid}}/{{item.Value.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Value.Name }}</a>
                                 </div>
                             </div>
                         </div>
@@ -157,35 +157,35 @@
             <div class="col-sm-12 col-md-12">
                 <div class="form-group">
                     <select #selectElemFiles (change)="onChangeFile(selectElemFiles.value)" class="form-control">
-                        <option *ngFor="let item of files" [value]="item">{{workspace.Code[item].Item1}}</option>
+                        <option *ngFor="let item of files" [value]="item">{{workflow.Code[item].Item1}}</option>
                     </select>
                 </div>
             </div>
-            <codemirror *ngIf="permissionSet && workspace.Code != undefined && workspace.Code[fileidx] != undefined && !(workspace.Code[fileidx].Item2.startsWith('//scala') || workspace.Code[fileidx].Item2.startsWith('//java') || workspace.Code[fileidx].Item2.startsWith('//js') || workspace.Code[fileidx].Item2.startsWith('\'vb') || workspace.Code[fileidx].Item2.startsWith('//cs') || workspace.Code[fileidx].Item2.startsWith('import clr') || workspace.Code[fileidx].Item2.startsWith('#py')) || workspace.Code[fileidx].Item1.endsWith('.fs')" [(ngModel)]="workspace.Code[fileidx].Item2" 
+            <codemirror *ngIf="permissionSet && workflow.Code != undefined && workflow.Code[fileidx] != undefined && !(workflow.Code[fileidx].Item2.startsWith('//scala') || workflow.Code[fileidx].Item2.startsWith('//java') || workflow.Code[fileidx].Item2.startsWith('//js') || workflow.Code[fileidx].Item2.startsWith('\'vb') || workflow.Code[fileidx].Item2.startsWith('//cs') || workflow.Code[fileidx].Item2.startsWith('import clr') || workflow.Code[fileidx].Item2.startsWith('#py')) || workflow.Code[fileidx].Item1.endsWith('.fs')" [(ngModel)]="workflow.Code[fileidx].Item2" 
             [config]="editorOptionsFs">
             </codemirror>
 
-            <codemirror *ngIf="permissionSet && workspace.Code != undefined && workspace.Code[fileidx] != undefined && workspace.Code[fileidx].Item2.startsWith('//cs') || workspace.Code[fileidx].Item1.endsWith('.cs')" [(ngModel)]="workspace.Code[fileidx].Item2" 
+            <codemirror *ngIf="permissionSet && workflow.Code != undefined && workflow.Code[fileidx] != undefined && workflow.Code[fileidx].Item2.startsWith('//cs') || workflow.Code[fileidx].Item1.endsWith('.cs')" [(ngModel)]="workflow.Code[fileidx].Item2" 
             [config]="editorOptionsCs">
             </codemirror>
 
-            <codemirror *ngIf="permissionSet && workspace.Code != undefined && workspace.Code[fileidx] != undefined && (workspace.Code[fileidx].Item2.startsWith('import clr') || workspace.Code[fileidx].Item2.startsWith('#py') || workspace.Code[fileidx].Item1.endsWith('.py'))" [(ngModel)]="workspace.Code[fileidx].Item2" 
+            <codemirror *ngIf="permissionSet && workflow.Code != undefined && workflow.Code[fileidx] != undefined && (workflow.Code[fileidx].Item2.startsWith('import clr') || workflow.Code[fileidx].Item2.startsWith('#py') || workflow.Code[fileidx].Item1.endsWith('.py'))" [(ngModel)]="workflow.Code[fileidx].Item2" 
             [config]="editorOptionsPy">
             </codemirror>
 
-            <codemirror *ngIf="permissionSet && workspace.Code != undefined && workspace.Code[fileidx] != undefined && workspace.Code[fileidx].Item2.startsWith('\'vb') || workspace.Code[fileidx].Item1.endsWith('.vb')" [(ngModel)]="workspace.Code[fileidx].Item2" 
+            <codemirror *ngIf="permissionSet && workflow.Code != undefined && workflow.Code[fileidx] != undefined && workflow.Code[fileidx].Item2.startsWith('\'vb') || workflow.Code[fileidx].Item1.endsWith('.vb')" [(ngModel)]="workflow.Code[fileidx].Item2" 
             [config]="editorOptionsVb">
             </codemirror>
 
-            <codemirror *ngIf="permissionSet && workspace.Code != undefined && workspace.Code[fileidx] != undefined && workspace.Code[fileidx].Item2.startsWith('//js') || workspace.Code[fileidx].Item1.endsWith('.js')" [(ngModel)]="workspace.Code[fileidx].Item2" 
+            <codemirror *ngIf="permissionSet && workflow.Code != undefined && workflow.Code[fileidx] != undefined && workflow.Code[fileidx].Item2.startsWith('//js') || workflow.Code[fileidx].Item1.endsWith('.js')" [(ngModel)]="workflow.Code[fileidx].Item2" 
             [config]="editorOptionsJs">
             </codemirror>
 
-            <codemirror *ngIf="permissionSet && workspace.Code != undefined && workspace.Code[fileidx] != undefined && workspace.Code[fileidx].Item2.startsWith('//java') || workspace.Code[fileidx].Item1.endsWith('.java')" [(ngModel)]="workspace.Code[fileidx].Item2" 
+            <codemirror *ngIf="permissionSet && workflow.Code != undefined && workflow.Code[fileidx] != undefined && workflow.Code[fileidx].Item2.startsWith('//java') || workflow.Code[fileidx].Item1.endsWith('.java')" [(ngModel)]="workflow.Code[fileidx].Item2" 
             [config]="editorOptionsJava">
             </codemirror>
 
-            <codemirror *ngIf="permissionSet && workspace.Code != undefined && workspace.Code[fileidx] != undefined && workspace.Code[fileidx].Item2.startsWith('//scala') || workspace.Code[fileidx].Item1.endsWith('.scala')" [(ngModel)]="workspace.Code[fileidx].Item2" 
+            <codemirror *ngIf="permissionSet && workflow.Code != undefined && workflow.Code[fileidx] != undefined && workflow.Code[fileidx].Item2.startsWith('//scala') || workflow.Code[fileidx].Item1.endsWith('.scala')" [(ngModel)]="workflow.Code[fileidx].Item2" 
             [config]="editorOptionsScala">
             </codemirror>
 
@@ -213,14 +213,14 @@
                     </div>
                     <div class="scroll-y" style="max-height: 250px;">
                         <div class="card-body">
-                            <!-- <ngx-datatable *ngIf="workspace.Permissions.length > 0"
+                            <!-- <ngx-datatable *ngIf="workflow.Permissions.length > 0"
                             [columnMode]="'force'"
                             [headerHeight]="40"
                             [footerHeight]="0"
                             [rowHeight]="40"
                             [scrollbarV]="true"
                             [scrollbarH]="true"
-                            [rows]="workspace.Permissions">
+                            [rows]="workflow.Permissions">
                                 <ngx-datatable-column prop="Value.ID" name="Email" [width]="100">
                                     <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
                                         {{row.ID}}
@@ -242,7 +242,7 @@
                                 
                             </ngx-datatable> -->
 
-                            <div class="row" *ngFor="let item of workspace.Permissions">
+                            <div class="row" *ngFor="let item of workflow.Permissions">
                                 <div class="col-sm-6 col-md-6">
                                     {{ item.ID }}
                                 </div>

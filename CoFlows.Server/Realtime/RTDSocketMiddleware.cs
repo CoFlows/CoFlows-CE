@@ -243,10 +243,10 @@ namespace CoFlows.Server.Realtime
                 catch (Exception e)
                 {
                     var id = WebSocketListner.manager.GetId(socket);
-                    if(WebSocketListner.registered_id_workspaces.ContainsKey(id))
+                    if(WebSocketListner.registered_id_workflows.ContainsKey(id))
                     {
-                        var wid = WebSocketListner.registered_id_workspaces[id];
-                        var wsp_ais = QuantApp.Kernel.M.Base(wid)[x => true].FirstOrDefault() as WorkSpace;
+                        var wid = WebSocketListner.registered_id_workflows[id];
+                        var wsp_ais = QuantApp.Kernel.M.Base(wid)[x => true].FirstOrDefault() as Workflow;
                         foreach(var fid in wsp_ais.Functions)
                         {
                             var f = F.Find(fid).Value;
@@ -254,10 +254,10 @@ namespace CoFlows.Server.Realtime
                         }
 
                         string none = "";
-                        WebSocketListner.registered_id_workspaces.TryRemove(id, out none);
+                        WebSocketListner.registered_id_workflows.TryRemove(id, out none);
 
-                        if(WebSocketListner.registered_workspaces_id.ContainsKey(wid))
-                            WebSocketListner.registered_workspaces_id.TryRemove(wid, out none);
+                        if(WebSocketListner.registered_workflows_id.ContainsKey(wid))
+                            WebSocketListner.registered_workflows_id.TryRemove(wid, out none);
                         
                     }
 
@@ -278,8 +278,8 @@ namespace CoFlows.Server.Realtime
     public class WebSocketListner : QuantApp.Kernel.Factories.IRTDEngineFactory
     {
         public static ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>> subscriptions = new ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>>();
-        public static ConcurrentDictionary<string, string> registered_id_workspaces = new ConcurrentDictionary<string, string>();
-        public static ConcurrentDictionary<string, string> registered_workspaces_id = new ConcurrentDictionary<string, string>();
+        public static ConcurrentDictionary<string, string> registered_id_workflows = new ConcurrentDictionary<string, string>();
+        public static ConcurrentDictionary<string, string> registered_workflows_id = new ConcurrentDictionary<string, string>();
         public static ConcurrentDictionary<string, System.Net.IPAddress> registered_address = new ConcurrentDictionary<string, System.Net.IPAddress>();
         public static ConcurrentDictionary<string, WebSocket> registered_sockets = new ConcurrentDictionary<string, WebSocket>();
         public static ConcurrentDictionary<string, string> traders = new ConcurrentDictionary<string, string>();

@@ -46,7 +46,7 @@ import { TranslateService } from '@ngx-translate/core';
 export class MenuComponent {
   currentLang = 'en';
 
-  menu_function(workspaces){
+  menu_function(workflows){
 
       return [
         {
@@ -56,11 +56,11 @@ export class MenuComponent {
           icon: 'basic-accelerator'
         },
         {
-          state: 'workspaces',
-          name: 'Workspaces',
+          state: 'workflows',
+          name: 'Workflows',
           type: 'sub',
           icon: 'software-layers2',
-          children: workspaces
+          children: workflows
 
         }
       ]
@@ -72,11 +72,11 @@ export class MenuComponent {
 
     private quantapp: QuantAppComponent,
     public translate: TranslateService) {
-        this.quantapp.Get("m/servicedworkspaces", data => {
+        this.quantapp.Get("m/servicedworkflows", data => {
             let wp = []
             data.forEach(element => {
                 wp.push({
-                    state: 'workspace',
+                    state: 'workflow',
                     parameters: [element.ID],
                     name: element.Name
                 });

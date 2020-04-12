@@ -241,7 +241,7 @@ export class FunctionComponent{
     files = []
     fileidx = 0
 
-    workspace = {
+    workflow = {
         Permissions: []
     }
 
@@ -255,15 +255,15 @@ export class FunctionComponent{
             let wid = params['wid'];
 
         
-        //this.quantapp.Get('m/workspace?id=Freepoint_WorkSpace',
+        //this.quantapp.Get('m/workflow?id=Freepoint_Workflow',
         //    data =>
             this.quantapp.LinkAction(wid,
                 data => { //Load
 
-                    this.workspace = data[0].Value
-                    // console.log(this.workspace)
+                    this.workflow = data[0].Value
+                    // console.log(this.workflow)
 
-                    this.workspace.Permissions.forEach(x => {
+                    this.workflow.Permissions.forEach(x => {
                         if(x.ID == this.quantapp.quser.User.Email) this.permission = x.Permission
                     })
 

@@ -2117,7 +2117,7 @@ module Code =
                                         (entry.Name, entry.Content.Replace("$WID$", pkg_content.ID))
                                     ],
                                     entry.Exe, [||])
-                                let fpkg = { fpkg with ID = fpkg.ID.Replace("$WID$", pkg_id); WorkspaceID = fpkg.WorkspaceID.Replace("$WID$", pkg_id) }
+                                let fpkg = { fpkg with ID = fpkg.ID.Replace("$WID$", pkg_id); WorkflowID = fpkg.WorkflowID.Replace("$WID$", pkg_id) }
                                 let f, result = F.CreatePKG(fpkg, code)
                                 async { { Function = "Main"; Data = "Initial Execution" } |> Newtonsoft.Json.JsonConvert.SerializeObject |> f.Body |> ignore } |> Async.Start
                                 f, result
@@ -2199,7 +2199,7 @@ module Code =
                                 Name = entry.Name
                                 ID = if entry.ID |> String.IsNullOrEmpty then System.Guid.NewGuid().ToString() else entry.ID
                                 Code = entry.Content
-                                WorkspaceID = pkg_id
+                                WorkflowID = pkg_id
                             })
                     else
                         work_books.Add(
@@ -2207,7 +2207,7 @@ module Code =
                                 Name = entry.Name
                                 ID = if entry.ID |> String.IsNullOrWhiteSpace then System.Guid.NewGuid().ToString() else entry.ID
                                 Code = entry.Content
-                                WorkspaceID = pkg_id
+                                WorkflowID = pkg_id
                             }) |> ignore
                 )
                 work_books.Save()
@@ -2328,7 +2328,7 @@ module Code =
                                 Name = entry.Name
                                 ID = if entry.ID |> String.IsNullOrEmpty then System.Guid.NewGuid().ToString() else entry.ID
                                 Code = entry.Content
-                                WorkspaceID = pkg_id
+                                WorkflowID = pkg_id
                             })
                     else
                         work_books.Add(
@@ -2336,7 +2336,7 @@ module Code =
                                 Name = entry.Name
                                 ID = if entry.ID |> String.IsNullOrWhiteSpace then System.Guid.NewGuid().ToString() else entry.ID
                                 Code = entry.Content
-                                WorkspaceID = pkg_id
+                                WorkflowID = pkg_id
                             }) |> ignore
                 )
                 ws
@@ -2346,7 +2346,7 @@ module Code =
 
         build              
     
-    let ProcessPackageWorkspace (wsp : WorkSpace) : PKG =
+    let ProcessPackageWorkflow (wsp : Workflow) : PKG =
         
         let pkg_id = wsp.ID
 

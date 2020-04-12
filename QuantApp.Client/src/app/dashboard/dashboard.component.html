@@ -1,12 +1,12 @@
 <div class="p-3">
 
     <!-- <div class="col-sm-6 col-md-3"> -->
-        <div class="card card-body card-widget" *ngFor="let item of workspaces">
+        <div class="card card-body card-widget" *ngFor="let item of workflows">
             <div class="widget-icon rounded-circle bg-teal text-white icon icon-basic-server2"  *ngIf="item != undefined && item.functions != undefined && item.workbooks != undefined">
             </div>
             <div class="block ml-3 mr-3" *ngIf="item != undefined && item.functions != undefined && item.workbooks != undefined">
                 <h5 class="mb-0 fw-400">                    
-                    <a routerLink="/workspaces/workspace/{{item.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a>        
+                    <a routerLink="/workflows/workflow/{{item.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a>        
                 </h5>
             </div>
             <div class="mr-auto"></div>
@@ -101,7 +101,7 @@
                     <span class="slide-toggle-content">{{ item.Started ? 'Active' : 'Inactive'}}</span>
                 </div>
                 <div class="mr-auto">
-                    <a routerLink="/workspaces/function/{{wid}}/{{item.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a>        
+                    <a routerLink="/workflows/function/{{wid}}/{{item.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a>        
                     <div>{{ item.Description }}</div>
                 </div>
             </div>
@@ -113,7 +113,7 @@
       <div class="card-header">
           <div class="card-header-text w-100">
               <div class="card-title">
-                  <a routerLink="/workspaces/workbook/{{wid}}/0" routerLinkActive="active" class="ff-headers text-color">Queries</a>
+                  <a routerLink="/workflows/workbook/{{wid}}/0" routerLinkActive="active" class="ff-headers text-color">Queries</a>
               </div>
           </div>
       </div>
@@ -126,7 +126,7 @@
                       </a>
                   </div>
                   <div class="mr-auto">
-                      <a routerLink="/workspaces/workbook/{{wid}}/{{item.Value.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Value.Name }}</a>
+                      <a routerLink="/workflows/workbook/{{wid}}/{{item.Value.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Value.Name }}</a>
                   </div>
               </div>
               

@@ -1,17 +1,17 @@
 import { Routes } from '@angular/router';
 
-import { WorkspaceComponent } from './workspace/workspace.component';
+import { WorkflowComponent } from './workflow/workflow.component';
 import { FunctionComponent } from './function/function.component';
 import { WorkbookComponent } from './workbook/workbook.component';
 
-export const WorkspaceRoutes: Routes = [{
+export const WorkflowRoutes: Routes = [{
   path: '',
   children: [
     {
-      path: 'workspace/:id',
-      component: WorkspaceComponent,
+      path: 'workflow/:id',
+      component: WorkflowComponent,
       data: {
-          heading: 'Workspace'
+          heading: 'Workflow'
       }
     },
     {

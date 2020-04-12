@@ -16,12 +16,12 @@ export class DashboardComponent {
     functions = []
     workbooks = []
 
-    workspaces = []
+    workflows = []
     
     wid = ""
     permission = -1
 
-    workspace = {
+    workflow = {
         Permissions: []
     }
 
@@ -32,24 +32,24 @@ export class DashboardComponent {
 
     constructor(private quantapp: QuantAppComponent) {
 
-        this.quantapp.Get("m/servicedworkspaces", data => {
+        this.quantapp.Get("m/servicedworkflows", data => {
             // console.log(data)
-            this.workspaces = data
+            this.workflows = data
 
-            this.workspaces.forEach(workspace => {
-                let wiid = workspace.ID + "--Workbook"
-                this.quantapp.LinkAction(workspace.ID,
+            this.workflows.forEach(workflow => {
+                let wiid = workflow.ID + "--Workbook"
+                this.quantapp.LinkAction(workflow.ID,
                     data => { //Load
                         
-                        workspace.workspace = data[0].Value
+                        workflow.workflow = data[0].Value
                         
-                        workspace.workspace.Permissions.forEach(x => {
+                        workflow.workflow.Permissions.forEach(x => {
                             if(x.ID == this.quantapp.quser.User.Email) this.permission = x.Permission
                         })
     
-                        workspace.functions = []
-                        workspace.activeFunctions = []
-                        workspace.inActiveFunctions = []
+                        workflow.functions = []
+                        workflow.activeFunctions = []
+                        workflow.inActiveFunctions = []
                         data[0].Value.Functions.forEach(x => {
     
                             let fid = x + "-F-MetaData";
@@ -59,63 +59,63 @@ export class DashboardComponent {
                                     // console.log(data)
                                     
                                     data.forEach(x => {
-                                        workspace.functions.push(x.Value)
+                                        workflow.functions.push(x.Value)
                                         if(x.Value.Started)
-                                            workspace.activeFunctions.push(x.Value)
+                                            workflow.activeFunctions.push(x.Value)
                                         else
-                                            workspace.inActiveFunctions.push(x.Value)
+                                            workflow.inActiveFunctions.push(x.Value)
                                     })
                                 },
                                 data => { //Add
                                     // console.log("add", data)
-                                    workspace.functions.push(data)
-                                    workspace.functions = [...  workspace.functions]
+                                    workflow.functions.push(data)
+                                    workflow.functions = [...  workflow.functions]
 
-                                    workspace.activeFunctions = []
-                                    workspace.inActiveFunctions = []
-                                    workspace.functions.forEach(x => {
+                                    workflow.activeFunctions = []
+                                    workflow.inActiveFunctions = []
+                                    workflow.functions.forEach(x => {
                                         if(x.Value.Started)
-                                            workspace.activeFunctions.push(x.Value)
+                                            workflow.activeFunctions.push(x.Value)
                                         else
-                                            workspace.inActiveFunctions.push(x.Value)
+                                            workflow.inActiveFunctions.push(x.Value)
                                     })
                                 },
                                 data => { //Exchange
                                     // console.log("exchange",data)
-                                    let id = workspace.functions.findIndex(x => x.ID == data.Value.ID)
+                                    let id = workflow.functions.findIndex(x => x.ID == data.Value.ID)
                                     
                                     if(id > -1){
-                                        workspace.functions[id] = data.Value
+                                        workflow.functions[id] = data.Value
                                     }
-                                    workspace.functions = [...  workspace.functions]
+                                    workflow.functions = [...  workflow.functions]
 
-                                    workspace.activeFunctions = []
-                                    workspace.inActiveFunctions = []
-                                    workspace.functions.forEach(x => {
+                                    workflow.activeFunctions = []
+                                    workflow.inActiveFunctions = []
+                                    workflow.functions.forEach(x => {
                                         if(x.Value.Started)
-                                            workspace.activeFunctions.push(x.Value)
+                                            workflow.activeFunctions.push(x.Value)
                                         else
-                                            workspace.inActiveFunctions.push(x.Value)
+                                            workflow.inActiveFunctions.push(x.Value)
                                     })
                                     
                                 },
                                 data => { //Remove
                                     //console.log("exchange",data)
-                                    let id = workspace.functions.findIndex(x => x.ID == data.Value.ID)
+                                    let id = workflow.functions.findIndex(x => x.ID == data.Value.ID)
                                     
                                     if(id > -1){
-                                        workspace.functions.splice(id, 1)
+                                        workflow.functions.splice(id, 1)
                                         //this.functions[id] = data
                                     }
-                                    workspace.functions = [...  workspace.functions]
+                                    workflow.functions = [...  workflow.functions]
 
-                                    workspace.activeFunctions = []
-                                    workspace.inActiveFunctions = []
-                                    workspace.functions.forEach(x => {
+                                    workflow.activeFunctions = []
+                                    workflow.inActiveFunctions = []
+                                    workflow.functions.forEach(x => {
                                         if(x.Value.Started)
-                                            workspace.activeFunctions.push(x.Value)
+                                            workflow.activeFunctions.push(x.Value)
                                         else
-                                            workspace.inActiveFunctions.push(x.Value)
+                                            workflow.inActiveFunctions.push(x.Value)
                                     })
                                 }
                             );
@@ -123,11 +123,11 @@ export class DashboardComponent {
     
                         // this.qastrategies.SetStrategies(data[0].Value.Strategies)
 
-                        // console.log(this.workspaces)
+                        // console.log(this.workflows)
                         
                         this.quantapp.LinkAction(wiid,
                             data => { //Load
-                                workspace.workbooks = data
+                                workflow.workbooks = data
                             },
                             data => { //Add
                                 // console.log(data)
@@ -137,96 +137,96 @@ export class DashboardComponent {
                                 // console.log('Exchange', data)
                                 
                                 let counter = -1
-                                for(let i = 0; i < workspace.workbooks.length; i++){
+                                for(let i = 0; i < workflow.workbooks.length; i++){
                                     // console.log(this.workbooks[i])
-                                    if(workspace.workbooks[i].Key == data.Key){                
+                                    if(workflow.workbooks[i].Key == data.Key){                
                                         counter = i
                                     }
                                 }
                                 
                                 if(counter > -1)
-                                workspace.workbooks[counter] = data
+                                workflow.workbooks[counter] = data
                                 // console.log(data)
                             },
                             data => { //Remove
                                 // console.log(data)
     
                                 let counter = -1
-                                for(let i = 0; i < workspace.workbooks.length; i++){
-                                    if(workspace.workbooks[i].Key == data.Key){
+                                for(let i = 0; i < workflow.workbooks.length; i++){
+                                    if(workflow.workbooks[i].Key == data.Key){
                                         counter = i
                                     }
                                 }
                                 if(counter > -1)
-                                workspace.workbooks.splice(counter,1)
+                                workflow.workbooks.splice(counter,1)
                             }
                         );
                     },
                     data => { //Add
                     },
                     data => { //Exchange
-                        workspace.workspace = data.Value
+                        workflow.workflow = data.Value
     
-                        workspace.functions = []
+                        workflow.functions = []
                         data.Value.Functions.forEach(x => {
     
                             let fid = x + "-F-MetaData";
                             this.quantapp.LinkAction(fid,
                                 data => { //Load                                
                                     data.forEach(x => {
-                                        workspace.functions.push(x.Value)
+                                        workflow.functions.push(x.Value)
                                     })
                                 },
                                 data => { //Add
-                                    workspace.functions.push(data)
-                                    workspace.functions = [...  workspace.functions]
+                                    workflow.functions.push(data)
+                                    workflow.functions = [...  workflow.functions]
                                 },
                                 data => { //Exchange
-                                    let id = workspace.functions.findIndex(x => x.ID = data.Value.ID)
+                                    let id = workflow.functions.findIndex(x => x.ID = data.Value.ID)
                                     
                                     if(id > -1){
-                                        workspace.functions[id] = data.Value
+                                        workflow.functions[id] = data.Value
                                     }
-                                    workspace.functions = [...  workspace.functions]
+                                    workflow.functions = [...  workflow.functions]
                                     
                                 },
                                 data => { //Remove
-                                    let id = workspace.functions.findIndex(x => x.ID = data.Value.ID)
+                                    let id = workflow.functions.findIndex(x => x.ID = data.Value.ID)
                                     
                                     if(id > -1){
-                                        workspace.functions.splice(id, 1)
+                                        workflow.functions.splice(id, 1)
                                     }
-                                    workspace.functions = [...  workspace.functions]
+                                    workflow.functions = [...  workflow.functions]
                                 }
                             );
                         });
                         // this.qastrategies.SetStrategies(data.Value.Strategies)
                         this.quantapp.LinkAction(wiid,
                             data => { //Load
-                                workspace.workbooks = data
+                                workflow.workbooks = data
                             },
                             data => { //Add
                             },
                             data => { //Exchange
                                 let counter = -1
-                                for(let i = 0; i < workspace.workbooks.length; i++){
-                                    if(workspace.workbooks[i].Key == data.Key){
+                                for(let i = 0; i < workflow.workbooks.length; i++){
+                                    if(workflow.workbooks[i].Key == data.Key){
                                         counter = i
                                     }
                                 }
                                 
-                                workspace.workbooks[counter] = data
+                                workflow.workbooks[counter] = data
                                 console.log(data)
                             },
                             data => { //Remove
                                 let counter = -1
-                                for(let i = 0; i < workspace.workbooks.length; i++){
-                                    if(workspace.workbooks[i].Key == data.Key){                
+                                for(let i = 0; i < workflow.workbooks.length; i++){
+                                    if(workflow.workbooks[i].Key == data.Key){                
                                         counter = i
                                     }
                                 }
                                 if(counter > -1)
-                                workspace.workbooks.splice(counter,1)
+                                workflow.workbooks.splice(counter,1)
                             }
                         );
                     },
@@ -242,9 +242,9 @@ export class DashboardComponent {
             // this.quantapp.LinkAction(this.wid,
             //     data => { //Load
                     
-            //         this.workspace = data[0].Value
+            //         this.workflow = data[0].Value
                     
-            //         this.workspace.Permissions.forEach(x => {
+            //         this.workflow.Permissions.forEach(x => {
             //             if(x.ID == this.quantapp.quser.User.Email) this.permission = x.Permission
             //         })
                     
@@ -333,7 +333,7 @@ export class DashboardComponent {
             //     data => { //Add
             //     },
             //     data => { //Exchange
-            //         this.workspace = data.Value
+            //         this.workflow = data.Value
 
             //         this.functions = []
             //         data.Value.Functions.forEach(x => {
@@ -426,7 +426,7 @@ export class DashboardComponent {
 
     createNewFunctionFs(){
         let templateCode = {
-            WorkspaceID: this.wid,
+            WorkflowID: this.wid,
             ID: "",
             Name: "Hello F# Agent",
             Description: "Hello F# Analytics Agent Skeleton",
@@ -460,7 +460,7 @@ export class DashboardComponent {
     let master(): F_v01 =
         {
             ID = None
-            WorkspaceID = Some("` + this.wid + `")
+            WorkflowID = Some("` + this.wid + `")
             Code = None
             Name = "Hello F# Agent"
             Description = Some("Hello F# Analytics Agent Skeleton")
@@ -528,7 +528,7 @@ export class DashboardComponent {
 
     createNewFunctionPy(){
         let templateCode = {
-            WorkspaceID: this.wid,
+            WorkflowID: this.wid,
             ID: "",
             Name: "Hello Python Agent",
             Description: "Hello Python Analytics Agent Skeleton",
@@ -576,7 +576,7 @@ def Job(timestamp, data):
 def pkg():
     return qae.FPKG(
     None, #ID
-    "` + this.wid + `", #Workspace ID
+    "` + this.wid + `", #Workflow ID
     "Hello Python Agent", #Name
     "Hello Python Analytics Agent Sample", #Description
     None, #M ID Listener
@@ -605,7 +605,7 @@ def pkg():
 
     createNewFunctionCs(){
         let templateCode = {
-            WorkspaceID: this.wid,
+            WorkflowID: this.wid,
             ID: "",
             Name: "Hello C# Agent",
             Description: "Hello C# Analytics Agent Skeleton",
@@ -634,7 +634,7 @@ public class CSharpAgent
     {
         return new FPKG(
             null, //ID
-            "` + this.wid + `", //Workspace ID
+            "` + this.wid + `", //Workflow ID
             "Hello C# Agent", //Name
             "Hello C# Analytics Agent Sample", //Description
             null, //M ID Listener
@@ -686,7 +686,7 @@ public class CSharpAgent
 
     createNewFunctionVb(){
         let templateCode = {
-            WorkspaceID: this.wid,
+            WorkflowID: this.wid,
             ID: "",
             Name: "Hello VB Agent",
             Description: "Hello VB Analytics Agent Skeleton",
@@ -740,7 +740,7 @@ public class CSharpAgent
         public Shared Function pkg() As FPKG
             Return new FPKG(
                 Nothing, 'ID
-                "` + this.wid + `", 'Workspace ID
+                "` + this.wid + `", 'Workflow ID
                 "Hello VB Agent", 'Name
                 "Hello VB Analytics Agent Sample", 'Description
                 Nothing, 'M ID Listener
@@ -771,7 +771,7 @@ public class CSharpAgent
     
     createNewFunctionJs(){
         let templateCode = {
-            WorkspaceID: this.wid,
+            WorkflowID: this.wid,
             ID: "",
             Name: "Javascript Agent",
             Description: "Hello Javascript Analytics Agent Skeleton",
@@ -797,7 +797,7 @@ var qengine = importNamespace('QuantApp.Engine')
 
 let pkg = new qengine.FPKG(
     null, //ID
-    '` + this.wid + `', //Workspace ID
+    '` + this.wid + `', //Workflow ID
     'Hello Js Agent', //Name
     'Hello Js Analytics Agent Sample', //Description
     null, //M ID Listener

@@ -1,8 +1,8 @@
-Workspaces
+Workflows
 ===
-In **CoFlows** a project is called a Workspace. Developers declare the entire environment through a **package.json** file where they define both the project and it's executing containers together with the required resources.
+In **CoFlows** a project is called a Workflow. Developers declare the entire environment through a **package.json** file where they define both the project and it's executing containers together with the required resources.
 
-Every workspace depends on a set of sections:
+Every workflow depends on a set of sections:
 * **Base** code containing libraries used across the entire project
 * [Agents](Agents/General.md "Agents") code describing functions that are called either on a scheduled basis or that react to various external triggers. Agents can pull data from a website or check for updates in a database to give a few examples
 * [Queries](Queries/General.md "Queries") code defining functions that are automatically assigned URLs for WebAPI access from external systems.
@@ -16,7 +16,7 @@ Every workspace depends on a set of sections:
 ## Languages
 The QuantApp Engine enables a polyglot environment where developers can code their functions in a variety of languages while allowing all languages to co-exist in the same process in memory. This mitigates the need for a TCP (SOAP, JSON WebAPI, Py4J) overhead which is usual when functions from different languages interact.
 
-Within a **CoFlows** workspace, three computing environments interact within the same process including the **Core CLR** (DotNet Core Language Runtime), **JVM** (Java Virtual Machine) and the **Python interpreter**. Javascript is interpreted within the CLR using the Jint package. 
+Within a **CoFlows** workflow, three computing environments interact within the same process including the **Core CLR** (DotNet Core Language Runtime), **JVM** (Java Virtual Machine) and the **Python interpreter**. Javascript is interpreted within the CLR using the Jint package. 
 Note: The CLR is the main execution environment which calls the JVM and and Python interpreter.
 
 The full list is:
@@ -42,7 +42,7 @@ Once a project has been committed to a **GitHub** repo (or straight into **CoFlo
 
 ## Definition
 
-Workspaces are declared through a package.json file like:
+Workflows are declared through a package.json file like:
 
     {
         "ID": GUID,

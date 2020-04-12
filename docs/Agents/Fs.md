@@ -15,7 +15,7 @@ This is a generic example of F# agent following the generic structure within **C
     let pkg(): FPKG =
         {
             ID = Some(defaultID)
-            WorkspaceID = Some("Hello_World_WorkSpace")
+            WorkflowID = Some("Hello_World_Workflow")
             Code = None
             Name = "Hello F# Agent"
             Description = Some("Hello F# Analytics Agent Sample")

@@ -18,7 +18,7 @@ This is a generic example of C# agent following the generic structure within **C
         {
             return new FPKG(
                 defaultID, //ID
-                "Hello_World_WorkSpace", //Workspace ID  
+                "Hello_World_Workflow", //Workflow ID  
                 "Hello C# Agent", //Name
                 "Hello C# Analytics Agent Sample", //Description
                 "xxx-MID", //F# Listener

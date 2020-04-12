@@ -15,8 +15,8 @@ export const AppRoutes: Routes = [{
         loadChildren: './dashboard/dashboard.module#DashboardModule'
       }, 
       {
-        path: 'workspaces',
-        loadChildren: './workspaces/workspaces.module#WorkspacesModule'
+        path: 'workflows',
+        loadChildren: './workflows/workflows.module#WorkflowsModule'
       }
 ]
 }, {

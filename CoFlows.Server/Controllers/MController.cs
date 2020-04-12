@@ -120,7 +120,7 @@ namespace CoFlows.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> WorkSpace(string id)
+        public async Task<IActionResult> Workflow(string id)
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -132,9 +132,9 @@ namespace CoFlows.Server.Controllers
             var res = m[x => true];
             if(res.Count > 0)
             {
-                var workSpace = res.FirstOrDefault() as WorkSpace;
+                var workflow = res.FirstOrDefault() as Workflow;
 
-                return Ok(workSpace);
+                return Ok(workflow);
 
             }
 
@@ -142,7 +142,7 @@ namespace CoFlows.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> DefaultWorkSpaces()
+        public async Task<IActionResult> DefaultWorkflows()
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -150,14 +150,14 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
 
-            var ws = Program.GetDefaultWorkSpaces();
-            var filtered = new List<WorkSpace>();
+            var ws = Program.GetDefaultWorkflows();
+            var filtered = new List<Workflow>();
 
             foreach(var w in ws)
                 foreach(var p in w.Permissions)
                     if(p.ID == quser.Email && (int)p.Permission > (int)AccessType.Denied)
                         {
-                            var newWorkSpace = new WorkSpace(
+                            var newWorkflow = new Workflow(
                                 w.ID, 
                                 w.Name, 
                                 w.Strategies,
@@ -168,13 +168,13 @@ namespace CoFlows.Server.Controllers
                                 w.Pips, 
                                 w.Jars, 
                                 null,//w.Bins, 
-                                null,//workSpace.Files, 
+                                null,//workflow.Files, 
                                 w.ReadMe, 
                                 w.Publisher, 
                                 w.PublishTimestamp, 
                                 w.AutoDeploy, 
                                 w.Container);
-                            filtered.Add(newWorkSpace);
+                            filtered.Add(newWorkflow);
                         }
                 
             
@@ -191,11 +191,11 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
 
-            var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--WorkSpaces");
-            if(workspace_ids[x => true].Where(x => x.ToString() == data.ID).Count() == 0)
+            var workflow_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows");
+            if(workflow_ids[x => true].Where(x => x.ToString() == data.ID).Count() == 0)
             {
-                workspace_ids.Add(data.ID);
-                workspace_ids.Save();
+                workflow_ids.Add(data.ID);
+                workflow_ids.Save();
             }
 
             QuantApp.Kernel.User.ContextUser = quser.ToUserData();
@@ -206,9 +206,9 @@ namespace CoFlows.Server.Controllers
 
             try
             {
-                var wsp = QuantApp.Kernel.M.Base(data.ID)[x => true][0] as WorkSpace;
+                var wsp = QuantApp.Kernel.M.Base(data.ID)[x => true][0] as Workflow;
                 
-                var _pkg = QuantApp.Engine.Code.ProcessPackageWorkspace(wsp);
+                var _pkg = QuantApp.Engine.Code.ProcessPackageWorkflow(wsp);
                 if(Directory.Exists("/app/mnt/Agents"))
                     Directory.Delete("/app/mnt/Agents", true);
                 if(Directory.Exists("/app/mnt/Base"))
@@ -236,7 +236,7 @@ namespace CoFlows.Server.Controllers
                     // var entryStream = entry.Open();
                     // var streamReader = new StreamReader(entryStream);
                     // var content = streamReader.ReadToEnd();
-                    // var filePath = "/Workspace/" + entry.FullName;
+                    // var filePath = "/Workflow/" + entry.FullName;
 
                     // System.IO.FileInfo file = new System.IO.FileInfo(filePath);
                     // file.Directory.Create(); // If the directory already exists, this method does nothing.
@@ -263,7 +263,7 @@ namespace CoFlows.Server.Controllers
                 // });
                 // th.Start();
 
-                Program.AddServicedWorkSpaces(wsp.ID);
+                Program.AddServicedWorkflows(wsp.ID);
             }
             catch(Exception e)
             {
@@ -312,7 +312,7 @@ namespace CoFlows.Server.Controllers
         }
 
         [HttpGet, AllowAnonymous]
-        public async Task<FileStreamResult> GetZipFromWorkSpace(string id)
+        public async Task<FileStreamResult> GetZipFromWorkflow(string id)
         {
             QuantApp.Kernel.User quser = null;
             string cokey = Request.Cookies["coflows"]; 
@@ -353,7 +353,7 @@ namespace CoFlows.Server.Controllers
 
             // QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
 
-            var wsp = M.Base(id)[x => true][0] as WorkSpace;
+            var wsp = M.Base(id)[x => true][0] as Workflow;
 
             var up = QuantApp.Kernel.AccessType.Denied;
         
@@ -364,7 +364,7 @@ namespace CoFlows.Server.Controllers
 
             if(up == AccessType.Write)
             {
-                var pkg =  QuantApp.Engine.Code.ProcessPackageWorkspace(wsp);
+                var pkg =  QuantApp.Engine.Code.ProcessPackageWorkflow(wsp);
 
                 var bytes = QuantApp.Engine.Code.ProcessPackageToZIP(pkg);
 
@@ -378,7 +378,7 @@ namespace CoFlows.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ServicedWorkSpaces()
+        public async Task<IActionResult> ServicedWorkflows()
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -386,16 +386,16 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
 
-            var ws = Program.GetServicedWorkSpaces();
-            var filtered = new List<WorkSpace>();
+            var ws = Program.GetServicedWorkflows();
+            var filtered = new List<Workflow>();
 
             foreach(var id in ws)
             {
-                var w = QuantApp.Kernel.M.Base(id)[x => true].FirstOrDefault() as WorkSpace;
+                var w = QuantApp.Kernel.M.Base(id)[x => true].FirstOrDefault() as Workflow;
                 foreach(var p in w.Permissions)
                     if(p.ID == quser.Email && (int)p.Permission > (int)AccessType.Denied || p.ID.ToLower() == "public")
                     {
-                        var newWorkSpace = new WorkSpace(
+                        var newWorkflow = new Workflow(
                             w.ID, 
                             w.Name, 
                             w.Strategies,
@@ -406,13 +406,13 @@ namespace CoFlows.Server.Controllers
                             w.Pips, 
                             w.Jars, 
                             null,//w.Bins, 
-                            null,//workSpace.Files, 
+                            null,//workflow.Files, 
                             w.ReadMe, 
                             w.Publisher, 
                             w.PublishTimestamp, 
                             w.AutoDeploy, 
                             w.Container);
-                        filtered.Add(newWorkSpace);
+                        filtered.Add(newWorkflow);
                     }
             }
                 
@@ -432,17 +432,17 @@ namespace CoFlows.Server.Controllers
 
             F f = F.Find(id).Value;
 
-            var m = M.Base(f.WorkspaceID);
+            var m = M.Base(f.WorkflowID);
             var res = m[x => true];
             if(res.Count > 0)
             {
-                var w = res.FirstOrDefault() as WorkSpace;
+                var w = res.FirstOrDefault() as Workflow;
                 var up = QuantApp.Kernel.AccessType.Denied;
 
-                var actives = CoFlows.Server.Program.GetDefaultWorkSpaces();
+                var actives = CoFlows.Server.Program.GetDefaultWorkflows();
                 var ok = false;
                 foreach(var active in actives)
-                    if(f.WorkspaceID == active.ID)
+                    if(f.WorkflowID == active.ID)
                         ok = true;
 
             
@@ -517,13 +517,13 @@ namespace CoFlows.Server.Controllers
                     else
                         f.Stop();
 
-                    var m = M.Base(f.WorkspaceID);
+                    var m = M.Base(f.WorkflowID);
                     var mres = m[x => true];
                     if(mres.Count > 0)
                     {
-                        var workSpace = mres.FirstOrDefault() as WorkSpace;
+                        var workflow = mres.FirstOrDefault() as Workflow;
 
-                        var flist = workSpace.Functions.ToEnumerable();
+                        var flist = workflow.Functions.ToEnumerable();
                         var nflist = new List<string>();
                         
                         foreach(var fl in flist)
@@ -531,7 +531,7 @@ namespace CoFlows.Server.Controllers
                         nflist.Add(f.ID);
                         var ff = nflist.ToFSharplist();
 
-                        var plist = workSpace.Permissions.ToEnumerable();
+                        var plist = workflow.Permissions.ToEnumerable();
                         var nplist = new List<Permission>();
                         
                         foreach(var pl in plist)
@@ -539,24 +539,24 @@ namespace CoFlows.Server.Controllers
 
                         var pp = nplist.ToFSharplist();
 
-                        var newWorkSpace = new WorkSpace(
-                            workSpace.ID, 
-                            workSpace.Name, 
-                            workSpace.Strategies,
-                             workSpace.Code, 
+                        var newWorkflow = new Workflow(
+                            workflow.ID, 
+                            workflow.Name, 
+                            workflow.Strategies,
+                             workflow.Code, 
                              ff, 
                              pp, 
-                             workSpace.NuGets, 
-                             workSpace.Pips, 
-                             workSpace.Jars, 
-                             workSpace.Bins, 
-                             workSpace.Files, 
-                             workSpace.ReadMe, 
-                             workSpace.Publisher, 
-                             workSpace.PublishTimestamp, 
-                             workSpace.AutoDeploy, 
-                             workSpace.Container);
-                        m.Exchange(workSpace, newWorkSpace);
+                             workflow.NuGets, 
+                             workflow.Pips, 
+                             workflow.Jars, 
+                             workflow.Bins, 
+                             workflow.Files, 
+                             workflow.ReadMe, 
+                             workflow.Publisher, 
+                             workflow.PublishTimestamp, 
+                             workflow.AutoDeploy, 
+                             workflow.Container);
+                        m.Exchange(workflow, newWorkflow);
                         m.Save();
                     }
                 }
@@ -605,7 +605,7 @@ namespace CoFlows.Server.Controllers
                     data.Code.ID = System.Guid.NewGuid().ToString();
 
 
-                var wb = M.Base(data.Code.WorkspaceID + "--Workbook");
+                var wb = M.Base(data.Code.WorkflowID + "--Workbook");
                 var wb_res = wb[x => M.V<string>(x, "ID") == data.Code.ID];
                 if(wb_res.Count > 0)
                 {
@@ -618,22 +618,22 @@ namespace CoFlows.Server.Controllers
                 wb.Save();
             }
 
-            var m = M.Base(data.Code.WorkspaceID);
+            var m = M.Base(data.Code.WorkflowID);
             var res = m[x => true];
             if(res.Count > 0)
             {
-                var workSpace = res.FirstOrDefault() as WorkSpace;
+                var workflow = res.FirstOrDefault() as Workflow;
                 var codes = new List<Tuple<string, string>>();
 
-                // foreach(var c in workSpace.Code)
+                // foreach(var c in workflow.Code)
                 //     codes.Add(c);
                 
                 if(!string.IsNullOrEmpty(data.Code.Name))
-                    // codes.Add(new Tuple<string, string>(data.Code.Name, data.Code.Code.Replace(data.Code.WorkspaceID, "$WID$")));
+                    // codes.Add(new Tuple<string, string>(data.Code.Name, data.Code.Code.Replace(data.Code.WorkflowID, "$WID$")));
                     codes.Add(new Tuple<string, string>(data.Code.Name, data.Code.Code));
                 else
                 {
-                    var wb = M.Base(data.Code.WorkspaceID + "--Workbook");
+                    var wb = M.Base(data.Code.WorkflowID + "--Workbook");
                     var wb_res = wb[x => M.V<string>(x, "ID") == data.Code.ID];
                     if(wb_res.Count > 0)
                     {
@@ -667,7 +667,7 @@ namespace CoFlows.Server.Controllers
             if(string.IsNullOrWhiteSpace(data.ID))
                 data.ID = System.Guid.NewGuid().ToString();
 
-            var wb = M.Base(data.WorkspaceID + "--Workbook");
+            var wb = M.Base(data.WorkflowID + "--Workbook");
             var wb_res = wb[x => M.V<string>(x, "ID") == data.ID];
             if(wb_res.Count > 0)
             {
@@ -708,7 +708,7 @@ namespace CoFlows.Server.Controllers
             var res = m[x => true];
             if(res.Count > 0)
             {
-                var workSpace = res.FirstOrDefault() as WorkSpace;
+                var workflow = res.FirstOrDefault() as Workflow;
 
                 var wb_m = M.Base(workbook + "--Workbook");
                 var wb_res = wb_m[x => M.V<string>(x, "ID") == id];
@@ -812,11 +812,11 @@ namespace CoFlows.Server.Controllers
 
             /////////////////
 
-            var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--WorkSpaces");
-            if(workspace_ids[x => true].Where(x => x.ToString() == data.ID).Count() == 0)
+            var workflow_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows");
+            if(workflow_ids[x => true].Where(x => x.ToString() == data.ID).Count() == 0)
             {
-                workspace_ids.Add(data.ID);
-                workspace_ids.Save();
+                workflow_ids.Add(data.ID);
+                workflow_ids.Save();
             }
 
             QuantApp.Kernel.User.ContextUser = quser.ToUserData();
@@ -1520,7 +1520,7 @@ namespace CoFlows.Server.Controllers
                     var res = m[x => true];
                     if(res.Count > 0)
                     {
-                        var workSpace = res.FirstOrDefault() as WorkSpace;
+                        var workflow = res.FirstOrDefault() as Workflow;
                         var codes = new List<Tuple<string, string>>();
                         
                         var wb = M.Base(wid + "--Workbook");
@@ -1540,7 +1540,7 @@ namespace CoFlows.Server.Controllers
                     }
                     else
                     {
-                        Console.WriteLine("DASH ERROR Workspace not found: " + wid);
+                        Console.WriteLine("DASH ERROR Workflow not found: " + wid);
                         return;
                     }
                 }
@@ -1714,7 +1714,7 @@ namespace CoFlows.Server.Controllers
                     var res = m[x => true];
                     if(res.Count > 0)
                     {
-                        var workSpace = res.FirstOrDefault() as WorkSpace;
+                        var workflow = res.FirstOrDefault() as Workflow;
                         var codes = new List<Tuple<string, string>>();
                         
                         var wb = M.Base(wid + "--Workbook");
@@ -1734,7 +1734,7 @@ namespace CoFlows.Server.Controllers
                     }
                     else
                     {
-                        Console.WriteLine("DASH ERROR Workspace not found: " + wid);
+                        Console.WriteLine("DASH ERROR Workflow not found: " + wid);
                         return;
                     }
                 }

@@ -17,7 +17,7 @@ type CodeData =
         Name : string
         mutable ID : string
         Code : string
-        WorkspaceID : string
+        WorkflowID : string
     }
 
 
@@ -114,7 +114,7 @@ type PKG =
 type FPKG =
     {
         ID : string
-        WorkspaceID : string
+        WorkflowID : string
         Name : string
         Description : string
         MID : string
@@ -139,7 +139,7 @@ type RegisterCode = delegate of bool * bool * (string * string) list -> string
 type ExecuteCode = delegate of (string * string) list -> ExecuteCodeResult
 type ExecuteCodeFunction = delegate of bool * (string * string) list * string * obj[] -> ExecuteCodeResult
 
-type WorkSpace =
+type Workflow =
     {
         ID : string
         Name : string
@@ -170,7 +170,7 @@ type Job = delegate of DateTime * string -> unit
 /// </summary>
 module Utils =
 
-    let ActiveWorkSpaceList = System.Collections.Generic.List<WorkSpace>()
+    let ActiveWorkflowList = System.Collections.Generic.List<Workflow>()
     let mutable CompileAll = false
 
     let mutable _registerCode : RegisterCode = null

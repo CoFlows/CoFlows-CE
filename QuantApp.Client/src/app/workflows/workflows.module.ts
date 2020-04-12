@@ -15,8 +15,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
 
-import { WorkspaceRoutes } from './workspaces.routing';
-import { WorkspaceComponent } from './workspace/workspace.component';
+import { WorkflowRoutes } from './workflows.routing';
+import { WorkflowComponent } from './workflow/workflow.component';
 import { FunctionComponent } from './function/function.component';
 import { WorkbookComponent } from './workbook/workbook.component';
 
@@ -26,7 +26,7 @@ import { QuantAppModule } from '../quantapp/quantapp.module';
 @NgModule({
   imports: [
     CommonModule,
-    RouterModule.forChild(WorkspaceRoutes),    
+    RouterModule.forChild(WorkflowRoutes),    
     ChartModule,
     FormsModule,
     NgbModule,
@@ -38,10 +38,10 @@ import { QuantAppModule } from '../quantapp/quantapp.module';
     QuantAppModule
   ],
   declarations: [
-    WorkspaceComponent,
+    WorkflowComponent,
     FunctionComponent,
     WorkbookComponent
   ]
 })
 
-export class WorkspacesModule {}
+export class WorkflowsModule {}

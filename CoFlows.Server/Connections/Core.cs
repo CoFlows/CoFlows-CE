@@ -465,18 +465,18 @@ namespace QuantApp.Core
             return comp;
         }
 
-        public Compute CreateCompute(string workspaceID)
+        public Compute CreateCompute(string workflowID)
         {
-            var workSpace = QuantApp.Kernel.M.Base(workspaceID)[x => true].First() as WorkSpace;
-            var pkg = QuantApp.Engine.Code.ProcessPackageWorkspace(workSpace);
+            var workflow = QuantApp.Kernel.M.Base(workflowID)[x => true].First() as Workflow;
+            var pkg = QuantApp.Engine.Code.ProcessPackageWorkflow(workflow);
             var res = GetObject<CreateComputeResult>("m/CreateComputeFromJSON",  pkg);
             var comp = new Compute(pkg, this, res);
             return comp;
         }
 
-        public string RemoteLogID(string workspaceID)
+        public string RemoteLogID(string workflowID)
         {
-            var podname = workspaceID;
+            var podname = workflowID;
             string res = GetURL("m/PodLog?id=" + podname);
 
             var jobj = Newtonsoft.Json.Linq.JObject.Parse(res);
@@ -506,9 +506,9 @@ namespace QuantApp.Core
         }
 
         // public string RemoteRemove(QuantApp.Engine.PKG pkg)
-        public string RemoteRemoveID(string workspaceID)
+        public string RemoteRemoveID(string workflowID)
         {
-            var podname = workspaceID;
+            var podname = workflowID;
             string res = GetURL("m/RemovePod?id=" + podname);
 
             var jobj = Newtonsoft.Json.Linq.JObject.Parse(res);
@@ -529,10 +529,10 @@ namespace QuantApp.Core
             public FunctionData Function {get;set;}
         }
 
-        public object Execute(string code, string code_name, string workspaceID, string queryID, string funcName, params object[] parameters)
+        public object Execute(string code, string code_name, string workflowID, string queryID, string funcName, params object[] parameters)
         {
             var res = GetString("m/PostEC",  new CallData(){ 
-                Code = new QuantApp.Engine.CodeData(code_name, queryID, code, workspaceID),
+                Code = new QuantApp.Engine.CodeData(code_name, queryID, code, workflowID),
                 Function = new FunctionData() { Name = funcName, Parameters = parameters }
             });
 
@@ -556,10 +556,10 @@ namespace QuantApp.Core
             return null;
         }
 
-        public object Execute(string workspaceID, string queryID, string funcName, params object[] parameters)
+        public object Execute(string workflowID, string queryID, string funcName, params object[] parameters)
         {
             var res = GetString("m/PostEC",  new CallData(){ 
-                Code = new QuantApp.Engine.CodeData("", queryID, "", workspaceID),
+                Code = new QuantApp.Engine.CodeData("", queryID, "", workflowID),
                 Function = new FunctionData() { Name = funcName, Parameters = parameters }
             });
 

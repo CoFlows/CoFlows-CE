@@ -216,9 +216,9 @@ export class WorkbookComponent {
 
     workbooks = []
 
-    workSpaceID = ""
+    workflowID = ""
 
-    workspace = {
+    workflow = {
         Permissions: []
     }
 
@@ -231,15 +231,15 @@ export class WorkbookComponent {
             let wid = params['wid'];
             let id = params['id'];
 
-            this.workSpaceID = wid
+            this.workflowID = wid
 
             this.quantapp.LinkAction(wid,
                 data => { //Load
 
-                    this.workspace = data[0].Value
-                    // console.log(this.workspace)
+                    this.workflow = data[0].Value
+                    // console.log(this.workflow)
 
-                    this.workspace.Permissions.forEach(x => {
+                    this.workflow.Permissions.forEach(x => {
                         if(x.ID == this.quantapp.quser.User.Email) this.permission = x.Permission
                     })
 
@@ -279,7 +279,7 @@ export class WorkbookComponent {
                     }
                     else{
                         this.selectedWB = JSON.parse(JSON.stringify(this.qawbook.templaceWB))
-                        this.selectedWB.WorkspaceID = wid
+                        this.selectedWB.WorkflowID = wid
                         this.workbooks.push({Value : this.selectedWB })
                         
                         this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
@@ -401,7 +401,7 @@ export class WorkbookComponent {
 
     newCode(){
         this.selectedWB = JSON.parse(JSON.stringify(this.qawbook.templaceWB))
-        this.selectedWB.WorkspaceID = this.workSpaceID
+        this.selectedWB.WorkflowID = this.workflowID
         this.workbooks.push({ Value: this.selectedWB })
         
     }

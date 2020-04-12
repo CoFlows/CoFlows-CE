@@ -25,7 +25,7 @@ namespace QuantApp.Kernel
             //CreateAccount = 12, CreateSubStrategy = 13,
             CRUD = 14,
             PING = 15,
-            // RegisterWorkspace = 16,
+            // RegisterWorkflow = 16,
             // Call = 17,
             // Response = 18,
             SaveM = 19,
