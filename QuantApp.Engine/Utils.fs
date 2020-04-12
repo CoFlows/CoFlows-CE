@@ -69,11 +69,18 @@ type Resource =
         Mem : string //50Gi = 50 Gb RAM, 200Mi = 200Mb RAM
     }
 
+type Volume =
+    {
+        Path : string //Path to mount the volume in the container
+        Name : string //Name of volume
+    }
+
 type Container =
     {
         Type : string
         Request : Resource
         Limit : Resource
+        Volumes : seq<Volume>
     }
 
 
