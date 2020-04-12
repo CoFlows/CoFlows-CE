@@ -1,4 +1,4 @@
-cd QuantApp.Client
+cd CoFlows.CE.Client
 REM npm install
 REM npm install -g @angular/cli
 REM ng build --prod --aot

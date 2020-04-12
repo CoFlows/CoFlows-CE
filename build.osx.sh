@@ -1,4 +1,4 @@
-cd QuantApp.Client
+cd CoFlows.CE.Client
 # npm install
 # # npm install -g @angular/cli
 ng build --prod --aot
