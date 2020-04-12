@@ -2,7 +2,7 @@ Scala Agent
 ===
 This is a generic example of Scala agent following the generic structure within **CoFlows**.
 
-Note: The Scala <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](https://github.com/QuantApp/CoFlows-CE/tree/master/QuantApp.Kernel/JVM "QAJVM").
+Note: The Scala <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](https://github.com/CoFlows/CoFlows-CE/tree/master/QuantApp.Kernel/JVM "QAJVM").
 
     import scala.collection._
 
@@ -17,7 +17,7 @@ Note: The Scala <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](ht
 
             CLR("QuantApp.Engine.FPKG",
                 defaultID, //ID
-                "Hello_World_WorkSpace", //Workspace ID  
+                "Hello_World_Workflow", //Workflow ID  
                 "Hello Scala Agent", //Name
                 "Hello Scala Analytics Agent Sample", //Description
                 "xxx-MID", //Scala Listener

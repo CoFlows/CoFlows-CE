@@ -35,7 +35,7 @@ Note: The python <-> CoreCLR interop is achieved through **PythonNet**.
     def pkg():
         return qae.FPKG(
         defaultID, #ID
-        "Hello_World_WorkSpace", #Workspace ID
+        "Hello_World_Workflow", #Workflow ID
         "Hello Python Agent", #Name
         "Hello Python Analytics Agent Sample", #Description
         mid, #M ID Listener

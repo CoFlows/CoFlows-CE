@@ -21,7 +21,7 @@
         },
         {
             "label": "publish server osx",            
-            "command": "dotnet publish -c Release -f netcoreapp3.1 -o QuantApp.Server/obj/Core/publish QuantApp.Server/QuantApp.Server.osx.csproj",
+            "command": "dotnet publish -c Release -f netcoreapp3.1 -o CoFlows.Server/obj/Core/publish CoFlows.Server/CoFlows.Server.osx.csproj",
             "type": "shell",
             "group": "build",
             //"dependsOn": "clean server",
@@ -45,7 +45,7 @@
         },
         {
             "label": "publish server win",            
-            "command": "dotnet publish -c Release -f netcoreapp3.1 -o QuantApp.Server/obj/Core/publish QuantApp.Server/QuantApp.Server.win.csproj",
+            "command": "dotnet publish -c Release -f netcoreapp3.1 -o CoFlows.Server/obj/Core/publish CoFlows.Server/CoFlows.Server.win.csproj",
             "type": "shell",
             "group": "build",
             //"dependsOn": "clean server",
@@ -69,7 +69,7 @@
         },
         {
             "label": "publish server lnx",            
-            "command": "dotnet publish -c Release -f netcoreapp3.1 -o QuantApp.Server/obj/Core/publish QuantApp.Server/QuantApp.Server.lnx.csproj",
+            "command": "dotnet publish -c Release -f netcoreapp3.1 -o CoFlows.Server/obj/Core/publish CoFlows.Server/CoFlows.Server.lnx.csproj",
             "type": "shell",
             "group": "build",
             //"dependsOn": "clean server",

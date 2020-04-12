@@ -1,0 +1,222 @@
+ARG JAVA_HOME=C:\\openjdk-8
+ARG NET_HOME=C:\\dotnet
+ARG PYTHON_HOME=C:\\Python
+ARG SCALA_HOME=C:\\scala
+ARG CYGWIN_HOME=C:\\tools\\cygwin
+ARG SPARK_HOME=C:\\spark
+ARG PYTHONPATH=C:\\App\\mnt\\pip
+
+FROM mcr.microsoft.com/windows/servercore:1607 as builder
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+# ENV JAVA_HOME C:\\openjdk-8
+ARG JAVA_HOME
+RUN $newPath = ('{0}\bin;{1}' -f $env:JAVA_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+    # Nano Server does not have "[Environment]::SetEnvironmentVariable()"
+	setx /M PATH $newPath
+
+# https://adoptopenjdk.net/upstream.html
+ENV JAVA_VERSION 8u222
+ENV JAVA_BASE_URL https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jdk_
+ENV JAVA_URL_VERSION 8u222b10
+# https://github.com/docker-library/openjdk/issues/320#issuecomment-494050246
+
+RUN $url = ('{0}x64_windows_{1}.zip' -f $env:JAVA_BASE_URL, $env:JAVA_URL_VERSION); \
+	Write-Host ('Downloading {0} ...' -f $url); \
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+	Invoke-WebRequest -Uri $url -OutFile 'openjdk.zip'; \
+    # TODO signature? checksum?
+	\
+	Write-Host 'Expanding ...'; \
+	New-Item -ItemType Directory -Path C:\temp | Out-Null; \
+	Expand-Archive openjdk.zip -DestinationPath C:\temp; \
+	Move-Item -Path C:\temp\* -Destination $env:JAVA_HOME; \
+	Remove-Item C:\temp; \
+	\
+	Write-Host 'Removing ...'; \
+	Remove-Item openjdk.zip -Force; \
+	\
+	Write-Host 'Verifying install ...'; \
+	Write-Host '  javac -version'; javac -version; \
+	Write-Host '  java -version'; java -version; \
+	\
+	Write-Host 'Complete.'
+
+# Install ASP.NET Core Runtime
+ENV ASPNETCORE_VERSION 3.0.0
+
+RUN Invoke-WebRequest -OutFile aspnetcore.zip https://dotnetcli.blob.core.windows.net/dotnet/aspnetcore/Runtime/$Env:ASPNETCORE_VERSION/aspnetcore-runtime-$Env:ASPNETCORE_VERSION-win-x64.zip; \
+    Expand-Archive aspnetcore.zip -DestinationPath dotnet; \
+    Remove-Item -Force aspnetcore.zip
+
+ENV PYTHON_VERSION 3.7.4
+ENV PYTHON_RELEASE 3.7.4
+
+RUN $url = ('https://www.python.org/ftp/python/{0}/python-{1}-amd64.exe' -f $env:PYTHON_RELEASE, $env:PYTHON_VERSION); \
+	Write-Host ('Downloading {0} ...' -f $url); \
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+	Invoke-WebRequest -Uri $url -OutFile 'python.exe'; \
+	\
+	Write-Host 'Installing ...'; \
+    # https://docs.python.org/3.5/using/windows.html#installing-without-ui
+	Start-Process python.exe -Wait \
+		-ArgumentList @( \
+			'/quiet', \
+			'InstallAllUsers=1', \
+			'TargetDir=C:\Python', \
+			'PrependPath=1', \
+			'Shortcuts=0', \
+			'Include_doc=0', \
+			'Include_pip=0', \
+			'Include_test=0' \
+		); \
+	\
+    # the installer updated PATH, so we should refresh our local value
+	$env:PATH = [Environment]::GetEnvironmentVariable('PATH', [EnvironmentVariableTarget]::Machine); \
+	\
+	Write-Host 'Verifying install ...'; \
+	Write-Host '  python --version'; python --version; \
+	\
+	Write-Host 'Removing ...'; \
+	Remove-Item python.exe -Force; \
+	\
+	Write-Host 'Complete.'
+
+# if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
+ENV PYTHON_PIP_VERSION 19.3
+# https://github.com/pypa/get-pip
+ENV PYTHON_GET_PIP_URL https://bootstrap.pypa.io/get-pip.py
+
+RUN Write-Host ('Downloading get-pip.py ({0}) ...' -f $env:PYTHON_GET_PIP_URL); \
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+	Invoke-WebRequest -Uri $env:PYTHON_GET_PIP_URL -OutFile 'get-pip.py'; \
+	\
+	Write-Host ('Installing pip=={0} ...' -f $env:PYTHON_PIP_VERSION); \
+	python get-pip.py \
+		--disable-pip-version-check \
+		--no-cache-dir \
+		('pip=={0}' -f $env:PYTHON_PIP_VERSION) \
+	; \
+	Remove-Item get-pip.py -Force; \
+	\
+	Write-Host 'Verifying pip install ...'; \
+	pip --version; \
+	\
+	Write-Host 'Complete.'
+
+RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+    Invoke-WebRequest -OutFile scala.zip https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.zip; \
+    Expand-Archive scala.zip -DestinationPath scala; \
+    Remove-Item -Force scala.zip; \
+    mv scala/scala-2.12.8/* scala; \
+    rm -r scala/scala-2.12.8
+
+ARG CYGWIN_HOME
+RUN Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing | Invoke-Expression
+RUN choco install cygwin -y;
+
+RUN $newPath = ('{0}\bin;{1}' -f $env:CYGWIN_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+    Invoke-WebRequest -OutFile spark.tgz https://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz; \
+    tar xzf spark.tgz; \
+    Remove-Item -Force spark.tgz; \
+    mv spark-2.4.4-bin-hadoop2.7 spark
+
+
+# FROM mcr.microsoft.com/windows/nanoserver:sac2016
+
+ARG JAVA_HOME
+ARG NET_HOME
+ARG PYTHON_HOME
+ARG SCALA_HOME
+ARG SPARK_HOME
+ARG PYTHON_INSTALL
+ARG PIP_INSTALL
+ARG PYTHONPATH
+
+# COPY --from=builder ["$JAVA_HOME", "$JAVA_HOME"]
+# COPY --from=builder ["$NET_HOME", "$NET_HOME"]
+# COPY --from=builder ["$PYTHON_HOME", "$PYTHON_HOME"]
+# COPY --from=builder ["$SCALA_HOME", "$SCALA_HOME"]
+# COPY --from=builder ["$SPARK_HOME", "$SPARK_HOME"]
+# COPY --from=builder ["$PYTHON_INSTALL", "$PYTHON_INSTALL"]
+# COPY --from=builder ["$PIP_INSTALL", "$PIP_INSTALL"]
+
+# SHELL ["powershell", "-Command"]
+
+
+RUN $newPath = ('{0}\bin;{1}' -f $env:JAVA_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN $newPath = ('{0}\bin;{1}' -f $env:SCALA_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN $newPath = ('{0};{1}' -f $env:PYTHON_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN $newPath = ('{0}\Scripts;{1}' -f $env:PYTHON_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN $newPath = ('{0};{1}' -f $env:NET_HOME, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	setx /M PATH $newPath
+
+RUN $newPath = ('{0}\bin;{1}' -f $env:SPARK_HOME, $env:PATH); \
+    Write-Host ('Updating PATH: {0}' -f $newPath); \
+    setx /M PATH $newPath
+
+# No SSL
+ENV ASPNETCORE_URLS http://+:80
+EXPOSE 80/tcp
+
+WORKDIR /App
+RUN mkdir pip
+
+RUN $newPath = ('{0}\Scripts;{0};{1}' -f $env:PYTHON_HOME, $env:PYTHONPATH); \
+    Write-Host ('Updating PATH: {0}' -f $newPath); \
+    setx /M PYTHONPATH $newPath
+
+RUN pip install dash
+RUN pip install dash-daq
+RUN pip install requests
+
+# RUN winutils chmod -R 777 C:\Users\ContainerAdministrator\AppData\Local\Temp
+ 
+RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+    Invoke-WebRequest -OutFile winutils.exe http://public-repo-1.hortonworks.com/hdp-win-alpha/winutils.exe; \
+    mv winutils.exe C:\\spark\\bin;
+
+RUN $newPath = ('{0};{0};{1}' -f $env:SPARK_HOME, $env:PATH); \
+    Write-Host ('Updating HADOOP_HOME: {0}' -f $newPath); \
+    setx /M HADOOP_HOME $newPath
+
+ENV HADOOP_HOME=C:\\spark
+ENV SPARK_HOME=C:\\spark
+
+#RUN icacls.exe C:\\spark\\bin\\winutils.exe /grant BUILTIN\Users:F /t
+#RUN icacls.exe C:\\spark\\bin\\winutils.exe /grant Everyone:F /t
+#RUN icacls.exe C:\\spark /inheritance:r /grant Everyone:F /t
+RUN c:\\spark\\bin\\winutils.exe chmod -R 7777 c:\\spark\\bin
+#RUN c:\\spark\\bin\\winutils.exe chmod -R 7777 c:\\spark\\bin\\winutils.exe
+
+RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+     Invoke-WebRequest -OutFile sql.tgz https://download.microsoft.com/download/0/2/A/02AAE597-3865-456C-AE7F-613F99F850A8/sqljdbc_6.0.8112.200_enu.tar.gz; \
+     tar xzf sql.tgz; \
+     Remove-Item -Force sql.tgz; \
+     cp sqljdbc_6.0/enu/jre8/sqljdbc42.jar /app/mnt/jars
+ 	mv sqljdbc_6.0/enu/auth/sqljdbc_auth.dll /App
+
+RUN c:\\spark\\bin\\winutils.exe chmod -R 7777 c:\\App\\sqljdbc_auth.dll
+
+COPY ${source:-obj/win/publish} ./
+
+ENTRYPOINT ["dotnet", "CoFlows.Server.win.dll"]

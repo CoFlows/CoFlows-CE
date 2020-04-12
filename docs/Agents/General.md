@@ -5,7 +5,7 @@ General Agent
 
 Agents can be written in a variety of languages (C#, F#, VB, Python, Java, Scala and Javascript) and all follow the same generic structure.
 
-Every agent has a set of properties like ID, Name and Description. Every agent also belongs to a Workspace.
+Every agent has a set of properties like ID, Name and Description. Every agent also belongs to a Workflow.
 Agents, can react to either a 
 * scheduled event which is defined by a CRON command in the **ScheduledCommand** property and/or to
 * changes to an **M** set defined by the **MID** property and /or to
@@ -14,7 +14,7 @@ Agents, can react to either a
 ### Properties
 
     ID                  "The ID of the Agent, we recommend using a GUID"
-    WorkspaceID         "ID of the Workspace the Agent belongs to"
+    WorkflowID         "ID of the Workflow the Agent belongs to"
     Name                "Name of Agent"
     Description         "Description of Agent's reason to exist"
     MID                 "ID of the M set which the Agent should react to"

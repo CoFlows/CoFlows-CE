@@ -474,7 +474,7 @@ module Code =
                             |> List.filter(fun f -> 
                                 let f = f |> Path.GetFileName
                                 (
-                                    not(f.Contains("QuantApp.Server.")) && 
+                                    not(f.Contains("CoFlows.Server.")) && 
                                     not(f.Contains("_")) && 
                                     not(f.Contains("-")) && 
                                     not(f.Contains("clr")) && 
@@ -1775,7 +1775,7 @@ module Code =
                         ""|>Console.WriteLine
                         ""|>Console.WriteLine
                         
-                        let work_books = pkgID + "--Workbook" |> M.Base
+                        let work_books = pkgID + "--Queries" |> M.Base
                         let wb_res = work_books.[fun x -> M.V<string>(x, "Name") = name]
                         if wb_res.Count > 0 then
                             let item = wb_res.[0] :?> CodeData
@@ -2107,7 +2107,7 @@ module Code =
                         ID = pkg_id
                         Name = pkg_content.Name
                         Strategies = []
-                        Functions = 
+                        Agents = 
                             pkg_content.Agents
                             |> Seq.toList
                             |> List.map(fun entry -> 
@@ -2117,7 +2117,7 @@ module Code =
                                         (entry.Name, entry.Content.Replace("$WID$", pkg_content.ID))
                                     ],
                                     entry.Exe, [||])
-                                let fpkg = { fpkg with ID = fpkg.ID.Replace("$WID$", pkg_id); WorkspaceID = fpkg.WorkspaceID.Replace("$WID$", pkg_id) }
+                                let fpkg = { fpkg with ID = fpkg.ID.Replace("$WID$", pkg_id); WorkflowID = fpkg.WorkflowID.Replace("$WID$", pkg_id) }
                                 let f, result = F.CreatePKG(fpkg, code)
                                 async { { Function = "Main"; Data = "Initial Execution" } |> Newtonsoft.Json.JsonConvert.SerializeObject |> f.Body |> ignore } |> Async.Start
                                 f, result
@@ -2182,7 +2182,7 @@ module Code =
                 files_m.Save()
                 bins_m.Save()
 
-                let work_books = pkg_id + "--Workbook" |> M.Base
+                let work_books = pkg_id + "--Queries" |> M.Base
                 work_books.[fun _ -> true] |> Seq.iter(work_books.Remove)
                 work_books.Save()
                 
@@ -2199,7 +2199,7 @@ module Code =
                                 Name = entry.Name
                                 ID = if entry.ID |> String.IsNullOrEmpty then System.Guid.NewGuid().ToString() else entry.ID
                                 Code = entry.Content
-                                WorkspaceID = pkg_id
+                                WorkflowID = pkg_id
                             })
                     else
                         work_books.Add(
@@ -2207,7 +2207,7 @@ module Code =
                                 Name = entry.Name
                                 ID = if entry.ID |> String.IsNullOrWhiteSpace then System.Guid.NewGuid().ToString() else entry.ID
                                 Code = entry.Content
-                                WorkspaceID = pkg_id
+                                WorkflowID = pkg_id
                             }) |> ignore
                 )
                 work_books.Save()
@@ -2246,7 +2246,7 @@ module Code =
                         ID = pkg_id
                         Name = pkg_content.Name
                         Strategies = []
-                        Functions = 
+                        Agents = 
                             pkg_content.Agents
                             |> Seq.toList
                             |> List.map(fun entry -> 
@@ -2314,7 +2314,7 @@ module Code =
                         Container = pkg_content.Container
                     }
 
-                let work_books = M.Base(pkg_id + "--Workbook")
+                let work_books = M.Base(pkg_id + "--Queries")
                 pkg_content.Queries
                 |> Seq.toList
                 |> List.iter(fun entry ->
@@ -2328,7 +2328,7 @@ module Code =
                                 Name = entry.Name
                                 ID = if entry.ID |> String.IsNullOrEmpty then System.Guid.NewGuid().ToString() else entry.ID
                                 Code = entry.Content
-                                WorkspaceID = pkg_id
+                                WorkflowID = pkg_id
                             })
                     else
                         work_books.Add(
@@ -2336,22 +2336,22 @@ module Code =
                                 Name = entry.Name
                                 ID = if entry.ID |> String.IsNullOrWhiteSpace then System.Guid.NewGuid().ToString() else entry.ID
                                 Code = entry.Content
-                                WorkspaceID = pkg_id
+                                WorkflowID = pkg_id
                             }) |> ignore
                 )
                 ws
 
             if startAgents then
-                ws.Functions |> List.iter(fun id -> F.Find(id).Value.Start())
+                ws.Agents |> List.iter(fun id -> F.Find(id).Value.Start())
 
         build              
     
-    let ProcessPackageWorkspace (wsp : WorkSpace) : PKG =
+    let ProcessPackageWorkflow (wsp : Workflow) : PKG =
         
         let pkg_id = wsp.ID
 
         let queries =
-            let work_books = M.Base(pkg_id + "--Workbook")
+            let work_books = M.Base(pkg_id + "--Queries")
             if work_books |> isNull |> not then
                 work_books.[fun _ -> true] 
                 |> Seq.map(
@@ -2367,7 +2367,7 @@ module Code =
                 null
 
         let agents = 
-            wsp.Functions
+            wsp.Agents
             |> List.map(fun id -> 
                 let m = id+ "-F-MetaData" |> M.Base
 
