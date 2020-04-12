@@ -2094,6 +2094,14 @@ module Code =
             let ws =
                 let pkg_id = pkg_content.ID
 
+                let files_m = pkg_id + "--Files" |> M.Base
+                files_m.[fun _ -> true] |> Seq.iter(files_m.Remove)
+                files_m.Save()
+
+                let bins_m = pkg_id + "--Bins" |> M.Base
+                bins_m.[fun _ -> true] |> Seq.iter(bins_m.Remove)
+                bins_m.Save()
+
                 let ws = 
                     {
                         ID = pkg_id
@@ -2122,14 +2130,57 @@ module Code =
                         NuGets = pkg_content.NuGets |> Seq.toList
                         Pips = pkg_content.Pips |> Seq.toList
                         Jars = pkg_content.Jars |> Seq.toList
-                        Bins = pkg_content.Bins |> Seq.toList
-                        Files = pkg_content.Files |> Seq.toList
+                        // Bins = pkg_content.Bins |> Seq.toList
+                        // Files = pkg_content.Files |> Seq.toList
+                        Bins = 
+                            pkg_content.Bins
+                            |> Seq.map(fun filePkg ->
+                                
+                                let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                                if bins_m_res.Count > 0 then
+                                    let item = bins_m_res.[0] :?> FilePackage
+                                    
+                                    bins_m.Exchange(
+                                        item, 
+                                        filePkg)
+                                else
+                                    bins_m.Add(
+                                        filePkg) |> ignore
+
+                                {    
+                                    Name = filePkg.Name
+                                    Content = "__content__in__m__"
+                                } : FilePackage)
+                            |> Seq.toList
+                        Files = 
+                            pkg_content.Files
+                            |> Seq.map(fun filePkg ->
+                                
+                                let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                                if files_m_res.Count > 0 then
+                                    let item = files_m_res.[0] :?> FilePackage
+                                    
+                                    files_m.Exchange(
+                                        item, 
+                                        filePkg)
+                                else
+                                    files_m.Add(
+                                        filePkg) |> ignore
+
+                                {    
+                                    Name = filePkg.Name
+                                    Content = "__content__in__m__"
+                                } : FilePackage)
+                            |> Seq.toList
                         ReadMe = pkg_content.ReadMe
                         Publisher = if pkg_content.Publisher |> isNull then QuantApp.Kernel.User.ContextUser.Email else pkg_content.Publisher
                         PublishTimestamp = if pkg_content.PublishTimestamp.Year <= (DateTime.Now.Year - 10) then DateTime.Now else pkg_content.PublishTimestamp
                         AutoDeploy = pkg_content.AutoDeploy
                         Container = pkg_content.Container
                     }
+
+                files_m.Save()
+                bins_m.Save()
 
                 let work_books = pkg_id + "--Workbook" |> M.Base
                 work_books.[fun _ -> true] |> Seq.iter(work_books.Remove)
@@ -2140,7 +2191,6 @@ module Code =
                 |> List.iter(fun entry ->
                     let wb_res = work_books.[fun x -> M.V<string>(x, "ID") = entry.ID]
                     if wb_res.Count > 0 then
-
                         let item = wb_res.[0] :?> CodeData
                         
                         work_books.Exchange(
@@ -2185,6 +2235,12 @@ module Code =
                 pkg_content.Pips |> InstallPips
                 pkg_content.Jars |> InstallJars
 
+                let files_m = pkg_id + "--Files" |> M.Base
+                files_m.[fun _ -> true] |> Seq.iter(files_m.Remove)
+
+                let bins_m = pkg_id + "--Bins" |> M.Base
+                bins_m.[fun _ -> true] |> Seq.iter(bins_m.Remove)
+
                 let ws = 
                     {
                         ID = pkg_id
@@ -2209,8 +2265,48 @@ module Code =
                         NuGets = pkg_content.NuGets |> Seq.toList
                         Pips = pkg_content.Pips |> Seq.toList
                         Jars = pkg_content.Jars |> Seq.toList
-                        Bins = pkg_content.Bins |> Seq.toList
-                        Files = pkg_content.Files |> Seq.toList
+                        // Bins = pkg_content.Bins |> Seq.toList
+                        // Files = pkg_content.Files |> Seq.toList
+                        Bins = 
+                            pkg_content.Bins
+                            |> Seq.map(fun filePkg ->
+                                
+                                let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                                if bins_m_res.Count > 0 then
+                                    let item = bins_m_res.[0] :?> FilePackage
+                                    
+                                    bins_m.Exchange(
+                                        item, 
+                                        filePkg)
+                                else
+                                    bins_m.Add(
+                                        filePkg) |> ignore
+
+                                {    
+                                    Name = filePkg.Name
+                                    Content = "__content__in__m__"
+                                } : FilePackage)
+                            |> Seq.toList
+                        Files = 
+                            pkg_content.Files
+                            |> Seq.map(fun filePkg ->
+                                
+                                let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                                if files_m_res.Count > 0 then
+                                    let item = files_m_res.[0] :?> FilePackage
+                                    
+                                    files_m.Exchange(
+                                        item, 
+                                        filePkg)
+                                else
+                                    files_m.Add(
+                                        filePkg) |> ignore
+
+                                {    
+                                    Name = filePkg.Name
+                                    Content = "__content__in__m__"
+                                } : FilePackage)
+                            |> Seq.toList
                         ReadMe = pkg_content.ReadMe
                         Publisher = if pkg_content.Publisher |> isNull then QuantApp.Kernel.User.ContextUser.Email else pkg_content.Publisher
                         PublishTimestamp = if pkg_content.PublishTimestamp.Year <= (DateTime.Now.Year - 10) then DateTime.Now else pkg_content.PublishTimestamp
@@ -2286,7 +2382,8 @@ module Code =
                     Exe = "pkg"
                 })
 
-
+        let files_m = pkg_id + "--Files" |> M.Base
+        let bins_m = pkg_id + "--Bins" |> M.Base
         {
             ID = pkg_id
             Name = wsp.Name
@@ -2297,8 +2394,26 @@ module Code =
             NuGets = wsp.NuGets |> Seq.toList
             Pips = wsp.Pips |> Seq.toList
             Jars = wsp.Jars |> Seq.toList
-            Bins = wsp.Bins |> Seq.toList
-            Files = wsp.Files |> Seq.toList
+            // Bins = wsp.Bins |> Seq.toList
+            // Files = wsp.Files |> Seq.toList
+            Bins =
+                wsp.Bins
+                |> Seq.map(fun filePkg ->
+                    
+                    let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                    if bins_m_res.Count > 0 then
+                        bins_m_res.[0] :?> FilePackage
+                    else
+                        filePkg)
+            Files =
+                wsp.Files
+                |> Seq.map(fun filePkg ->
+                    
+                    let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                    if files_m_res.Count > 0 then
+                        files_m_res.[0] :?> FilePackage
+                    else
+                        filePkg)
             ReadMe = wsp.ReadMe
             Publisher = if wsp.Publisher |> isNull then QuantApp.Kernel.User.ContextUser.Email else wsp.Publisher
             PublishTimestamp = if wsp.PublishTimestamp.Year <= (DateTime.Now.Year - 10) then DateTime.Now else wsp.PublishTimestamp
@@ -2344,6 +2459,7 @@ module Code =
                     streamWriter.Close()
                     )
 
+                let bins_m = pkg.ID + "--Bins" |> M.Base
                 pkg.Bins
                 |> Seq.iter(fun entry -> 
                     let file = archive.CreateEntry("Bins/" + entry.Name, CompressionLevel.Optimal)
@@ -2351,19 +2467,26 @@ module Code =
                     let entryStream = file.Open()
                     let streamWriter = BinaryWriter(entryStream)
                     
-                    streamWriter.Write(System.Convert.FromBase64String(entry.Content))
-                    streamWriter.Close()
+                    let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = entry.Name]
+                    if bins_m_res.Count > 0 then
+                        let item = bins_m_res.[0] :?> FilePackage
+                        streamWriter.Write(System.Convert.FromBase64String(entry.Content))
+                        streamWriter.Close()
                     )
 
+                let files_m = pkg.ID + "--Files" |> M.Base
                 pkg.Files
                 |> Seq.iter(fun entry -> 
                     let file = archive.CreateEntry("Files/" + entry.Name, CompressionLevel.Optimal)
 
                     let entryStream = file.Open()
                     let streamWriter = BinaryWriter(entryStream)
-                    
-                    streamWriter.Write(System.Convert.FromBase64String(entry.Content))
-                    streamWriter.Close()
+
+                    let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = entry.Name]
+                    if files_m_res.Count > 0 then
+                        let item = files_m_res.[0] :?> FilePackage
+                        streamWriter.Write(System.Convert.FromBase64String(item.Content))
+                        streamWriter.Close()
                     )
 
                 let file = archive.CreateEntry("README.md", CompressionLevel.Optimal)
