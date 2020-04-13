@@ -21,9 +21,6 @@ import { SimulationComponent } from './simulation/simulation.component';
 
 import { CoFlowsModule } from '../coflows/coflows.module';
 
-// import { QAStrategiesComponent } from './strategies/qastrategies.component';
-
-
 @NgModule({
   imports: [
     CommonModule,
@@ -33,21 +30,16 @@ import { CoFlowsModule } from '../coflows/coflows.module';
     NgbModule,
     NgxDatatableModule,
     TreeTableModule, GrowlModule, TabViewModule, ContextMenuModule, CodeHighlighterModule, SharedModule,
-    CodemirrorModule,//.forRoot(),    
-    //NguiMapModule.forRoot({apiUrl: 'https://maps.google.com/maps/api/js?key=AIzaSyDckDGx8RGsoGHTbMq4fj_3DG5q3CSfd9c&libraries=visualization,places,drawing'}),
-
+    CodemirrorModule,
     CoFlowsModule
   ],
   declarations: [
     TraderComponent,
     SimulationComponent,
-    // QAStrategiesComponent
   ],
   providers: [
-    // QAStrategiesComponent
   ],
   exports: [
-    // QAStrategiesComponent
   ]
 })
 
