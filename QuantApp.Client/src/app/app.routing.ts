@@ -17,10 +17,6 @@ export const AppRoutes: Routes = [{
       {
         path: 'workspaces',
         loadChildren: './workspaces/workspaces.module#WorkspacesModule'
-      },
-      {
-        path: 'trader',
-        loadChildren: './trader/trader.module#TraderModule'
       }
 ]
 }, {
