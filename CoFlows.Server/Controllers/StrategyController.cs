@@ -25,9 +25,9 @@ using AQI.AQILabs.Kernel;
 using AQI.AQILabs.Kernel.Numerics.Util;
 using AQI.AQILabs.SDK.Strategies;
 
-using QuantApp.Server.Utils;
+using CoFlows.Server.Utils;
 
-namespace QuantApp.Server.Controllers
+namespace CoFlows.Server.Controllers
 {
     [Authorize, Route("[controller]/[action]")]
     public class StrategyController : Controller

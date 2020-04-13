@@ -36,10 +36,10 @@ using QuantApp.Engine;
 using Python.Runtime;
 
 
-using QuantApp.Server.Utils;
-using QuantApp.Server.Realtime;
+using CoFlows.Server.Utils;
+using CoFlows.Server.Realtime;
 
-namespace QuantApp.Server.Realtime
+namespace CoFlows.Server.Realtime
 {
     public class HttpProxyRequest
     {
@@ -83,9 +83,9 @@ namespace QuantApp.Server.Realtime
                     string cokey = context.Request.Cookies["coflows"]; 
                     if(cokey != null)
                     {
-                        if(QuantApp.Server.Controllers.AccountController.sessionKeys.ContainsKey(cokey))
+                        if(CoFlows.Server.Controllers.AccountController.sessionKeys.ContainsKey(cokey))
                         {
-                            quser = QuantApp.Kernel.User.FindUserBySecret(QuantApp.Server.Controllers.AccountController.sessionKeys[cokey]);
+                            quser = QuantApp.Kernel.User.FindUserBySecret(CoFlows.Server.Controllers.AccountController.sessionKeys[cokey]);
                             if(quser == null)
                             {
                                 await _next.Invoke(context);
@@ -128,9 +128,9 @@ namespace QuantApp.Server.Realtime
                     var wid = path.Replace("/lab/", "");
                     wid = wid.Substring(0, wid.IndexOf("/"));
 
-                    if(QuantApp.Server.Realtime.WebSocketListner.registered_workspaces_id.ContainsKey(wid))
+                    if(CoFlows.Server.Realtime.WebSocketListner.registered_workspaces_id.ContainsKey(wid))
                     {
-                        var sid = QuantApp.Server.Realtime.WebSocketListner.registered_workspaces_id[wid];
+                        var sid = CoFlows.Server.Realtime.WebSocketListner.registered_workspaces_id[wid];
                         var _socket = WebSocketListner.registered_sockets[sid];
 
                         var mess = new QuantApp.Kernel.RTDMessage { 
@@ -268,8 +268,8 @@ namespace QuantApp.Server.Realtime
                     if(WebSocketListner.registered_id_workspaces.ContainsKey(id))
                     {
                         var wid = WebSocketListner.registered_id_workspaces[id];
-                        var wsp_ais = QuantApp.Kernel.M.Base(wid)[x => true].FirstOrDefault() as WorkSpace;
-                        foreach(var fid in wsp_ais.Functions)
+                        var wsp_ais = QuantApp.Kernel.M.Base(wid)[x => true].FirstOrDefault() as Workflow;
+                        foreach(var fid in wsp_ais.Agents)
                         {
                             var f = F.Find(fid).Value;
                             f.RemoteStop();

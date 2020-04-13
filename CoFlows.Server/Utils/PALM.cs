@@ -16,7 +16,7 @@ using QuantApp.Kernel;
 using AQI.AQILabs.Kernel;
 
 
-namespace QuantApp.Server.Utils
+namespace CoFlows.Server.Utils
 {
     public class PALMStrategy
     {

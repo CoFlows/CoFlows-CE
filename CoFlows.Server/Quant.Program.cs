@@ -18,7 +18,7 @@ using QuantApp.Kernel;
 using QuantApp.Kernel.Adapters.SQL;
 using QuantApp.Engine;
 
-using QuantApp.Server.Utils;
+using CoFlows.Server.Utils;
 
 using Python.Runtime;
 
@@ -35,7 +35,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ContainerInstance.Fluent.Models;
 
-namespace QuantApp.Server.Quant
+namespace CoFlows.Server.Quant
 {
     public class Program
     {
@@ -54,7 +54,7 @@ namespace QuantApp.Server.Quant
             PythonEngine.Initialize();
 
             Code.InitializeCodeTypes(new Type[]{ 
-                typeof(QuantApp.Engine.WorkSpace),
+                typeof(QuantApp.Engine.Workflow),
                 typeof(Jint.Native.Array.ArrayConstructor),
                 typeof(AQI.AQILabs.Kernel.Instrument), 
                 typeof(AQI.AQILabs.Derivatives.CashFlow), 
@@ -69,25 +69,25 @@ namespace QuantApp.Server.Quant
 
             JObject config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
 
-            QuantApp.Server.Program.workspace_name = config["Workspace"].ToString();
-            QuantApp.Server.Program.hostName = config["Server"]["Host"].ToString();
+            CoFlows.Server.Program.workflow_name = config["Workflow"].ToString();
+            CoFlows.Server.Program.hostName = config["Server"]["Host"].ToString();
             var secretKey = config["Server"]["SecretKey"].ToString();
 
             var cloudHost = config["Cloud"]["Host"].ToString();
             var cloudKey = config["Cloud"]["SecretKey"].ToString();
             var cloudSSL = config["Cloud"]["SSL"].ToString();
 
-            QuantApp.Server.Program.letsEncryptEmail = config["Server"]["LetsEncrypt"]["Email"].ToString();
-            QuantApp.Server.Program.letsEncryptStaging = config["Server"]["LetsEncrypt"]["Staging"].ToString().ToLower() == "true";
+            CoFlows.Server.Program.letsEncryptEmail = config["Server"]["LetsEncrypt"]["Email"].ToString();
+            CoFlows.Server.Program.letsEncryptStaging = config["Server"]["LetsEncrypt"]["Staging"].ToString().ToLower() == "true";
 
-            var sslFlag = QuantApp.Server.Program.hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(QuantApp.Server.Program.letsEncryptEmail);
+            var sslFlag = CoFlows.Server.Program.hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(CoFlows.Server.Program.letsEncryptEmail);
 
 
-            QuantApp.Server.Program.useJupyter = config["Jupyter"].ToString().ToLower() == "true";
+            CoFlows.Server.Program.useJupyter = config["Jupyter"].ToString().ToLower() == "true";
 
             if(args != null && args.Length > 0 && args[0] == "lab")
             {
-                Connection.Client.Init(QuantApp.Server.Program.hostName, sslFlag);
+                Connection.Client.Init(CoFlows.Server.Program.hostName, sslFlag);
 
                 if(!Connection.Client.Login(secretKey))
                     throw new Exception("CoFlows Not connected!");
@@ -121,10 +121,10 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("Starting cloud deployment... ");
 
-                Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name);
+                Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name);
                 var t0 = DateTime.Now;
                 Console.WriteLine("Started: " + t0);
-                var res = Connection.Client.PublishPackage(QuantApp.Server.Program.workspace_name);
+                var res = Connection.Client.PublishPackage(CoFlows.Server.Program.workflow_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + res);
@@ -145,10 +145,10 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("CoFlows Cloud build... ");
 
-                Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name);
+                Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name);
                 var t0 = DateTime.Now;
                 Console.WriteLine("Started: " + t0);
-                var res = Connection.Client.BuildPackage(QuantApp.Server.Program.workspace_name);
+                var res = Connection.Client.BuildPackage(CoFlows.Server.Program.workflow_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + res);
@@ -173,8 +173,8 @@ namespace QuantApp.Server.Quant
                 var funcName = args.Length > 3 ? args[3] : null;
                 var parameters = args.Length > 4 ? args.Skip(4).ToArray() : null;
 
-                var pkg = Code.ProcessPackageFile(QuantApp.Server.Program.workspace_name);
-                Console.WriteLine("Workspace: " + pkg.Name);
+                var pkg = Code.ProcessPackageFile(CoFlows.Server.Program.workflow_name);
+                Console.WriteLine("Workflow: " + pkg.Name);
 
                 Console.WriteLine("Query ID: " + queryID);
                 Console.WriteLine("Function Name: " + funcName);
@@ -211,7 +211,7 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("CoFlows Cloud log... ");
 
-                var res = Connection.Client.RemoteLog(QuantApp.Server.Program.workspace_name);
+                var res = Connection.Client.RemoteLog(CoFlows.Server.Program.workflow_name);
                 Console.WriteLine("Result: ");
                 Console.WriteLine(res);
             }
@@ -231,7 +231,7 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("CoFlows Cloud log... ");
 
-                var res = Connection.Client.RemoteRemove(QuantApp.Server.Program.workspace_name);
+                var res = Connection.Client.RemoteRemove(CoFlows.Server.Program.workflow_name);
                 Console.WriteLine("Result: ");
                 Console.WriteLine(res);
             }
@@ -251,7 +251,7 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("CoFlows Cloud log... ");
 
-                var res = Connection.Client.RemoteRestart(QuantApp.Server.Program.workspace_name);
+                var res = Connection.Client.RemoteRestart(CoFlows.Server.Program.workflow_name);
                 Console.WriteLine("Result: ");
                 Console.WriteLine(res);
             }
@@ -281,18 +281,18 @@ namespace QuantApp.Server.Quant
 
                 if(string.IsNullOrEmpty(config_env))
                 {
-                    var pkg = Code.ProcessPackageFile(QuantApp.Server.Program.workspace_name);
+                    var pkg = Code.ProcessPackageFile(CoFlows.Server.Program.workflow_name);
                     Code.ProcessPackageJSON(pkg);
-                    SetDefaultWorkSpaces(new string[]{ pkg.ID }, false);
+                    SetDefaultWorkflows(new string[]{ pkg.ID }, false);
                     Console.WriteLine(pkg.Name + " started");
                 }
                 else
                 {
                     Console.WriteLine("Empty server...");
-                    var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--WorkSpaces")[xe => true];
+                    var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows")[xe => true];
                     foreach(var wsp in workspace_ids)
                     {
-                        SetDefaultWorkSpaces(new string[]{ wsp.ToString() }, true);
+                        SetDefaultWorkflows(new string[]{ wsp.ToString() }, true);
                         Console.WriteLine(wsp + " started");
                     }
                 }
@@ -318,9 +318,9 @@ namespace QuantApp.Server.Quant
                 /// QuantSpecific END
                 
                 if(!sslFlag)
-                    QuantApp.Server.Program.Init(new string[]{"--urls", "http://*:80"}, new Realtime.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.RTDSocketMiddleware>));
+                    CoFlows.Server.Program.Init(new string[]{"--urls", "http://*:80"}, new Realtime.WebSocketListner(), typeof(Startup<CoFlows.Server.Realtime.RTDSocketMiddleware>));
                 else
-                    QuantApp.Server.Program.Init(args, new Realtime.WebSocketListner(), typeof(Startup<QuantApp.Server.Realtime.RTDSocketMiddleware>));
+                    CoFlows.Server.Program.Init(args, new Realtime.WebSocketListner(), typeof(Startup<CoFlows.Server.Realtime.RTDSocketMiddleware>));
                 
             
             
@@ -353,7 +353,7 @@ namespace QuantApp.Server.Quant
 
                 Console.WriteLine("Local build");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name));
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(string.IsNullOrEmpty(res))
@@ -391,7 +391,7 @@ namespace QuantApp.Server.Quant
                 Console.WriteLine("Parameters: " + parameters);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name));
                 Code.ProcessPackageJSON(pkg);
                 
 
@@ -428,7 +428,7 @@ namespace QuantApp.Server.Quant
                 Console.WriteLine("Started: " + t0);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name));
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(string.IsNullOrEmpty(res))
@@ -505,7 +505,7 @@ namespace QuantApp.Server.Quant
                             .WithEnvironmentVariables(new Dictionary<string,string>(){ 
                                 {"coflows_config", File.ReadAllText(@"mnt/" + config_file)}, 
                                 })
-                            .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")
+                            .WithStartingCommandLine("dotnet", "CoFlows.Server.quant.lnx.dll", "server")
                             .Attach()
                         .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
                         .CreateAsync()
@@ -531,7 +531,7 @@ namespace QuantApp.Server.Quant
                             .WithEnvironmentVariables(new Dictionary<string,string>(){ 
                                 {"coflows_config", File.ReadAllText(@"mnt/" + config_file)}, 
                                 })
-                            .WithStartingCommandLine("dotnet", "QuantApp.Server.quant.lnx.dll", "server")
+                            .WithStartingCommandLine("dotnet", "CoFlows.Server.quant.lnx.dll", "server")
                             .Attach()
                         .WithDnsPrefix(config["AzureContainerInstance"]["Dns"].ToString()) 
                         .CreateAsync()
@@ -588,8 +588,8 @@ namespace QuantApp.Server.Quant
 
                 Console.Write("Starting azure deployment... ");
 
-                Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name);
-                var resDeploy = Connection.Client.PublishPackage(QuantApp.Server.Program.workspace_name);
+                Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name);
+                var resDeploy = Connection.Client.PublishPackage(CoFlows.Server.Program.workflow_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + resDeploy);
@@ -600,7 +600,7 @@ namespace QuantApp.Server.Quant
                 Console.WriteLine();
                 Console.WriteLine("Azure Container Instance remove start");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(QuantApp.Server.Program.workspace_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name));
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(!string.IsNullOrEmpty(res))
@@ -655,7 +655,7 @@ namespace QuantApp.Server.Quant
 
         private static void SetRTD()
         {
-            QuantApp.Server.Realtime.WebSocketListner.RTDMessageFunction = new QuantApp.Server.Realtime.RTDMessageDelegate((message_string) => {
+            CoFlows.Server.Realtime.WebSocketListner.RTDMessageFunction = new CoFlows.Server.Realtime.RTDMessageDelegate((message_string) => {
                 var message = JsonConvert.DeserializeObject<QuantApp.Kernel.RTDMessage>(message_string);
                 if ((int)message.Type == (int)AQI.AQILabs.Kernel.RTDMessage.MessageType.MarketData)
                 {
@@ -984,25 +984,25 @@ namespace QuantApp.Server.Quant
             }
         }
 
-        public static IEnumerable<WorkSpace> SetDefaultWorkSpaces(string[] ids, bool saveToDisk)
+        public static IEnumerable<Workflow> SetDefaultWorkflows(string[] ids, bool saveToDisk)
         {
-            return QuantApp.Server.Program.SetDefaultWorkSpaces(ids, saveToDisk);
+            return CoFlows.Server.Program.SetDefaultWorkflows(ids, saveToDisk);
         }
 
 
-        public static IEnumerable<WorkSpace> GetDefaultWorkSpaces()
+        public static IEnumerable<Workflow> GetDefaultWorkflows()
         {
-            return QuantApp.Server.Program.GetDefaultWorkSpaces();
+            return CoFlows.Server.Program.GetDefaultWorkflows();
         }
 
-        public static void AddServicedWorkSpaces(string id)
+        public static void AddServicedWorkflows(string id)
         {
-            QuantApp.Server.Program.AddServicedWorkSpaces(id);
+            CoFlows.Server.Program.AddServicedWorkflows(id);
         }
 
-        public static IEnumerable<string> GetServicedWorkSpaces()
+        public static IEnumerable<string> GetServicedWorkflows()
         {
-            return QuantApp.Server.Program.GetServicedWorkSpaces();
+            return CoFlows.Server.Program.GetServicedWorkflows();
         }
     }
 }

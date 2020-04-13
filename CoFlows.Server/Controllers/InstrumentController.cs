@@ -15,8 +15,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-using QuantApp.Server.Models;
-using QuantApp.Server.Utils;
+using CoFlows.Server.Models;
+using CoFlows.Server.Utils;
 
 using Microsoft.AspNetCore.Authorization;
 
@@ -25,7 +25,7 @@ using AQI.AQILabs.Kernel;
 using AQI.AQILabs.Kernel.Numerics.Util;
 using AQI.AQILabs.SDK.Strategies;
 
-namespace QuantApp.Server.Controllers
+namespace CoFlows.Server.Controllers
 {
     [Authorize, Route("[controller]/[action]")]
     public class InstrumentController : Controller
