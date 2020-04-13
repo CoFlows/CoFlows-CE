@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { CoFlowsComponent } from '../coflows/core/coflows.component';
-import { QAWorkbookComponent } from '../coflows/workbook/qaworkbook.component';
+import { CFQueryComponent } from '../coflows/query/cfquery.component';
 
 import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
 
@@ -25,10 +25,8 @@ export class DashboardComponent {
         Permissions: []
     }
 
-    @ViewChild('qawbook')
-    private qawbook:QAWorkbookComponent
-
-    
+    @ViewChild('cfquery')
+    private cfquery:CFQueryComponent
 
     constructor(private coflows: CoFlowsComponent) {
 
@@ -415,7 +413,7 @@ export class DashboardComponent {
     tabBeforeChange(event){
         // console.log(event)
         if(event == 0)
-            CoFlowsComponent.UpdateInstruments = !(this.qawbook.status.indexOf('thinking...') == -1 && this.qawbook.results.length > 0)
+            CoFlowsComponent.UpdateInstruments = !(this.cfquery.status.indexOf('thinking...') == -1 && this.cfquery.results.length > 0)
         else
             CoFlowsComponent.UpdateInstruments = false
 

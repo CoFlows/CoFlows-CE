@@ -19,6 +19,7 @@ import { WorkflowRoutes } from './workflows.routing';
 import { WorkflowComponent } from './workflow/workflow.component';
 import { AgentComponent } from './agent/agent.component';
 import { QueryComponent } from './query/query.component';
+import { AppComponent } from './app/app.component';
 
 import { CoFlowsModule } from '../coflows/coflows.module';
 
@@ -40,7 +41,8 @@ import { CoFlowsModule } from '../coflows/coflows.module';
   declarations: [
     WorkflowComponent,
     AgentComponent,
-    QueryComponent
+    QueryComponent,
+    AppComponent
   ]
 })
 
