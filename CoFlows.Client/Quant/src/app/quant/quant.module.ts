@@ -9,8 +9,6 @@ import { CodemirrorModule } from 'ng2-codemirror';
 
 import { TreeTableModule, SharedModule, GrowlModule, TabViewModule, ContextMenuModule, CodeHighlighterModule} from 'primeng/primeng';
 
-import { NguiMapModule} from '@ngui/map';
-
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
