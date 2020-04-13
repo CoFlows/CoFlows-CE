@@ -6,7 +6,6 @@ import { ActivatedRoute } from '@angular/router';
 
 import { CoFlowsComponent } from '../../coflows/core/coflows.component';
 import { CFQueryComponent } from '../../coflows/query/cfquery.component';
-// import { QAStrategiesComponent } from '../../coflows/strategies/qastrategies.component';
 
 import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
 
@@ -51,11 +50,6 @@ export class WorkflowComponent {
 
     containerChart = {}
     processesChart = {}
-
-    pod = { Log: null }
-
-    // @ViewChild('qastrategies')
-    // private qastrategies:QAStrategiesComponent
 
     @ViewChild('cfquery')
     private cfquery:CFQueryComponent
@@ -195,9 +189,6 @@ export class WorkflowComponent {
                     );
                 });
             
-                // if(this.qastrategies != undefined)
-                //     this.qastrategies.SetStrategies(data[0].Value.Strategies)
-
                 this.coflows.LinkAction(wiid,
                     data => { //Load
                         this.workbooks = data
@@ -306,9 +297,7 @@ export class WorkflowComponent {
                     );
                 });
             
-                // if(this.qastrategies != undefined)
-                //     this.qastrategies.SetStrategies(data.Value.Strategies)
-
+            
                 this.coflows.LinkAction(wiid,
                     data => { //Load
                         this.workbooks = data
@@ -349,8 +338,6 @@ export class WorkflowComponent {
             data => { //Remove
 
             });
-
-            let podCounter = 0
 
             // let t0 = Date.now()
             this.coflows.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
@@ -537,25 +524,7 @@ export class WorkflowComponent {
         this.activePermissionID = permission.ID
         this.modalService.open(content).result.then((result) => {
             
-            // console.log(result)
-            // if(result == 'restart'){
-            //     this.modalMessage = "Restarting..."
-            //     this.coflows.Get('m/restartpod?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         this.modalMessage = ''
-            //         this.modalService.dismissAll(content)
-            //     });
-            // }
-            // else if(result == 'delete'){
-            //     this.modalMessage = "Removing..."
-            //     this.coflows.Get('m/removepod?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         this.modalMessage = ''
-            //         this.modalService.dismissAll(content)
-            //     });
-            // }
+            
 
         }, (reason) => {
             // console.log(reason)
@@ -887,7 +856,6 @@ export class WorkflowComponent {
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -964,7 +932,6 @@ def pkg():
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -1045,7 +1012,6 @@ public class CSharpAgent
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -1130,7 +1096,6 @@ public class CSharpAgent
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -1204,12 +1169,10 @@ let pkg = new qengine.FPKG(
             }]
 
         }
-        // console.log(templateCode)
-
+        
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
