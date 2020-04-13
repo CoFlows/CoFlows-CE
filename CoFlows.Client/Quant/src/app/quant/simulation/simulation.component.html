@@ -1,0 +1,82 @@
+<ngb-tabset (tabChange)="tabBeforeChange($event)">
+    <ngb-tab title="Chart">
+        <ng-template ngbTabContent>
+            <div class="col-sm-12 col-md-12">
+                <div [chart]="chart"></div>
+            </div>
+            <br />
+            <div class="form-group" *ngIf="lastSeries != null">
+                <select #selectElem  (change)="onChangeTimeSeries(selectElem.value)" class="form-control">
+                    <option *ngFor="let item of timeSeriesType" [value]="stringify(item)" [selected]="item.Type == selectedTimeSeriesType.Type">{{item.Type}}</option>
+                </select>
+            </div>
+        </ng-template>
+    </ngb-tab>
+    <ngb-tab title="Monthly Performance">
+        <ng-template ngbTabContent>
+            <div class="col-sm-12 col-md-12">
+                    <ngx-datatable
+                    [columnMode]="'force'"
+                    [headerHeight]="40"
+                    [footerHeight]="0"
+                    [rowHeight]="40"
+                    [scrollbarV]="true"
+                    [scrollbarH]="true"
+                    [rows]="monthlyPerformance">
+                        <ngx-datatable-column name="Year" [width]="80" prop="Year"></ngx-datatable-column>
+                        <ngx-datatable-column name="Jan" [width]="80" prop="Jan"></ngx-datatable-column>
+                        <ngx-datatable-column name="Feb" [width]="80" prop="Feb"></ngx-datatable-column>
+                        <ngx-datatable-column name="Mar" [width]="80" prop="Mar"></ngx-datatable-column>
+                        <ngx-datatable-column name="Apr" [width]="80" prop="Apr"></ngx-datatable-column>
+                        <ngx-datatable-column name="Jun" [width]="80" prop="Jun"></ngx-datatable-column>
+                        <ngx-datatable-column name="Jul" [width]="80" prop="Jul"></ngx-datatable-column>
+                        <ngx-datatable-column name="Aug" [width]="80" prop="Aug"></ngx-datatable-column>
+                        <ngx-datatable-column name="Sep" [width]="80" prop="Sep"></ngx-datatable-column>
+                        <ngx-datatable-column name="Oct" [width]="80" prop="Oct"></ngx-datatable-column>
+                        <ngx-datatable-column name="Nov" [width]="80" prop="Nov"></ngx-datatable-column>
+                        <ngx-datatable-column name="Dec" [width]="80" prop="Dec"></ngx-datatable-column>
+                        <ngx-datatable-column name="Yearly" [width]="80" prop="Yearly"></ngx-datatable-column>
+                    </ngx-datatable>
+            </div>            
+        </ng-template>
+    </ngb-tab>
+    <ngb-tab title="Statistics">
+        <ng-template ngbTabContent>
+            <div class="col-sm-12 col-md-12">
+                    <ngx-datatable
+                    [columnMode]="'force'"
+                    [headerHeight]="40"
+                    [footerHeight]="0"
+                    [rowHeight]="40"
+                    [scrollbarV]="true"
+                    [scrollbarH]="true"
+                    [rows]="statistics">
+                        <ngx-datatable-column name="Measure" [width]="80" prop="Measure"></ngx-datatable-column>
+                        <ngx-datatable-column name="Value" [width]="80">
+                            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                                {{row.Measure == 'Sharpe Ratio' ? coflows.formatNumber(row.Value, false) : coflows.formatNumber(row.Value, false)}}
+                            </ng-template>
+                        </ngx-datatable-column>
+                    </ngx-datatable>
+            </div>            
+        </ng-template>
+    </ngb-tab>
+</ngb-tabset>
+
+<br />
+<div class="row">
+<div class="col-sm-6 col-md-6">
+    <div class="form-group">
+        <select #selectSet  (change)="onChangeSet(selectSet.value)" class="form-control">
+            <option *ngFor="let item of sets" [value]="item.Index" [selected]="item.Name == selectedTimeSeriesType.Name">{{item.Name}}</option>
+        </select>
+    </div>
+</div>
+<div class="col-sm-6 col-md-6">
+    <div class="form-group">
+        <select #selectSimulation  (change)="onChangeSimulation(selectSimulation.value)" class="form-control">
+            <option *ngFor="let item of selectedSet.SObjects" [value]="item.SIndex" [selected]="item.Name == selectedTimeSeriesType.Name">{{item.Name}}</option>
+        </select>
+    </div>
+</div>
+</div>

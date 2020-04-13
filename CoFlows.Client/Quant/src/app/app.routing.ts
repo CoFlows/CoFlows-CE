@@ -17,6 +17,10 @@ export const AppRoutes: Routes = [{
       {
         path: 'workflows',
         loadChildren: './workflows/workflows.module#WorkflowsModule'
+      }, 
+      {
+        path: 'quant',
+        loadChildren: './quant/quant.module#QuantModule'
       }
 ]
 }, {

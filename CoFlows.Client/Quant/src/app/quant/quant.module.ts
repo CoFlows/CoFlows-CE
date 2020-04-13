@@ -15,37 +15,40 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
 
-import { WorkflowRoutes } from './workflows.routing';
-import { WorkflowComponent } from './workflow/workflow.component';
-import { AgentComponent } from './agent/agent.component';
-import { QueryComponent } from './query/query.component';
-import { AppComponent } from './app/app.component';
+import { QuantRoutes } from './quant.routing';
+import { TraderComponent } from './trader/trader.component';
+import { SimulationComponent } from './simulation/simulation.component';
 
 import { CoFlowsModule } from '../coflows/coflows.module';
-import { QuantModule } from '../quant/quant.module';
+
+import { QAStrategiesComponent } from './strategies/qastrategies.component';
 
 
 @NgModule({
   imports: [
     CommonModule,
-    RouterModule.forChild(WorkflowRoutes),    
+    RouterModule.forChild(QuantRoutes),    
     ChartModule,
     FormsModule,
     NgbModule,
     NgxDatatableModule,
     TreeTableModule, GrowlModule, TabViewModule, ContextMenuModule, CodeHighlighterModule, SharedModule,
     CodemirrorModule,//.forRoot(),    
-    NguiMapModule.forRoot({apiUrl: 'https://maps.google.com/maps/api/js?key=AIzaSyDckDGx8RGsoGHTbMq4fj_3DG5q3CSfd9c&libraries=visualization,places,drawing'}),
+    //NguiMapModule.forRoot({apiUrl: 'https://maps.google.com/maps/api/js?key=AIzaSyDckDGx8RGsoGHTbMq4fj_3DG5q3CSfd9c&libraries=visualization,places,drawing'}),
 
-    CoFlowsModule,
-    QuantModule
+    CoFlowsModule
   ],
   declarations: [
-    WorkflowComponent,
-    AgentComponent,
-    QueryComponent,
-    AppComponent
+    TraderComponent,
+    SimulationComponent,
+    QAStrategiesComponent
+  ],
+  providers: [
+    QAStrategiesComponent
+  ],
+  exports: [
+    QAStrategiesComponent
   ]
 })
 
-export class WorkflowsModule {}
+export class QuantModule {}

@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { CoFlowsComponent } from '../../coflows/core/coflows.component';
 import { CFQueryComponent } from '../../coflows/query/cfquery.component';
-// import { QAStrategiesComponent } from '../../coflows/strategies/qastrategies.component';
+import { QAStrategiesComponent } from '../../quant/strategies/qastrategies.component';
 
 import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
 
@@ -54,8 +54,8 @@ export class WorkflowComponent {
 
     pod = { Log: null }
 
-    // @ViewChild('qastrategies')
-    // private qastrategies:QAStrategiesComponent
+    @ViewChild('qastrategies')
+    private qastrategies:QAStrategiesComponent
 
     @ViewChild('cfquery')
     private cfquery:CFQueryComponent
@@ -195,8 +195,8 @@ export class WorkflowComponent {
                     );
                 });
             
-                // if(this.qastrategies != undefined)
-                //     this.qastrategies.SetStrategies(data[0].Value.Strategies)
+                if(this.qastrategies != undefined)
+                    this.qastrategies.SetStrategies(data[0].Value.Strategies)
 
                 this.coflows.LinkAction(wiid,
                     data => { //Load
@@ -306,8 +306,8 @@ export class WorkflowComponent {
                     );
                 });
             
-                // if(this.qastrategies != undefined)
-                //     this.qastrategies.SetStrategies(data.Value.Strategies)
+                if(this.qastrategies != undefined)
+                    this.qastrategies.SetStrategies(data.Value.Strategies)
 
                 this.coflows.LinkAction(wiid,
                     data => { //Load
