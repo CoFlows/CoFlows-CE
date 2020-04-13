@@ -76,7 +76,7 @@ namespace CoFlows.Server
             var config_file = Environment.GetEnvironmentVariable("config_file");
 
             if(string.IsNullOrEmpty(config_file))
-                config_file = "quantapp_config.json";
+                config_file = "coflows_config.json";
 
             JObject config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
             workflow_name = config["Workflow"].ToString();
