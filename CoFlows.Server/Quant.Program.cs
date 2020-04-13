@@ -869,6 +869,8 @@ namespace CoFlows.Server.Quant
                 Console.WriteLine("Creating table structure in: " + sqliteFile);
                 var schema = File.ReadAllText(@"create.sql");
                 QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(schema);
+                var quant = File.ReadAllText(@"quant.sql");
+                QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(quant);
                 Console.WriteLine("Adding calendar data in: " + sqliteFile);
                 var calendars = File.ReadAllText(@"calendars.sql");
                 QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(calendars);

@@ -21,6 +21,7 @@
     <Content Include="coflows" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="kernel.jupyter" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="create.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="quant.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="calendars.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="fic.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
 
