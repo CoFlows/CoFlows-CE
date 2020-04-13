@@ -1,0 +1,39 @@
+/* $avatar
+ ------------------------------------------*/
+.avatar-status {
+  position: relative;
+  padding: 2px;
+  border-radius: 50%;
+  display: inline-block;
+  &.bg-none {
+    padding: 0;
+  }
+}
+/* sizes */
+.avatar-xxlg {
+  width: 32rem;
+}
+
+.avatar-xlg {
+  width: 16rem;
+}
+
+.avatar-lg {
+  width: 8rem;
+}
+
+.avatar-md {
+  width: 4rem;
+}
+
+.avatar-sm {
+  width: 3rem;
+}
+
+.avatar-xs {
+  width: 2.125rem;
+}
+
+.avatar-xxs {
+  width: 1.375rem;
+}

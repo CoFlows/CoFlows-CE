@@ -1,0 +1,127 @@
+/* $sidebar-panel
+ ------------------------------------------*/
+.app ng-sidebar > .sidebar-panel.ng-sidebar {
+  width: $sidebar-width;
+  overflow: hidden;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  transition: width $transition-duration, transform $transition-duration cubic-bezier(0, 0, 0.3, 1);
+  app-sidebar {
+    overflow: hidden;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+  }
+  app-menu {
+    position: relative;
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overflow-y: overlay;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+    margin-right: -35px;
+    padding-right: 35px;
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .navigation-item {
+      position: relative;
+      display: block;
+      &.open > a > .menu-caret {
+        transform: rotate(90deg);
+      }
+      &.open > .navigation-submenu {
+        max-height: 1000px;
+      }
+    }
+    .navigation-link {
+      position: relative;
+      padding: 0.594rem $spacer;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      white-space: nowrap;
+      transition: background $transition-duration, color $transition-duration;
+      @include hover-focus {
+        background-color: transparent;
+      }
+      span {
+        display: inline-block;
+      }
+      [class^="icon-"]:not(.menu-caret),
+      [class*=" icon-"]:not(.menu-caret) {
+        width: 20px;
+        text-align: center;
+        margin-right: 1rem;
+        font-size: 1rem;
+        line-height: 1;
+      }
+    }
+    .navigation-submenu {
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      max-height: 0;
+      transition: .5s ease;
+      transition-property: max-height;
+      a {
+        padding: .4rem $spacer .4rem 3.28rem;
+      }
+    }
+    .menu-caret {
+      display: inline-block;
+      transition: transform $transition-duration ease;
+      float: right;
+      line-height: 1;
+      width: 16px;
+      height: 16px;
+    }
+  }
+  @include media-breakpoint-up(lg) {
+    z-index: 1030;
+    width: $sidebar-width;
+    app-menu {
+      min-width: $sidebar-width;
+    }
+    /* Docked sidebar */
+    &.ng-sidebar--dock:not(:hover) {
+      width: $sidebar-small-menu-width;
+      .navigation-submenu,
+      .docked-hidden {
+        display: none!important;
+        visibility: hidden;
+      }
+      .main-brand {
+        flex-direction: column;
+        .navbar-brand {
+          width: 100%;
+          text-align: center;
+        }
+      }
+      app-menu {
+        min-width: $sidebar-small-menu-width;
+        .navigation-link {
+          padding-right: 0;
+          padding-left: 0;
+          span, .menu-caret {
+            display: none;
+          }
+        }
+        .icon {
+          width: 100%;
+          padding: 0;
+          margin: 0;
+        }
+      }
+    }
+  }
+}

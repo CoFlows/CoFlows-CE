@@ -1,0 +1,69 @@
+<div class="d-flex align-items-stretch flex-nowrap min-height-100 h-100">
+  <div class="bg-cover d-none d-md-inline-flex col-md-6 col-lg-8">
+      <video (ended)="videoFlip($event)" autoplay  id="video-background" muted plays-inline >
+        <source src="assets/videos/{{bgVideo[bgVideoIdx]}}" type="video/mp4"/>
+      </video>
+    </div>
+  <div class="card card-body mb-0 rounded-0 p-5 col-sm-12 col-md-6 col-lg-4">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <img src="assets/images/logo.png" style="border-radius: 50px;" class="avatar-xs mb-1" alt="">
+        <p class="ff-headers text-uppercase">Create an account</p>
+      </div>
+      <fieldset class="form-group" [ngClass]="{'has-danger': form.controls['email'].hasError('required') && form.controls['email'].touched}">
+        <label for="email">
+          Email
+        </label>
+        <input type="text" class="form-control" placeholder="email" [formControl]="form.controls['email']" [ngClass]="{'form-control-danger': form.controls['email'].hasError('required') && form.controls['email'].touched}"/>
+        <div class="form-control-feedback" *ngIf="form.controls['email'].hasError('required') && form.controls['email'].touched">Email is required.</div>
+      </fieldset>
+
+      <fieldset class="form-group" [ngClass]="{'has-danger': form.controls['email'].hasError('required') && form.controls['email'].touched}">
+        <label for="fname">
+          First name
+        </label>
+        <input type="text" class="form-control" placeholder="first name" [formControl]="form.controls['fname']" [ngClass]="{'form-control-danger': form.controls['fname'].hasError('required') && form.controls['fname'].touched}"/>
+        <div class="form-control-feedback" *ngIf="form.controls['fname'].hasError('required') && form.controls['fname'].touched">First name is required.</div>
+      </fieldset>
+
+        <fieldset class="form-group" [ngClass]="{'has-danger': form.controls['lname'].hasError('required') && form.controls['lname'].touched}">
+          <label for="lname">
+            Last name
+          </label>
+          <input type="text" class="form-control" placeholder="last name" [formControl]="form.controls['lname']" [ngClass]="{'form-control-danger': form.controls['lname'].hasError('required') && form.controls['lname'].touched}"/>
+          <div class="form-control-feedback" *ngIf="form.controls['lname'].hasError('required') && form.controls['lname'].touched">Last name is required.</div>
+        </fieldset>
+
+      <fieldset class="form-group" [ngClass]="{'has-danger': form.controls['password'].hasError('required') && form.controls['password'].touched}">
+        <label for="password">
+          Enter your password
+        </label>
+        <input type="password" class="form-control" placeholder="********" [formControl]="form.controls['password']" [ngClass]="{'form-control-danger': form.controls['password'].hasError('required') && form.controls['password'].touched}"/>
+        <div class="form-control-feedback" *ngIf="form.controls['password'].hasError('required') && form.controls['password'].touched">Password is required.</div>
+      </fieldset>
+      <fieldset class="form-group" [ngClass]="{'has-danger': form.controls['confirmPassword'].hasError('required') && form.controls['confirmPassword'].touched}">
+        <label for="password">
+          Confirm your password
+        </label>
+        <input type="password" class="form-control" placeholder="********" [formControl]="form.controls['confirmPassword']" [ngClass]="{'form-control-danger': form.controls['confirmPassword'].hasError('required') && form.controls['confirmPassword'].touched}"/>
+        <div class="form-control-feedback" *ngIf="form.controls['confirmPassword'].hasError('required') && form.controls['confirmPassword'].touched">Confirm your password.</div>
+
+        <div class="mb-3" *ngIf="errorMessage != ''">
+          <div class="block">&nbsp;</div>
+          <p class="ff-headers text-uppercase">{{errorMessage}}</p>
+        </div>
+      </fieldset>
+      
+      <div class="block mb-3"></div>
+      
+      <div class="row">
+      
+          <button class="text-color col-lg-6 col-md-6 col-sm-6 btn btn-warning btn-sm" type="submit" [disabled]="!form.valid">Create</button>
+        
+        
+          <a class="text-color col-lg-6 col-md-6 col-sm-6 btn btn-outline-warning btn-link btn-sm" [routerLink]="['/authentication/signin']">Login!</a>
+        
+      </div>
+    </form>
+  </div>
+</div>

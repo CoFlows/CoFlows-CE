@@ -1,0 +1,30 @@
+@import "../mixins/material-palette";
+@import "../variables";
+@import "../../../../../node_modules/bootstrap/scss/functions";
+@import "../../../../../node_modules/bootstrap/scss/variables";
+
+:host ::ng-deep {
+  height: 100%;
+  .email-panel.ng-sidebar {
+    width: 300px;
+    border-right: 1px solid rgba($black,.1);
+  }
+
+  .list-group-item {
+    &.selected {
+      background-color: lighten(theme-color("warning"), 40%);
+      border-color: rgba(theme-color("warning"),.2);
+      + .list-group-item {
+        border-color: rgba(theme-color("warning"),.2);
+      }
+      &:hover,
+      &:focus,
+      &:active {
+        background-color: lighten(theme-color("warning"), 40%);
+      }
+    }
+    a .time {
+      font-size: 10px;
+    }
+  }
+}
