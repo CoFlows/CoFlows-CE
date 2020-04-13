@@ -21,7 +21,7 @@ import { SimulationComponent } from './simulation/simulation.component';
 
 import { CoFlowsModule } from '../coflows/coflows.module';
 
-import { QAStrategiesComponent } from './strategies/qastrategies.component';
+// import { QAStrategiesComponent } from './strategies/qastrategies.component';
 
 
 @NgModule({
@@ -41,13 +41,13 @@ import { QAStrategiesComponent } from './strategies/qastrategies.component';
   declarations: [
     TraderComponent,
     SimulationComponent,
-    QAStrategiesComponent
+    // QAStrategiesComponent
   ],
   providers: [
-    QAStrategiesComponent
+    // QAStrategiesComponent
   ],
   exports: [
-    QAStrategiesComponent
+    // QAStrategiesComponent
   ]
 })
 
