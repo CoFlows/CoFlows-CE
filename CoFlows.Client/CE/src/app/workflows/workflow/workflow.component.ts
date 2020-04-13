@@ -6,7 +6,6 @@ import { ActivatedRoute } from '@angular/router';
 
 import { CoFlowsComponent } from '../../coflows/core/coflows.component';
 import { CFQueryComponent } from '../../coflows/query/cfquery.component';
-// import { QAStrategiesComponent } from '../../coflows/strategies/qastrategies.component';
 
 import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
 
@@ -51,11 +50,6 @@ export class WorkflowComponent {
 
     containerChart = {}
     processesChart = {}
-
-    pod = { Log: null }
-
-    // @ViewChild('qastrategies')
-    // private qastrategies:QAStrategiesComponent
 
     @ViewChild('cfquery')
     private cfquery:CFQueryComponent
@@ -195,9 +189,6 @@ export class WorkflowComponent {
                     );
                 });
             
-                // if(this.qastrategies != undefined)
-                //     this.qastrategies.SetStrategies(data[0].Value.Strategies)
-
                 this.coflows.LinkAction(wiid,
                     data => { //Load
                         this.workbooks = data
@@ -306,9 +297,7 @@ export class WorkflowComponent {
                     );
                 });
             
-                // if(this.qastrategies != undefined)
-                //     this.qastrategies.SetStrategies(data.Value.Strategies)
-
+            
                 this.coflows.LinkAction(wiid,
                     data => { //Load
                         this.workbooks = data
@@ -350,28 +339,6 @@ export class WorkflowComponent {
 
             });
 
-            let podCounter = 0
-            
-            // let iid = setInterval(x => {
-            //     this.coflows.Get('m/podlog?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         if(data.Log != undefined){
-            //             let flag = this.logArea != undefined  ? this.logArea.nativeElement.scrollTop / this.logArea.nativeElement.scrollHeight >= 0.5 : false
-                            
-            //             this.pod = { Log: data.Log }
-            //             if(this.logArea != undefined && (flag || podCounter == 0))
-            //                 this.logArea.nativeElement.scrollTop = this.logArea.nativeElement.scrollHeight
-
-            //             if(this.logArea != undefined)
-            //                 podCounter++
-            //         }
-            //         else
-            //             clearInterval(iid)
-
-            //     });
-            // }, 2500);
-
             // let t0 = Date.now()
             this.coflows.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
                 // console.log(data)
@@ -403,24 +370,7 @@ export class WorkflowComponent {
         this.modalService.open(content).result.then((result) => {
             
             console.log(result)
-            // if(result == 'restart'){
-            //     this.modalMessage = "Restarting..."
-            //     this.coflows.Get('m/restartpod?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         this.modalMessage = ''
-            //         this.modalService.dismissAll(content)
-            //     });
-            // }
-            // else if(result == 'delete'){
-            //     this.modalMessage = "Removing..."
-            //     this.coflows.Get('m/removepod?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         this.modalMessage = ''
-            //         this.modalService.dismissAll(content)
-            //     });
-            // }
+            
 
         }, (reason) => {
             // console.log(reason)
@@ -574,25 +524,7 @@ export class WorkflowComponent {
         this.activePermissionID = permission.ID
         this.modalService.open(content).result.then((result) => {
             
-            // console.log(result)
-            // if(result == 'restart'){
-            //     this.modalMessage = "Restarting..."
-            //     this.coflows.Get('m/restartpod?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         this.modalMessage = ''
-            //         this.modalService.dismissAll(content)
-            //     });
-            // }
-            // else if(result == 'delete'){
-            //     this.modalMessage = "Removing..."
-            //     this.coflows.Get('m/removepod?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         this.modalMessage = ''
-            //         this.modalService.dismissAll(content)
-            //     });
-            // }
+            
 
         }, (reason) => {
             // console.log(reason)
@@ -632,288 +564,8 @@ export class WorkflowComponent {
             CoFlowsComponent.UpdateInstruments = false
 
         if(event == 3){
-            // let iid = setInterval(x => {
-            //     this.coflows.Get('m/podlog?id=' + this.wid ,
-            //     data => {
-            //         console.log(data)
-            //         if(data.Log != undefined){
-            //             this.pod = { Log: data.Log }
-            //             if(this.logArea != undefined)
-            //                 this.logArea.nativeElement.scrollTop = this.logArea.nativeElement.scrollHeight
-            //         }
-
-            //     });
-            // });
+            
         }
-
-        // if(event == 4){
-        //     this.coflows.Get('m/containerresourcedata?id=' + this.wid ,
-        //     data => {
-        //         if(data.length > 0) {
-        //             // console.log(data)
-
-        //             var cores = [], memory = [], dataLength = data.length;
-        //             for (var i = 0; i < dataLength; i++) {
-        //                 cores.push([data[i].Timestamp, data[i].Cores]);
-        //                 memory.push([data[i].Timestamp, data[i].Memory]);
-        //             }
-
-        //             var chart_config = {
-        //                 chart: {                    
-        //                     zoomType: 'x',
-        //                 },
-        //                 title: {
-        //                     text: null
-        //                 },
-        //                 credits: {
-        //                     enabled: false
-        //                 },
-        //                 useHighStocks: true,                
-        //                 legend: {
-        //                     enabled: false
-        //                 },
-        //                 xAxis: [{
-        //                     type: 'datetime',
-        //                 }],
-        //                 yAxis: [{
-        //                     title: {
-        //                         offset: 75,
-        //                         text: 'Cores',
-        //                     },
-        //                     gridLineColor: 'rgba(154,154,154,0.20)',
-        //                     alignTicks: false,
-        //                     height: 190,
-        //                     lineWidth: 0,
-        //                     minPadding: 0.005,
-        //                     maxPadding: 0.005,
-        //                 },
-        //                 {
-        //                     title: {
-        //                         offset: 57,
-        //                         text: 'Memory (MB)',
-        //                     },
-        //                     gridLineColor: 'rgba(154,154,154,0.20)',
-        //                     alignTicks: false,
-        //                     top: 225,
-        //                     offset: 0,
-        //                     height: 120,
-        //                     lineWidth: 0,
-        //                     minPadding: 0.005,
-        //                     maxPadding: 0.005,
-        //                 //    labels: {
-        //                 //        formatter: function () {
-        //                 //            return formatYAxis(this.value, true) + "%";
-        //                 //        }
-        //                 //    }
-        //                 }
-        //                 ],
-
-        //                 tooltip: {
-        //                     headerFormat: '<b>{point.key}</b><br />',
-        //                     valueDecimals: 2
-        //                 },
-        //                 options: {
-        //                     chart: {
-        //                         zoomType: 'x'
-        //                     },
-        //                     rangeSelector: {
-        //                         enabled: true
-        //                     },
-        //                     navigator: {
-        //                         enabled: true
-        //                     }
-        //                 },
-        //                 series: [{
-        //                     type: 'line',
-        //                     name: 'Cores',
-        //                     data: cores,
-        //                     shadow: true,
-        //                     id: 'dataseries',
-        //                     shape: 'none',
-        //                     yAxis: 0,
-        //                     marker: {
-        //                         enabled: false
-        //                     }                    
-        //                 },
-        //                 {
-        //                     type: 'area',
-        //                     name: 'Memory (MB)',
-        //                     data: memory,
-        //                     shadow: true,
-        //                     yAxis: 1,
-        //                     // tooltip: {
-        //                     //     valueSuffix: ' %'
-        //                     // },
-        //                     marker: {
-        //                         enabled: false
-        //                     }
-        //                 }
-        //             ]};
-
-        //             this.containerChart = new Chart(chart_config);
-        //         }
-        //         else
-        //             this.containerChart = null
-                
-        //     });
-
-        //     this.coflows.Get('m/processresourcedata?id=' + this.wid ,
-        //     data => {
-        //         if(data.length > 0) {
-        //             // console.log(data)
-
-        //             let map = new Map<string, Map<string, object>>()
-        //             let names = []
-        //             this.agents_filtered = []
-        //             data.forEach(x => {
-                        
-        //                 if(!map[x.WorkbookID]){
-        //                     names.push(x.WorkbookID)
-        //                     map[x.WorkbookID] = new Map<string, object>()
-        //                 }
-
-        //                 if(!(map[x.WorkbookID][x.FunctionID])){
-        //                     if(this.selectedWB.ID == x.WorkbookID && x.FunctionID != "" && x.WorkbookID != ""){
-        //                         this.agents_filtered.push({ Value: {Name : x.FunctionID, ID: x.FunctionID }})
-        //                     }
-
-        //                     map[x.WorkbookID][x.FunctionID] = []
-        //                 }
-
-        //                 map[x.WorkbookID][x.FunctionID].push({ Timestamp: x.Timestamp, Value: x.TimeSpan})
-        //             })
-        //             // console.log(map)
-
-        //             if(this.workbooks_filtered.length == 0){
-        //                 this.workbooks.forEach(x => {
-        //                     if(map[x.Value.ID] || x.Value.Name == "Workbook") {
-        //                         this.workbooks_filtered.push(x)
-        //                     }
-        //                 })
-        //             }
-        //             this.agents_filtered.push({ Value: {Name : "Workbook", ID: "Workbook" }})
-        //             // console.log(this.agents_filtered)
-
-        //             // console.log(this.selectedFunc.ID)
-
-        //             var timeSpan = [], dataLength = data.length;
-        //             for (var i = 0; i < dataLength; i++) {
-        //                 if(this.selectedWB.ID == "" || this.selectedWB.ID == undefined)
-        //                     timeSpan.push([data[i].Timestamp, data[i].TimeSpan])
-        //                 else{
-        //                     if(data[i].WorkbookID == this.selectedWB.ID)
-        //                         if(this.selectedFunc.ID == "" || this.selectedFunc.ID == "Workbook")
-        //                             timeSpan.push([data[i].Timestamp, data[i].TimeSpan])
-        //                         else
-        //                             if(data[i].FunctionID == this.selectedFunc.ID)
-        //                                 timeSpan.push([data[i].Timestamp, data[i].TimeSpan])
-        //                         //else
-        //                         //    timeSpan.push([data[i].Timestamp, data[i].TimeSpan])
-        //                 }
-
-        //                 // this.selectedFunc
-        //             }
-
-        //             var chart_config = {
-        //                 chart: {                    
-        //                     zoomType: 'x',
-        //                 },
-        //                 title: {
-        //                     text: null
-        //                 },
-        //                 credits: {
-        //                     enabled: false
-        //                 },
-        //                 useHighStocks: true,                
-        //                 legend: {
-        //                     enabled: false
-        //                 },
-        //                 xAxis: [{
-        //                     type: 'datetime',
-        //                 }],
-        //                 yAxis: [{
-        //                     title: {
-        //                         offset: 75,
-        //                         text: 'Seconds',
-        //                     },
-        //                     gridLineColor: 'rgba(154,154,154,0.20)',
-        //                     alignTicks: false,
-        //                     // height: 190,
-        //                     // lineWidth: 0,
-        //                     // minPadding: 0.005,
-        //                     // maxPadding: 0.005,
-        //                 }
-        //                 //,
-        //                 // {
-        //                 //     title: {
-        //                 //         offset: 57,
-        //                 //         text: 'Memory',
-        //                 //     },
-        //                 //     gridLineColor: 'rgba(154,154,154,0.20)',
-        //                 //     alignTicks: false,
-        //                 //     top: 225,
-        //                 //     offset: 0,
-        //                 //     height: 120,
-        //                 //     lineWidth: 0,
-        //                 //     minPadding: 0.005,
-        //                 //     maxPadding: 0.005,
-        //                 // //    labels: {
-        //                 // //        formatter: function () {
-        //                 // //            return formatYAxis(this.value, true) + "%";
-        //                 // //        }
-        //                 // //    }
-        //                 // }
-        //                 ],
-
-        //                 tooltip: {
-        //                     headerFormat: '<b>{point.key}</b><br />',
-        //                     valueDecimals: 2
-        //                 },
-        //                 options: {
-        //                     chart: {
-        //                         zoomType: 'x'
-        //                     },
-        //                     rangeSelector: {
-        //                         enabled: true
-        //                     },
-        //                     navigator: {
-        //                         enabled: true
-        //                     }
-        //                 },
-        //                 series: [{
-        //                     type: 'line',
-        //                     name: 'TimeSpan',
-        //                     data: timeSpan,
-        //                     shadow: true,
-        //                     id: 'dataseries',
-        //                     shape: 'none',
-        //                     yAxis: 0,
-        //                     marker: {
-        //                         enabled: false
-        //                     }                    
-        //                 }
-        //                 //,
-        //                 // {
-        //                 //     type: 'area',
-        //                 //     name: 'Memory (MB)',
-        //                 //     data: memory,
-        //                 //     shadow: true,
-        //                 //     yAxis: 1,
-        //                 //     // tooltip: {
-        //                 //     //     valueSuffix: ' %'
-        //                 //     // },
-        //                 //     marker: {
-        //                 //         enabled: false
-        //                 //     }
-        //                 // }
-        //             ]};
-
-        //             this.processesChart = new Chart(chart_config);
-        //         }
-        //         else
-        //             this.processesChart = null
-        //     });
-        // }
     }
 
     //Workbook Sourcecode
@@ -1204,7 +856,6 @@ export class WorkflowComponent {
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -1281,7 +932,6 @@ def pkg():
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -1362,7 +1012,6 @@ public class CSharpAgent
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -1447,7 +1096,6 @@ public class CSharpAgent
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -1521,12 +1169,10 @@ let pkg = new qengine.FPKG(
             }]
 
         }
-        // console.log(templateCode)
-
+        
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
