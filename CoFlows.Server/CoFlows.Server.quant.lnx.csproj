@@ -16,14 +16,14 @@
   <ItemGroup>
     <Content Include="ref\**\*.dll" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Folder Include="wwwroot\" CopyToPublishDirectory="Always" />
-    <Content Include="ipykernel_launcher.py" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="lab" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="coflows" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="kernel.jupyter" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="create.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="quant.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="calendars.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="fic.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="jupyter/ipykernel_launcher.py" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="jupyter/lab.quant" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="jupyter/coflows.quant" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="jupyter/kernel.jupyter" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="sql/create.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="sql/quant.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="sql/calendars.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="sql/fic.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
 
     <Compile Remove="Realtime\RTDSocketMiddleware.cs" />
   </ItemGroup>

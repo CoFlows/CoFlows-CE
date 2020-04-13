@@ -867,15 +867,15 @@ namespace CoFlows.Server.Quant
                 KernelDataAdapter.ConnectString = KernelConnectString;
                 QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
                 Console.WriteLine("Creating table structure in: " + sqliteFile);
-                var schema = File.ReadAllText(@"create.sql");
+                var schema = File.ReadAllText(@"sql/create.sql");
                 QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(schema);
-                var quant = File.ReadAllText(@"quant.sql");
+                var quant = File.ReadAllText(@"sql/quant.sql");
                 QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(quant);
                 Console.WriteLine("Adding calendar data in: " + sqliteFile);
-                var calendars = File.ReadAllText(@"calendars.sql");
+                var calendars = File.ReadAllText(@"sql/calendars.sql");
                 QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(calendars);
                 Console.WriteLine("Adding fixed income and currency data in: " + sqliteFile);
-                var fic = File.ReadAllText(@"fic.sql");
+                var fic = File.ReadAllText(@"sql/fic.sql");
                 QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(fic);
             }
 

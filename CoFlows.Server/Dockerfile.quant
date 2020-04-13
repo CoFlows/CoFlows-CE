@@ -103,6 +103,10 @@ EXPOSE 80/tcp
 
 COPY ${source:-obj/lnx/publish} ./
 
+RUN mv /app/jupyter/lab.quant /app/lab
+RUN mv /app/jupyter/coflows.quant /app/coflows
+RUN mv /app/jupyter/ipykernel_launcher.py /app/
+
 RUN chmod +x /app/lab
 RUN chmod +x /app/coflows
 
