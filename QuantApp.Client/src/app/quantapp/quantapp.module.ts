@@ -43,11 +43,12 @@ import { QAWorkbookComponent } from './workbook/qaworkbook.component';
     QuantAppComponent,
     WebsocketService, 
     MessagingService,
-    QAWorkbookComponent,
+    QAWorkbookComponent
+    // ,
     // QAStrategiesComponent
   ],
   exports: [
-    QAWorkbookComponent,
+    QAWorkbookComponent
     // ,
     // QAStrategiesComponent
   ]
