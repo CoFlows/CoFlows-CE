@@ -47,7 +47,7 @@ This is a generic example of VB agent following the generic structure within **C
         public Shared Function pkg() As FPKG
             Return new FPKG(
                 defaultID, 'ID
-                "Hello_World_WorkSpace", 'Workspace ID
+                "Hello_World_Workflow", 'Workflow ID
                 "Hello VB Agent", 'Name
                 "Hello VB Analytics Agent Sample", 'Description
                 "xxx-MID", 'Listener

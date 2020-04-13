@@ -1,12 +1,12 @@
 Polyglot
 ===
 
-In process interop in **CoFlows** is achieved by merging the functionality of various open-source projects. **CoreCLR** is the main execution environment that loads both the JVM and Python environments and also interprets Javascript. The Python environment is loaded through a fork of the [PythonNet](https://github.com/pythonnet/pythonnet "PythonNet") library while the JVM is loaded through the [QuantApp.Kernel/JVM](https://github.com/QuantApp/CoFlows-CE/tree/master/QuantApp.Kernel/JVM "QAJVM") libraries. Please note that the **PythonNet** fork was incorporated into the [QuantApp.Kernel/Python](https://github.com/QuantApp/CoFlows-CE/tree/master/QuantApp.Kernel/Python "QAPy") package for additional integration.
+In process interop in **CoFlows** is achieved by merging the functionality of various open-source projects. **CoreCLR** is the main execution environment that loads both the JVM and Python environments and also interprets Javascript. The Python environment is loaded through a fork of the [PythonNet](https://github.com/pythonnet/pythonnet "PythonNet") library while the JVM is loaded through the [QuantApp.Kernel/JVM](https://github.com/CoFlows/CoFlows-CE/tree/master/QuantApp.Kernel/JVM "QAJVM") libraries. Please note that the **PythonNet** fork was incorporated into the [QuantApp.Kernel/Python](https://github.com/CoFlows/CoFlows-CE/tree/master/QuantApp.Kernel/Python "QAPy") package for additional integration.
 
 ## Languages
 The **QuantApp Engine and Kernel** enable a polyglot environment where developers can code their functions in a variety of languages while allowing all functions irrespective of language to co-exist in the same process and memory. This mitigates the need for a TCP (SOAP, JSON WebAPI, Py4J) overhead which is usual when functions from different languages interact.
 
-Within a **CoFlows** workspace, three computing environments interact within the same process including the **Core CLR** (DotNet Core Language Runtime), **JVM** (Java Virtual Machine) and the **Python interpreter**. Javascript is interpreted within the CLR using the Jint package. 
+Within a **CoFlows** workflow, three computing environments interact within the same process including the **Core CLR** (DotNet Core Language Runtime), **JVM** (Java Virtual Machine) and the **Python interpreter**. Javascript is interpreted within the CLR using the Jint package. 
 
 The full list is:
 * CoreCLR: C#, F# & VB
@@ -52,6 +52,6 @@ These difference can be seen in the examples below.
 ## Notes
 The Python link is achieved through the wonderful library [PythonNet](https://github.com/pythonnet/pythonnet "PythonNet").
 
-The link between the **JVM** and **CLR** is achieved through the [QuantApp.Kernel/JVM](https://github.com/QuantApp/CoFlows-CE/tree/master/QuantApp.Kernel/JVM "QAJVM") libraries which have been developed from scratch for this project.
+The link between the **JVM** and **CLR** is achieved through the [QuantApp.Kernel/JVM](https://github.com/CoFlows/CoFlows-CE/tree/master/QuantApp.Kernel/JVM "QAJVM") libraries which have been developed from scratch for this project.
 
 Javascript interpretation is achieved using the great [Jint](https://github.com/sebastienros/jint "Jint") library.

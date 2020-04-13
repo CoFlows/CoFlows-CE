@@ -1,7 +1,7 @@
 Queries
 ===
 
-Developers can define Web API entry points to the Workspaces through Queries.
+Developers can define Web API entry points to the Workflows through Queries.
 
 Every function defined in a query is automatically assigned a _url_ by the **CoFlows** simplifying the process of creating these endpoints.
 
@@ -12,12 +12,12 @@ In C# you simply need to define a class with static functions. In F# its a modul
 The WebAPI url structure is defined by
 
  
-    http(s)://[host]/m/getwb?workbook=[WorkspaceID]&id=[QueryID]&name=[Function]&p[0]=x&p[1]=y...
+    http(s)://[host]/m/getwb?workbook=[WorkflowID]&id=[QueryID]&name=[Function]&p[0]=x&p[1]=y...
 
 where the
 
     [host] = name of machine hosting CoFlows
-    [WorkspaceID] = ID of workspace as defined in package.json
+    [WorkflowID] = ID of workflow as defined in package.json
     [QueryID] = ID of Query as defined in package.json
     [Function] = name of function in query
     p[0] = value of first argument taken by function

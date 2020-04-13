@@ -13,7 +13,7 @@ Note: The Javascript <-> CoreCLR interop is achieved through then **Jint** Nuget
 
     let pkg = new qengine.FPKG(
         defaultID, //ID
-        'Hello_World_WorkSpace', //Workspace ID
+        'Hello_World_Workflow', //Workflow ID
         'Hello Js Agent', //Name
         'Hello Js Analytics Agent Sample', //Description
         'xxx-MID', //VB Listener

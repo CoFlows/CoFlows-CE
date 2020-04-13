@@ -1,0 +1,187 @@
+<html>
+<meta http-equiv="Cache-Control" content="no-store" />
+<head>
+<title>CoFlows Web Data Connector</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
+<script src="https://connectors.tableau.com/libs/tableauwdc-1.1.1.js" type="text/javascript"></script>
+<script type="text/javascript">
+      // Example of Standard Connections in Web Data Connectors using JSONPlaceholder JSON endpoints
+// Tableau 10.1 - WDC API v2.1
+
+// Define our Web Data Connector
+
+(function(){
+
+  String.prototype.replaceAll = function(search, replacement) {
+      var target = this;
+      return target.replace(new RegExp(search, 'g'), replacement);
+  };
+
+function loadQueryString(){
+    var parameters = {};
+    var searchString = location.search.substr(1);
+    var pairs = searchString.split("&");
+    var parts;
+    for(i = 0; i < pairs.length; i++){
+        parts = pairs[i].split("=");
+        var name = parts[0];
+        var data = decodeURI(parts[1]);
+        parameters[name] = data;
+    }
+    return parameters;
+}
+
+  var params = loadQueryString()
+
+
+  var wb = params["workbook"];
+  var id = params["id"];
+  var name = params["name"];
+  
+  //var wb = new URL(window.location.href).searchParams.get("workbook");
+  //var id = new URL(window.location.href).searchParams.get("id");
+  //var name = new URL(window.location.href).searchParams.get("name");
+  var url = 'https://' + window.location.hostname + '/m/getquery?wid=' + wb + '&qid=' + id + '&name=' + name
+  //console.log(url)
+
+  
+  
+  var myConnector = tableau.makeConnector();
+  myConnector.getColumnHeaders = function() {
+    // Create a promise to get our Standard Connections List from a JSON file. This increases code readability since we
+    // no longer need to define the lengthy object within our javascript itself.
+
+    var fieldNames = []
+    var fieldTypes = []
+
+    var obj = {}
+
+    loadJSON(url, function(data) {
+        obj = JSON.parse(data);
+
+        for (var i in obj[0] ) { 
+            //console.log(i)
+            var val_float = parseFloat(obj[0][i]).toString() == obj[0][i]
+            //var val_int = parseInt(obj[0][i]).toString() == obj[0][i]
+
+            //console.log(val_float, val_int)
+
+            //if(val_int)
+            //  fieldTypes.push('int');//tableau.dataTypeEnum.int)
+            //else 
+            if(val_float)
+              fieldTypes.push('float');//tableau.dataTypeEnum.float)
+            else
+              fieldTypes.push('string');//tableau.dataTypeEnum.string)
+
+            fieldNames.push(i)
+        } 
+
+        tableau.headersCallback(fieldNames, fieldTypes);
+    });
+  }
+
+  myConnector.getTableData = function(lastRecordToken) {
+    // Load our data from the API. Multiple tables for WDC work by calling getData multiple times with a different id
+    // so we want to make sure we are getting the correct table data per getData call
+
+    loadJSON(url, function(data) {
+        obj = JSON.parse(data);
+    
+      var feat = obj,
+          tableData = [];
+
+      // Iterate over the JSON object
+      for (var i = 0, len = feat.length; i < len; i++) {
+          tableData.push(obj[i]);
+      }
+
+      //table.appendRows(tableData);
+      //doneCallback();
+      tableau.dataCallback(tableData, tableData.length.toString(), false);
+    });
+
+  }
+
+  //myConnector.init = function(callback){
+    //tableau.submit();
+    //callback();
+  //};
+
+  myConnector.init = function () {
+    //tableau.connectionName = wb + '_' + id.replaceAll('-','_') + '_' + name;
+    tableau.connectionName = name;
+    tableau.initCallback();
+    //tableau.submit();
+  };
+
+  tableau.registerConnector(myConnector);
+})();
+
+
+// Helper function that loads a json and a callback to call once that file is loaded
+
+function loadJSON(path, cb, isLocal) {
+  var obj = new XMLHttpRequest();
+  obj.overrideMimeType("application/json");
+  if(isLocal) {
+    obj.open("GET", path, true);
+  }
+  else {
+    obj.open("GET", path, true);
+  }
+  obj.onreadystatechange = function() {
+    if (obj.readyState == 4 && obj.status == "200"){
+      cb(obj.responseText);
+    }
+  }
+  obj.send(null);
+}
+
+function send() {
+  tableau.submit();
+}
+    </script>
+    <style>
+      * {
+        padding: 0px;
+        margin:  0px;
+        font-family: Arial, sans-serif;
+        color: #1c1c1c;
+      }
+      body {
+        background-color: #f5f5f5;
+        text-align: center;
+      }
+      h1 {
+        margin-top:  30px;
+        font-weight: normal;
+        margin-bottom: 15px;
+      }
+      p {
+        margin-bottom: 15px;
+        line-height: 1.4;
+      }
+      button {
+        padding: 6px 12px;
+        background-color: #5cb85c;
+        border: 2px solid #4cae4c;
+        color: white;
+        border-radius: 4px;
+        margin: 0 auto;
+        font-size: 1.2em;
+        transition: background-color .4s, border-color .4s;
+      }
+      button:hover{
+        cursor: pointer;
+        background-color: #3c9e3c;
+        border-color: #3c9e3c;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>CoFlows Web Data Connector</h1>
+    <!-- <p>Example Web Data Connector demonstrating the Standard Connections feature <br>using the <a href="http://jsonplaceholder.typicode.com/">JSON Placeholder REST service</a>.</p> -->
+    <button id="submitButton" onclick="send()">Get Data</button>
+  </body>
+</html>

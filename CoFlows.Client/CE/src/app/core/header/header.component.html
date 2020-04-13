@@ -1,0 +1,131 @@
+<nav class="navbar custom-navbar bg-faded main-header">
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <a href="javascript:;" class="nav-link" (click)="toggleSidebar.emit()">
+        <i class="hamburger-icon v2">
+          <span></span>
+        </i>
+      </a>
+    </li>
+  </ul>
+  <span class="navbar-heading hidden-xs-down">{{heading}}</span>
+
+  <span class="mr-auto"></span>
+  <ngb-alert *ngIf="coflows.message" type="success" (close)="coflows.message = null">{{coflows.message}}</ngb-alert>
+
+  <span class="mr-auto"></span>
+  <ul class="navbar-nav">
+    <li class="nav-item" ngbDropdown placement="bottom-right">
+      <a href="javascript:;" class="nav-link" ngbDropdownToggle>
+        {{coflows != null && coflows.quser != null ? coflows.quser.User.Name : ''}}
+        <i class="menu-caret icon icon-arrows-circle-down"></i>
+      </a>
+      <div ngbDropdownMenu class="dropdown-menu dropdown-menu-right">
+        <a class="dropdown-item" (click)="open(profile)" href="javascript:;">
+          <i class="icon icon-user mr-3"></i>
+          <span>Profile</span>
+        </a>
+        <a class="dropdown-item" (click)="open(changepassword)" href="javascript:;">
+          <i class="icon icon-key mr-3"></i>
+          <span>Change Password</span>
+        </a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" (click)="logout()" href="javascript:;">
+          <i class="icon icon-logout mr-3"></i>
+          <span>Signout</span>
+        </a>
+      </div>
+    </li>
+  </ul>
+</nav>
+
+
+
+<ng-template #changepassword let-c="close" let-d="dismiss">
+    <form [formGroup]="formPassword" (ngSubmit)="onSubmitPassword()">
+      <div class="modal-header">
+          <h6 class="modal-title text-uppercase">Change Password</h6>
+          <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+          <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+      
+      <div class="modal-body">
+          <div class="card card-body mb-0 rounded-0 p-5 ">
+              <fieldset class="form-group" [ngClass]="{'has-danger': formPassword.controls['oldPassword'].hasError('required') && formPassword.controls['oldPassword'].touched}">
+                  <label for="oldPassword">
+                    Enter your old password
+                  </label>
+                  <input type="password" class="form-control" placeholder="********" [formControl]="formPassword.controls['oldPassword']" [ngClass]="{'form-control-danger': formPassword.controls['oldPassword'].hasError('required') && formPassword.controls['oldPassword'].touched}"/>
+                  <div class="form-control-feedback" *ngIf="formPassword.controls['oldPassword'].hasError('required') && formPassword.controls['oldPassword'].touched">Password is required.</div>
+                </fieldset>
+
+              <fieldset class="form-group" [ngClass]="{'has-danger': formPassword.controls['newPassword'].hasError('required') && formPassword.controls['newPassword'].touched}">
+                <label for="newPassword">
+                  Enter your new password
+                </label>
+                <input type="password" class="form-control" placeholder="********" [formControl]="formPassword.controls['newPassword']" [ngClass]="{'form-control-danger': formPassword.controls['newPassword'].hasError('required') && formPassword.controls['newPassword'].touched}"/>
+                <div class="form-control-feedback" *ngIf="formPassword.controls['newPassword'].hasError('required') && formPassword.controls['newPassword'].touched">Password is required.</div>
+              </fieldset>
+              <fieldset class="form-group" [ngClass]="{'has-danger': formPassword.controls['confirmNewPassword'].hasError('required') && formPassword.controls['confirmNewPassword'].touched}">
+                <label for="confirmNewPassword">
+                  Confirm your new password
+                </label>
+                <input type="password" class="form-control" placeholder="********" [formControl]="formPassword.controls['confirmNewPassword']" [ngClass]="{'form-control-danger': formPassword.controls['confirmNewPassword'].hasError('required') && formPassword.controls['confirmNewPassword'].touched}"/>
+                <div class="form-control-feedback" *ngIf="this.formPassword.value.newPassword != this.formPassword.value.confirmNewPassword && formPassword.controls['confirmNewPassword'].touched">Passwords must match...</div>
+                <div class="form-control-feedback" *ngIf="passChangeMessage">{{passChangeMessage}}</div>
+                
+              </fieldset>
+            
+          </div>
+      </div>
+      <div class="modal-footer">
+          <button type="button" class="btn btn-danger" type="submit" *ngIf="formPassword.valid">Submit</button>
+          <button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>
+      </div>
+  </form>
+</ng-template>
+
+<ng-template #profile >
+    <form [formGroup]="formProfile" (ngSubmit)="onSubmitProfile()">
+      <div class="modal-header">
+          <h6 class="modal-title text-uppercase">Profile</h6>
+      </div>
+      
+      <div class="modal-body">
+          <div class="card card-body mb-0 rounded-0 p-5 ">
+              <fieldset class="form-group" [ngClass]="{'has-danger': formProfile.controls['firstName'].hasError('required')}">
+                <label>
+                  Email
+                </label>
+                <input type="text" [disabled]="true" class="form-control" value="{{coflows.quser.User.Email}}" />
+              </fieldset>
+
+              <fieldset class="form-group" [ngClass]="{'has-danger': formProfile.controls['firstName'].hasError('required') && formProfile.controls['firstName'].touched}">
+                  <label for="firstName">
+                    First Name
+                  </label>
+                  <input type="text" class="form-control" value="{{coflows.quser.User.FirstName}}" [formControl]="formProfile.controls['firstName']" [ngClass]="{'form-control-danger': formProfile.controls['firstName'].hasError('required') && formProfile.controls['firstName'].touched}"/>
+                </fieldset>
+
+              <fieldset class="form-group" [ngClass]="{'has-danger': formProfile.controls['lastName'].hasError('required') && formProfile.controls['lastName'].touched}">
+                <label for="lastName">
+                  Last Name
+                </label>
+                <input type="text" class="form-control" value="{{coflows.quser.User.LastName}}" [formControl]="formProfile.controls['lastName']" [ngClass]="{'form-control-danger': formProfile.controls['lastName'].hasError('required') && formProfile.controls['lastName'].touched}"/>
+              </fieldset>
+
+              <fieldset class="form-group">
+                <label>
+                  Secret
+                </label>
+                <input type="text" [disabled]="true" class="form-control" value="{{coflows.quser.User.Secret}}" />
+              </fieldset>
+          </div>
+      </div>
+      <div class="modal-footer">
+          <button type="button" class="btn btn-danger" type="submit" *ngIf="formProfile.valid">Submit</button>
+          <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+      </div>
+  </form>
+</ng-template>

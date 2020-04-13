@@ -2,7 +2,7 @@ Java Agent
 ===
 This is a generic example of Java agent following the generic structure within **CoFlows**.
 
-Note: The Java <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](https://github.com/QuantApp/CoFlows-CE/tree/master/QuantApp.Kernel/JVM "QAJVM").
+Note: The Java <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](https://github.com/CoFlows/CoFlows-CE/tree/master/QuantApp.Kernel/JVM "QAJVM").
 
     import app.quant.clr.*;
 
@@ -19,7 +19,7 @@ Note: The Java <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](htt
 
             return CLRRuntime.CreateInstance("QuantApp.Engine.FPKG",
                 defaultID, //ID
-                "Hello_World_WorkSpace", //Workspace ID  
+                "Hello_World_Workflow", //Workflow ID  
                 "Hello Java Agent", //Name
                 "Hello Java Analytics Agent Sample", //Description
                 "xxx-MID", //JS Listener

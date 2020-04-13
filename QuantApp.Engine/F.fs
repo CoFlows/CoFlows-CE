@@ -14,7 +14,7 @@ open QuantApp.Kernel
 type public F_v01 =
     {
         ID : string option
-        WorkspaceID : string option
+        WorkflowID : string option
 
         Code : (string * string) list option
         Name : string
@@ -34,7 +34,7 @@ type public F_v01 =
 type FMeta =
     {
         ID : string
-        WorkspaceID : string
+        WorkflowID : string
         Code : (string * string) seq
         Name : string
         Description : string
@@ -56,27 +56,9 @@ type FunctionType =
         Data : string
     }
 
-/// <summary>
-/// Class representing a strategy that optimises a portfolio in a multistep process:
-/// 1) Target volatility for each underlying asset. This step sets an equal volatility weight to all assets.
-/// 2) Concentration risk and Information Ratio management. This step mitigates the risk of an over exposure to a set of highly correlated assets. 
-///    Furthermore, a tilt in the weight is also implemented based on the information ratios for each asset.
-///    This entire step is achieved through the implementation of a Mean-Variance optimisation where all volatilities are equal to 1.0, the expected returns are normalised and transformed to information ratios.
-/// 3) Target volatility for the entire portfolio. After steps 1 and 2, the portfolio will probably have a lower risk level than the target due to diversification.
-///    This step adjusts the strategy's overall exposure in order to achieve the desired target volatility for the entire portfolio.
-/// 4) Maximum individual exposure to each asset is implemented
-/// 5) Maximum exposure to the entire portfolio is implemented
-/// 6) Deleverage the portfolio if the portfolio's Value at Risk exceeds a given level. The exposure is changed linearly such that the new VaR given by the new weights is the limit VaR.
-///    The implemented VaR measure is the UCITS calculation based on the 99 percentile of the distribution of the 20 day rolling return for the entire portfolio where each return is based on the current weights.
-/// 7) Only rebalance if the notional exposure to a position changes by more than a given threshold.
-/// The class also allows developers to specify a number of custom functions:
-///     a) Risk: risk measure for each asset.
-///     b) Exposure: defines if the portfolio should have a long (1.0) / short (-1.0) or neutral (0.0) exposure to a given asset.
-///     c) InformationRatio: measure of risk-neutral expectation for each asset. This affectes the MV optimisation of the concentration risk management.
-/// </summary>
 type F = 
     val ID : string
-    val mutable private _workspaceID : string
+    val mutable private _workflowID : string
     val mutable private _name : string
     val mutable private _description : string
     val mutable private _mid : string
@@ -103,7 +85,7 @@ type F =
     val mutable private monitorScriptCode : obj
     val mutable private monitorName : obj
     val mutable private monitorDescription : obj
-    val mutable private monitorWorkspaceID : obj
+    val mutable private monitorWorkflowID : obj
     val mutable private monitorMID : obj
     val mutable private monitorScheduleCommand : obj
     val mutable private monitorStarted : obj
@@ -147,7 +129,7 @@ type F =
                     with _ ->
 
                         let code = value
-                        if Utils.CompileAll || Utils.ActiveWorkSpaceList |> Seq.filter(fun x -> x.ID = this.WorkspaceID) |> Seq.isEmpty |> not then
+                        if Utils.CompileAll || Utils.ActiveWorkflowList |> Seq.filter(fun x -> x.ID = this.WorkflowID) |> Seq.isEmpty |> not then
                             
                             code 
                             |> List.map(fun (name, code) -> 
@@ -165,7 +147,7 @@ type F =
                                         .Replace("jsWrapper.Callback(","jsWrapper.Callback(\"" + this.ID + "-\" + ")
                                         .Replace("jsWrapper.Job(","jsWrapper.Job(\"" + this.ID + "-\" + ")
                                         .Replace("jsWrapper.Body(","jsWrapper.Body(\"" + this.ID + "-\" + ")
-                                        .Replace("$WID$", this.WorkspaceID)
+                                        .Replace("$WID$", this.WorkflowID)
                                         .Replace("$ID$", this.ID)
                                 )
                             )
@@ -179,8 +161,8 @@ type F =
                         let pkg = 
                             { 
                                 ID = this.ID
-                                WorkspaceID = this._workspaceID
-                                Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                                WorkflowID = this._workflowID
+                                Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                                 Name = this._name
                                 Description = this._description
                                 MID = this._mid
@@ -202,7 +184,7 @@ type F =
                         if res.Count = 0 then pkg |> m.Add |> ignore else m.Exchange(res.[0], pkg)
                         m.Save()
                     else
-                        this._scriptCode <- value |> List.map(fun (name, code) -> (name, code.Replace("$WID$", this._workspaceID)))
+                        this._scriptCode <- value |> List.map(fun (name, code) -> (name, code.Replace("$WID$", this._workflowID)))
                     )
 
 
@@ -221,8 +203,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -263,8 +245,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -291,21 +273,21 @@ type F =
 
     /// Delegate function used to set the add function
     /// </summary>
-    member this.WorkspaceID
-        with get() : string = this._workspaceID
+    member this.WorkflowID
+        with get() : string = this._workflowID
         and set(value) =
-            lock (this.monitorWorkspaceID) (fun () ->
+            lock (this.monitorWorkflowID) (fun () ->
                 
 
-                if this.Initialized && this._workspaceID <> value then
-                    this._workspaceID <- value
+                if this.Initialized && this._workflowID <> value then
+                    this._workflowID <- value
                     let m = this.ID + "-F-MetaData" |> M.Base
 
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -327,7 +309,7 @@ type F =
                     if res.Count = 0 then pkg |> m.Add |> ignore else m.Exchange(res.[0], pkg)
                     m.Save()
                 else
-                    this._workspaceID <- value
+                    this._workflowID <- value
             )
     /// Delegate function used to set the add function
     /// </summary>
@@ -344,8 +326,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -385,8 +367,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -425,8 +407,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -458,8 +440,8 @@ type F =
         let pkg = 
             { 
                 ID = this.ID
-                WorkspaceID = this._workspaceID
-                Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                WorkflowID = this._workflowID
+                Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                 Name = this._name
                 Description = this._description
                 MID = this._mid
@@ -512,8 +494,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -567,8 +549,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$"))) |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -620,8 +602,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -668,8 +650,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -716,8 +698,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -764,8 +746,8 @@ type F =
                     let pkg = 
                         { 
                             ID = this.ID
-                            WorkspaceID = this._workspaceID
-                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workspaceID, "$WID$")))
+                            WorkflowID = this._workflowID
+                            Code = this._scriptCode |> Seq.map(fun (name, code) -> (name, code.Replace(this._workflowID, "$WID$")))
                             Name = this._name
                             Description = this._description
                             MID = this._mid
@@ -820,7 +802,7 @@ type F =
         { 
             ID = ID
             
-            _workspaceID = null
+            _workflowID = null
             _name = null
             _description = null
             _mid = null
@@ -849,7 +831,7 @@ type F =
             monitorScriptCode = Object()
             monitorName = Object()
             monitorDescription = Object()
-            monitorWorkspaceID = Object()
+            monitorWorkflowID = Object()
             monitorMID = Object()
             monitorScheduleCommand = Object()
             monitorStarted = Object()
@@ -887,12 +869,12 @@ type F =
                             this._scheduleCommand <- pkg.ScheduleCommand
 
 
-                        if not(String.IsNullOrWhiteSpace(pkg.WorkspaceID)) then
-                            this._workspaceID <- pkg.WorkspaceID
+                        if not(String.IsNullOrWhiteSpace(pkg.WorkflowID)) then
+                            this._workflowID <- pkg.WorkflowID
 
                         this.ScriptCode <- 
                             pkg.Code 
-                            |> Seq.map(fun (name, code) -> (name, code.Replace("$WID$", pkg.WorkspaceID))) 
+                            |> Seq.map(fun (name, code) -> (name, code.Replace("$WID$", pkg.WorkflowID))) 
                             |> Seq.filter(fun (name, code) -> code |> String.IsNullOrWhiteSpace |> not) 
                             |> Seq.toList
 
@@ -1057,10 +1039,10 @@ type F =
                 pkg.ID.Value
 
         let wid = 
-            if pkg.WorkspaceID.IsNone then
+            if pkg.WorkflowID.IsNone then
                 "$WID$"
             else
-                pkg.WorkspaceID.Value
+                pkg.WorkflowID.Value
 
 
 
@@ -1117,8 +1099,8 @@ type F =
 
         f.Initialize()
         
-        if pkg.WorkspaceID.IsSome then
-            f.WorkspaceID <- pkg.WorkspaceID.Value
+        if pkg.WorkflowID.IsSome then
+            f.WorkflowID <- pkg.WorkflowID.Value
 
         let containsPackage (text : string) : bool =
             let lines = text.ToLower().Split([|"\r\n"; "\r"; "\n"|], StringSplitOptions.RemoveEmptyEntries)
@@ -1183,7 +1165,7 @@ type F =
         let pkg =
             {
                 ID = None
-                WorkspaceID = if meta.WorkspaceID |> String.IsNullOrEmpty |> not then Some(meta.WorkspaceID) else None
+                WorkflowID = if meta.WorkflowID |> String.IsNullOrEmpty |> not then Some(meta.WorkflowID) else None
 
                 Code = if meta.Code |> isNull || meta.Code |> Seq.isEmpty then None else Some(meta.Code |> Seq.toList)
                 Name = meta.Name
@@ -1206,7 +1188,7 @@ type F =
         let pkg =
             {
                 ID = if pkg.ID |> String.IsNullOrEmpty |> not then Some(pkg.ID) else None
-                WorkspaceID = if pkg.WorkspaceID |> String.IsNullOrEmpty |> not then Some(pkg.WorkspaceID) else None
+                WorkflowID = if pkg.WorkflowID |> String.IsNullOrEmpty |> not then Some(pkg.WorkflowID) else None
 
                 Code = if code |> isNull || code |> Seq.isEmpty then None else Some(code |> Seq.toList)
                 Name = pkg.Name
@@ -1238,7 +1220,7 @@ type F =
     static member ToFPKG (pkg : F_v01) =
         {
             ID = if pkg.ID.IsNone then null else pkg.ID.Value
-            WorkspaceID = if pkg.WorkspaceID.IsNone then null else pkg.WorkspaceID.Value
+            WorkflowID = if pkg.WorkflowID.IsNone then null else pkg.WorkflowID.Value
             Name = pkg.Name
             Description = if pkg.Description.IsNone then null else pkg.Description.Value
             MID = if pkg.MID.IsNone then null else pkg.MID.Value
