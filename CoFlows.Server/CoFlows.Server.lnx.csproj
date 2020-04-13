@@ -17,11 +17,11 @@
   <ItemGroup>
     <Content Include="ref\**\*.dll" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Folder Include="wwwroot\" CopyToPublishDirectory="Always" />
-    <Content Include="ipykernel_launcher.py" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="lab" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="coflows" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="kernel.jupyter" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="create.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="jupyter/ipykernel_launcher.py" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="jupyter/lab" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="jupyter/coflows" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="jupyter/kernel.jupyter" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    <Content Include="sql/create.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
   </ItemGroup>
 
   <ItemGroup>    

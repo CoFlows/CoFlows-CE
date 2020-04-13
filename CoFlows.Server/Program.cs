@@ -663,7 +663,7 @@ namespace CoFlows.Server
             if(!dbExists)
             {
                 Console.WriteLine("Creating table structure in: " + sqliteFile);
-                var script = File.ReadAllText(@"create.sql");
+                var script = File.ReadAllText(@"sql/create.sql");
                 QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(script);
             }
         }

@@ -103,6 +103,10 @@ EXPOSE 80/tcp
 
 COPY ${source:-obj/lnx/publish} ./
 
+RUN mv /app/jupyter/lab /app/
+RUN mv /app/jupyter/coflows /app/
+RUN mv /app/jupyter/ipykernel_launcher.py /app/
+
 RUN chmod +x /app/lab
 RUN chmod +x /app/coflows
 
@@ -133,7 +137,7 @@ RUN pip install requests
 
 RUN pip install pyodbc
 
-RUN mv /app/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kernel.json
+RUN mv /app/jupyter/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kernel.json
 
 RUN apt-get update && apt-get install -y procps
 RUN apt-get install -y git
