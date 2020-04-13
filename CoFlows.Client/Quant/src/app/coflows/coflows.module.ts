@@ -19,7 +19,7 @@ import { WebsocketService } from './core/websocket.service';
 import { MessagingService } from './core/messaging.service';
 
 import { CFQueryComponent } from './query/cfquery.component';
-// import { QAStrategiesComponent } from './strategies/qastrategies.component';
+import { QAStrategiesComponent } from '../quant/strategies/qastrategies.component';
 
 
 
@@ -37,20 +37,20 @@ import { CFQueryComponent } from './query/cfquery.component';
   declarations: [
     CoFlowsComponent,
     CFQueryComponent,
-    // QAStrategiesComponent
+    QAStrategiesComponent
   ],
   providers: [
     CoFlowsComponent,
     WebsocketService, 
     MessagingService,
     CFQueryComponent
-    // ,
-    // QAStrategiesComponent
+    ,
+    QAStrategiesComponent
   ],
   exports: [
     CFQueryComponent
-    // ,
-    // QAStrategiesComponent
+    ,
+    QAStrategiesComponent
   ]
 })
 

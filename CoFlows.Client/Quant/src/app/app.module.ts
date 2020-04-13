@@ -17,7 +17,7 @@ import { AppRoutes } from './app.routing';
 import { AppComponent } from './app.component';
 
 import { CoFlowsModule } from './coflows/coflows.module';
-import { QuantModule } from './quant/quant.module';
+// import { QuantModule } from './quant/quant.module';
 
 import {
   MenuComponent,
@@ -67,7 +67,7 @@ export function createTranslateLoader(http: HttpClient) {
     AgmCoreModule.forRoot({apiKey: 'YOURAPIKEY'}),
 
     CoFlowsModule,
-    QuantModule
+    // QuantModule
   ],
   providers: [
   ],
