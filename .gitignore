@@ -11,23 +11,23 @@ QuantApp.Engine/.git/
 QuantApp.Engine/bin/
 QuantApp.Engine/obj/
 
-QuantApp.Server/bin/
-QuantApp.Server/obj/
+CoFlows.Server/bin/
+CoFlows.Server/obj/
 
-QuantApp.Server/__pycache__/
-QuantApp.Server/.ipynb_checkpoints/
+CoFlows.Server/__pycache__/
+CoFlows.Server/.ipynb_checkpoints/
 
-QuantApp.Server/wwwroot/
+CoFlows.Server/wwwroot/
 
 obj/
 mnt/
 
 nugets/
-QuantApp.Server/nugets/
+CoFlows.Server/nugets/
 
-QuantApp.Server/jars/
+CoFlows.Server/jars/
 
 .DS_Store
-QuantApp.Server/libpython3.7m.dylib
-QuantApp.Server/python3.7m
-QuantApp.Server/libJNIWrapper.jnilib
+CoFlows.Server/libpython3.7m.dylib
+CoFlows.Server/python3.7m
+CoFlows.Server/libJNIWrapper.jnilib

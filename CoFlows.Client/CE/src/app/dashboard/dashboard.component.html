@@ -1,0 +1,139 @@
+<div class="p-3">
+
+    <!-- <div class="col-sm-6 col-md-3"> -->
+        <div class="card card-body card-widget" *ngFor="let item of workflows">
+            <div class="widget-icon rounded-circle bg-teal text-white icon icon-basic-server2"  *ngIf="item != undefined && item.Agents != undefined && item.workbooks != undefined">
+            </div>
+            <div class="block ml-3 mr-3" *ngIf="item != undefined && item.Agents != undefined && item.workbooks != undefined">
+                <h5 class="mb-0 fw-400">                    
+                    <a routerLink="/workflows/workflow/{{item.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a>        
+                </h5>
+            </div>
+            <div class="mr-auto"></div>
+            <div class="mr-3 d-flex align-items-center"   *ngIf="item != undefined && item.Agents != undefined && item.workbooks != undefined">
+                <small class="text-muted text-uppercase">
+                    <strong>Active Agents: {{item.activeAgents.length}} - Inactive Agents: {{item.inActiveAgents.length}} - Queries: {{item.workbooks.length}}</strong>
+                </small>
+            </div>
+
+        </div>
+    <!-- </div> -->
+
+<!-- 
+    <div class="card" *ngIf="Agents.length > 0">
+
+        <div class="card-header">
+            <div class="card-header-text w-100">
+                <div class="card-title">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-3">
+                            <label class="switch m-b">
+                                <div class="slide-toggle-bar">
+                                    Agents
+                                </div>
+                            </label>
+                        </div>
+                        <div class="mr-auto">                            
+                        </div>
+
+                        <div class="d-flex align-items-center" *ngIf="permission == 2">
+                            <div class="forum-stat">
+                                <a (click)="createNewFunctionFs()" routerLinkActive="active" >
+                                    <div class="icon icon-arrows-circle-plus"></div>
+                                    <small>F# &nbsp;</small>
+                                </a>
+                                
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center" *ngIf="permission == 2">
+                            <div class="forum-stat">
+                                <a (click)="createNewFunctionCs()" routerLinkActive="active" >
+                                    <div class="icon icon-arrows-circle-plus"></div>
+                                    <small>C# &nbsp;</small>
+                                </a>
+                                
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center" *ngIf="permission == 2">
+                            <div class="forum-stat">
+                                <a (click)="createNewFunctionPy()" routerLinkActive="active">
+                                        
+                                    <div class="icon icon-arrows-circle-plus"></div>
+                                    <small>Py &nbsp;</small>
+                                </a>
+                                
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center" *ngIf="permission == 2">
+                            <div class="forum-stat">
+                                <a (click)="createNewFunctionJs()" routerLinkActive="active">
+                                        
+                                    <div class="icon icon-arrows-circle-plus"></div>
+                                    <small>Js &nbsp;</small>
+                                </a>
+                                
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center" *ngIf="permission == 2">
+                            <div class="forum-stat">
+                                <a (click)="createNewFunctionVb()" routerLinkActive="active">
+                                        
+                                    <div class="icon icon-arrows-circle-plus"></div>
+                                    <small>VB</small>
+                                </a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body" *ngFor="let item of Agents">
+            <div class="d-flex align-items-center">
+                <div class="mr-3">
+                    <label class="switch m-b">
+                        <div class="slide-toggle-bar">
+                            <input  #selectElem type="checkbox" [disabled]="permission < 2" [(ngModel)]="item.Started" [checked]="item.Started" (change)="onChangeActiveFunction(item.ID, selectElem.value)">
+                            <span></span>
+                        </div>
+                    </label>
+                    <span class="slide-toggle-content">{{ item.Started ? 'Active' : 'Inactive'}}</span>
+                </div>
+                <div class="mr-auto">
+                    <a routerLink="/workflows/function/{{wid}}/{{item.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a>        
+                    <div>{{ item.Description }}</div>
+                </div>
+            </div>
+        </div>
+  </div>
+
+
+  <div class="card" *ngIf="workbooks.length > 0">
+      <div class="card-header">
+          <div class="card-header-text w-100">
+              <div class="card-title">
+                  <a routerLink="/workflows/workbook/{{wid}}/0" routerLinkActive="active" class="ff-headers text-color">Queries</a>
+              </div>
+          </div>
+      </div>
+      <div class="scroll-y" style="max-height: 400px;">
+          <div class="card-body" *ngFor="let item of workbooks">
+              <div class="d-flex align-items-center">
+                  <div class="mr-3">
+                      <a (click)="cfquery.submitCode(item.Value)" routerLinkActive="active" class="ff-headers text-color">
+                          <div class="icon icon-arrows-circle-left"></div>
+                      </a>
+                  </div>
+                  <div class="mr-auto">
+                      <a routerLink="/workflows/workbook/{{wid}}/{{item.Value.ID}}" routerLinkActive="active" class="ff-headers text-color">{{ item.Value.Name }}</a>
+                  </div>
+              </div>
+              
+          </div>
+      </div>
+  </div>
+
+  <coflows-query  #cfquery></coflows-query> -->
+
+</div>

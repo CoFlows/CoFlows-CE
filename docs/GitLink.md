@@ -2,7 +2,7 @@ GitHub Link
 ===
 Create a copy of this repository in order to play around with it. We will first create a clone of this repo. Then link this clone to a new repo of your own and finally connect **CoFlows** with **GitHub** to automate deployment:
 * Clone this project to your local environment:  
-  `git clone https://github.com/QuantApp/CoFlows-Public.git`
+  `git clone https://github.com/CoFlows/CoFlows-Public.git`
 * In the unzipped folder CoFlows-Public, delete the .git/ folder:  
   `Bash> rm -rf .git`
 * Create your own new cloud repository on **GitHub**
@@ -10,7 +10,7 @@ Create a copy of this repository in order to play around with it. We will first 
   `git init`  
   `git add .`  
   `git commit -a -m "first commit"`  
-  `git remote add origin https://github.com/QuantApp/CoFlows-Public.git`  
+  `git remote add origin https://github.com/CoFlows/CoFlows-Public.git`  
   `git push (--force) origin master`  
 
 We must now both get a **CoFlows** key and a **GitHub** token in order to allow CoFlows to deploy new changes to the GiHub repo after every commit.
