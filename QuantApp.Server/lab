@@ -1,3 +1,3 @@
 #!/bin/bash
 cd /app
-dotnet QuantApp.Server.quant.lnx.dll lab $1 $2 $3 $4
+dotnet QuantApp.Server.lnx.dll lab $1 $2 $3 $4
