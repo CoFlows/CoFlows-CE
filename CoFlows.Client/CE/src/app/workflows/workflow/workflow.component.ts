@@ -5,7 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 
 import { CoFlowsComponent } from '../../coflows/core/coflows.component';
-import { QAWorkbookComponent } from '../../coflows/workbook/qaworkbook.component';
+import { CFQueryComponent } from '../../coflows/query/cfquery.component';
 // import { QAStrategiesComponent } from '../../coflows/strategies/qastrategies.component';
 
 import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
@@ -57,8 +57,8 @@ export class WorkflowComponent {
     // @ViewChild('qastrategies')
     // private qastrategies:QAStrategiesComponent
 
-    @ViewChild('qawbook')
-    private qawbook:QAWorkbookComponent
+    @ViewChild('cfquery')
+    private cfquery:CFQueryComponent
 
     @ViewChild('logarea')
     private logArea:ElementRef
@@ -626,8 +626,8 @@ export class WorkflowComponent {
 
     tabBeforeChange(event){
         // console.log(event)
-        if(event == 0 && this.qawbook != undefined)
-            CoFlowsComponent.UpdateInstruments = !(this.qawbook.status.indexOf('thinking...') == -1 && this.qawbook.results.length > 0)
+        if(event == 0 && this.cfquery != undefined)
+            CoFlowsComponent.UpdateInstruments = !(this.cfquery.status.indexOf('thinking...') == -1 && this.cfquery.results.length > 0)
         else
             CoFlowsComponent.UpdateInstruments = false
 

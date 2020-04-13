@@ -18,7 +18,7 @@ import { CoFlowsComponent } from './core/coflows.component';
 import { WebsocketService } from './core/websocket.service';
 import { MessagingService } from './core/messaging.service';
 
-import { QAWorkbookComponent } from './workbook/qaworkbook.component';
+import { CFQueryComponent } from './query/cfquery.component';
 // import { QAStrategiesComponent } from './strategies/qastrategies.component';
 
 
@@ -36,19 +36,19 @@ import { QAWorkbookComponent } from './workbook/qaworkbook.component';
   ],
   declarations: [
     CoFlowsComponent,
-    QAWorkbookComponent,
+    CFQueryComponent,
     // QAStrategiesComponent
   ],
   providers: [
     CoFlowsComponent,
     WebsocketService, 
     MessagingService,
-    QAWorkbookComponent
+    CFQueryComponent
     // ,
     // QAStrategiesComponent
   ],
   exports: [
-    QAWorkbookComponent
+    CFQueryComponent
     // ,
     // QAStrategiesComponent
   ]

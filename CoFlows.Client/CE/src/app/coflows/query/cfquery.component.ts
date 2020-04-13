@@ -10,10 +10,10 @@ import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'coflows-query',
-  templateUrl: './qaworkbook.component.html'
+  templateUrl: './cfquery.component.html'
 })
 
-export class QAWorkbookComponent {
+export class CFQueryComponent {
     
     chart : any = {}
     rows = []
@@ -207,6 +207,8 @@ export class QAWorkbookComponent {
 
                             result.IsDash = true
                             result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.coflows.coflows_server + 'dash/' + workbook.WorkflowID + '/' + workbook.ID + '?uid=' + this.coflows.quser.User.Secret)
+                            result.URL2 = '/workflows/app/dash/' + workbook.WorkflowID + '/' + workbook.ID + '?uid=' + this.coflows.quser.User.Secret
+                            
                         }
                         else if(result.Item1.indexOf('_map') >= 0){
                             let name = result.Item1
@@ -432,7 +434,7 @@ export class QAWorkbookComponent {
 
 
     private addItem_internal(items, name, item){
-        let result = { Item1: name, Item2: item, columns: [], IsChart: false, IsMap: false, IsFigure: false, IsDash: false, URL: null}
+        let result = { Item1: name, Item2: item, columns: [], IsChart: false, IsMap: false, IsFigure: false, IsDash: false, URL: null, URL2: null}
         if(result.Item1.indexOf('_chart') >= 0){
             //let name = result.Item1
             
@@ -487,6 +489,8 @@ export class QAWorkbookComponent {
 
             result.IsDash = true
             result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.coflows.coflows_server + 'dash/' + this.selectedWB.WorkflowID + '/' + this.selectedWB.ID + '?uid=' + this.coflows.quser.User.Secret)
+            result.URL2 = '/workflows/app/dash/' + this.selectedWB.WorkflowID + '/' + this.selectedWB.ID + '?uid=' + this.coflows.quser.User.Secret
+            
         }
         else if(result.Item1.indexOf('_map') >= 0){
             let name = this.selectedTab

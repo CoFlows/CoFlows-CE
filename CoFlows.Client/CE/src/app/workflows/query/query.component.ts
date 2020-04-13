@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { CoFlowsComponent } from '../../coflows/core/coflows.component';
-import { QAWorkbookComponent } from '../../coflows/workbook/qaworkbook.component';
+import { CFQueryComponent } from '../../coflows/query/cfquery.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ActivatedRoute } from '@angular/router';
@@ -225,7 +225,7 @@ export class QueryComponent {
     permission = -1
     permissionSet = false
 
-    constructor(private activatedRoute: ActivatedRoute, public coflows: CoFlowsComponent, private cfquery: QAWorkbookComponent, private modalService: NgbModal){
+    constructor(private activatedRoute: ActivatedRoute, public coflows: CoFlowsComponent, private cfquery: CFQueryComponent, private modalService: NgbModal){
 
         this.activatedRoute.params.subscribe(params => {
             let wid = params['wid'];
