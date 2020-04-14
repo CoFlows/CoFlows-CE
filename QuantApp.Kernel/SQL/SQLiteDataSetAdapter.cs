@@ -146,12 +146,63 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public DataTable GetDataTable(string table, string target, string search)
         {
-            try
+            lock (objLock)
+            {
+                try
+                {
+                    using (SQLiteConnection _connectionInternal = new SQLiteConnection(ConnectString))
+                    {
+                        string SelectString = @"SELECT " + (target == null ? "*" : target) + " FROM " + table + (search == null ? "" : (search.Trim().ToLower().StartsWith("order") ? " " : " WHERE ") + search);
+
+                        DataSet dataset = new DataSet();
+                        try
+                        {
+                            if (_connectionInternal.State != ConnectionState.Open)
+                                _connectionInternal.Open();
+
+                            SQLiteDataAdapter adapter = new SQLiteDataAdapter();
+                            adapter.SelectCommand = new SQLiteCommand(SelectString, _connectionInternal);
+                            adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
+
+                            adapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
+
+                            adapter.Fill(dataset, table);
+                        }
+                        catch (Exception ex)
+                        {
+                            SQLiteConnection.ClearAllPools();
+
+                            if (_connectionInternal.State != ConnectionState.Open)
+                                _connectionInternal.Open();
+
+                            SQLiteDataAdapter adapter = new SQLiteDataAdapter();
+                            adapter.SelectCommand = new SQLiteCommand(SelectString, _connectionInternal);
+                            adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
+
+                            adapter.Fill(dataset, table);
+
+
+                        }
+                        _connectionInternal.Close();
+
+                        return dataset.Tables[table];
+                    }
+                }
+                catch (Exception e)
+                {
+                    string SelectString = @"SELECT " + (target == null ? "*" : target) + " FROM " + table + (search == null ? "" : (search.Trim().ToLower().StartsWith("order") ? " " : " WHERE ") + search);
+                    Console.WriteLine(SelectString + e);
+                    return null;
+                }
+            }
+        }
+
+        public DataTable ExecuteDataTable(string table, string command)
+        {
+            lock (objLock)
             {
                 using (SQLiteConnection _connectionInternal = new SQLiteConnection(ConnectString))
                 {
-                    string SelectString = @"SELECT " + (target == null ? "*" : target) + " FROM " + table + (search == null ? "" : (search.Trim().ToLower().StartsWith("order") ? " " : " WHERE ") + search);
-
                     DataSet dataset = new DataSet();
                     try
                     {
@@ -159,14 +210,12 @@ namespace QuantApp.Kernel.Adapters.SQL
                             _connectionInternal.Open();
 
                         SQLiteDataAdapter adapter = new SQLiteDataAdapter();
-                        adapter.SelectCommand = new SQLiteCommand(SelectString, _connectionInternal);
+                        adapter.SelectCommand = new SQLiteCommand(command, _connectionInternal);
                         adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
-
-                        adapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
 
                         adapter.Fill(dataset, table);
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         SQLiteConnection.ClearAllPools();
 
@@ -174,7 +223,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                             _connectionInternal.Open();
 
                         SQLiteDataAdapter adapter = new SQLiteDataAdapter();
-                        adapter.SelectCommand = new SQLiteCommand(SelectString, _connectionInternal);
+                        adapter.SelectCommand = new SQLiteCommand(command, _connectionInternal);
                         adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
 
                         adapter.Fill(dataset, table);
@@ -182,76 +231,36 @@ namespace QuantApp.Kernel.Adapters.SQL
 
                     }
                     _connectionInternal.Close();
-
                     return dataset.Tables[table];
                 }
-            }
-            catch (Exception e)
-            {
-                string SelectString = @"SELECT " + (target == null ? "*" : target) + " FROM " + table + (search == null ? "" : (search.Trim().ToLower().StartsWith("order") ? " " : " WHERE ") + search);
-                Console.WriteLine(SelectString + e);
-                return null;
-            }
-        }
-
-        public DataTable ExecuteDataTable(string table, string command)
-        {
-            using (SQLiteConnection _connectionInternal = new SQLiteConnection(ConnectString))
-            {
-                DataSet dataset = new DataSet();
-                try
-                {
-                    if (_connectionInternal.State != ConnectionState.Open)
-                        _connectionInternal.Open();
-
-                    SQLiteDataAdapter adapter = new SQLiteDataAdapter();
-                    adapter.SelectCommand = new SQLiteCommand(command, _connectionInternal);
-                    adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
-
-                    adapter.Fill(dataset, table);
-                }
-                catch
-                {
-                    SQLiteConnection.ClearAllPools();
-
-                    if (_connectionInternal.State != ConnectionState.Open)
-                        _connectionInternal.Open();
-
-                    SQLiteDataAdapter adapter = new SQLiteDataAdapter();
-                    adapter.SelectCommand = new SQLiteCommand(command, _connectionInternal);
-                    adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
-
-                    adapter.Fill(dataset, table);
-
-
-                }
-                _connectionInternal.Close();
-                return dataset.Tables[table];
             }
         }
 
         public DataTable UpdateDataTable(DataTable table, string target, string search)
         {
-            using (SQLiteConnection _connectionInternal = new SQLiteConnection(ConnectString))
+            lock (objLock)
             {
-                if (_connectionInternal.State != ConnectionState.Open)
-                    _connectionInternal.Open();
-            
-                string SelectString = @"SELECT " + (target == null ? "*" : target) + " FROM " + table.TableName + (search == null ? "" : " WHERE " + search) + " LIMIT 1";
+                using (SQLiteConnection _connectionInternal = new SQLiteConnection(ConnectString))
+                {
+                    if (_connectionInternal.State != ConnectionState.Open)
+                        _connectionInternal.Open();
+                
+                    string SelectString = @"SELECT " + (target == null ? "*" : target) + " FROM " + table.TableName + (search == null ? "" : " WHERE " + search) + " LIMIT 1";
 
-                SQLiteDataAdapter adapter = new SQLiteDataAdapter();
-                adapter.SelectCommand = new SQLiteCommand(SelectString, _connectionInternal);
-                adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
+                    SQLiteDataAdapter adapter = new SQLiteDataAdapter();
+                    adapter.SelectCommand = new SQLiteCommand(SelectString, _connectionInternal);
+                    adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
 
-                adapter.UpdateBatchSize = 0;
-                adapter.Update(table.DataSet, table.TableName);
+                    adapter.UpdateBatchSize = 0;
+                    adapter.Update(table.DataSet, table.TableName);
 
 
-                table.AcceptChanges();
+                    table.AcceptChanges();
 
-                _connectionInternal.Close();
+                    _connectionInternal.Close();
 
-                return table;
+                    return table;
+                }
             }
         }
 
