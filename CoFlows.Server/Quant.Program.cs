@@ -578,11 +578,21 @@ namespace CoFlows.Server.Quant
 
                 Connection.Client.Init(serverUrl, sslFlag);
 
-                if(!Connection.Client.Login(config["Server"]["SecretKey"].ToString()))
-                    throw new Exception("CoFlows Not connected!");
+                for(int i = 0; i < 50 ; i++)
+                {
+                    try
+                    {
+                        SdkContext.DelayProvider.Delay(10000);
+                        // Console.WriteLine("Connecting to Cluster(" + i + "): " + CoFlows.Server.Program.hostName + " with SSL " + sslFlag + " " + config["Server"]["SecretKey"].ToString());
+                        if(!Connection.Client.Login(config["Server"]["SecretKey"].ToString()))
+                            throw new Exception("CoFlows Not connected!");
 
-                Connection.Client.Connect();
-                Console.Write("Container connected! ");
+                        Connection.Client.Connect();
+                        Console.WriteLine("Container connected! " + i);
+                        break;
+                    }
+                    catch{}
+                }
 
                 QuantApp.Kernel.M.Factory = new MFactory();
 
