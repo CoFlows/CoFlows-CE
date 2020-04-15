@@ -264,348 +264,350 @@ namespace QuantApp.Kernel.Adapters.SQL
             }
         }
 
-
-
-
         public void AddDataTable(DataTable table)
         {
-            SQLiteConnection _connectionInternal;
-
-            _connectionInternal = new SQLiteConnection(ConnectString);
-
-            if (_connectionInternal.State != ConnectionState.Open)
-                _connectionInternal.Open();
-
-            lock (_connectionInternal)
+            lock (objLock)
             {
-                try
-                {
-                    DateTime debugTime = new DateTime();
+                SQLiteConnection _connectionInternal;
 
-                    DataTable changes = table.GetChanges();
-                    if (changes != null)
+                _connectionInternal = new SQLiteConnection(ConnectString);
+
+                if (_connectionInternal.State != ConnectionState.Open)
+                    _connectionInternal.Open();
+
+                lock (_connectionInternal)
+                {
+                    try
                     {
-                        DataRowCollection rows = changes.Rows;
-                        DataColumnCollection cols = changes.Columns;
-                        int rowLength = rows.Count;
-                        int colLength = cols.Count;
+                        DateTime debugTime = new DateTime();
 
-                        string insert = @"INSERT INTO " + table.TableName + "(";
-
-                        for (int i = 0; i < colLength; i++)
+                        DataTable changes = table.GetChanges();
+                        if (changes != null)
                         {
-                            DataColumn col = cols[i];
-                            insert += col.ColumnName + ",";
-                        }
-                        insert = insert.Substring(0, insert.Length - 1) + ")";
+                            DataRowCollection rows = changes.Rows;
+                            DataColumnCollection cols = changes.Columns;
+                            int rowLength = rows.Count;
+                            int colLength = cols.Count;
 
-                        var dbCommand = new SQLiteCommand(_connectionInternal);
-                        var transaction = _connectionInternal.BeginTransaction();
-
-                        // string masterString = "";
-                        // var mstStr = new StringWriter();
-                        debugTime = DateTime.Now;
-
-                        for (int i = 0; i < rowLength; i++)
-                        {
-                            DataRow row = rows[i];
-                            string addstring = insert + " VALUES(";
-
-                            for (int j = 0; j < colLength; j++)
-                            {
-                                DataColumn col = cols[j];
-
-                                var value = row[col];
-
-                                string vstr = value.ToString();
-
-                                var type = col.DataType;
-
-                                if (type == typeof(string) || type == typeof(char))
-                                    addstring += "\"" + value + "\" , ";
-
-                                else if (type == typeof(bool))
-                                    addstring += ((bool)value ? 1 : 0) + " , ";
-
-                                else if (type == typeof(DateTime))
-                                    addstring += string.IsNullOrWhiteSpace(vstr) ? "null, " : "'" + ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' , ";
-
-                                else
-                                    addstring += (string.IsNullOrWhiteSpace(vstr) ? "null" : vstr) + " , ";
-                            }
-
-                            addstring = addstring.Remove(addstring.Length - 2) + ");";
-
-                            dbCommand.CommandText = addstring;
-                            dbCommand.ExecuteNonQuery();
-                            // mstStr.Write(addstring);
-                            // masterString += addstring;
-                        }
-
-                        debugTime = DateTime.Now;
-                        // var dbCommand = new SQLiteCommand(masterString, _connectionInternal, transaction);
-                        // var dbCommand = new SQLiteCommand(mstStr.ToString(), _connectionInternal, transaction);
-                        // dbCommand.CommandTimeout = 0 * 60 * 15;
-                        // dbCommand.ExecuteNonQuery();
-                        debugTime = DateTime.Now;
-                        transaction.Commit();
-                        debugTime = DateTime.Now;
-                        table.AcceptChanges();
-
-                        _connectionInternal.Close();
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("EXCEPTION FROM MSSQL.");
-                    Console.WriteLine(e);
-                }
-                finally
-                {
-                }
-            }
-
-        }
-
-        public void UpdateDataTable(DataTable table)
-        {
-            using (SQLiteConnection _connectionInternal = new SQLiteConnection(ConnectString))
-            {
-                try
-                {
-                    if (_connectionInternal.State != ConnectionState.Open)
-                        _connectionInternal.Open();
-
-                    DataTable changes = table.GetChanges(DataRowState.Added);
-                    if (changes != null)
-                    {
-                        DataRowCollection rows = changes.Rows;
-                        DataColumnCollection cols = changes.Columns;
-
-                        int colLength = cols.Count;
-                        int rowLength = rows.Count;
-
-
-                        string insert = @"INSERT INTO " + table.TableName + "(";
-
-                        for (int i = 0; i < colLength; i++)                                                   
-                            insert += cols[i].ColumnName + ",";
-                        
-                        insert = insert.Substring(0, insert.Length - 1) + ")";
-
-                        var transaction = _connectionInternal.BeginTransaction();
-
-                        for (int j = 0; j < rowLength; j++)
-                        {
-                            DataRow row = rows[j];
-
-                            string addstring = insert + " VALUES(";
+                            string insert = @"INSERT INTO " + table.TableName + "(";
 
                             for (int i = 0; i < colLength; i++)
                             {
                                 DataColumn col = cols[i];
-                                if (col.DataType == typeof(string) || col.DataType == typeof(char))
-                                    addstring += "'" + row[col] + "' , ";
+                                insert += col.ColumnName + ",";
+                            }
+                            insert = insert.Substring(0, insert.Length - 1) + ")";
 
-                                else if (col.DataType == typeof(bool))
-                                    addstring += ((bool)row[col] ? 1 : 0) + " , ";
+                            var dbCommand = new SQLiteCommand(_connectionInternal);
+                            var transaction = _connectionInternal.BeginTransaction();
 
-                                else if (col.DataType == typeof(DateTime))
-                                    addstring += string.IsNullOrWhiteSpace(row[col].ToString()) ? "null, " : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' , ";
+                            // string masterString = "";
+                            // var mstStr = new StringWriter();
+                            debugTime = DateTime.Now;
 
-                                else
-                                    addstring += (string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : row[col].ToString()) + " , ";
+                            for (int i = 0; i < rowLength; i++)
+                            {
+                                DataRow row = rows[i];
+                                string addstring = insert + " VALUES(";
+
+                                for (int j = 0; j < colLength; j++)
+                                {
+                                    DataColumn col = cols[j];
+
+                                    var value = row[col];
+
+                                    string vstr = value.ToString();
+
+                                    var type = col.DataType;
+
+                                    if (type == typeof(string) || type == typeof(char))
+                                        addstring += "\"" + value + "\" , ";
+
+                                    else if (type == typeof(bool))
+                                        addstring += ((bool)value ? 1 : 0) + " , ";
+
+                                    else if (type == typeof(DateTime))
+                                        addstring += string.IsNullOrWhiteSpace(vstr) ? "null, " : "'" + ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' , ";
+
+                                    else
+                                        addstring += (string.IsNullOrWhiteSpace(vstr) ? "null" : vstr) + " , ";
+                                }
+
+                                addstring = addstring.Remove(addstring.Length - 2) + ");";
+
+                                dbCommand.CommandText = addstring;
+                                dbCommand.ExecuteNonQuery();
+                                // mstStr.Write(addstring);
+                                // masterString += addstring;
                             }
 
-                            addstring = addstring.Substring(0, addstring.Length - 2) + ");";
-                            SQLiteCommand command = new SQLiteCommand(addstring, _connectionInternal, transaction);
-                            command.ExecuteNonQuery();
+                            debugTime = DateTime.Now;
+                            // var dbCommand = new SQLiteCommand(masterString, _connectionInternal, transaction);
+                            // var dbCommand = new SQLiteCommand(mstStr.ToString(), _connectionInternal, transaction);
+                            // dbCommand.CommandTimeout = 0 * 60 * 15;
+                            // dbCommand.ExecuteNonQuery();
+                            debugTime = DateTime.Now;
+                            transaction.Commit();
+                            debugTime = DateTime.Now;
+                            table.AcceptChanges();
+
+                            _connectionInternal.Close();
                         }
-                        transaction.Commit();
-                        table.AcceptChanges();                        
                     }
-
-
-                    changes = table.GetChanges(DataRowState.Modified);
-                    if (changes != null)
+                    catch (Exception e)
                     {
-                        DataRowCollection rows = changes.Rows;
-                        DataColumnCollection cols = changes.Columns;
-
-                        DataColumn[] primary = changes.PrimaryKey;
-                        int pl = primary.Length;
-                        
-                        var names = new Dictionary<string, string>();
-                        for (int i = 0; i < pl; i++)
-                        {
-                            var p = primary[i];
-                            string name = p.ColumnName;
-                            names.Add(name, "");                            
-                        }
-
-                        int colLength = cols.Count;
-                        int rowLength = rows.Count;
-                        
-                        var transaction = _connectionInternal.BeginTransaction();
-
-                        for (int j = 0; j < rowLength; j++)
-                        {
-                            string update = @"UPDATE " + table.TableName + " SET ";
-
-                            DataRow row = rows[j];
-
-                            int added = 0;
-
-                            for (int i = 0; i < colLength; i++)
-                            {
-                                var col = cols[i];
-                                string name = col.ColumnName;
-                                if (!names.ContainsKey(name))
-                                {
-                                    added++;
-                                    string value = "";
-                                    if (col.DataType == typeof(string) || col.DataType == typeof(char))
-                                        value = "'" + row[col] + "' , ";
-
-                                    else if (col.DataType == typeof(bool))
-                                        value = ((bool)row[col] ? 1 : 0) + " , ";
-
-                                    else if (col.DataType == typeof(DateTime))
-                                        value = string.IsNullOrWhiteSpace(row[col].ToString()) ? "null, " : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' , ";
-
-                                    else
-                                        value = (string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : row[col].ToString()) + " , ";
-
-                                    update += name + " = " + value;
-                                }
-                            }
-
-                            if (added > 0)
-                            {
-                                update = update.Substring(0, update.Length - 2) + " WHERE ";
-
-                                for (int i = 0; i < pl; i++)
-                                {
-                                    var col = primary[i];
-                                    string name = col.ColumnName;
-                                    string value = "";
-
-                                    if (col.DataType == typeof(string) || col.DataType == typeof(char))
-                                        value = "'" + row[col] + "'";
-
-                                    else if (col.DataType == typeof(bool))
-                                        value = ((bool)row[col] ? 1 : 0).ToString();
-
-                                    else if (col.DataType == typeof(DateTime))
-                                        value = string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' ";
-
-                                    else
-                                        value = (string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : row[col].ToString());
-
-                                    update += name + " = " + value + (i == pl - 1 ? ";" : " AND ");
-                                }
-
-                                update = update.Trim();
-                                if (update.EndsWith(", ;"))
-                                    update = update.Replace(", ;", ";");
-
-                                SQLiteCommand command = new SQLiteCommand(update, _connectionInternal, transaction);
-                                command.ExecuteNonQuery();
-                            }
-                        }
-
-                        transaction.Commit();
-                        table.AcceptChanges();                        
+                        Console.WriteLine("EXCEPTION FROM MSSQL.");
+                        Console.WriteLine(e);
                     }
-
-                    changes = table.GetChanges(DataRowState.Deleted);
-                    if (changes != null)
+                    finally
                     {
-                        DataRowCollection rows = changes.Rows;
-                        DataColumnCollection cols = changes.Columns;
-
-                        DataColumn[] primary = changes.PrimaryKey;
-                        int pl = primary.Length;
-
-                        var names = new Dictionary<string, string>();
-                        for (int i = 0; i < pl; i++)
-                        {
-                            var p = primary[i];
-                            string name = p.ColumnName;
-                            names.Add(name, "");
-                        }
-
-                        int colLength = cols.Count;
-                        int rowLength = rows.Count;
-
-                        var transaction = _connectionInternal.BeginTransaction();
-
-                        for (int j = 0; j < rowLength; j++)
-                        {
-                            
-                            DataRow row = rows[j];
-
-                            // if(row.RowState != DataRowState.Deleted)
-                            {
-                                string update = @"DELETE FROM " + table.TableName + " WHERE ";
-
-                                for (int i = 0; i < pl; i++)
-                                {
-                                    // var col = primary[i];
-                                    // string name = col.ColumnName;
-                                    // string value = "";
-                                    // // Console.WriteLine(" -----> REMOVE:  " + col + " " + name);
-
-                                    // if (col.DataType == typeof(string) || col.DataType == typeof(char))
-                                    //     value = "'" + row[col, DataRowVersion.Original] + "' , ";
-
-                                    // else if (col.DataType == typeof(bool))
-                                    //     value = ((bool)row[col, DataRowVersion.Original] ? 1 : 0).ToString();
-
-                                    // else if (col.DataType == typeof(DateTime))
-                                    //     value = string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null, " : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' ";
-
-                                    // else
-                                    //     value = (string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null" : row[col].ToString());
-
-                                    // update += name + " = " + value + (i == pl - 1 ? ";" : " AND ");
-
-                                    var col = primary[i];
-                                    string name = col.ColumnName;
-                                    string value = "";
-
-                                    if (col.DataType == typeof(string) || col.DataType == typeof(char))
-                                        value = "'" + row[col, DataRowVersion.Original] + "'";
-
-                                    else if (col.DataType == typeof(bool))
-                                        value = ((bool)row[col, DataRowVersion.Original] ? 1 : 0).ToString();
-
-                                    else if (col.DataType == typeof(DateTime))
-                                        value = string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null" : "'" + ((DateTime)row[col, DataRowVersion.Original]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' ";
-
-                                    else
-                                        value = (string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null" : row[col, DataRowVersion.Original].ToString());
-
-                                    update += name + " = " + value + (i == pl - 1 ? ";" : " AND ");
-                                }
-
-                                update = update.Trim();
-                                if (update.EndsWith(", ;"))
-                                    update = update.Replace(", ;", ";");
-
-                                SQLiteCommand command = new SQLiteCommand(update, _connectionInternal, transaction);
-                                command.ExecuteNonQuery();
-                            }
-                        }
-                        transaction.Commit();
-                        table.AcceptChanges();
                     }
-                    _connectionInternal.Close();
                 }
-                catch (Exception e)
+            }
+        }
+
+        public void UpdateDataTable(DataTable table)
+        {
+            lock (objLock)
+            {
+                using (SQLiteConnection _connectionInternal = new SQLiteConnection(ConnectString))
                 {
-                    SQLiteConnection.ClearAllPools();
-                    Console.WriteLine(e);
+                    try
+                    {
+                        if (_connectionInternal.State != ConnectionState.Open)
+                            _connectionInternal.Open();
+
+                        DataTable changes = table.GetChanges(DataRowState.Added);
+                        if (changes != null)
+                        {
+                            DataRowCollection rows = changes.Rows;
+                            DataColumnCollection cols = changes.Columns;
+
+                            int colLength = cols.Count;
+                            int rowLength = rows.Count;
+
+
+                            string insert = @"INSERT INTO " + table.TableName + "(";
+
+                            for (int i = 0; i < colLength; i++)                                                   
+                                insert += cols[i].ColumnName + ",";
+                            
+                            insert = insert.Substring(0, insert.Length - 1) + ")";
+
+                            var transaction = _connectionInternal.BeginTransaction();
+
+                            for (int j = 0; j < rowLength; j++)
+                            {
+                                DataRow row = rows[j];
+
+                                string addstring = insert + " VALUES(";
+
+                                for (int i = 0; i < colLength; i++)
+                                {
+                                    DataColumn col = cols[i];
+                                    if (col.DataType == typeof(string) || col.DataType == typeof(char))
+                                        addstring += "'" + row[col] + "' , ";
+
+                                    else if (col.DataType == typeof(bool))
+                                        addstring += ((bool)row[col] ? 1 : 0) + " , ";
+
+                                    else if (col.DataType == typeof(DateTime))
+                                        addstring += string.IsNullOrWhiteSpace(row[col].ToString()) ? "null, " : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' , ";
+
+                                    else
+                                        addstring += (string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : row[col].ToString()) + " , ";
+                                }
+
+                                addstring = addstring.Substring(0, addstring.Length - 2) + ");";
+                                SQLiteCommand command = new SQLiteCommand(addstring, _connectionInternal, transaction);
+                                command.ExecuteNonQuery();
+                            }
+                            transaction.Commit();
+                            table.AcceptChanges();                        
+                        }
+
+
+                        changes = table.GetChanges(DataRowState.Modified);
+                        if (changes != null)
+                        {
+                            DataRowCollection rows = changes.Rows;
+                            DataColumnCollection cols = changes.Columns;
+
+                            DataColumn[] primary = changes.PrimaryKey;
+                            int pl = primary.Length;
+                            
+                            var names = new Dictionary<string, string>();
+                            for (int i = 0; i < pl; i++)
+                            {
+                                var p = primary[i];
+                                string name = p.ColumnName;
+                                names.Add(name, "");                            
+                            }
+
+                            int colLength = cols.Count;
+                            int rowLength = rows.Count;
+                            
+                            var transaction = _connectionInternal.BeginTransaction();
+
+                            for (int j = 0; j < rowLength; j++)
+                            {
+                                string update = @"UPDATE " + table.TableName + " SET ";
+
+                                DataRow row = rows[j];
+
+                                int added = 0;
+
+                                for (int i = 0; i < colLength; i++)
+                                {
+                                    var col = cols[i];
+                                    string name = col.ColumnName;
+                                    if (!names.ContainsKey(name))
+                                    {
+                                        added++;
+                                        string value = "";
+                                        if (col.DataType == typeof(string) || col.DataType == typeof(char))
+                                            value = "'" + row[col] + "' , ";
+
+                                        else if (col.DataType == typeof(bool))
+                                            value = ((bool)row[col] ? 1 : 0) + " , ";
+
+                                        else if (col.DataType == typeof(DateTime))
+                                            value = string.IsNullOrWhiteSpace(row[col].ToString()) ? "null, " : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' , ";
+
+                                        else
+                                            value = (string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : row[col].ToString()) + " , ";
+
+                                        update += name + " = " + value;
+                                    }
+                                }
+
+                                if (added > 0)
+                                {
+                                    update = update.Substring(0, update.Length - 2) + " WHERE ";
+
+                                    for (int i = 0; i < pl; i++)
+                                    {
+                                        var col = primary[i];
+                                        string name = col.ColumnName;
+                                        string value = "";
+
+                                        if (col.DataType == typeof(string) || col.DataType == typeof(char))
+                                            value = "'" + row[col] + "'";
+
+                                        else if (col.DataType == typeof(bool))
+                                            value = ((bool)row[col] ? 1 : 0).ToString();
+
+                                        else if (col.DataType == typeof(DateTime))
+                                            value = string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' ";
+
+                                        else
+                                            value = (string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : row[col].ToString());
+
+                                        update += name + " = " + value + (i == pl - 1 ? ";" : " AND ");
+                                    }
+
+                                    update = update.Trim();
+                                    if (update.EndsWith(", ;"))
+                                        update = update.Replace(", ;", ";");
+
+                                    SQLiteCommand command = new SQLiteCommand(update, _connectionInternal, transaction);
+                                    command.ExecuteNonQuery();
+                                }
+                            }
+
+                            transaction.Commit();
+                            table.AcceptChanges();                        
+                        }
+
+                        changes = table.GetChanges(DataRowState.Deleted);
+                        if (changes != null)
+                        {
+                            DataRowCollection rows = changes.Rows;
+                            DataColumnCollection cols = changes.Columns;
+
+                            DataColumn[] primary = changes.PrimaryKey;
+                            int pl = primary.Length;
+
+                            var names = new Dictionary<string, string>();
+                            for (int i = 0; i < pl; i++)
+                            {
+                                var p = primary[i];
+                                string name = p.ColumnName;
+                                names.Add(name, "");
+                            }
+
+                            int colLength = cols.Count;
+                            int rowLength = rows.Count;
+
+                            var transaction = _connectionInternal.BeginTransaction();
+
+                            for (int j = 0; j < rowLength; j++)
+                            {
+                                
+                                DataRow row = rows[j];
+
+                                // if(row.RowState != DataRowState.Deleted)
+                                {
+                                    string update = @"DELETE FROM " + table.TableName + " WHERE ";
+
+                                    for (int i = 0; i < pl; i++)
+                                    {
+                                        // var col = primary[i];
+                                        // string name = col.ColumnName;
+                                        // string value = "";
+                                        // // Console.WriteLine(" -----> REMOVE:  " + col + " " + name);
+
+                                        // if (col.DataType == typeof(string) || col.DataType == typeof(char))
+                                        //     value = "'" + row[col, DataRowVersion.Original] + "' , ";
+
+                                        // else if (col.DataType == typeof(bool))
+                                        //     value = ((bool)row[col, DataRowVersion.Original] ? 1 : 0).ToString();
+
+                                        // else if (col.DataType == typeof(DateTime))
+                                        //     value = string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null, " : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' ";
+
+                                        // else
+                                        //     value = (string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null" : row[col].ToString());
+
+                                        // update += name + " = " + value + (i == pl - 1 ? ";" : " AND ");
+
+                                        var col = primary[i];
+                                        string name = col.ColumnName;
+                                        string value = "";
+
+                                        if (col.DataType == typeof(string) || col.DataType == typeof(char))
+                                            value = "'" + row[col, DataRowVersion.Original] + "'";
+
+                                        else if (col.DataType == typeof(bool))
+                                            value = ((bool)row[col, DataRowVersion.Original] ? 1 : 0).ToString();
+
+                                        else if (col.DataType == typeof(DateTime))
+                                            value = string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null" : "'" + ((DateTime)row[col, DataRowVersion.Original]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' ";
+
+                                        else
+                                            value = (string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null" : row[col, DataRowVersion.Original].ToString());
+
+                                        update += name + " = " + value + (i == pl - 1 ? ";" : " AND ");
+                                    }
+
+                                    update = update.Trim();
+                                    if (update.EndsWith(", ;"))
+                                        update = update.Replace(", ;", ";");
+
+                                    SQLiteCommand command = new SQLiteCommand(update, _connectionInternal, transaction);
+                                    command.ExecuteNonQuery();
+                                }
+                            }
+                            transaction.Commit();
+                            table.AcceptChanges();
+                        }
+                        _connectionInternal.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        SQLiteConnection.ClearAllPools();
+                        Console.WriteLine(e);
+                    }
                 }
             }
         }
