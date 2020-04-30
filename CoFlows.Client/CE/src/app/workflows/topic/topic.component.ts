@@ -39,40 +39,8 @@ export class TopicComponent {
     permission = -1
     permissionSet = false
 
-    containerChart = {}
-    processesChart = {}
-
-    pod = { Log: null }
-
-    // @ViewChild('qastrategies')
-    // private qastrategies:QAStrategiesComponent
-
-    // @ViewChild('cfquery')
-    // private cfquery:CFQueryComponent
-
-    // @ViewChild('logarea')
-    // private logArea:ElementRef
-
-    
     private newPermission = 0
     private newEmail = ''
-
-    private newGroup = ''
-
-    selectedWB = {Name: "All", ID: ""}
-    selectedFunc = {Name: "Workbook", ID: "Workbook"}
-
-    selectWBFunc(item){
-        this.selectedWB = JSON.parse(item)
-        this.agents_filtered = []
-        this.selectedFunc = {Name: "Workbook", ID: "Workbook"}
-        this.tabBeforeChange(4)
-    }
-
-    selectWBFuncFunc(item){
-        this.selectedFunc = JSON.parse(item)
-        this.tabBeforeChange(4)
-    }
 
     result = { columns: [], Item2: [], SubItems: []}
     users = { items: [] }
@@ -82,27 +50,20 @@ export class TopicComponent {
     subgroups = []
     activeGroupID = ''
 
-    //groupId = 'Public'
-
     updateUserFilter(event) {
-        // console.log(event)
         const val = event.target.value.toLowerCase()
         this.search = val
-        // filter our data
+
         const temp = this.users.items.filter(d => {
             return (d.first.toLowerCase().indexOf(val) !== -1|| (d.last + "").toLowerCase().indexOf(val) !== -1 || d.email.toLowerCase().indexOf(val) !== -1) || !val
         })
-        // update the rows
+
         if(temp.length == 0)
             this.search = 'No users found...'
         this.users_filtered = temp
     }
 
     subscribe() {
-        // console.log(event)
-        // const val = event.target.value
-        // this.wid = val
-
         this.result = { columns: [], Item2: [], SubItems: []}
         this.users = { items: [] }
         this.users_filtered = []
@@ -404,29 +365,7 @@ export class TopicComponent {
     open(content) {
         this.activeModal = content
         this.modalService.open(content).result.then((result) => {
-            
-            // console.log(result)
-            // if(result == 'restart'){
-            //     this.modalMessage = "Restarting..."
-            //     this.coflows.Get('m/restartpod?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         this.modalMessage = ''
-            //         this.modalService.dismissAll(content)
-            //     });
-            // }
-            // else if(result == 'delete'){
-            //     this.modalMessage = "Removing..."
-            //     this.coflows.Get('m/removepod?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         this.modalMessage = ''
-            //         this.modalService.dismissAll(content)
-            //     });
-            // }
-
         }, (reason) => {
-            // console.log(reason)
         });
     }
 
@@ -487,115 +426,22 @@ export class TopicComponent {
                 else
                     this.addPermissionMessage = data.Data
 
-                // console.log(data)
             });
-        // AddPermission(string email, int accessType)
     }
 
-    addGroupMessage = ''
-    addGroup(){
-        // console.log(this.newEmail, this.newPermission)
-        this.coflows.Get('administration/newsubgroup?name=' + this.newGroup + '&parendid=' + this.wid,
-            data => {
-                if(data.Data == "ok"){
-                    this.modalService.dismissAll(this.activeModal)
-
-                    this.coflows.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
-                        // console.log(data)
-                        this.subgroups = [ { Name: 'Master', ID: this.wid }]
-                        this.subgroups = this.subgroups.concat(data);
-                        this.activeGroupID = this.subgroups[0].ID;
-
-                        this.viewGroup(this.activeGroupID);
-                    });
-                }
-                else
-                    this.addGroupMessage = data.Data
-
-                console.log(data)
-            });
-        // AddPermission(string email, int accessType)
-    }
-
-    removeGroupMessage = ''
-    removeGroup(){
-        // console.log(this.newEmail, this.newPermission)
-        this.coflows.Get('administration/RemoveGroup?id=' + this.activeGroupID,
-            data => {
-                if(data.Data == "ok"){
-
-                    // this.search = 'Reloading permissions...'
-                    this.modalService.dismissAll(this.activeModal)
-
-                    this.coflows.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
-                        console.log(data)
-                        this.subgroups = [ { Name: 'Master', ID: this.wid }]
-                        this.subgroups = this.subgroups.concat(data);
-                        this.activeGroupID = this.subgroups[0].ID;
-
-                        this.viewGroup(this.activeGroupID);
-                    });
-
-                    // let t0 = Date.now()
-                    // this.users_filtered = []
-                    // this.coflows.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
-                    //     // this.coflows.Get("administration/UsersApp_contacts?groupid=00ab632b-b083-4204-bc82-6b50aa2ffb8d&agreements=false", data => {
-                    //     this.users = data
-                    //     this.users_filtered = this.users.items
-                    //     // console.log(data, (Date.now() - t0) / 1000)
-                    //     this.search = ''
-                        
-                    // });
-                    
-                    
-                }
-                else
-                    this.addGroupMessage = data.Data
-
-                console.log(data)
-            });
-        // AddPermission(string email, int accessType)
-    }
-     
     activePermissionID = null
     openRemovePermission(content, permission) {
         // console.log(content, permission)
         this.activeModal = content
         this.activePermissionID = permission.ID
         this.modalService.open(content).result.then((result) => {
-            
-            // console.log(result)
-            // if(result == 'restart'){
-            //     this.modalMessage = "Restarting..."
-            //     this.coflows.Get('m/restartpod?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         this.modalMessage = ''
-            //         this.modalService.dismissAll(content)
-            //     });
-            // }
-            // else if(result == 'delete'){
-            //     this.modalMessage = "Removing..."
-            //     this.coflows.Get('m/removepod?id=' + this.wid ,
-            //     data => {
-            //         // console.log(data)
-            //         this.modalMessage = ''
-            //         this.modalService.dismissAll(content)
-            //     });
-            // }
-
         }, (reason) => {
-            // console.log(reason)
-            // this.modalService.dismissAll(content)
-        });
-
-        // this.modalMessage = ''
-        
+        });        
     }
     removePermissionMessage = ''
     removePermission(){
         let id = this.activePermissionID
-        // console.log(id)
+        
         this.search = 'Reloading permissions...'
                 
         this.coflows.Get('administration/removepermission?userid=' + id + '&groupid=' + this.wid,
@@ -603,10 +449,8 @@ export class TopicComponent {
                 let t0 = Date.now()
                 this.users_filtered = []
                 this.coflows.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
-                    // this.coflows.Get("administration/UsersApp_contacts?groupid=00ab632b-b083-4204-bc82-6b50aa2ffb8d&agreements=false", data => {
                     this.users = data
                     this.users_filtered = this.users.items
-                    // console.log(data, (Date.now() - t0) / 1000)
                     this.search = ''
                     this.modalService.dismissAll(this.activeModal)
                 });
@@ -616,15 +460,12 @@ export class TopicComponent {
 
     tabBeforeChange(event){}
 
-
     //Workbook functionality
     @ViewChild('tabs')
     private tabs:NgbTabset;
 
     addItem(items, name, item){
         let result = { Item1: name, Item2: item, columns: [] }
-        
-        //else {
         let columns = []
 
         for (let i in result.Item2[0] ) { 
