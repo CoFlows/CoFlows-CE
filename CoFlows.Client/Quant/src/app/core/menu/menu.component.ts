@@ -15,6 +15,12 @@ import { TranslateService } from '@ngx-translate/core';
         <span class="mr-auto"></span>
         <span class="badge badge-{{ badge.type }}" *ngFor="let badge of menuitem.badge">{{ badge.value }}</span>
       </a>
+      <a class="navigation-link" appAccordionToggle [routerLink]="menuitem.parameters == undefined ? ['/', menuitem.state, menuitem.substate] : ['/', menuitem.state, menuitem.substate].concat(menuitem.parameters)" *ngIf="menuitem.type === 'sublink'">
+        <i class="icon icon-{{ menuitem.icon }}"></i>
+        <span>{{ menuitem.name | translate }}</span>
+        <span class="mr-auto"></span>
+        <span class="badge badge-{{ badge.type }}" *ngFor="let badge of menuitem.badge">{{ badge.value }}</span>
+      </a>
       <a class="navigation-link" appAccordionToggle href="{{menuitem.state}}" *ngIf="menuitem.type === 'extLink'">
         <i class="icon icon-{{ menuitem.icon }}"></i>
         <span>{{ menuitem.name | translate }}</span>
@@ -61,7 +67,14 @@ export class MenuComponent {
           type: 'sub',
           icon: 'software-layers2',
           children: workflows
-
+        },
+        {
+          state: 'workflows',
+          substate: 'topic',
+          name: 'Topics',
+          parameters: ["-"],
+          type: 'sublink',
+          icon: 'basic-mixer2'
         }
       ]
   }

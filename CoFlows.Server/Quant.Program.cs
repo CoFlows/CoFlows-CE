@@ -285,6 +285,21 @@ namespace CoFlows.Server.Quant
                     Code.ProcessPackageJSON(pkg);
                     SetDefaultWorkflows(new string[]{ pkg.ID }, false);
                     Console.WriteLine(pkg.Name + " started");
+
+                    var _g = Group.FindGroup(pkg.ID);
+                    if(_g == null)
+                        _g = Group.CreateGroup(pkg.ID);
+                    
+                    foreach(var _p in pkg.Permissions)
+                    {
+                        string _id = "QuantAppSecure_" + _p.ID.ToLower().Replace('@', '.').Replace(':', '.');
+                        var _quser = QuantApp.Kernel.User.FindUser(_id);
+                        if(_quser != null)
+                        {
+                            _g.Remove(_quser);
+                            _g.Add(_quser, typeof(QuantApp.Kernel.User), _p.Permission);
+                        }
+                    }
                 }
                 else
                 {
@@ -393,6 +408,21 @@ namespace CoFlows.Server.Quant
 
                 var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name));
                 Code.ProcessPackageJSON(pkg);
+
+                var _g = Group.FindGroup(pkg.ID);
+                if(_g == null)
+                    _g = Group.CreateGroup(pkg.ID);
+                
+                foreach(var _p in pkg.Permissions)
+                {
+                    string _id = "QuantAppSecure_" + _p.ID.ToLower().Replace('@', '.').Replace(':', '.');
+                    var _quser = QuantApp.Kernel.User.FindUser(_id);
+                    if(_quser != null)
+                    {
+                        _g.Remove(_quser);
+                        _g.Add(_quser, typeof(QuantApp.Kernel.User), _p.Permission);
+                    }
+                }
                 
 
                 if(parameters != null)
@@ -418,7 +448,7 @@ namespace CoFlows.Server.Quant
             }
 
             //Azure Container Instance
-            else if(args != null && args.Length > 1 && args[0] == "azure" && args[1] == "deploy")
+            else if(args != null && args.Length > 1 && args[0] == "aci" && args[1] == "deploy")
             {
                 PythonEngine.BeginAllowThreads();
 
@@ -604,7 +634,7 @@ namespace CoFlows.Server.Quant
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + resDeploy);
             }
-            else if(args != null && args.Length > 1 && args[0] == "azure" && args[1] == "remove")
+            else if(args != null && args.Length > 1 && args[0] == "aci" && args[1] == "remove")
             {
                 PythonEngine.BeginAllowThreads();
                 Console.WriteLine();

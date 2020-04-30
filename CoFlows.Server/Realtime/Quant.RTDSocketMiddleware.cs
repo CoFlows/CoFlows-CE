@@ -166,19 +166,26 @@ namespace CoFlows.Server.Realtime
                     
                 await Receive(socket, async (result, length, buffer) =>
                 {
+                    if(quser != null)
+                        QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
                         await _socketManager.RemoveSocket(id);
+                        QuantApp.Kernel.User.ContextUser = new UserData();
                         return;
                     }
                     else if (result.MessageType == WebSocketMessageType.Text)
                     {
                         string userMessage = Encoding.UTF8.GetString(buffer, 0, length);
                         WebSocketListner.appServer_NewMessageReceived(socket, userMessage, path, headers);
+                        QuantApp.Kernel.User.ContextUser = new UserData();
                         return;
                     }
                     else
                         Console.WriteLine("REC BIN1: " + result.MessageType);
+
+                    QuantApp.Kernel.User.ContextUser = new UserData();
 
                 });
                 
@@ -300,6 +307,8 @@ namespace CoFlows.Server.Realtime
     public class WebSocketListner : QuantApp.Kernel.Factories.IRTDEngineFactory
     {
         public static ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>> subscriptions = new ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>>();
+        public static ConcurrentDictionary<string, ConcurrentDictionary<string, QuantApp.Kernel.UserData>> users = new ConcurrentDictionary<string, ConcurrentDictionary<string, QuantApp.Kernel.UserData>>();
+        
         public static ConcurrentDictionary<string, string> registered_id_workspaces = new ConcurrentDictionary<string, string>();
         public static ConcurrentDictionary<string, string> registered_workspaces_id = new ConcurrentDictionary<string, string>();
         public static ConcurrentDictionary<string, System.Net.IPAddress> registered_address = new ConcurrentDictionary<string, System.Net.IPAddress>();
@@ -386,7 +395,13 @@ namespace CoFlows.Server.Realtime
                                     if (!subscriptions[contract].ContainsKey(skey))
                                         subscriptions[contract].TryAdd(skey, session);
 
-                                    Console.WriteLine("Subscribed: " + skey + " -- " + contract);
+                                    if (!users.ContainsKey(contract))
+                                        users.TryAdd(contract, new ConcurrentDictionary<string, QuantApp.Kernel.UserData>());
+
+                                    if (!users[contract].ContainsKey(skey))
+                                        users[contract].TryAdd(skey, QuantApp.Kernel.User.ContextUser);
+
+                                    // Console.WriteLine("Subscribed: " + skey + " -- " + contract);
 
                                     int id = -1;
                                     int.TryParse(contract, out id);
@@ -988,7 +1003,13 @@ namespace CoFlows.Server.Realtime
                         string ckey = manager.GetId(connection);
                         try
                         {
-                            if (ckey != skey)
+                            var _user = users[topicID][ckey];
+                            var group = Group.FindGroup(topicID);
+                            var permission = AccessType.View;
+                            if(group != null && !string.IsNullOrEmpty(_user.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                                permission = group.Permission(_user);
+
+                            if (ckey != skey && permission != AccessType.Denied)
                             {
                                 Send(connection, message);
                             }
@@ -1142,7 +1163,13 @@ namespace CoFlows.Server.Realtime
                 {
                     if (connection.State == WebSocketState.Open)
                     {
-                        Send(connection, message_string);
+                        var _user = users[topicID][ckey];
+                        var group = Group.FindGroup(topicID);
+                        var permission = AccessType.View;
+                        if(group != null && !string.IsNullOrEmpty(_user.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                            permission = group.Permission(_user);
+                        if (permission != AccessType.Denied)
+                            Send(connection, message_string);
                         success = true;
                     }
 
