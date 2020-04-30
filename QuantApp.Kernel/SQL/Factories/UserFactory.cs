@@ -101,10 +101,10 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
         string userTableName = "Users";
         string permissionTableName = "PermissionsRepository";
 
-
+        public readonly static object objLock_findUser = new object();
         public User FindUser(string user)
         {
-            lock (objLock)
+            // lock (objLock_findUser)
             {
                 if (user == null)
                     return null;
@@ -135,9 +135,10 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
             }
         }
 
+        public readonly static object objLock_findUserSecret = new object();
         public User FindUserBySecret(string key)
         {
-            lock (objLock)
+            // lock (objLock_findUserSecret)
             {
                 string tableName = userTableName;
                 string searchString = "Secret = '" + key + "'";
@@ -181,7 +182,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
             return new List<User>(_userDB.Values);
         }
 
-        public readonly static object objLock = new object();
+        // public readonly static object objLock = new object();
 
         public List<Group> Groups(User user, bool aggregated)
         { 
@@ -210,9 +211,10 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
             return new List<Group>((from r in roles.Values where r.Parent == null select r).ToList());
         }
 
+        public readonly static object objLock_Permission = new object();
         public AccessType Permission(User user, IPermissible permissible)
         {
-            lock (objLock)
+            lock (objLock_Permission)
             {
                 AccessType t = AccessType.Denied;
 

@@ -231,10 +231,10 @@ namespace QuantApp.Kernel
         public List<IPermissible> List(User user, Type type, AccessType accessType, bool aggregated)
         {
             if (Permission(User.CurrentUser) != AccessType.Write)
-                return null;
+                return new List<IPermissible>();
 
             if (Factory == null)
-                return null;
+                return new List<IPermissible>();
 
             return Factory.List(user, this, type, accessType, aggregated);
         }
@@ -264,6 +264,17 @@ namespace QuantApp.Kernel
                 return AccessType.Denied;
                 
             return Factory.Permission(quser, this, quser);
+        }
+
+        public List<IPermissible> ListContext(Type type, bool aggregated)
+        {
+            if (Factory == null)
+                return new List<IPermissible>();
+            var quser = User.FindUser(User.ContextUser.ID);
+            if(quser == null)
+                return new List<IPermissible>();
+
+            return Factory.List(quser, this, type, aggregated);
         }
 
         public AccessType PermissionSecret(string secret)
@@ -360,6 +371,8 @@ namespace QuantApp.Kernel
 
         public static Group FindGroup(string groupID)
         {
+            if(Factory == null)
+                return null;
             return Factory.FindGroup(User.CurrentUser, groupID);
         }
         public static Group FindGroupByName(string groupName)

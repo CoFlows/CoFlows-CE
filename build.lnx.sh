@@ -1,5 +1,5 @@
 # cd CoFlows.Client/CE
-# npm install
+# # npm install
 # # npm install -g @angular/cli
 # ng build --prod --aot
 
