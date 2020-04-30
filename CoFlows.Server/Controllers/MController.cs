@@ -82,8 +82,20 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
 
+            if (userId != null)
+            {
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+            }
+            else
+                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+
             M m = M.Base(type);
             var res = m.KeyValues();
+
+            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
 
             return Ok(res);
         }
@@ -97,8 +109,20 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
 
+            if (userId != null)
+            {
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+            }
+            else
+                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+
             M m = M.Base(type);
             var res = m.RawEntries();
+
+            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
 
             return Ok(res);
         }
@@ -196,6 +220,21 @@ namespace CoFlows.Server.Controllers
             {
                 workflow_ids.Add(data.ID);
                 workflow_ids.Save();
+            }
+
+            var _g = Group.FindGroup(data.ID);
+            if(_g == null)
+                _g = Group.CreateGroup(data.ID);
+            
+            foreach(var _p in data.Permissions)
+            {
+                string _id = "QuantAppSecure_" + _p.ID.ToLower().Replace('@', '.').Replace(':', '.');
+                var _quser = QuantApp.Kernel.User.FindUser(_id);
+                if(_quser != null)
+                {
+                    _g.Remove(_quser);
+                    _g.Add(_quser, typeof(QuantApp.Kernel.User), _p.Permission);
+                }
             }
 
             QuantApp.Kernel.User.ContextUser = quser.ToUserData();
@@ -381,44 +420,97 @@ namespace CoFlows.Server.Controllers
         public async Task<IActionResult> ServicedWorkflows()
         {
             string userId = this.User.QID();
+
             if (userId == null)
                 return Unauthorized();
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
+
+            if (userId != null)
+            {
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+            }
+            else
+                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
 
             var ws = Program.GetServicedWorkflows();
             var filtered = new List<Workflow>();
 
             foreach(var id in ws)
             {
-                var w = QuantApp.Kernel.M.Base(id)[x => true].FirstOrDefault() as Workflow;
-                foreach(var p in w.Permissions)
-                    if(p.ID == quser.Email && (int)p.Permission > (int)AccessType.Denied || p.ID.ToLower() == "public")
+                var added = false;
+                var m = QuantApp.Kernel.M.Base(id);
+                var l = m[x => true];
+                if(l != null && l.Count > 0)
+                {
+                    var w = l[0] as Workflow;
+                    foreach(var p in w.Permissions)
+                        if(p.ID == quser.Email && (int)p.Permission > (int)AccessType.Denied || p.ID.ToLower() == "public")
+                        {
+                            added = true;
+                            var newWorkflow = new Workflow(
+                                w.ID, 
+                                w.Name, 
+                                w.Strategies,
+                                null,//w.Code,
+                                w.Agents, 
+                                w.Permissions, 
+                                w.NuGets, 
+                                w.Pips, 
+                                w.Jars, 
+                                null,//w.Bins, 
+                                null,//workSpace.Files, 
+                                w.ReadMe, 
+                                w.Publisher, 
+                                w.PublishTimestamp, 
+                                w.AutoDeploy, 
+                                w.Container);
+                            filtered.Add(newWorkflow);
+                            break;
+                        }
+                    
+                    if(!added)
                     {
-                        var newWorkflow = new Workflow(
-                            w.ID, 
-                            w.Name, 
-                            w.Strategies,
-                            null,//w.Code,
-                            w.Agents, 
-                            w.Permissions, 
-                            w.NuGets, 
-                            w.Pips, 
-                            w.Jars, 
-                            null,//w.Bins, 
-                            null,//workflow.Files, 
-                            w.ReadMe, 
-                            w.Publisher, 
-                            w.PublishTimestamp, 
-                            w.AutoDeploy, 
-                            w.Container);
-                        filtered.Add(newWorkflow);
+                        var group = Group.FindGroup(id);
+                        if(group != null && (int)group.Permission(quser.ToUserData()) > (int)AccessType.Denied)
+                        {
+                            added = true;
+                            var newWorkflow = new Workflow(
+                                w.ID, 
+                                w.Name, 
+                                w.Strategies,
+                                null,//w.Code,
+                                w.Agents, 
+                                w.Permissions, 
+                                w.NuGets, 
+                                w.Pips, 
+                                w.Jars, 
+                                null,//w.Bins, 
+                                null,//workSpace.Files, 
+                                w.ReadMe, 
+                                w.Publisher, 
+                                w.PublishTimestamp, 
+                                w.AutoDeploy, 
+                                w.Container);
+                            filtered.Add(newWorkflow);
+                        }
                     }
+                }
             }
-                
-            
 
-            return Ok(filtered.GroupBy(p => p.ID).Select(g => g.FirstOrDefault()).OrderBy(x => x.Name));
+            if(filtered.Count == 0)
+                return Ok(filtered);
+
+            var orderFilter = from s in filtered
+                orderby s.Name 
+                select s;
+
+            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+
+            return Ok(orderFilter.ToList());
         }
 
         [HttpGet]

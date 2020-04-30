@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { WorkflowComponent } from './workflow/workflow.component';
+import { TopicComponent } from './topic/topic.component';
 import { AgentComponent } from './agent/agent.component';
 import { QueryComponent } from './query/query.component';
 import { AppComponent } from './app/app.component';
@@ -13,6 +14,13 @@ export const WorkflowRoutes: Routes = [{
       component: WorkflowComponent,
       data: {
           heading: 'Workflow'
+      }
+    },
+    {
+      path: 'topic/:id',
+      component: TopicComponent,
+      data: {
+          heading: 'Topic'
       }
     },
     {
