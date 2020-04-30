@@ -424,7 +424,7 @@ namespace CoFlows.Server
                 Console.WriteLine(result);
             }
             //Azure Container Instance
-            else if(args != null && args.Length > 1 && args[0] == "azure" && args[1] == "deploy")
+            else if(args != null && args.Length > 1 && args[0] == "aci" && args[1] == "deploy")
             {
                 PythonEngine.BeginAllowThreads();
 
@@ -611,7 +611,7 @@ namespace CoFlows.Server
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
                 Console.Write("Result: " + resDeploy);
             }
-            else if(args != null && args.Length > 1 && args[0] == "azure" && args[1] == "remove")
+            else if(args != null && args.Length > 1 && args[0] == "aci" && args[1] == "remove")
             {
                 PythonEngine.BeginAllowThreads();
 
