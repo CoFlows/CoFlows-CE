@@ -253,12 +253,16 @@ namespace CoFlows.Server.Realtime
                     if(WebSocketListner.registered_id_workflows.ContainsKey(id))
                     {
                         var wid = WebSocketListner.registered_id_workflows[id];
+                        try
+                        {
                         var wsp_ais = QuantApp.Kernel.M.Base(wid)[x => true].FirstOrDefault() as Workflow;
                         foreach(var fid in wsp_ais.Agents)
                         {
                             var f = F.Find(fid).Value;
                             f.RemoteStop();
                         }
+                        }
+                        catch{}
 
                         string none = "";
                         WebSocketListner.registered_id_workflows.TryRemove(id, out none);
@@ -621,13 +625,17 @@ namespace CoFlows.Server.Realtime
                 {
                     if (connection.State == WebSocketState.Open)
                     {
-                        var _user = users[topicID][ckey];
                         var group = Group.FindGroup(topicID);
                         var permission = AccessType.View;
                         
-                        if(group != null && !string.IsNullOrEmpty(_user.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
-                            permission = group.Permission(_user);
-                        
+                        if(users.ContainsKey(topicID) && users[topicID].ContainsKey(ckey))
+                        {
+                            var _user = users[topicID][ckey];
+                            
+                            if(group != null && !string.IsNullOrEmpty(_user.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                                permission = group.Permission(_user);
+                        }
+
                         if(permission != AccessType.Denied)
                             Send(connection, message_string);
                         success = true;

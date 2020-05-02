@@ -738,7 +738,7 @@ namespace QuantApp.Kernel
                 {
                     var permission = group.PermissionContext();
                     if(permission == AccessType.Denied)
-                        return null;
+                        return new List<KeyValuePair<string, object>>();
                 }
 
                 return singularity.ToList();
@@ -756,7 +756,7 @@ namespace QuantApp.Kernel
                 {
                     var permission = group.PermissionContext();
                     if(permission == AccessType.Denied)
-                        return null;
+                        return new List<RawEntry>();
                 }
 
                 var entries = singularity.ToList();
@@ -860,6 +860,8 @@ namespace QuantApp.Kernel
                         if(permission == AccessType.Denied)
                             return new List<object>();
                     }
+
+
 
                     List<object> res = singularity.Values.Where(predicate).Select(x => x).ToList();
                     return res;
