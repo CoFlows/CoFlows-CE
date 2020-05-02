@@ -288,17 +288,14 @@ namespace CoFlows.Server.Quant
 
                     var _g = Group.FindGroup(pkg.ID);
                     if(_g == null)
-                        _g = Group.CreateGroup(pkg.ID);
+                        _g = Group.CreateGroup(pkg.ID, pkg.ID);
                     
                     foreach(var _p in pkg.Permissions)
                     {
                         string _id = "QuantAppSecure_" + _p.ID.ToLower().Replace('@', '.').Replace(':', '.');
                         var _quser = QuantApp.Kernel.User.FindUser(_id);
                         if(_quser != null)
-                        {
-                            _g.Remove(_quser);
                             _g.Add(_quser, typeof(QuantApp.Kernel.User), _p.Permission);
-                        }
                     }
                 }
                 else
@@ -411,17 +408,14 @@ namespace CoFlows.Server.Quant
 
                 var _g = Group.FindGroup(pkg.ID);
                 if(_g == null)
-                    _g = Group.CreateGroup(pkg.ID);
+                    _g = Group.CreateGroup(pkg.ID, pkg.ID);
                 
                 foreach(var _p in pkg.Permissions)
                 {
                     string _id = "QuantAppSecure_" + _p.ID.ToLower().Replace('@', '.').Replace(':', '.');
                     var _quser = QuantApp.Kernel.User.FindUser(_id);
                     if(_quser != null)
-                    {
-                        _g.Remove(_quser);
                         _g.Add(_quser, typeof(QuantApp.Kernel.User), _p.Permission);
-                    }
                 }
                 
 
