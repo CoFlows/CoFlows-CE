@@ -224,17 +224,14 @@ namespace CoFlows.Server.Controllers
 
             var _g = Group.FindGroup(data.ID);
             if(_g == null)
-                _g = Group.CreateGroup(data.ID);
+                _g = Group.CreateGroup(data.ID, data.ID);
             
             foreach(var _p in data.Permissions)
             {
                 string _id = "QuantAppSecure_" + _p.ID.ToLower().Replace('@', '.').Replace(':', '.');
                 var _quser = QuantApp.Kernel.User.FindUser(_id);
                 if(_quser != null)
-                {
-                    _g.Remove(_quser);
                     _g.Add(_quser, typeof(QuantApp.Kernel.User), _p.Permission);
-                }
             }
 
             QuantApp.Kernel.User.ContextUser = quser.ToUserData();
