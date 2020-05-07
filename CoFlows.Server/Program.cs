@@ -52,6 +52,7 @@ namespace CoFlows.Server
         public static string letsEncryptEmail = null;
         public static bool letsEncryptStaging = false;
         public static bool useJupyter = false;
+        public static bool loadedJupyter = false;
 
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
@@ -287,7 +288,7 @@ namespace CoFlows.Server
                 {
                     var pkg = Code.ProcessPackageFile(workflow_name);
                     Code.ProcessPackageJSON(pkg);
-                    SetDefaultWorkflows(new string[]{ pkg.ID }, false);
+                    SetDefaultWorkflows(new string[]{ pkg.ID }, false, config["Jupter"] != null && config["Jupter"].ToString().ToLower() == "true");
                     Console.WriteLine(pkg.Name + " started");
 
                     var _g = Group.FindGroup(pkg.ID);
@@ -308,7 +309,7 @@ namespace CoFlows.Server
                     var workflow_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows")[xe => true];
                     foreach(var wsp in workflow_ids)
                     {
-                        SetDefaultWorkflows(new string[]{ wsp.ToString() }, true);
+                        SetDefaultWorkflows(new string[]{ wsp.ToString() }, true, config["Jupter"] != null && config["Jupter"].ToString().ToLower() == "true");
                         Console.WriteLine(wsp + " started");
                     }
                 }
@@ -739,7 +740,7 @@ namespace CoFlows.Server
         }
 
         private static List<string> _wspServicedList = new List<string>();
-        public static IEnumerable<Workflow> SetDefaultWorkflows(string[] ids, bool saveToDisk)
+        public static IEnumerable<Workflow> SetDefaultWorkflows(string[] ids, bool saveToDisk, bool startJupyter)
         {
             foreach(var id in ids)
             {
@@ -792,8 +793,9 @@ namespace CoFlows.Server
                         }
 
                         #if MONO_LINUX || MONO_OSX
-                        if(useJupyter)
+                        if(useJupyter && !loadedJupyter)
                         {
+                            loadedJupyter = true;
                             var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/app/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
                             var th = new System.Threading.Thread(() => {
                                 using (Py.GIL())
@@ -875,14 +877,14 @@ namespace CoFlows.Server
 
         public static void RemoveServicesWorkflow(string id)
         {
+            Console.WriteLine("RemoveServicesWorkflow: " + id);
+            _wspServicedList.RemoveAll(x => x == id);
             var workflow_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows");
             if(workflow_ids[x => true].Where(x => x.ToString() == id).Count() > 0)
             {
                 workflow_ids.Remove(id);
                 workflow_ids.Save();
             }
-
-            _wspServicedList.RemoveAll(x => x == id);
         }
 
         public static IEnumerable<string> GetServicedWorkflows()
