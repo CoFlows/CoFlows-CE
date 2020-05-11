@@ -273,7 +273,7 @@ namespace CoFlows.Server.Utils
             string searchString = "UserID LIKE '" + userID + "' ORDER BY Timestamp DESC";
             string targetString = "TOP 1 * ";
 
-            if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+            if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
             {
                 searchString = "UserID LIKE '" + userID + "' ORDER BY Timestamp DESC LIMIT 1";
                 targetString = "*";
@@ -364,7 +364,7 @@ namespace CoFlows.Server.Utils
             string searchString = "UserID LIKE '" + userID + "' ORDER BY Timestamp DESC";
             string targetString = "TOP 1 *";
             
-            if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+            if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
             {
                 searchString = "UserID LIKE '" + userID + "' ORDER BY Timestamp DESC LIMIT 1";
                 targetString = "*";
@@ -395,7 +395,7 @@ namespace CoFlows.Server.Utils
                     string tableName = "UserHistoryRepository";
                     string searchString = "UserID LIKE '" + userID + "' ORDER BY Timestamp DESC";
                     string targetString = "TOP 1 *";
-                    if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                    if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                     {
                         searchString = "UserID LIKE '" + userID + "' ORDER BY Timestamp DESC LIMIT 1";
                         targetString = "*";
