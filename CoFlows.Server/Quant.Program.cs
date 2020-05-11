@@ -283,7 +283,7 @@ namespace CoFlows.Server.Quant
                 {
                     var pkg = Code.ProcessPackageFile(CoFlows.Server.Program.workflow_name);
                     Code.ProcessPackageJSON(pkg);
-                    SetDefaultWorkflows(new string[]{ pkg.ID }, false);
+                    SetDefaultWorkflows(new string[]{ pkg.ID }, false, config["Jupter"] != null && config["Jupter"].ToString().ToLower() == "true");
                     Console.WriteLine(pkg.Name + " started");
 
                     var _g = Group.FindGroup(pkg.ID);
@@ -304,7 +304,7 @@ namespace CoFlows.Server.Quant
                     var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows")[xe => true];
                     foreach(var wsp in workspace_ids)
                     {
-                        SetDefaultWorkflows(new string[]{ wsp.ToString() }, true);
+                        SetDefaultWorkflows(new string[]{ wsp.ToString() }, true, config["Jupter"] != null && config["Jupter"].ToString().ToLower() == "true");
                         Console.WriteLine(wsp + " started");
                     }
                 }
@@ -1020,9 +1020,9 @@ namespace CoFlows.Server.Quant
             }
         }
 
-        public static IEnumerable<Workflow> SetDefaultWorkflows(string[] ids, bool saveToDisk)
+        public static IEnumerable<Workflow> SetDefaultWorkflows(string[] ids, bool saveToDisk, bool startJupyter)
         {
-            return CoFlows.Server.Program.SetDefaultWorkflows(ids, saveToDisk);
+            return CoFlows.Server.Program.SetDefaultWorkflows(ids, saveToDisk, startJupyter);
         }
 
 

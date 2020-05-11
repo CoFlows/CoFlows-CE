@@ -258,7 +258,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             string searchString = "Name LIKE '%" + name + "%' OR Description LIKE '%" + name + "%'";
             string targetString = "Top 100 ID";
 
-            if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+            if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
             {
                 searchString += " LIMIT 100";
                 targetString = "ID";
@@ -889,7 +889,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
 
             string tableName = _timeSeriesTableName;
             string searchString = instrument.InstrumentType == InstrumentType.Strategy ? "ID = " + instrument.ID + string.Format(" AND TimeSeriesTypeID={0} AND ProviderID={1}  Order By Timestamp", (int)(tstype == TimeSeriesType.Close ? TimeSeriesType.Last : tstype), provider.ID) : "ID = " + instrument.ID + string.Format(" AND TimeSeriesTypeID={0} AND ProviderID={1} AND (CONVERT(TIME,Timestamp) = '23:59:59.990')  Order By Timestamp", (int)(tstype == TimeSeriesType.Close ? TimeSeriesType.Last : tstype), provider.ID);
-            if(Database.DB[instrument.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+            if(Database.DB[instrument.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[instrument.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                 searchString = instrument.InstrumentType == InstrumentType.Strategy ? "ID = " + instrument.ID + string.Format(" AND TimeSeriesTypeID={0} AND ProviderID={1}  Order By Timestamp", (int)(tstype == TimeSeriesType.Close ? TimeSeriesType.Last : tstype), provider.ID) : "ID = " + instrument.ID + string.Format(" AND TimeSeriesTypeID={0} AND ProviderID={1} AND (strftime('%H:%M:%f', Timestamp) = '23:59:59.990')  Order By Timestamp", (int)(tstype == TimeSeriesType.Close ? TimeSeriesType.Last : tstype), provider.ID);
 
 
@@ -903,7 +903,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                 else
                 {
                     
-                    if(Database.DB[instrument.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                    if(Database.DB[instrument.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[instrument.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                         searchString = instrument.InstrumentType == InstrumentType.Strategy ? "ID = " + instrument.ID + string.Format(" AND TimeSeriesTypeID={0} AND ProviderID={1}  Order By Timestamp", (int)(tstype == TimeSeriesType.Close ? TimeSeriesType.Last : tstype), provider.ID) : "ID = " + instrument.ID + string.Format(" AND TimeSeriesTypeID={0} AND ProviderID={1} AND (strftime('%H:%M:%f', Timestamp) <> '23:59:59.990') Order By Timestamp", (int)(tstype == TimeSeriesType.Close ? TimeSeriesType.Last : tstype), provider.ID);
                     else
                         searchString = instrument.InstrumentType == InstrumentType.Strategy ? "ID = " + instrument.ID + string.Format(" AND TimeSeriesTypeID={0} AND ProviderID={1}  Order By Timestamp", (int)(tstype == TimeSeriesType.Close ? TimeSeriesType.Last : tstype), provider.ID) : "ID = " + instrument.ID + string.Format(" AND TimeSeriesTypeID={0} AND ProviderID={1} AND (CONVERT(TIME,Timestamp) <> '23:59:59.990') Order By Timestamp", (int)(tstype == TimeSeriesType.Close ? TimeSeriesType.Last : tstype), provider.ID);

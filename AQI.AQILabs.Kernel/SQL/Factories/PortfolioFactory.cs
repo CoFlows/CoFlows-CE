@@ -234,7 +234,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                     searchString = null;
                     targetString = "TOP 1 *";
 
-                    if(Database.DB[p.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                    if(Database.DB[p.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[p.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                     {
                         searchString = " LIMIT 1";
                         targetString = "*";
@@ -251,7 +251,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                     searchString = null;
                     targetString = "TOP 1 *";
 
-                    if(Database.DB[p.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                    if(Database.DB[p.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[p.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                     {
                         searchString = " LIMIT 1";
                         targetString = "*";
@@ -334,7 +334,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                         {
                             if (!_positionsNewTables.ContainsKey(p.Portfolio.ID))
                             {
-                                if(Database.DB[p.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                                if(Database.DB[p.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[p.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                                     _positionsNewTables.TryAdd(p.Portfolio.ID, Database.DB[p.Portfolio.StrategyDB].GetDataTable(_positionTableName, "*", "ID = " + p.Portfolio.ID + " LIMIT 1"));
                                 else
                                     _positionsNewTables.TryAdd(p.Portfolio.ID, Database.DB[p.Portfolio.StrategyDB].GetDataTable(_positionTableName, "TOP 1 *", "ID = " + p.Portfolio.ID));
@@ -368,7 +368,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                             string searchString = string.Format("ID={0} AND ConstituentID={1} AND Timestamp='{2:yyyy-MM-dd HH:mm:ss.fff}' AND Aggregated={3}", p.Portfolio.ID, p.Instrument.ID, p.Timestamp, p.Aggregated ? 1 : 0);
                             string targetString = "TOP 1 *";
 
-                            if(Database.DB[p.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                            if(Database.DB[p.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[p.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                             {
                                 searchString += " LIMIT 1";
                                 targetString = "*";
@@ -414,7 +414,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             {
                 if (!_positionsNewTables.ContainsKey(p.Portfolio.ID))
                 {
-                    if(Database.DB[p.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                    if(Database.DB[p.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[p.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                         _positionsNewTables.TryAdd(p.Portfolio.ID, Database.DB[p.Portfolio.StrategyDB].GetDataTable(_positionTableName, "*", "ID = " + p.Portfolio.ID + " LIMIT 1"));
                     else
                         _positionsNewTables.TryAdd(p.Portfolio.ID, Database.DB[p.Portfolio.StrategyDB].GetDataTable(_positionTableName, "TOP 1 *", "ID = " + p.Portfolio.ID));
@@ -454,7 +454,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                 r["OrderDate"] = o.OrderDate;
                 r["ExecutionDate"] = o.ExecutionDate;
                 r["OrderType"] = o.Type;
-                if(Database.DB[o.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB[o.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[o.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                     r["Limits"] = o.Limit;
                 else
                     r["Limit"] = o.Limit;
@@ -489,7 +489,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
 
                 if (!_positionsNewTables.ContainsKey(portfolio.ID))
                 {
-                    if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                    if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                         _positionsNewTables.TryAdd(portfolio.ID, Database.DB[portfolio.StrategyDB].GetDataTable(_positionTableName, "*", "ID = " + portfolio.ID + " LIMIT 1"));
                     else
                         _positionsNewTables.TryAdd(portfolio.ID, Database.DB[portfolio.StrategyDB].GetDataTable(_positionTableName, "TOP 1 *", "ID = " + portfolio.ID));
@@ -500,7 +500,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
 
                 if (!_ordersNewTables.ContainsKey(portfolio.ID))
                 {
-                    if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                    if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                         _ordersNewTables.TryAdd(portfolio.ID, Database.DB[portfolio.StrategyDB].GetDataTable(_orderTableName, "*", "PortfolioID = " + portfolio.ID + " LIMIT 1"));
                     else
                         _ordersNewTables.TryAdd(portfolio.ID, Database.DB[portfolio.StrategyDB].GetDataTable(_orderTableName, "TOP 1 *", "PortfolioID = " + portfolio.ID));
@@ -554,7 +554,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                                 + "'" + o.Account + "'"
                                 + ");";
                         
-                        if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                        if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                             line = "DELETE FROM " + _orderTableName + " WHERE ID = '" + o.ID + "' AND PortfolioID = " + o.PortfolioID + ";"
                                     + "INSERT INTO " + _orderTableName + " (ID, PortfolioID, ConstituentID, OrderDate, Unit, Aggregated, OrderType, Limits, Status, ExecutionLevel, ExecutionDate, Client, Destination, Account) "
                                     + " VALUES ('" + o.ID + "',"
@@ -651,7 +651,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                     }
                 }
 
-                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                 {
                     _positionsNewTables[portfolio.ID] = Database.DB[portfolio.StrategyDB].GetDataTable(_positionTableName, "*", "ID = -10000 LIMIT 1");// + portfolio.ID);;
                     _ordersNewTables[portfolio.ID] = Database.DB[portfolio.StrategyDB].GetDataTable(_orderTableName, "*", "PortfolioID = -1000 LIMIT 1");// + portfolio.ID);;
@@ -694,7 +694,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                 string searchString = string.Format("ID='{0}' AND PortfolioID='{1}' AND Aggregated={2}", order.ID, order.PortfolioID, order.Aggregated ? 1 : 0);
                 string targetString = "TOP 1 *";
 
-                if(Database.DB[order.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB[order.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[order.Portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                 {
                     searchString += " LIMIT 1";
                     targetString = "*";
@@ -742,7 +742,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             string searchString = (date.Date == DateTime.MinValue ? string.Format("PortfolioID={0}", portfolio.ID) : string.Format("PortfolioID={0} AND OrderDate<='{1:yyyy-MM-dd HH:mm:ss.fff}'", portfolio.ID, Calendar.Close(date))) + " ORDER BY OrderDate DESC";
             string targetString = "TOP 1 *";
 
-            if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+            if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
             {
                 searchString += " LIMIT 1";
                 targetString = "*";
@@ -765,7 +765,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                 string searchString = (date.Date == DateTime.MinValue ? string.Format("ID={0}", portfolio.ID) : string.Format("ID={0} AND Timestamp<='{1:yyyy-MM-dd HH:mm:ss.fff}'", portfolio.ID, Calendar.Close(date))) + " ORDER BY Timestamp DESC";
                 string targetString = "TOP 1 *";
 
-                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                 {
                     searchString += " LIMIT 1";
                     targetString = "*";
@@ -788,7 +788,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                 string searchString = (date == DateTime.MinValue ? string.Format("ID={0}", portfolio.ID) : string.Format("ID={0} AND Timestamp<='{1:yyyy-MM-dd HH:mm:ss.fff}'", portfolio.ID, Calendar.Close(date))) + " ORDER BY Timestamp";
                 string targetString = "TOP 1 *";
 
-                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                 {
                     searchString += " LIMIT 1";
                     targetString = "*";
@@ -830,7 +830,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             foreach (DataRow row in rows)
             {
                 Order o = new Order((string)row["ID"], portfolio.ID, GetInt(row["ConstituentID"]), (double)row["Unit"], (DateTime)row["OrderDate"], (DateTime)row["ExecutionDate"], (OrderType)row["OrderType"], (double)row["Limit"], (OrderStatus)row["Status"], (double)row["ExecutionLevel"], (Boolean)row["Aggregated"], GetValue<string>(row, "Client"), GetValue<string>(row, "Destination"), GetValue<string>(row, "Account"));
-                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                     o = new Order((string)row["ID"], portfolio.ID, GetInt(row["ConstituentID"]), (double)row["Unit"], (DateTime)row["OrderDate"], (DateTime)row["ExecutionDate"], (OrderType)row["OrderType"], (double)row["Limits"], (OrderStatus)row["Status"], (double)row["ExecutionLevel"], (Boolean)row["Aggregated"], GetValue<string>(row, "Client"), GetValue<string>(row, "Destination"), GetValue<string>(row, "Account"));
 
                 if ((o.Status == OrderStatus.NotExecuted && o.ExecutionDate == timestamp))
@@ -873,7 +873,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             foreach (DataRow row in rows)
             {
                 Order o = new Order((string)row["ID"], portfolio.ID, GetInt(row["ConstituentID"]), (double)row["Unit"], (DateTime)row["OrderDate"], (DateTime)row["ExecutionDate"], (OrderType)row["OrderType"], (double)row["Limit"], (OrderStatus)row["Status"], (double)row["ExecutionLevel"], (Boolean)row["Aggregated"], GetValue<string>(row, "Client"), GetValue<string>(row, "Destination"), GetValue<string>(row, "Account"));
-                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                     o = new Order((string)row["ID"], portfolio.ID, GetInt(row["ConstituentID"]), (double)row["Unit"], (DateTime)row["OrderDate"], (DateTime)row["ExecutionDate"], (OrderType)row["OrderType"], (double)row["Limits"], (OrderStatus)row["Status"], (double)row["ExecutionLevel"], (Boolean)row["Aggregated"], GetValue<string>(row, "Client"), GetValue<string>(row, "Destination"), GetValue<string>(row, "Account"));
 
                 if (o.Status != OrderStatus.Booked && o.Status != OrderStatus.NotExecuted)
@@ -980,7 +980,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             string searchTimeString = "FORMAT((SELECT TOP 1 Timestamp FROM " + tableName + " WHERE " + string.Format("ID={0} AND Timestamp<='{1:yyyy-MM-dd HH:mm:ss.fff}'", portfolio.ID, Calendar.Close(date)) + " ORDER BY Timestamp DESC), 'yyyy-MM-dd')";
             string searchString = (date.Date == DateTime.MinValue ? "" : "DECLARE @DATE VARCHAR(MAX); SET @DATE=" + searchTimeString + ";") + "SELECT * FROM " + tableName + " WHERE ID = " + portfolio.ID + (date.Date == DateTime.MinValue ? "" : " AND " + string.Format("Timestamp>=@DATE + ' 00:00:00.000'") + " AND " + string.Format("Timestamp<=@DATE + ' 23:59:59.999'")) + "  ORDER BY Timestamp" + (date.Date == DateTime.MinValue ? "" : " DESC");
 
-            if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+            if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
             {
                 searchTimeString = "FORMAT((SELECT Timestamp FROM " + tableName + " WHERE " + string.Format("ID={0} AND Timestamp<='{1:yyyy-MM-dd HH:mm:ss.fff}'", portfolio.ID, Calendar.Close(date)) + " ORDER BY Timestamp DESC LIMIT 1), 'yyyy-MM-dd')";
                 searchString = (date.Date == DateTime.MinValue ? "" : "DECLARE @DATE VARCHAR(MAX); SET @DATE=" + searchTimeString + ";") + "SELECT * FROM " + tableName + " WHERE ID = " + portfolio.ID + (date.Date == DateTime.MinValue ? "" : " AND " + string.Format("Timestamp>=@DATE + ' 00:00:00.000'") + " AND " + string.Format("Timestamp<=@DATE + ' 23:59:59.999'")) + "  ORDER BY Timestamp" + (date.Date == DateTime.MinValue ? "" : " DESC");
@@ -1006,7 +1006,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             string searchTimeString = "FORMAT((SELECT TOP 1 OrderDate FROM " + tableName + " WHERE " + string.Format("PortfolioID={0} AND OrderDate<='{1:yyyy-MM-dd HH:mm:ss.fff}'", portfolio.ID, Calendar.Close(date)) + " ORDER BY OrderDate DESC), 'yyyy-MM-dd')";
             string searchString = (date.Date == DateTime.MinValue ? "" : "DECLARE @DATE VARCHAR(MAX); SET @DATE=" + searchTimeString + ";") + "SELECT * FROM " + tableName + " WHERE PortfolioID = " + portfolio.ID + (date.Date == DateTime.MinValue ? "" : " AND " + string.Format("OrderDate>=@DATE + ' 00:00:00.000'") + " AND " + string.Format("OrderDate<=@DATE + ' 23:59:59.999'")) + "  ORDER BY OrderDate";
 
-            if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+            if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
             {
                 searchTimeString = "FORMAT((SELECT OrderDate FROM " + tableName + " WHERE " + string.Format("PortfolioID={0} AND OrderDate<='{1:yyyy-MM-dd HH:mm:ss.fff}'", portfolio.ID, Calendar.Close(date)) + " ORDER BY OrderDate DESC LIMIT 1), 'yyyy-MM-dd')";
                 searchString = (date.Date == DateTime.MinValue ? "" : "DECLARE @DATE VARCHAR(MAX); SET @DATE=" + searchTimeString + ";") + "SELECT * FROM " + tableName + " WHERE PortfolioID = " + portfolio.ID + (date.Date == DateTime.MinValue ? "" : " AND " + string.Format("OrderDate>=@DATE + ' 00:00:00.000'") + " AND " + string.Format("OrderDate<=@DATE + ' 23:59:59.999'")) + "  ORDER BY OrderDate";
@@ -1019,7 +1019,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             foreach (DataRow r in rows)
             {
                 Order o = new Order((string)r["ID"], portfolio.ID, GetInt(r["ConstituentID"]), (double)r["Unit"], (DateTime)r["OrderDate"], (DateTime)r["ExecutionDate"], (OrderType)r["OrderType"], (double)r["Limit"], (OrderStatus)r["Status"], (double)r["ExecutionLevel"], (Boolean)r["Aggregated"], GetValue<string>(r, "Client"), GetValue<string>(r, "Destination"), GetValue<string>(r, "Account"));
-                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[portfolio.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                     o = new Order((string)r["ID"], portfolio.ID, GetInt(r["ConstituentID"]), (double)r["Unit"], (DateTime)r["OrderDate"], (DateTime)r["ExecutionDate"], (OrderType)r["OrderType"], (double)r["Limits"], (OrderStatus)r["Status"], (double)r["ExecutionLevel"], (Boolean)r["Aggregated"], GetValue<string>(r, "Client"), GetValue<string>(r, "Destination"), GetValue<string>(r, "Account"));
                 orders.Add(o);
             }

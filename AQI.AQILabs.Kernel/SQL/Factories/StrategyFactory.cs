@@ -534,7 +534,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             else
                 searchString = string.Format("ID={0} AND MemoryTypeID={1} AND MemoryClassID={2} AND Timestamp<='{3:yyyy-MM-dd HH:mm:ss.fff}' ORDER BY Timestamp DESC", strategy.ID, (int)memorytype, (int)memoryclass, date);
 
-            if(Database.DB[strategy.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+            if(Database.DB[strategy.StrategyDB] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB[strategy.StrategyDB] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
             {
                 searchString += " LIMIT 1";
                 targetString = "*";

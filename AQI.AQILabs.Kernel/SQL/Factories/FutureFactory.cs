@@ -354,7 +354,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                 string searchString = string.Format("UnderlyingInstrumentID={0}", underlyingInstrument.ID);
                 string targetString = "TOP 1 *";
 
-                if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                 {
                     searchString += " LIMIT 1";
                     targetString = "*";
@@ -377,7 +377,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                 string searchString = string.Format("UnderlyingInstrumentID={0} AND LastTradeDate>'{1:yyyy-MM-dd HH:mm:ss}' ORDER BY LastTradeDate", id, lastTradeDate);
                 string targetString = "TOP 1 *";
 
-                if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                 {
                     searchString += " LIMIT 1";
                     targetString = "*";
@@ -403,7 +403,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                 string searchString = string.Format("UnderlyingInstrumentID={0} AND LastTradeDate<'{1:yyyy-MM-dd HH:mm:ss}' ORDER BY LastTradeDate DESC", id, lastTradeDate);
                 string targetString = "TOP 1 *";
 
-                if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                 {
                     searchString += " LIMIT 1";
                     targetString = "*";

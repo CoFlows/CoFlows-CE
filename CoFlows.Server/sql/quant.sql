@@ -7,23 +7,23 @@
  */
  
 CREATE TABLE PALM_Bookmarks (
-    UserID NVarchar(150) Not Null,
+    UserID Varchar(150) Not Null,
     InstrumentID int Not Null,
     PRIMARY KEY (UserID, InstrumentID)
     );
 
 CREATE TABLE PALM_Strategies (
-    UserID NVarchar(150) Not Null,
+    UserID Varchar(150) Not Null,
     StrategyID int Not Null,
-    AttorneyID NVarchar(150) Not Null,
-    Master Bit Not Null,
+    AttorneyID Varchar(150) Not Null,
+    Master int Not Null,
     PRIMARY KEY (UserID, StrategyID, AttorneyID, Master)
     );
 
 CREATE TABLE PALM_Pending (
-    UserID NVarchar(150) Not Null,
+    UserID Varchar(150) Not Null,
     StrategyID int Not Null,
-    AttorneyID NVarchar(150) Not Null,
+    AttorneyID Varchar(150) Not Null,
     Provider Text,
     AccountID Text,
     SubmissionDate DateTime Not Null,
@@ -39,15 +39,15 @@ CREATE TABLE Categories (
     );
 
 CREATE TABLE CorporateAction (
-    ID NVarchar(50) Not Null,
+    ID Varchar(50) Not Null,
     InstrumentID int Not Null,
     DeclaredDate DateTime Not Null,
     ExDate DateTime Not Null,
     RecordDate DateTime Not Null,
     PayableDate DateTime Not Null,
     Amount float,
-    Frequency NVarchar(250) Not Null,
-    Type NVarchar(250) Not Null,
+    Frequency Varchar(250) Not Null,
+    Type Varchar(250) Not Null,
     PRIMARY KEY (ID, InstrumentID, DeclaredDate, ExDate, RecordDate, PayableDate, Frequency, Type)
     );
 
@@ -179,7 +179,7 @@ CREATE TABLE Options (
     ExpiryDate DateTime Not Null,
     FirstTradeDate DateTime Not Null,
     StrikePrice float Not Null,
-    IsCall Bit Not Null,
+    IsCall int Not Null,
     ExerciseType Text Not Null,
     PRIMARY KEY (ID)
     );
@@ -208,7 +208,7 @@ CREATE TABLE Portfolio (
     );
 
 CREATE TABLE ProcessedCorporateAction (
-    ID NVarchar(50) Not Null,
+    ID Varchar(50) Not Null,
     PortfolioID int Not Null,
     PRIMARY KEY (ID, PortfolioID)
     );
@@ -272,7 +272,7 @@ CREATE TABLE Strategy (
 CREATE TABLE SystemData (
     ID int Not Null,
     Revision int Not Null,
-    Deleted bit Not Null,
+    Deleted int Not Null,
     CreateTime DateTime Not Null,
     UpdateTime DateTime Not Null,
     TimeSeriesAccessType int Not Null,
@@ -287,7 +287,7 @@ CREATE TABLE SystemData (
     );
 
 CREATE TABLE SystemLog (
-    ID Nvarchar(50) Not Null,
+    ID Varchar(50) Not Null,
     InstrumentID int Not Null,
     EntryDate DateTime Not Null,
     EntryType int Not Null,
@@ -318,12 +318,12 @@ CREATE TABLE TimeSeries (
 
 -- IN STRATEGY
 CREATE TABLE Orders (
-    ID Nvarchar(50) Not Null,
+    ID Varchar(50) Not Null,
     PortfolioID int Not Null,
     ConstituentID int Not Null,
     OrderDate DateTime Not Null,
     Unit float Not Null,
-    Aggregated bit Not Null,
+    Aggregated int Not Null,
     OrderType int Not Null,
     Limits float Not Null,
     Status int Not Null,
@@ -344,7 +344,7 @@ CREATE TABLE Position (
     StrikeTimestamp DateTime Not Null,
     InitialStrike float Not Null,
     InitialStrikeTimestamp DateTime Not Null,
-    Aggregated bit Not Null,
+    Aggregated int Not Null,
     PRIMARY KEY (ID, ConstituentID, Timestamp, Unit, Strike, StrikeTimestamp, InitialStrike, InitialStrikeTimestamp, Aggregated)
     );
 
