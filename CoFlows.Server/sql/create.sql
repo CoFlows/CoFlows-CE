@@ -7,14 +7,14 @@
  */
  
 CREATE TABLE Roles (
-    ID NVarchar(50) Not Null,
+    ID Varchar(50) Not Null,
     Name Text,
     Description Text,
-    Parent NVarchar(50),
+    Parent Varchar(50),
     AccessType int Not Null,
-    profile NVarchar(50),
-    url NVarchar(50),
-    OwnerID NVarchar(150),
+    profile Varchar(50),
+    url Varchar(50),
+    OwnerID Varchar(150),
     PRIMARY KEY (ID)
     );
 
@@ -22,8 +22,8 @@ INSERT INTO Roles (ID, Name, Description, AccessType, profile, OwnerID) Values (
 INSERT INTO Roles (ID, Name, Description, AccessType, profile, OwnerID) Values ('Administrator', 'Administrator', 'Administrator', -1, 'profile', 'QuantAppSecure_root');
 
 CREATE TABLE PermissionsRepository (
-    PermissibleID NVarchar(250) Not Null,
-    GroupID NVarchar(50) Not Null,
+    PermissibleID Varchar(250) Not Null,
+    GroupID Varchar(50) Not Null,
     AccessType Int Not Null,
     Type Text Not Null,
     PRIMARY KEY (PermissibleID, GroupID)
@@ -35,14 +35,14 @@ INSERT INTO PermissionsRepository (PermissibleID, GroupID, AccessType, Type) Val
 CREATE TABLE Users (
     FirstName Text,
     LastName Text,
-    IdentityProvider NVarchar(150) Not Null,
-    NameIdentifier NVarchar(150) Not Null,
+    IdentityProvider Varchar(150) Not Null,
+    NameIdentifier Varchar(150) Not Null,
     Email Text,
-    TenantName NVarchar(150),
-    Hash NVarchar(150),
-    Secret NVarchar(150),
-    GroupID NVarchar(50),
-    StripeID NVarchar(150),
+    TenantName Varchar(150),
+    Hash Varchar(150),
+    Secret Varchar(150),
+    GroupID Varchar(50),
+    StripeID Varchar(150),
     MetaData Text,
     PRIMARY KEY (IdentityProvider, NameIdentifier)
     );
@@ -51,14 +51,14 @@ INSERT INTO Users (FirstName, LastName, IdentityProvider, NameIdentifier, Email,
 INSERT INTO Users (FirstName, LastName, IdentityProvider, NameIdentifier, Email, TenantName, Hash, Secret, GroupID, StripeID, MetaData) Values ('root', '', 'QuantAppSecure', 'dd554db4-b969-44d8-98ad-28575be368e5', 'root', 'QuantAppSecure_root', '202cb962ac59075b964b07152d234b70', '26499e5e555e9957725f51cc4d400384', '', '', '');
 
 CREATE TABLE UserLoginRepository (
-    UserID NVarchar(150) Not Null,
+    UserID Varchar(150) Not Null,
     Timestamp DateTime Not Null,
     IP Text Not Null,
     PRIMARY KEY (UserID, Timestamp)
     );
 
 CREATE TABLE UserHistoryRepository (
-    UserID NVarchar(150) Not Null,
+    UserID Varchar(150) Not Null,
     Timestamp DateTime Not Null,
     Url Text Not Null,
     IP Text Not Null,
@@ -66,8 +66,8 @@ CREATE TABLE UserHistoryRepository (
     );
 
 CREATE TABLE M (
-    ID NVarChar(150) Not Null,
-    EntryID NVarChar(150) Not Null,
+    ID Varchar(150) Not Null,
+    EntryID Varchar(150) Not Null,
     Entry Text Not Null,
     Assembly Text Not Null,
     Type Text Not Null,

@@ -146,7 +146,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                 string searchString = "ID = '" + m.ID + "'";
                 string targetString = "TOP 0 *";
 
-                if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                 {
                     searchString += " LIMIT 0";
                     targetString = "*";
@@ -187,7 +187,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                             searchString = "ID = '" + m.ID + "'";
                             targetString = "TOP 0 *";
                             
-                            if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                            if(Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter || Database.DB["Kernel"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                             {
                                 searchString += " LIMIT 0";
                                 targetString = "*";

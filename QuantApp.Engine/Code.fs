@@ -278,14 +278,17 @@ module Code =
                     ()
 
             let assembly = 
-                let filename = "mnt/nugets/" + masterName + "/" + masterName + ".dll"
-                if filename |> File.Exists |> not then
-                    _downloadPackage masterName version
+                try
+                    System.Reflection.Assembly.Load(packageName)
+                with
+                | _ -> 
+                    let filename = "mnt/nugets/" + masterName + "/" + masterName + ".dll"
+                    if filename |> File.Exists |> not then
+                        _downloadPackage masterName version
 
-                System.Reflection.Emit.AssemblyBuilder.LoadFrom("mnt/nugets/" + masterName + "/" + masterName + ".dll")
+                    System.Reflection.Emit.AssemblyBuilder.LoadFrom("mnt/nugets/" + masterName + "/" + masterName + ".dll")
             assembly
-            
-            
+        
         let assembly = downloadPackage packageName packageVersion
         "NuGet Loaded: " + packageName + " " + packageVersion.ToString() + " " + assembly.ToString() |> Console.WriteLine
         if M._compiledAssemblies.ContainsKey(packageName + packageVersion.ToString()) then
