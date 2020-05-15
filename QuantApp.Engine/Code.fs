@@ -2473,7 +2473,9 @@ module Code =
                     let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = entry.Name]
                     if bins_m_res.Count > 0 then
                         let item = bins_m_res.[0] :?> FilePackage
-                        streamWriter.Write(System.Convert.FromBase64String(entry.Content))
+                        try
+                            streamWriter.Write(System.Convert.FromBase64String(entry.Content))
+                        with | _ -> 0 |> ignore
                         streamWriter.Close()
                     )
 
@@ -2488,7 +2490,9 @@ module Code =
                     let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = entry.Name]
                     if files_m_res.Count > 0 then
                         let item = files_m_res.[0] :?> FilePackage
-                        streamWriter.Write(System.Convert.FromBase64String(item.Content))
+                        try
+                            streamWriter.Write(System.Convert.FromBase64String(item.Content))
+                        with | _ -> 0 |> ignore
                         streamWriter.Close()
                     )
 
