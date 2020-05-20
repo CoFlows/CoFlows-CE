@@ -43,7 +43,7 @@ export class TopicComponent {
     private newEmail = ''
 
     result = { columns: [], Item2: [], SubItems: []}
-    users = { items: [] }
+    users = []
     users_filtered = []
     search = 'Loading users...'
 
@@ -54,8 +54,8 @@ export class TopicComponent {
         const val = event.target.value.toLowerCase()
         this.search = val
 
-        const temp = this.users.items.filter(d => {
-            return (d.first.toLowerCase().indexOf(val) !== -1|| (d.last + "").toLowerCase().indexOf(val) !== -1 || d.email.toLowerCase().indexOf(val) !== -1) || !val
+        const temp = this.users.filter(d => {
+            return (d.FirstName.toLowerCase().indexOf(val) !== -1|| (d.LastName + "").toLowerCase().indexOf(val) !== -1 || d.Email.toLowerCase().indexOf(val) !== -1) || !val
         })
 
         if(temp.length == 0)
@@ -65,7 +65,7 @@ export class TopicComponent {
 
     subscribe() {
         this.result = { columns: [], Item2: [], SubItems: []}
-        this.users = { items: [] }
+        this.users = []
         this.users_filtered = []
         this.search = 'Loading users...'
 
@@ -84,7 +84,7 @@ export class TopicComponent {
 
                 this.permission = 2
 
-                this.coflows.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
+                this.coflows.Get("administration/Users?groupid=" + this.wid, data => {
                     // console.log(data)
                     if(data == null){
                         this.users_filtered = []
@@ -92,7 +92,7 @@ export class TopicComponent {
                     }
                     else{
                         this.users = data
-                        this.users_filtered = this.users.items
+                        this.users_filtered = this.users
                         if(this.users_filtered.length == 0)
                             this.search = 'no users found'
                             // this.search = ''
@@ -228,7 +228,7 @@ export class TopicComponent {
             this.subgroups = [ { Name: 'Master', ID: this.wid }]
             this.activeGroupID = this.wid
             
-            this.users = { items: [] }
+            this.users = []
             this.users_filtered = []
             this.search = 'Loading users...'
 
@@ -373,7 +373,7 @@ export class TopicComponent {
     viewGroup(sgid){
         this.users_filtered = []
         this.search = 'loading users...'
-        this.coflows.Get("administration/UsersApp_contacts?groupid=" + sgid + "&agreements=false", data => {
+        this.coflows.Get("administration/Users?groupid=" + sgid, data => {
             // console.log(data)
             this.activeGroupID = sgid
             if(data == null){
@@ -382,7 +382,7 @@ export class TopicComponent {
             }
             else{
                 this.users = data
-                this.users_filtered = this.users.items
+                this.users_filtered = this.users
                 if(this.users_filtered.length > 0)
                     this.search = ''
             }
@@ -412,10 +412,9 @@ export class TopicComponent {
 
                     let t0 = Date.now()
                     this.users_filtered = []
-                    this.coflows.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
-                        // this.coflows.Get("administration/UsersApp_contacts?groupid=00ab632b-b083-4204-bc82-6b50aa2ffb8d&agreements=false", data => {
+                    this.coflows.Get("administration/Users?groupid=" + this.wid, data => {
                         this.users = data
-                        this.users_filtered = this.users.items
+                        this.users_filtered = this.users
                         // console.log(data, (Date.now() - t0) / 1000)
                         this.search = ''
                         
@@ -448,9 +447,9 @@ export class TopicComponent {
             data => {
                 let t0 = Date.now()
                 this.users_filtered = []
-                this.coflows.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
+                this.coflows.Get("administration/Users?groupid=" + this.wid, data => {
                     this.users = data
-                    this.users_filtered = this.users.items
+                    this.users_filtered = this.users
                     this.search = ''
                     this.modalService.dismissAll(this.activeModal)
                 });

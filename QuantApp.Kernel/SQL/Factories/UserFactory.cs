@@ -122,14 +122,14 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                 {
                     foreach (DataRow row in rows)
                     {
-                        User u = new User(user);
+                        User u = new User(user, (string)row["FirstName"], (string)row["LastName"], (string)row["Email"], (string)row["MetaData"], (string)row["Secret"]);
                         _userDB.Add(user, u);
                         return u;
                     }
                 }
 
-                if (user.StartsWith("QuantAppSecure:"))
-                    return new User(user);
+                // if (user.StartsWith("QuantAppSecure:"))
+                //     return new User(user);
 
                 return null;
             }
@@ -153,7 +153,8 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                     foreach (DataRow row in rows)
                     {
                         var user = GetValue(row, "TenantName", typeof(string)) as string;
-                        User u = new User(user);
+                        User u = new User(user, (string)row["FirstName"], (string)row["LastName"], (string)row["Email"], (string)row["MetaData"], (string)row["Secret"]);
+                        // User u = new User(user);
                         if(!_userDB.ContainsKey(user))
                             _userDB.Add(user, u);
                         return u;
@@ -383,7 +384,9 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                 rows.Add(r);
                 Database.DB["CloudApp"].UpdateDataTable(table);
 
-                return new User(id);
+                // return new User(id);
+
+                return new User(id, (string)r["FirstName"], (string)r["LastName"], (string)r["Email"], null, null);
             }
 
             return null;

@@ -193,7 +193,7 @@ namespace CoFlows.Server.Controllers
             return Ok(new { FirstName = quser.FirstName, LastName = quser.LastName, Groups = jres });                
         }
         
-        public IActionResult UsersApp_contacts(string groupid, bool agreements)
+        public IActionResult Users(string groupid)
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -217,7 +217,7 @@ namespace CoFlows.Server.Controllers
 
             List<IPermissible> users = role.Master.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false);
 
-            Dictionary<string, List<string>> lastLogin = UserRepository.LastUserLogins(role);
+            // Dictionary<string, List<string>> lastLogin = UserRepository.LastUserLogins(role);
 
             List<object> jres = new List<object>();
 
@@ -234,13 +234,13 @@ namespace CoFlows.Server.Controllers
                     jres.Add(new
                     {
                         ID = quser.ID,
-                        first = quser.FirstName,
-                        last = quser.LastName,
-                        email = quser.Email,
-                        group = ac.ToString(),
-                        meta = quser.MetaData,
-                        LastLoginDate = !lastLogin.ContainsKey(quser.ID) ? "" : lastLogin[quser.ID][0],
-                        LastLoginIP = !lastLogin.ContainsKey(quser.ID) ? "" : lastLogin[quser.ID][1],
+                        FirstName = quser.FirstName,
+                        LastName = quser.LastName,
+                        Email = quser.Email,
+                        Permission = ac.ToString(),
+                        MetaData = quser.MetaData,
+                        // LastLoginDate = !lastLogin.ContainsKey(quser.ID) ? "" : lastLogin[quser.ID][0],
+                        // LastLoginIP = !lastLogin.ContainsKey(quser.ID) ? "" : lastLogin[quser.ID][1],
                     });
                 }
                 else
@@ -248,8 +248,66 @@ namespace CoFlows.Server.Controllers
 
             }
 
-            return Ok(new { items = jres });
+            return Ok(jres);
         }
+
+        // public IActionResult UsersApp_contacts(string groupid, bool agreements)
+        // {
+        //     string userId = this.User.QID();
+        //     if (userId == null)
+        //         return null;
+
+        //     QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
+
+        //     if(user == null)
+        //         return null;
+                
+        //     QuantApp.Kernel.Group role = QuantApp.Kernel.Group.FindGroup(groupid);
+
+        //     if(role == null)
+        //         role = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
+
+        //     if(role == null)
+        //     {
+        //         role = QuantApp.Kernel.Group.CreateGroup(groupid, groupid);
+        //         // return null;
+        //     }
+
+        //     List<IPermissible> users = role.Master.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false);
+
+        //     Dictionary<string, List<string>> lastLogin = UserRepository.LastUserLogins(role);
+
+        //     List<object> jres = new List<object>();
+
+        //     foreach (QuantApp.Kernel.User user_mem in users)
+        //     {
+        //         QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(user_mem.ID);
+
+        //         if (quser != null)
+        //         {
+        //             List<object> jres_tracks = new List<object>();
+
+        //             var ac = role.Permission(null, user_mem);
+
+        //             jres.Add(new
+        //             {
+        //                 ID = quser.ID,
+        //                 first = quser.FirstName,
+        //                 last = quser.LastName,
+        //                 email = quser.Email,
+        //                 group = ac.ToString(),
+        //                 meta = quser.MetaData,
+        //                 LastLoginDate = !lastLogin.ContainsKey(quser.ID) ? "" : lastLogin[quser.ID][0],
+        //                 LastLoginIP = !lastLogin.ContainsKey(quser.ID) ? "" : lastLogin[quser.ID][1],
+        //             });
+        //         }
+        //         else
+        //             role.Remove(user_mem);
+
+        //     }
+
+        //     return Ok(new { items = jres });
+        // }
 
         public IActionResult GroupDataApp(string groupid)
         {
