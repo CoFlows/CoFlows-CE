@@ -55,7 +55,7 @@ export class TopicComponent {
         this.search = val
 
         const temp = this.users.items.filter(d => {
-            return (d.first.toLowerCase().indexOf(val) !== -1|| (d.last + "").toLowerCase().indexOf(val) !== -1 || d.email.toLowerCase().indexOf(val) !== -1) || !val
+            return (d.FirstName.toLowerCase().indexOf(val) !== -1|| (d.LastName + "").toLowerCase().indexOf(val) !== -1 || d.Email.toLowerCase().indexOf(val) !== -1) || !val
         })
 
         if(temp.length == 0)
@@ -84,7 +84,7 @@ export class TopicComponent {
 
                 this.permission = 2
 
-                this.coflows.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
+                this.coflows.Get("administration/Users?groupid=" + this.wid, data => {
                     // console.log(data)
                     if(data == null){
                         this.users_filtered = []
@@ -373,7 +373,7 @@ export class TopicComponent {
     viewGroup(sgid){
         this.users_filtered = []
         this.search = 'loading users...'
-        this.coflows.Get("administration/UsersApp_contacts?groupid=" + sgid + "&agreements=false", data => {
+        this.coflows.Get("administration/Users?groupid=" + sgid, data => {
             // console.log(data)
             this.activeGroupID = sgid
             if(data == null){
@@ -412,8 +412,7 @@ export class TopicComponent {
 
                     let t0 = Date.now()
                     this.users_filtered = []
-                    this.coflows.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
-                        // this.coflows.Get("administration/UsersApp_contacts?groupid=00ab632b-b083-4204-bc82-6b50aa2ffb8d&agreements=false", data => {
+                    this.coflows.Get("administration/Users?groupid=" + this.wid, data => {
                         this.users = data
                         this.users_filtered = this.users.items
                         // console.log(data, (Date.now() - t0) / 1000)
@@ -448,7 +447,7 @@ export class TopicComponent {
             data => {
                 let t0 = Date.now()
                 this.users_filtered = []
-                this.coflows.Get("administration/UsersApp_contacts?groupid=" + this.wid + "&agreements=false", data => {
+                this.coflows.Get("administration/Users?groupid=" + this.wid, data => {
                     this.users = data
                     this.users_filtered = this.users.items
                     this.search = ''
