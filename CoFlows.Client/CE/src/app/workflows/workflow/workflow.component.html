@@ -304,37 +304,37 @@
                         [scrollbarV]="true"
                         [scrollbarH]="true"
                         [rows]="users_filtered">
-                            <ngx-datatable-column prop="Value.first" name="First" [width]="100">
+                            <ngx-datatable-column prop="Value.FirstName" name="First" [width]="100">
                                 <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
-                                    {{row.first}}
+                                    {{row.FirstName}}
                                 </ng-template>
                             </ngx-datatable-column>
-                            <ngx-datatable-column prop="Value.last" name="Last" [width]="100">
+                            <ngx-datatable-column prop="Value.LastName" name="Last" [width]="100">
                                 <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
-                                    {{row.last}}
+                                    {{row.LastName}}
                                     
                                 </ng-template>
                             </ngx-datatable-column>
 
-                            <ngx-datatable-column prop="Value.email" name="Email" [width]="100">
+                            <ngx-datatable-column prop="Value.Email" name="Email" [width]="100">
                                 <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
-                                    {{row.email}}
+                                    {{row.Email}}
                                     
                                 </ng-template>
                             </ngx-datatable-column>
 
-                            <ngx-datatable-column prop="Value.group" name="Permission" [width]="100">
+                            <ngx-datatable-column prop="Value.Permission" name="Permission" [width]="100">
                                 <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
-                                    <select  class="form-control form-control-sm" #selectG (change)="setPermission(row.ID, row.group, selectG.value)">
-                                        <option [value]="-1" [selected]="row.group == 'Denied'">Denied</option>
-                                        <option [value]="0" [selected]="row.group == 'View'">View</option>
-                                        <option [value]="1" [selected]="row.group == 'Read'">Read</option>
-                                        <option [value]="2" [selected]="row.group == 'Write'">Write</option>
+                                    <select  class="form-control form-control-sm" #selectG (change)="setPermission(row.ID, row.Permission, selectG.value)">
+                                        <option [value]="-1" [selected]="row.Permission == 'Denied'">Denied</option>
+                                        <option [value]="0" [selected]="row.Permission == 'View'">View</option>
+                                        <option [value]="1" [selected]="row.Permission == 'Read'">Read</option>
+                                        <option [value]="2" [selected]="row.Permission == 'Write'">Write</option>
                                     </select>
                                 </ng-template>
                             </ngx-datatable-column>
 
-                            <ngx-datatable-column prop="Value.group" name="Remove" [width]="20">
+                            <ngx-datatable-column prop="Value.Permission" name="Remove" [width]="20">
                                 <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
                                     <a (click)="openRemovePermission(removepermission, row)"  class="ff-headers text-color">
                                         <div class="icon icon-arrows-circle-remove"></div>
