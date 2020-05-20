@@ -122,7 +122,13 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                 {
                     foreach (DataRow row in rows)
                     {
-                        User u = new User(user, (string)row["FirstName"], (string)row["LastName"], (string)row["Email"], (string)row["MetaData"], (string)row["Secret"]);
+                        var firstName = GetValue(row, "FirstName", typeof(string)) as string;
+                        var lastName = GetValue(row, "LastName", typeof(string)) as string;
+                        var email = GetValue(row, "Email", typeof(string)) as string;
+                        var meta = GetValue(row, "MetaData", typeof(string)) as string;
+                        var secret = GetValue(row, "Secret", typeof(string)) as string;
+
+                        User u = new User(user, firstName, lastName, email, meta, secret);
                         _userDB.Add(user, u);
                         return u;
                     }
@@ -153,7 +159,13 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                     foreach (DataRow row in rows)
                     {
                         var user = GetValue(row, "TenantName", typeof(string)) as string;
-                        User u = new User(user, (string)row["FirstName"], (string)row["LastName"], (string)row["Email"], (string)row["MetaData"], (string)row["Secret"]);
+                        var firstName = GetValue(row, "FirstName", typeof(string)) as string;
+                        var lastName = GetValue(row, "LastName", typeof(string)) as string;
+                        var email = GetValue(row, "Email", typeof(string)) as string;
+                        var meta = GetValue(row, "MetaData", typeof(string)) as string;
+                        var secret = GetValue(row, "Secret", typeof(string)) as string;
+
+                        User u = new User(user, firstName, lastName, email, meta, secret);
                         // User u = new User(user);
                         if(!_userDB.ContainsKey(user))
                             _userDB.Add(user, u);
