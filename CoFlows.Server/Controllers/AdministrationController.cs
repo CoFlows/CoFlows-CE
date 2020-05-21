@@ -108,8 +108,36 @@ namespace CoFlows.Server.Controllers
             return Ok(new { Data = "User not found..." });
 
         }
+
+        public class UpdateUserData
+        {
+            public string UserID;
+            public string FirstName;
+            public string LastName;
+            public string MetaData;
+        }
+        [HttpPost]
+        public ActionResult UpdateUser([FromBody] UpdateUserData data)
+        {
+            try
+            {
+                var quser = QuantApp.Kernel.User.FindUser(data.UserID);
+                if (!string.IsNullOrWhiteSpace(data.FirstName))
+                    quser.FirstName = data.FirstName;
+                if (!string.IsNullOrWhiteSpace(data.LastName))
+                    quser.LastName = data.LastName;
+                if (!string.IsNullOrWhiteSpace(data.MetaData))
+                    quser.MetaData = data.MetaData;
+
+                return Ok(new { Data = "ok" });
+            }
+            catch
+            {
+                return Ok(new { Data = "error" });
+            }
+        }
         
-        public ActionResult SubGroupsApp(string groupid, bool aggregated)
+        public ActionResult SubGroups(string groupid, bool aggregated)
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -131,6 +159,7 @@ namespace CoFlows.Server.Controllers
                     ID = group.ID,
                     Name = group.Name,
                     Description = group.Description,
+                    ParentID = group.Parent == null ? null : group.Parent.ID
                     // Permission = ac.ToString(),
                 });
             }
@@ -138,29 +167,7 @@ namespace CoFlows.Server.Controllers
             return Ok(jres);
         }
 
-        
-        public ActionResult UsersApp()
-        {
-            string userId = this.User.QID();
-            if (userId == null)
-                return null;
-
-            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
-
-            List<object> jres = new List<object>();
-
-            foreach (Utils.User usr in UserRepository.RetrieveUsers())
-            {
-                string id = usr.TenantName;
-                QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(id);
-                if (quser != null)
-                    jres.Add(new { ID = quser.ID, FirstName = quser.FirstName, LastName = quser.LastName, Email = quser.Email });
-            }
-
-            return Ok(jres);
-        }
-        
-        public ActionResult UserApp(string id)
+        public ActionResult UserData(string id, string groupid, bool aggregated)
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -170,9 +177,19 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(id);
 
+            QuantApp.Kernel.Group role = QuantApp.Kernel.Group.FindGroup(groupid);
+
+            if(role == null)
+                return null;
+
+            List<Group> sgroups = role.SubGroups(aggregated);
+            
+
             List<object> jres = new List<object>();
 
-            foreach (QuantApp.Kernel.Group group in QuantApp.Kernel.Group.MasterGroups())
+            var lastLogin = UserRepository.LastUserLogin(id);
+
+            foreach (QuantApp.Kernel.Group group in sgroups)
             {
                 if (!group.Name.StartsWith("Personal: "))
                 {
@@ -189,10 +206,18 @@ namespace CoFlows.Server.Controllers
                 }
             }
 
-
-            return Ok(new { FirstName = quser.FirstName, LastName = quser.LastName, Groups = jres });                
+            return Ok(new { 
+                Email = quser.Email,
+                Permission = role.Permission(null, quser).ToString(),
+                MetaData = quser.MetaData,
+                FirstName = quser.FirstName, 
+                LastName = quser.LastName, 
+                LastLogin = lastLogin,
+                Groups = jres 
+                });                
         }
-        
+
+
         public IActionResult Users(string groupid)
         {
             string userId = this.User.QID();
@@ -250,6 +275,197 @@ namespace CoFlows.Server.Controllers
 
             return Ok(jres);
         }
+
+        public ActionResult RemoveGroup(string id)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
+
+            Group group = QuantApp.Kernel.Group.FindGroup(id);
+            if (group != null)
+            {
+                group.Remove();
+
+                return Ok(new { Data = "ok" });
+            }
+            return Ok(new { Data = "error" });
+        }
+
+        public class NewSubGroupClass
+        {
+            public string Name;
+            public string Description; 
+            public string ParentID;
+        }
+        [HttpPost]
+        public ActionResult NewSubGroup([FromBody] NewSubGroupClass data)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
+            Console.WriteLine("------------NewSubGroup");
+            Console.WriteLine("1: " + data.Name);
+            Console.WriteLine("2: " + data.Description);
+            Console.WriteLine("3: " + data.ParentID);
+
+            Group parent = QuantApp.Kernel.Group.FindGroup(data.ParentID);
+
+            if (parent != null)
+            {
+                Group group = QuantApp.Kernel.Group.CreateGroup(data.Name);
+                group.Description = data.Description;
+                parent.Add(group);
+
+                return Ok(new { Data = "ok" });
+            }
+            return Ok(new { Data = "error" });
+        }
+
+        public class EditSubGroupClass
+        {
+            public string ID;
+            public string Name;
+            public string Description;
+        }
+        [HttpPost]
+        public ActionResult EditSubGroup([FromBody] EditSubGroupClass data)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
+
+            Group group = QuantApp.Kernel.Group.FindGroup(data.ID);
+            group.Name = data.Name;
+            group.Description = data.Description;
+            
+            return Ok(new { Data = "ok" });
+            
+        }
+
+        public IActionResult Group(string groupid)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
+            QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
+
+            AccessType ac = group.Permission(null, user);
+            if (ac != AccessType.Denied)
+                return Ok(new {
+                        ID = group.ID,
+                        Name = group.Name,
+                        ParentID = group.Parent == null ? null : group.Parent.ID,
+                        Description = group.Description
+                    });
+
+            return Ok(new { Data = "error" });
+        }
+
+        public class ChangePasswordClass
+        {
+            public string UserID;
+            public string OldPassword;
+            public string NewPassword;
+        }
+        [HttpPost]
+        public ActionResult UpdatePassword([FromBody] ChangePasswordClass data)
+        {
+            try
+            {
+                var users = UserRepository.RetrieveUsersFromTenant(data.UserID);
+                var ienum = users.GetEnumerator();
+                ienum.MoveNext();
+                var user = ienum.Current;
+                
+                var quser = QuantApp.Kernel.User.FindUser(data.UserID);
+
+                // string userid, string old_password, string new_password
+                
+                if(!quser.VerifyPassword(data.OldPassword))
+                    return Ok(new { Data = "Incorrect password"});
+
+                if (!string.IsNullOrWhiteSpace(data.NewPassword))
+                {
+                    user.Hash = QuantApp.Kernel.Adapters.SQL.Factories.SQLUserFactory.GetMd5Hash(data.NewPassword);
+                    return Ok(new { Data = "ok"});
+                }
+                else
+                    return Ok(new { Data = "Empty new password"});
+            }
+            catch(Exception e)
+            {
+                return Ok(new { Data = e.ToString() });
+            }
+        }
+
+
+
+
+        ////////////////
+
+        
+        public ActionResult UsersApp()
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
+
+            List<object> jres = new List<object>();
+
+            foreach (Utils.User usr in UserRepository.RetrieveUsers())
+            {
+                string id = usr.TenantName;
+                QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(id);
+                if (quser != null)
+                    jres.Add(new { ID = quser.ID, FirstName = quser.FirstName, LastName = quser.LastName, Email = quser.Email });
+            }
+
+            return Ok(jres);
+        }
+        
+        public ActionResult UserApp(string id)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
+
+            QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(id);
+
+            List<object> jres = new List<object>();
+
+            foreach (QuantApp.Kernel.Group group in QuantApp.Kernel.Group.MasterGroups())
+            {
+                if (!group.Name.StartsWith("Personal: "))
+                {
+                    AccessType accessType = group.Permission(null, quser);
+
+                    jres.Add(
+                        new
+                        {
+                            ID = group.ID,
+                            Name = group.Name,
+                            Permission = accessType.ToString()
+                        }
+                        );
+                }
+            }
+
+            return Ok(new { FirstName = quser.FirstName, LastName = quser.LastName, Groups = jres });                
+        }
+        
 
         // public IActionResult UsersApp_contacts(string groupid, bool agreements)
         // {
@@ -309,177 +525,55 @@ namespace CoFlows.Server.Controllers
         //     return Ok(new { items = jres });
         // }
 
-        public IActionResult GroupDataApp(string groupid)
-        {
-            string userId = this.User.QID();
-            if (userId == null)
-                return null;
-
-            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
-            QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
-
-            string profile = group.GetProperty("Profile");
-
-            string url = group.Master.GetProperty("URL");
-            List<object> jres_apps = new List<object>();
-
-            object jres = null;
-
-            AccessType ac = group.Permission(null, user);
-            if (ac != AccessType.Denied)
-                jres = new
-                {
-                    ID = group.ID,
-                    Name = group.Name,
-                    Master = group == group.Master,
-                    Description = group.Description,
-                    Profile = profile,
-                    URL = url
-                };
-
-            return Ok(jres);
-        }
-
-        [HttpPost]
-        public string EditGroupApp(string id, string name, string description, string planID, string profile, string apps, string stripeApiKey, string colordark, string parentid, string url, string dashboard, string redirect)
-        {
-            try
-            {
-                string userId = this.User.QID();
-                if (userId == null)
-                    return null;
-
-                QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
-                QuantApp.Kernel.User publicUser = QuantApp.Kernel.User.FindUser("anonymous");
-
-                Group parent = string.IsNullOrWhiteSpace(parentid) ? null : QuantApp.Kernel.Group.FindGroup(parentid);
-
-                Group group = string.IsNullOrWhiteSpace(id) ? QuantApp.Kernel.Group.CreateGroup(name) : QuantApp.Kernel.Group.FindGroup(id);
-
-                if (parent != null && string.IsNullOrWhiteSpace(id))
-                    group.Parent = parent;
-
-                if (parent == null)
-                {
-                    group.Add(user, typeof(QuantApp.Kernel.User), AccessType.Write);
-                    group.Add(publicUser, typeof(QuantApp.Kernel.User), AccessType.Denied);
-                }
-
-                group.Name = name;
-
-                string des = description.Trim().Replace("_&l;_", "<").Replace("_&r;_", ">");
-                if (!string.IsNullOrWhiteSpace(des) && des[des.Length - 1] == '\x0006')
-                    des = des.Substring(0, des.Length - 2);
-                group.Description = des;
-
-                GroupRepository.Set(group, "Profile", profile);
-
-
-                GroupRepository.Set(group, "URL", url);
-
-                return "ok";
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            return "error";
-        }
-
-        public ActionResult RemoveGroup(string id)
-        {
-            string userId = this.User.QID();
-            if (userId == null)
-                return null;
-
-            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
-
-            Group group = QuantApp.Kernel.Group.FindGroup(id);
-            if (group != null)
-            {
-                group.Remove();
-
-                return Ok(new { Data = "ok" });
-            }
-            return Ok(new { Data = "error" });
-        }
-
-        public ActionResult NewSubGroup(string name, string parendid)
-        {
-            string userId = this.User.QID();
-            if (userId == null)
-                return null;
-
-            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
-
-            Group parent = QuantApp.Kernel.Group.FindGroup(parendid);
-
-            if (parent != null)
-            {
-                Group group = QuantApp.Kernel.Group.CreateGroup(name);
-                parent.Add(group);
-
-                return Ok(new { Data = "ok" });
-            }
-            return Ok(new { Data = "error" });
-        }
-
-        public class UpdateUserData
-        {
-            public string UserID;
-            public string First;
-            public string Last;
-            public string MetaData;
-        }
-        [HttpPost]
-        public ActionResult UpdateUser_App([FromBody] UpdateUserData data)
-        {
-            try
-            {
-                var quser = QuantApp.Kernel.User.FindUser(data.UserID);
-                if (!string.IsNullOrWhiteSpace(data.First))
-                    quser.FirstName = data.First;
-                if (!string.IsNullOrWhiteSpace(data.Last))
-                    quser.LastName = data.Last;
-                if (!string.IsNullOrWhiteSpace(data.MetaData))
-                    quser.MetaData = data.MetaData;
-
-                return Ok(new { Data = "ok" });
-            }
-            catch
-            {
-                return Ok(new { Data = "error" });
-            }
-        }
-
         
-        public ActionResult UpdatePassword_App(string userid, string old_password, string new_password)
-        {
-            try
-            {
-                var users = UserRepository.RetrieveUsersFromTenant(userid);
-                var ienum = users.GetEnumerator();
-                ienum.MoveNext();
-                var user = ienum.Current;
-                
-                var quser = QuantApp.Kernel.User.FindUser(userid);
-                
-                if(!quser.VerifyPassword(old_password))
-                    return Ok(new { Data = "Incorrect password"});
 
-                if (!string.IsNullOrWhiteSpace(new_password))
-                {
-                    user.Hash = QuantApp.Kernel.Adapters.SQL.Factories.SQLUserFactory.GetMd5Hash(new_password);
-                    return Ok(new { Data = "ok"});
-                }
-                else
-                    return Ok(new { Data = "Empty new password"});
-            }
-            catch(Exception e)
-            {
-                return Ok(new { Data = e.ToString() });
-            }
-        }
+        // [HttpPost]
+        // public string EditGroupApp(string id, string name, string description, string planID, string profile, string apps, string stripeApiKey, string colordark, string parentid, string url, string dashboard, string redirect)
+        // {
+        //     try
+        //     {
+        //         string userId = this.User.QID();
+        //         if (userId == null)
+        //             return null;
+
+        //         QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
+        //         QuantApp.Kernel.User publicUser = QuantApp.Kernel.User.FindUser("anonymous");
+
+        //         Group parent = string.IsNullOrWhiteSpace(parentid) ? null : QuantApp.Kernel.Group.FindGroup(parentid);
+
+        //         Group group = string.IsNullOrWhiteSpace(id) ? QuantApp.Kernel.Group.CreateGroup(name) : QuantApp.Kernel.Group.FindGroup(id);
+
+        //         if (parent != null && string.IsNullOrWhiteSpace(id))
+        //             group.Parent = parent;
+
+        //         if (parent == null)
+        //         {
+        //             group.Add(user, typeof(QuantApp.Kernel.User), AccessType.Write);
+        //             group.Add(publicUser, typeof(QuantApp.Kernel.User), AccessType.Denied);
+        //         }
+
+        //         group.Name = name;
+
+        //         string des = description.Trim().Replace("_&l;_", "<").Replace("_&r;_", ">");
+        //         if (!string.IsNullOrWhiteSpace(des) && des[des.Length - 1] == '\x0006')
+        //             des = des.Substring(0, des.Length - 2);
+        //         group.Description = des;
+
+        //         GroupRepository.Set(group, "Profile", profile);
+
+
+        //         GroupRepository.Set(group, "URL", url);
+
+        //         return "ok";
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         Console.WriteLine(e);
+        //     }
+        //     return "error";
+        // }
+        
+        
 
 
 

@@ -61,7 +61,7 @@ export class WorkflowComponent {
     private newPermission = 0
     private newEmail = ''
 
-    private newGroup = ''
+    private newGroup = { Name: '', Description: '' }
 
     selectedWB = {Name: "All", ID: ""}
     selectedFunc = {Name: "Workbook", ID: "Workbook"}
@@ -107,7 +107,7 @@ export class WorkflowComponent {
         this.activatedRoute.params.subscribe(params => {
             this.wid = params['id'];
 
-            this.subgroups = [ { Name: 'Master', ID: this.wid }]
+            this.subgroups = [ { Name: 'Master', ID: this.wid, Description: 'Master Group' }]
             this.activeGroupID = this.wid
             
             this.users = []
@@ -355,7 +355,7 @@ export class WorkflowComponent {
                 }
             });
 
-            this.coflows.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
+            this.coflows.Get("administration/subgroups?groupid=" + this.wid + "&aggregated=true", data => {
                 // console.log(data)
                 this.subgroups = this.subgroups.concat(data);
             });
@@ -391,9 +391,11 @@ export class WorkflowComponent {
             });
     }
 
+    activeGroup = {}
     viewGroup(sgid){
         this.users_filtered = []
         this.search = 'loading users...'
+        this.coflows.Get("administration/Group?groupid=" + sgid, data => { this.activeGroup = data})
         this.coflows.Get("administration/Users?groupid=" + sgid, data => {
             // console.log(data)
             this.activeGroupID = sgid
@@ -454,14 +456,14 @@ export class WorkflowComponent {
     addGroupMessage = ''
     addGroup(){
         // console.log(this.newEmail, this.newPermission)
-        this.coflows.Get('administration/newsubgroup?name=' + this.newGroup + '&parendid=' + this.wid,
+        this.coflows.Post('administration/newsubgroup', { 'Name': this.newGroup.Name, 'Description': this.newGroup.Description, 'ParentID': this.wid },
             data => {
                 if(data.Data == "ok"){
                     this.modalService.dismissAll(this.activeModal)
 
-                    this.coflows.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
+                    this.coflows.Get("administration/subgroups?groupid=" + this.wid + "&aggregated=true", data => {
                         // console.log(data)
-                        this.subgroups = [ { Name: 'Master', ID: this.wid }]
+                        this.subgroups = [ { Name: 'Master', ID: this.wid, Description: 'Master Group'  }]
                         this.subgroups = this.subgroups.concat(data);
                         this.activeGroupID = this.subgroups[0].ID;
 
@@ -486,9 +488,9 @@ export class WorkflowComponent {
                     // this.search = 'Reloading permissions...'
                     this.modalService.dismissAll(this.activeModal)
 
-                    this.coflows.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
+                    this.coflows.Get("administration/subgroups?groupid=" + this.wid + "&aggregated=true", data => {
                         console.log(data)
-                        this.subgroups = [ { Name: 'Master', ID: this.wid }]
+                        this.subgroups = [ { Name: 'Master', ID: this.wid, Description: 'Master Group'  }]
                         this.subgroups = this.subgroups.concat(data);
                         this.activeGroupID = this.subgroups[0].ID;
 

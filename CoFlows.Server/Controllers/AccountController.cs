@@ -213,7 +213,8 @@ namespace CoFlows.Server.Controllers
                     QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup("Public");
                     group.Add(quser, typeof(QuantApp.Kernel.User), AccessType.Invited);
 
-                    QuantApp.Kernel.Group gp = GroupRepository.FindByProfile(profile);
+                    // QuantApp.Kernel.Group gp = GroupRepository.FindByProfile(profile);
+                    QuantApp.Kernel.Group gp = Group.FindGroup(profile);
                     if (gp != null)
                         gp.Add(quser, typeof(QuantApp.Kernel.User), AccessType.Invited);
 
@@ -253,14 +254,14 @@ namespace CoFlows.Server.Controllers
             string firstname = "";
             string lastname = "";
             string email = "";
-            string groupID = "";
-            string groupName = "";
-            string groupDescription = "";
-            string groupPermission = "";
-            string masterGroupID = "";
-            string masterGroupName = "";
-            string masterGroupDescription = "";
-            string masterGroupPermission = "";
+            // string groupID = "";
+            // string groupName = "";
+            // string groupDescription = "";
+            // string groupPermission = "";
+            // string masterGroupID = "";
+            // string masterGroupName = "";
+            // string masterGroupDescription = "";
+            // string masterGroupPermission = "";
             string metadata = "";
 
             string secret = "";
@@ -280,41 +281,41 @@ namespace CoFlows.Server.Controllers
 
                 // Response.Cookies.Append("coflows", quser.Secret, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });  
 
-                var appCookie = Request.Cookies["QuantAppProfile"];
+                // var appCookie = Request.Cookies["QuantAppProfile"];
 
-                string profile = appCookie != null ? appCookie : null;
+                // string profile = appCookie != null ? appCookie : null;
 
-                QuantApp.Kernel.Group group = string.IsNullOrWhiteSpace(profile) ? null : GroupRepository.FindByProfile(profile);
-                if (group == null)
-                {
-                    var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}");
-                    group = GroupRepository.FindByURL(location.AbsoluteUri);
-                }
+                // QuantApp.Kernel.Group group = string.IsNullOrWhiteSpace(profile) ? null : GroupRepository.FindByProfile(profile);
+                // if (group == null)
+                // {
+                //     var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}");
+                //     group = GroupRepository.FindByURL(location.AbsoluteUri);
+                // }
 
-                groupID = (group != null ? group.ID : "Public");
+                // groupID = (group != null ? group.ID : "Public");
 
-                var qgroup = QuantApp.Kernel.Group.FindGroup(groupID);
+                // var qgroup = QuantApp.Kernel.Group.FindGroup(groupID);
 
-                groupName = qgroup.Name;
-                groupPermission = qgroup.Permission(null, quser).ToString();
+                // groupName = qgroup.Name;
+                // groupPermission = qgroup.Permission(null, quser).ToString();
 
-                masterGroupID = qgroup.Master.ID;
-                masterGroupName = qgroup.Master.Name;
-                masterGroupPermission = qgroup.Master.Permission(null, quser).ToString();
+                // masterGroupID = qgroup.Master.ID;
+                // masterGroupName = qgroup.Master.Name;
+                // masterGroupPermission = qgroup.Master.Permission(null, quser).ToString();
 
-                var groups = quser.MasterGroups();
-                if (groups != null)
-                    foreach (var s_group in groups)
-                    {
-                        groups_serialized.Add(new
-                        {
-                            ID = s_group.ID,
-                            Name = (s_group.Name.StartsWith("Personal:") ? "Personal" : s_group.Name),
-                            Permission = s_group.Permission(null, quser).ToString()
-                        });
-                    }
+                // var groups = quser.MasterGroups();
+                // if (groups != null)
+                //     foreach (var s_group in groups)
+                //     {
+                //         groups_serialized.Add(new
+                //         {
+                //             ID = s_group.ID,
+                //             Name = (s_group.Name.StartsWith("Personal:") ? "Personal" : s_group.Name),
+                //             Permission = s_group.Permission(null, quser).ToString()
+                //         });
+                //     }
 
-                List<string> lastLogin = UserRepository.LastUserHistory(quser.ID);
+                // List<string> lastLogin = UserRepository.LastUserHistory(quser.ID);
 
                 return Ok(new
                 {
@@ -326,27 +327,27 @@ namespace CoFlows.Server.Controllers
                         FirstName = firstname,
                         LastName = lastname,
                         Email = email,
-                        Administrator = QuantApp.Kernel.Group.FindGroup("Administrator").Permission(null, quser).ToString(),
+                        // Administrator = QuantApp.Kernel.Group.FindGroup("Administrator").Permission(null, quser).ToString(),
                         MetaData = metadata,
-                        LastLoginDate = lastLogin == null ? null : lastLogin[0],
-                        LastLoginIP = lastLogin == null ? null : lastLogin[1],
+                        // LastLoginDate = lastLogin == null ? null : lastLogin[0],
+                        // LastLoginIP = lastLogin == null ? null : lastLogin[1],
                         Secret = secret
                     },
-                    Group = new
-                    {
-                        ID = groupID,
-                        Name = groupName,
-                        Description = groupDescription,
-                        Permission = groupPermission
-                    },
-                    MasterGroup = new
-                    {
-                        ID = masterGroupID,
-                        Name = masterGroupName,
-                        Description = masterGroupDescription,
-                        Permission = masterGroupPermission
-                    },
-                    Groups = groups_serialized,
+                    // Group = new
+                    // {
+                    //     ID = groupID,
+                    //     Name = groupName,
+                    //     Description = groupDescription,
+                    //     Permission = groupPermission
+                    // },
+                    // MasterGroup = new
+                    // {
+                    //     ID = masterGroupID,
+                    //     Name = masterGroupName,
+                    //     Description = masterGroupDescription,
+                    //     Permission = masterGroupPermission
+                    // },
+                    // Groups = groups_serialized,
                 });
             }
             else

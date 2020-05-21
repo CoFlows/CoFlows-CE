@@ -146,6 +146,7 @@
                             <ngx-datatable-column prop="Value.Permission" name="Permission" [width]="100">
                                 <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
                                     <select  class="form-control form-control-sm" #selectG (change)="setPermission(row.ID, row.Permission, selectG.value)">
+                                        <option [value]="-2" [selected]="row.Permission == 'Invited'">Invited</option>
                                         <option [value]="-1" [selected]="row.Permission == 'Denied'">Denied</option>
                                         <option [value]="0" [selected]="row.Permission == 'View'">View</option>
                                         <option [value]="1" [selected]="row.Permission == 'Read'">Read</option>
@@ -191,6 +192,7 @@
                 Permission
             </label>
             <select  class="form-control form-control-sm" [(ngModel)]="newPermission">
+                <option [value]="-2">Invited</option>
                 <option [value]="-1">Denied</option>
                 <option [value]="0">View</option>
                 <option [value]="1">Read</option>

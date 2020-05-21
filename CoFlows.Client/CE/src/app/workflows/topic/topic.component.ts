@@ -99,7 +99,7 @@ export class TopicComponent {
                     }
                 })
         
-                this.coflows.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
+                this.coflows.Get("administration/subgroups?groupid=" + this.wid + "&aggregated=true", data => {
                     // console.log(data)
                     this.subgroups = this.subgroups.concat(data);
                 })

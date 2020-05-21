@@ -308,7 +308,7 @@ export class CoFlowsComponent implements  CanActivate  {
 
     changePassword(oldPassword: string, newPassword: string, success, fail): void {
         // console.log(this.quser)
-        this.Get('administration/updatepassword_app?userid=' + this.quser.User.ID + '&old_password=' + oldPassword + '&new_password=' + newPassword,
+        this.Post('administration/updatepassword',{ UserID:this.quser.User.ID, OldPassword: oldPassword, NewPassword: newPassword  },
         data => {
             if(data.Data == "ok"){
                 success()
