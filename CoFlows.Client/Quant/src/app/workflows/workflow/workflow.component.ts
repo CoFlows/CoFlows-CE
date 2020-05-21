@@ -6,7 +6,6 @@ import { ActivatedRoute } from '@angular/router';
 
 import { CoFlowsComponent } from '../../coflows/core/coflows.component';
 import { CFQueryComponent } from '../../coflows/query/cfquery.component';
-import { QAStrategiesComponent } from '../../quant/strategies/qastrategies.component';
 
 import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
 
@@ -52,9 +51,6 @@ export class WorkflowComponent {
     containerChart = {}
     processesChart = {}
 
-    @ViewChild('qastrategies')
-    private qastrategies:QAStrategiesComponent
-
     @ViewChild('cfquery')
     private cfquery:CFQueryComponent
 
@@ -65,7 +61,7 @@ export class WorkflowComponent {
     private newPermission = 0
     private newEmail = ''
 
-    private newGroup = ''
+    private newGroup = { Name: '', Description: '' }
 
     selectedWB = {Name: "All", ID: ""}
     selectedFunc = {Name: "Workbook", ID: "Workbook"}
@@ -111,7 +107,7 @@ export class WorkflowComponent {
         this.activatedRoute.params.subscribe(params => {
             this.wid = params['id'];
 
-            this.subgroups = [ { Name: 'Master', ID: this.wid }]
+            this.subgroups = [ { Name: 'Master', ID: this.wid, Description: 'Master Group' }]
             this.activeGroupID = this.wid
             
             this.users = []
@@ -193,9 +189,6 @@ export class WorkflowComponent {
                     );
                 });
             
-                if(this.qastrategies != undefined)
-                    this.qastrategies.SetStrategies(data[0].Value.Strategies)
-
                 this.coflows.LinkAction(wiid,
                     data => { //Load
                         this.workbooks = data
@@ -304,9 +297,7 @@ export class WorkflowComponent {
                     );
                 });
             
-                if(this.qastrategies != undefined)
-                    this.qastrategies.SetStrategies(data.Value.Strategies)
-
+            
                 this.coflows.LinkAction(wiid,
                     data => { //Load
                         this.workbooks = data
@@ -364,7 +355,7 @@ export class WorkflowComponent {
                 }
             });
 
-            this.coflows.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
+            this.coflows.Get("administration/subgroups?groupid=" + this.wid + "&aggregated=true", data => {
                 // console.log(data)
                 this.subgroups = this.subgroups.concat(data);
             });
@@ -378,6 +369,9 @@ export class WorkflowComponent {
         this.activeModal = content
         this.modalService.open(content).result.then((result) => {
             
+            console.log(result)
+            
+
         }, (reason) => {
             // console.log(reason)
         });
@@ -397,9 +391,11 @@ export class WorkflowComponent {
             });
     }
 
+    activeGroup = {}
     viewGroup(sgid){
         this.users_filtered = []
         this.search = 'loading users...'
+        this.coflows.Get("administration/Group?groupid=" + sgid, data => { this.activeGroup = data})
         this.coflows.Get("administration/Users?groupid=" + sgid, data => {
             // console.log(data)
             this.activeGroupID = sgid
@@ -460,14 +456,14 @@ export class WorkflowComponent {
     addGroupMessage = ''
     addGroup(){
         // console.log(this.newEmail, this.newPermission)
-        this.coflows.Get('administration/newsubgroup?name=' + this.newGroup + '&parendid=' + this.wid,
+        this.coflows.Post('administration/newsubgroup', { 'Name': this.newGroup.Name, 'Description': this.newGroup.Description, 'ParentID': this.wid },
             data => {
                 if(data.Data == "ok"){
                     this.modalService.dismissAll(this.activeModal)
 
-                    this.coflows.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
+                    this.coflows.Get("administration/subgroups?groupid=" + this.wid + "&aggregated=true", data => {
                         // console.log(data)
-                        this.subgroups = [ { Name: 'Master', ID: this.wid }]
+                        this.subgroups = [ { Name: 'Master', ID: this.wid, Description: 'Master Group'  }]
                         this.subgroups = this.subgroups.concat(data);
                         this.activeGroupID = this.subgroups[0].ID;
 
@@ -492,9 +488,9 @@ export class WorkflowComponent {
                     // this.search = 'Reloading permissions...'
                     this.modalService.dismissAll(this.activeModal)
 
-                    this.coflows.Get("administration/subgroupsapp?groupid=" + this.wid + "&aggregated=true", data => {
+                    this.coflows.Get("administration/subgroups?groupid=" + this.wid + "&aggregated=true", data => {
                         console.log(data)
-                        this.subgroups = [ { Name: 'Master', ID: this.wid }]
+                        this.subgroups = [ { Name: 'Master', ID: this.wid, Description: 'Master Group'  }]
                         this.subgroups = this.subgroups.concat(data);
                         this.activeGroupID = this.subgroups[0].ID;
 
@@ -515,6 +511,7 @@ export class WorkflowComponent {
         this.activeModal = content
         this.activePermissionID = permission.ID
         this.modalService.open(content).result.then((result) => {
+            
             
 
         }, (reason) => {
@@ -556,10 +553,6 @@ export class WorkflowComponent {
         if(event == 3){
             
         }
-
-        // if(event == 4){
-
-        // }
     }
 
     //Workbook Sourcecode
@@ -850,7 +843,6 @@ export class WorkflowComponent {
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -927,7 +919,6 @@ def pkg():
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -1008,7 +999,6 @@ public class CSharpAgent
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -1093,7 +1083,6 @@ public class CSharpAgent
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
@@ -1167,12 +1156,10 @@ let pkg = new qengine.FPKG(
             }]
 
         }
-        // console.log(templateCode)
-
+        
         this.coflows.Post('m/createf',
             templateCode
             ,
-            //this.coflows.Post('strategy/portfoliolist',[93437],
             data => {
                 console.log(data)
             })
