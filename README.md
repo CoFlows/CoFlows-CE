@@ -2,7 +2,7 @@
 
 **CoFlows CE (Community Edition)** is a Containerized Polyglot Runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**. 
 
-To get started please go to our [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow).
+To get started please go to our [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workspace).
 
 For a bit context, one implementation of **CoFlows** is a system to track ships and the imports/exports between countries in order to predict supply and demand dynamics for various commodities. To this end, we worked with GPS data where it was essential for us to quickly plot transformed data on a map for correctly tuning the algorithms. Below is a visual of this example:
 
@@ -10,7 +10,7 @@ For a bit context, one implementation of **CoFlows** is a system to track ships 
 :-------------------------:|:-------------------------:|:-------------------------: 
 ![](docs/images/QA_python_agent.png)  | ![](docs/images/QA_vessels_map.png)  |  ![](docs/images/QA_table_query.png)
 
-More on how to visualize this type of data in the docs of the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow). 
+More on how to visualize this type of data in the docs of the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workspace). 
 
 As a Containerized Polyglot Runtime, its functionality allows developers to build complex workflows leveraging off great open-source libraries written in various languages. The wealth of distributed computing libraries of Java / Scala together with Python's data science tools are all available in order to use the right tool for the right purpose within the same process!
 
@@ -65,11 +65,11 @@ For further details please read [Polyglot](docs/Polyglot/General.md "Polyglot").
 
 ## Workflows
 
-Projects in **CoFlows** are called Workflows. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workflow depends on. For further information please read [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow).
+Projects in **CoFlows** are called Workflows. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workflow depends on. For further information please read [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workspace).
 
 ## Security, Authentication and Permissions
 
-**CoFlows** has integrated LetsEncrypt functionality to simply the process to enable encrypted SSL connections. The standard process is to purchase an SSL certificate from CA, then transform the certificate into a PFX file which then should be stored securely while being accessible by the container. With LetsEncrypt, **CoFlows** now automatically generates a trusted SSL certificate if the domain name linked to the certificate is pointing to the container IP address. For more information please see the docs in the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow).
+**CoFlows** has integrated LetsEncrypt functionality to simply the process to enable encrypted SSL connections. The standard process is to purchase an SSL certificate from CA, then transform the certificate into a PFX file which then should be stored securely while being accessible by the container. With LetsEncrypt, **CoFlows** now automatically generates a trusted SSL certificate if the domain name linked to the certificate is pointing to the container IP address. For more information please see the docs in the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workspace).
 
 ### Authentication through username/password and Secret Keys
 Authentication is done through **CoFlows** internal functionality. Users can either authenticate through the UI with a username and password. Alternatively, you can authenticate WebAPI calls using a secret key. This key can be accessed through the UI as explained below.
@@ -85,13 +85,13 @@ To manage user permissions you can create multiple groups and add users to these
 3) Read (1) - Mid level access, perhaps access to read information that is not accessible to (View only) users but no permission to change data.
 4) Write (2) - Administrators or users with permissions to change data.
 
-Please note that groups are arbitrary, you can create as many as you want. The meaning of the groups and their permissions are for you to define. To understand how to check if a user is a member of a group and see their permission please refer to the docs in the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow).
+Please note that groups are arbitrary, you can create as many as you want. The meaning of the groups and their permissions are for you to define. To understand how to check if a user is a member of a group and see their permission please refer to the docs in the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workspace).
 
 ## User Interface
 
 To simplify your interaction with your **CoFlows** project, we have created a user interface. Let's start with a few steps.
 
-1) Clone the CoFlows-Workflow repo from [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow).
+1) Clone the CoFlows-Workflow repo from [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workspace).
 
 2) In the bin folder, execute the server.sh or bat/server.bat scripts. Read more in the README of this repo.
 
@@ -115,7 +115,7 @@ alternatively you could create a new user by clicking on "Create an account!"
 
 ![workflow](docs/images/workflow.png)
 
-7) The Source tab lets you browse the Base code of workflow. The base code can be thought of as libraries used by both Agents and Queries. For more information please see the documentation of the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow). Please note that this code is read-only. To edit these libraries, you must do so outside of this UI.
+7) The Source tab lets you browse the Base code of workflow. The base code can be thought of as libraries used by both Agents and Queries. For more information please see the documentation of the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workspace). Please note that this code is read-only. To edit these libraries, you must do so outside of this UI.
 
 ![workflow](docs/images/workflow_source.png)
 
