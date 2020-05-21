@@ -206,7 +206,8 @@ namespace CoFlows.Server.Controllers
                 }
             }
 
-            return Ok(new { 
+            return Ok(new {
+                ID = quser.ID, 
                 Email = quser.Email,
                 Permission = role.Permission(null, quser).ToString(),
                 MetaData = quser.MetaData,
@@ -308,11 +309,7 @@ namespace CoFlows.Server.Controllers
                 return null;
 
             QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userId);
-            Console.WriteLine("------------NewSubGroup");
-            Console.WriteLine("1: " + data.Name);
-            Console.WriteLine("2: " + data.Description);
-            Console.WriteLine("3: " + data.ParentID);
-
+            
             Group parent = QuantApp.Kernel.Group.FindGroup(data.ParentID);
 
             if (parent != null)
