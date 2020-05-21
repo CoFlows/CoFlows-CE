@@ -68,9 +68,31 @@ namespace CoFlows.Server.Controllers
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
 
             QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
-            string data = quser.GetData(group, type);
 
-            return Ok(data);
+            return Ok(Newtonsoft.Json.JsonConvert.DeserializeObject(quser.GetData(group, type)));
+        }
+
+        public class SaveUserDataClass
+        {
+            public string UserID;
+            public string GroupID;
+            public string Type;
+            public Newtonsoft.Json.Linq.JObject data;
+        }
+        [HttpPost]
+        public async Task<IActionResult> SaveUserData([FromBody] SaveUserDataClass data)//string groupid, string type)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return Unauthorized();
+
+            QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(data.UserID);
+
+            QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(data.GroupID);
+
+            quser.SaveData(group, data.Type, data.ToString());
+
+            return Ok(new { Result = "ok" });
         }
 
         [HttpGet]
