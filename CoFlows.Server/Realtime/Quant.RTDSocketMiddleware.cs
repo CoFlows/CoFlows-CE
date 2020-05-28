@@ -1296,7 +1296,7 @@ namespace CoFlows.Server.Realtime
     }
 
 
-    public class ProxyConnection : QuantApp.Core.Connection
+    public class ProxyConnection : CoFlows.Core.Connection
     {
         //new public static ProxyConnection Client = new ProxyConnection();
         private static ConcurrentDictionary<string, ProxyConnection> registered_sockets = new ConcurrentDictionary<string, ProxyConnection>();
