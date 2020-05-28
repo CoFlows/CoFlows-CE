@@ -1779,7 +1779,7 @@ module Code =
                             ""|>Console.WriteLine
                             ""|>Console.WriteLine
                         
-                        "Saving changes to: " + name |> Console.WriteLine
+                        "Saving changes to: " + name + " @ " + DateTime.Now.ToString() |> Console.WriteLine
                         
                         let work_books = pkgID + "--Queries" |> M.Base
                         let wb_res = work_books.[fun x -> M.V<string>(x, "Name") = name]
