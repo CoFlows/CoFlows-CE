@@ -35,7 +35,7 @@ using System.Data;
 
 namespace CoFlows.Server
 {
-    public class Connection : QuantApp.Core.Connection
+    public class Connection : CoFlows.Core.Connection
     {
         new public static Connection Client = new Connection();
 

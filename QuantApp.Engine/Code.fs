@@ -1743,7 +1743,7 @@ module Code =
                 | e -> e.ToString() |> Console.WriteLine
                 )
     
-    let ProcessPackageFile (pkg_file : string) : PKG =
+    let ProcessPackageFile (pkg_file : string, registerBuild : bool) : PKG =
         let setListener (pkgID, file : string) = 
             let path = file |> Path.GetDirectoryName
             if path |> listeningPaths.ContainsKey |> not then
@@ -1766,17 +1766,20 @@ module Code =
                     if lastBuiltHash <> hash then
                         lastBuilt.[file] <- hash
 
-                        let t0 = DateTime.Now
-                        "--------------------Build started: " + name + " @ " + t0.ToString() |> Console.WriteLine
-                        let buildResult = Utils.RegisterCode (false, false) [name, code]
+                        if registerBuild then
+                            let t0 = DateTime.Now
+                            "--------------------Build started: " + name + " @ " + t0.ToString() |> Console.WriteLine
+                            let buildResult = Utils.RegisterCode (false, false) [name, code]
 
-                        if buildResult |> String.IsNullOrEmpty then
-                            "       building successful!!!" |> Console.WriteLine
+                            if buildResult |> String.IsNullOrEmpty then
+                                "       building successful!!!" |> Console.WriteLine
 
-                        let t1 = DateTime.Now
-                        "--------------------Build done: " + name + " @ " + t0.ToString() + " ... " + (t1 - t0).ToString() |> Console.WriteLine
-                        ""|>Console.WriteLine
-                        ""|>Console.WriteLine
+                            let t1 = DateTime.Now
+                            "--------------------Build done: " + name + " @ " + t0.ToString() + " ... " + (t1 - t0).ToString() |> Console.WriteLine
+                            ""|>Console.WriteLine
+                            ""|>Console.WriteLine
+                        
+                        "Saving changes to: " + name |> Console.WriteLine
                         
                         let work_books = pkgID + "--Queries" |> M.Base
                         let wb_res = work_books.[fun x -> M.V<string>(x, "Name") = name]
