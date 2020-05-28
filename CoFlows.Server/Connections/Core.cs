@@ -33,7 +33,7 @@ using QuantApp.Kernel.Adapters.SQL;
 
 using System.Data;
 
-namespace QuantApp.Core
+namespace CoFlows.Core
 {
     public class Initialize
     {
@@ -415,31 +415,31 @@ namespace QuantApp.Core
 
         public string PublishPackage(string file)
         {
-            var pkg = QuantApp.Engine.Code.ProcessPackageFile(file);
+            var pkg = QuantApp.Engine.Code.ProcessPackageFile(file, true);
             return PublishPackage(pkg);
         }
 
         public string BuildPackage(string file)
         {
-            var pkg = QuantApp.Engine.Code.ProcessPackageFile(file);
+            var pkg = QuantApp.Engine.Code.ProcessPackageFile(file, true);
             return BuildPackage(pkg);
         }
 
         public string RemoteLog(string file)
         {
-            var pkg = QuantApp.Engine.Code.ProcessPackageFile(file);
+            var pkg = QuantApp.Engine.Code.ProcessPackageFile(file, true);
             return RemoteLogID(pkg.ID);
         }
 
         public string RemoteRestart(string file)
         {
-            var pkg = QuantApp.Engine.Code.ProcessPackageFile(file);
+            var pkg = QuantApp.Engine.Code.ProcessPackageFile(file, true);
             return RemoteRestart(pkg);
         }
 
         public string RemoteRemove(string file)
         {
-            var pkg = QuantApp.Engine.Code.ProcessPackageFile(file);
+            var pkg = QuantApp.Engine.Code.ProcessPackageFile(file, true);
             return RemoteRemoveID(pkg.ID);
         }
 

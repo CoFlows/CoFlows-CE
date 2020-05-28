@@ -185,7 +185,7 @@ namespace CoFlows.Server
                 var funcName = args.Length > 3 ? args[3] : null;
                 var parameters = args.Length > 4 ? args.Skip(4).ToArray() : null;
 
-                var pkg = Code.ProcessPackageFile(workflow_name);
+                var pkg = Code.ProcessPackageFile(workflow_name, true);
                 Console.WriteLine("Workflow: " + pkg.Name);
 
                 Console.WriteLine("Query ID: " + queryID);
@@ -286,7 +286,7 @@ namespace CoFlows.Server
 
                 if(string.IsNullOrEmpty(config_env))
                 {
-                    var pkg = Code.ProcessPackageFile(workflow_name);
+                    var pkg = Code.ProcessPackageFile(workflow_name, true);
                     Code.ProcessPackageJSON(pkg);
                     SetDefaultWorkflows(new string[]{ pkg.ID }, false, config["Jupter"] != null && config["Jupter"].ToString().ToLower() == "true");
                     Console.WriteLine(pkg.Name + " started");
@@ -347,7 +347,7 @@ namespace CoFlows.Server
 
                 Console.WriteLine("Local build");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name), true);
                 var res = Code.BuildRegisterPackage(pkg);
                 if(string.IsNullOrEmpty(res))
                     Console.WriteLine("Success!!!");
@@ -380,7 +380,7 @@ namespace CoFlows.Server
                 Console.WriteLine("Parameters: " + parameters);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name), true);
                 Code.ProcessPackageJSON(pkg);
 
                 var _g = Group.FindGroup(pkg.ID);
@@ -429,7 +429,7 @@ namespace CoFlows.Server
                 Console.WriteLine("Started: " + t0);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name), true);
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(string.IsNullOrEmpty(res))
@@ -612,7 +612,7 @@ namespace CoFlows.Server
 
                 Console.WriteLine("Azure Container Instance remove start");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name));
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name), true);
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(!string.IsNullOrEmpty(res))
