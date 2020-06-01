@@ -29,6 +29,7 @@ CREATE TABLE PermissionsRepository (
     PRIMARY KEY (PermissibleID, GroupID)
     );
 
+INSERT INTO PermissionsRepository (PermissibleID, GroupID, AccessType, Type) Values ('QuantAppSecure_root','Administrator',2,'QuantApp.Kernel.User');
 INSERT INTO PermissionsRepository (PermissibleID, GroupID, AccessType, Type) Values ('QuantAppSecure_root','Public',0,'QuantApp.Kernel.User');
 INSERT INTO PermissionsRepository (PermissibleID, GroupID, AccessType, Type) Values ('QuantAppSecure_anonymous','Public',0,'QuantApp.Kernel.User');
 

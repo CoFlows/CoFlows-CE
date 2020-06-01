@@ -404,6 +404,41 @@ namespace CoFlows.Server.Controllers
             }
         }
 
+        public class ResetPasswordClass
+        {
+            public string Email; //email + ";" + name
+            public string From; //email + ";" + name
+            public string Subject;
+            public string Message;
+        }
+
+        [HttpPost, AllowAnonymous]
+        public ActionResult ResetPassword([FromBody] ResetPasswordClass data)
+        {
+            try
+            {
+                string id = "QuantAppSecure_" + data.Email.ToLower().Replace('@', '.').Replace(':', '.');
+
+                var users = UserRepository.RetrieveUsersFromTenant(id);
+                var ienum = users.GetEnumerator();
+                ienum.MoveNext();
+                var user = ienum.Current;
+                
+                var quser = QuantApp.Kernel.User.FindUser(id);
+
+                var newPassword = System.Guid.NewGuid().ToString();
+                user.Hash = QuantApp.Kernel.Adapters.SQL.Factories.SQLUserFactory.GetMd5Hash(newPassword);
+
+                RTDEngine.Send(new List<string>{ data.Email + ";" + quser.FirstName + " " + quser.LastName }, data.From, data.Subject, data.Message.Replace("$Password$", newPassword));
+                return Ok(new { Result = "ok" });
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+                return Ok(new { Result = e.ToString() });
+            }
+        }
+
 
 
 
@@ -586,6 +621,29 @@ namespace CoFlows.Server.Controllers
             {
                 Console.WriteLine(e);
                 return "error";
+            }
+        }
+
+        public class MessageClass
+        {
+            public List<string> To;
+            public string From; //email + ";" + name
+            public string Subject;
+            public string Message;
+        }
+
+        [HttpPost, AllowAnonymous]
+        public ActionResult Send([FromBody] MessageClass data)
+        {
+            try
+            {
+                RTDEngine.Send(data.To, data.From, data.Subject, data.Message);
+                return Ok(new { Result = "ok" });
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+                return Ok(new { Result = e.ToString() });
             }
         }
     }

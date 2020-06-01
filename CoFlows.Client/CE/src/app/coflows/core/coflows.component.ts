@@ -133,7 +133,7 @@ export class CoFlowsComponent implements  CanActivate  {
     checkLogin(url : string): void {
         // console.log('check user', this.header)
         this.checking = true
-        if(this.router.url == '/authentication/signup'){
+        if(this.router.url == '/authentication/signup' || this.router.url == '/authentication/forgot'){
             // console.log(this.quser)
             this.checking = false
             return
