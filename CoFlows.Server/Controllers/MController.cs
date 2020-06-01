@@ -1593,6 +1593,7 @@ namespace CoFlows.Server.Controllers
     
     
         private static System.Collections.Concurrent.ConcurrentDictionary<string, int> DashDB = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
+        private static System.Collections.Concurrent.ConcurrentDictionary<string, string> DashDBScript = new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
         private static int lastPort = 10000;
         public readonly static object objLockDashGet = new object();
 
@@ -1619,7 +1620,44 @@ namespace CoFlows.Server.Controllers
             lock(objLockDashGet)
             {
                 if(DashDB.ContainsKey(dashID))
+                {
                     port = DashDB[dashID];
+
+                    var m = QuantApp.Kernel.M.Base(wid);
+                    var _res = m[x => true];
+                    if(_res.Count > 0)
+                    {
+                        var workSpace = _res.FirstOrDefault() as Workflow;
+                        var codes = new List<Tuple<string, string>>();
+                        
+                        var wb = QuantApp.Kernel.M.Base(wid + "--Queries");
+                        var wb_res = wb[x => QuantApp.Kernel.M.V<string>(x, "ID") == qid];
+                        if(wb_res.Count > 0)
+                        {
+                            var item = wb_res.FirstOrDefault() as CodeData;
+
+                            if(DashDBScript[dashID] != item.Code)
+                            {
+                                DashDBScript[dashID] = item.Code;
+                                
+                                codes.Add(new Tuple<string, string>(item.Name, item.Code));
+                            
+                                Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
+                                var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("DASH ERROR Workbook not found: " + qid);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("DASH ERROR Workflow not found: " + wid);
+                        return;
+                    }
+                }
                 else
                 {
                     lastPort++;
@@ -1811,7 +1849,44 @@ namespace CoFlows.Server.Controllers
             lock(objLockDashPost)
             {
                 if(DashDB.ContainsKey(dashID))
+                {
                     port = DashDB[dashID];
+
+                    var m = QuantApp.Kernel.M.Base(wid);
+                    var _res = m[x => true];
+                    if(_res.Count > 0)
+                    {
+                        var workSpace = _res.FirstOrDefault() as Workflow;
+                        var codes = new List<Tuple<string, string>>();
+                        
+                        var wb = QuantApp.Kernel.M.Base(wid + "--Queries");
+                        var wb_res = wb[x => QuantApp.Kernel.M.V<string>(x, "ID") == qid];
+                        if(wb_res.Count > 0)
+                        {
+                            var item = wb_res.FirstOrDefault() as CodeData;
+
+                            if(DashDBScript[dashID] != item.Code)
+                            {
+                                DashDBScript[dashID] = item.Code;
+                                
+                                codes.Add(new Tuple<string, string>(item.Name, item.Code));
+                            
+                                Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
+                                var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("DASH ERROR Workbook not found: " + qid);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("DASH ERROR Workflow not found: " + wid);
+                        return;
+                    }
+                }
                 else
                 {
                     lastPort++;

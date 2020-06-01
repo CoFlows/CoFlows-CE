@@ -1,9 +1,9 @@
-# cd CoFlows.Client/CE
-# # npm install
-# # npm install -g @angular/cli
-# ng build --prod --aot
+cd CoFlows.Client/CE
+# npm install
+# npm install -g @angular/cli
+ng build --prod --aot
 
-# cd ../../
+cd ../../
 
 dotnet clean CoFlows.CE.lnx.sln
 dotnet publish -c Release -f netcoreapp3.1 -o CoFlows.Server/obj/lnx/publish CoFlows.Server/CoFlows.Server.lnx.csproj

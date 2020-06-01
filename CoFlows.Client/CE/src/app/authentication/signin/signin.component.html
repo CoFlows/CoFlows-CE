@@ -23,7 +23,7 @@
         </label>
         <input type="password" class="form-control" placeholder="********" [formControl]="form.controls['password']" [ngClass]="{'form-control-danger': form.controls['password'].hasError('required') && form.controls['password'].touched}"/>
         <div class="form-control-feedback" *ngIf="form.controls['password'].hasError('required') && form.controls['password'].touched">Password is required.</div>
-
+        <a [routerLink]="['/authentication/forgot']" class="form-text"><small>Recover password</small></a>
 
         <div class="mb-3" *ngIf="errorMessage != ''">
           <div class="block">&nbsp;</div>
