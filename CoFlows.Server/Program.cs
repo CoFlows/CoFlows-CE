@@ -274,8 +274,8 @@ namespace CoFlows.Server
                 // Databases(connectionString);
                 var connectionString = config["Database"]["Connection"].ToString();
                 var type = config["Database"]["Type"].ToString();
-                if(type.ToLower() == "mssql")
-                    DatabasesMssql(connectionString);
+                if(type.ToLower() == "mssql" || type.ToLower() == "postgres")
+                    DatabasesDB(connectionString);
                 else
                     DatabasesSqlite(connectionString);
 
@@ -338,8 +338,8 @@ namespace CoFlows.Server
                 // Databases(connectionString);
                 var connectionString = config["Database"]["Connection"].ToString();
                 var type = config["Database"]["Type"].ToString();
-                if(type.ToLower() == "mssql")
-                    DatabasesMssql(connectionString);
+                if(type.ToLower() == "mssql" || type.ToLower() == "postgres")
+                    DatabasesDB(connectionString);
                 else
                     DatabasesSqlite(connectionString);
 
@@ -361,8 +361,8 @@ namespace CoFlows.Server
                 // Databases(connectionString);
                 var connectionString = config["Database"]["Connection"].ToString();
                 var type = config["Database"]["Type"].ToString();
-                if(type.ToLower() == "mssql")
-                    DatabasesMssql(connectionString);
+                if(type.ToLower() == "mssql" || type.ToLower() == "postgres")
+                    DatabasesDB(connectionString);
                 else
                     DatabasesSqlite(connectionString);
 
@@ -704,7 +704,7 @@ namespace CoFlows.Server
             }
         }
 
-        private static void DatabasesMssql(string KernelConnectString)
+        private static void DatabasesDB(string KernelConnectString)
         {
             if (QuantApp.Kernel.User.CurrentUser == null)
                 QuantApp.Kernel.User.CurrentUser = new QuantApp.Kernel.User("System");
@@ -714,6 +714,21 @@ namespace CoFlows.Server
                 if(KernelConnectString.StartsWith("Server="))
                 {
                     MSSQLDataSetAdapter KernelDataAdapter = new MSSQLDataSetAdapter();
+                    KernelDataAdapter.ConnectString = KernelConnectString;
+                    QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
+                }
+                else if(KernelConnectString.StartsWith("Host="))
+                {
+                    var _KernelDataAdapter = new PostgresDataSetAdapter();
+                    _KernelDataAdapter.ConnectString = KernelConnectString;
+                    _KernelDataAdapter.CreateDB(KernelConnectString, new List<string> {
+                        File.ReadAllText(@"sql/create.sql").Replace("DateTime", "timestamp"),
+                        File.ReadAllText(@"sql/quant.sql").Replace("DateTime", "timestamp"),
+                        File.ReadAllText(@"sql/cluster.sql").Replace("DateTime", "timestamp"),
+                        File.ReadAllText(@"sql/calendars.sql"),
+                        File.ReadAllText(@"sql/fic.sql")
+                    });
+                    var KernelDataAdapter = new PostgresDataSetAdapter();
                     KernelDataAdapter.ConnectString = KernelConnectString;
                     QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
                 }
