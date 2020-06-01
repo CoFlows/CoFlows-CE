@@ -259,16 +259,27 @@ namespace CoFlows.Server.Quant
             {
                 PythonEngine.BeginAllowThreads();
 
-                if(config["Database"].Children().Count() > 0)
+                var type = config["Database"]["Type"].ToString();
+                if(type.ToLower() == "mssql" || type.ToLower() == "postgres")
                 {
-                    var kernelString = config["Database"]["Kernel"].ToString();
-                    var strategyString = config["Database"]["Strategies"].ToString();
-                    var quantappString = config["Database"]["QuantApp"].ToString();
-                    Databases(kernelString, strategyString, quantappString);
+                    if(config["Database"]["Connection"] == null)
+                    {
+                        var kernelString = config["Database"]["Kernel"].ToString();
+                        var strategyString = config["Database"]["Strategies"].ToString();
+                        var quantappString = config["Database"]["QuantApp"].ToString();
+                        Databases(kernelString, strategyString, quantappString);
+                    }
+                    else
+                    {
+                        var kernelString = config["Database"]["Connection"].ToString();
+                        var strategyString = kernelString;
+                        var quantappString = kernelString;
+                        Databases(kernelString, strategyString, quantappString);
+                    }
                 }
                 else
                 {
-                    var connectionString = config["Database"].ToString();
+                    var connectionString = config["Database"]["Connection"].ToString();
                     Databases(connectionString);
                 }
 
@@ -349,18 +360,30 @@ namespace CoFlows.Server.Quant
             {
                 PythonEngine.BeginAllowThreads();
 
-                if(config["Database"].Children().Count() > 0)
+                var type = config["Database"]["Type"].ToString();
+                if(type.ToLower() == "mssql" || type.ToLower() == "postgres")
                 {
-                    var kernelString = config["Database"]["Kernel"].ToString();
-                    var strategyString = config["Database"]["Strategies"].ToString();
-                    var quantappString = config["Database"]["QuantApp"].ToString();
-                    Databases(kernelString, strategyString, quantappString);
+                    if(config["Database"]["Connection"] == null)
+                    {
+                        var kernelString = config["Database"]["Kernel"].ToString();
+                        var strategyString = config["Database"]["Strategies"].ToString();
+                        var quantappString = config["Database"]["QuantApp"].ToString();
+                        Databases(kernelString, strategyString, quantappString);
+                    }
+                    else
+                    {
+                        var kernelString = config["Database"]["Connection"].ToString();
+                        var strategyString = kernelString;
+                        var quantappString = kernelString;
+                        Databases(kernelString, strategyString, quantappString);
+                    }
                 }
                 else
                 {
-                    var connectionString = config["Database"].ToString();
+                    var connectionString = config["Database"]["Connection"].ToString();
                     Databases(connectionString);
                 }
+
                 Console.WriteLine("DB Connected");
 
                 Console.WriteLine("Local build");
@@ -377,18 +400,30 @@ namespace CoFlows.Server.Quant
             {
                 PythonEngine.BeginAllowThreads();
 
-                if(config["Database"].Children().Count() > 0)
+                var type = config["Database"]["Type"].ToString();
+                if(type.ToLower() == "mssql" || type.ToLower() == "postgres")
                 {
-                    var kernelString = config["Database"]["Kernel"].ToString();
-                    var strategyString = config["Database"]["Strategies"].ToString();
-                    var quantappString = config["Database"]["QuantApp"].ToString();
-                    Databases(kernelString, strategyString, quantappString);
+                    if(config["Database"]["Connection"] == null)
+                    {
+                        var kernelString = config["Database"]["Kernel"].ToString();
+                        var strategyString = config["Database"]["Strategies"].ToString();
+                        var quantappString = config["Database"]["QuantApp"].ToString();
+                        Databases(kernelString, strategyString, quantappString);
+                    }
+                    else
+                    {
+                        var kernelString = config["Database"]["Connection"].ToString();
+                        var strategyString = kernelString;
+                        var quantappString = kernelString;
+                        Databases(kernelString, strategyString, quantappString);
+                    }
                 }
                 else
                 {
-                    var connectionString = config["Database"].ToString();
+                    var connectionString = config["Database"]["Connection"].ToString();
                     Databases(connectionString);
                 }
+
                 Console.WriteLine("Local Query " + DateTime.Now);
                 Console.WriteLine("DB Connected");
 
@@ -925,6 +960,21 @@ namespace CoFlows.Server.Quant
                 if(KernelConnectString.StartsWith("Server="))
                 {
                     MSSQLDataSetAdapter KernelDataAdapter = new MSSQLDataSetAdapter();
+                    KernelDataAdapter.ConnectString = KernelConnectString;
+                    QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
+                }
+                else if(KernelConnectString.StartsWith("Host="))
+                {
+                    var _KernelDataAdapter = new PostgresDataSetAdapter();
+                    _KernelDataAdapter.ConnectString = KernelConnectString;
+                    _KernelDataAdapter.CreateDB(KernelConnectString, new List<string> {
+                        File.ReadAllText(@"sql/create.sql").Replace("DateTime", "timestamp"),
+                        File.ReadAllText(@"sql/quant.sql").Replace("DateTime", "timestamp"),
+                        File.ReadAllText(@"sql/cluster.sql").Replace("DateTime", "timestamp"),
+                        File.ReadAllText(@"sql/calendars.sql"),
+                        File.ReadAllText(@"sql/fic.sql")
+                    });
+                    var KernelDataAdapter = new PostgresDataSetAdapter();
                     KernelDataAdapter.ConnectString = KernelConnectString;
                     QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
                 }
