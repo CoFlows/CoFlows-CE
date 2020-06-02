@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 
 using System.Data;
@@ -669,32 +670,48 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public void CreateDB(string connectionString, List<string> schemas)
         {
-            var connString = connectionString.Substring(0, connectionString.IndexOf("Database=") - 1);
-            var dbName = connectionString.Substring(connectionString.IndexOf("Database="));
-            dbName = dbName.Substring(dbName.IndexOf("=") + 1);
+            // var connString = connectionString.Substring(0, connectionString.IndexOf("Database=") - 1);
+            // var dbName = connectionString.Substring(connectionString.IndexOf("Database="));
+            // dbName = dbName.Substring(dbName.IndexOf("=") + 1);
+            var dbName = "";
+
+            var cons = connectionString.Split(';');
+            foreach(var f in cons)
+                if(f.ToLower().StartsWith("database="))
+                    dbName = f.ToLower().Replace("database=", "");
+            
+            var connString = string.Join(";", new List<string>(cons).Where(x => !x.ToLower().StartsWith("database="))) + ";Database=postgres";
 
             Console.WriteLine("Postgres database: " + dbName);
 
-            var conn = new NpgsqlConnection(connString);
-            conn.Open();
-            
-            using (var cmd = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname='" + dbName + "'", conn))
-            using (var reader = cmd.ExecuteReader())
+            try
             {
-                if(reader.Read())
-                    return;
+                var conn = new NpgsqlConnection(connString);
+                conn.Open();
+                
+                using (var cmd = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname='" + dbName + "'", conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if(reader.Read())
+                        return;
+                }
+                
+                bool addData = true;
+                Console.WriteLine("Postgres creating database" + dbName);
+                using (var cmd = new NpgsqlCommand("CREATE DATABASE " + dbName, conn))
+                cmd.ExecuteNonQuery();
             }
-            
-            bool addData = true;
-            Console.WriteLine("Postgres creating database" + dbName);
-            using (var cmd = new NpgsqlCommand("CREATE DATABASE " + dbName, conn))
-            cmd.ExecuteNonQuery();
+            catch{}
 
-            Console.WriteLine("Adding Schema: " + dbName);
+            Console.WriteLine("Checking Schema: " + dbName);
             foreach(var schema in schemas)
-                ExecuteCommand(schema);
+                try
+                {
+                    ExecuteCommand(schema);
+                }
+                catch{}
 
-            Console.WriteLine("Create DB: " + dbName);
+            Console.WriteLine("Processed DB: " + dbName);
         }
 
         public DbDataReader ExecuteReader(string command)
