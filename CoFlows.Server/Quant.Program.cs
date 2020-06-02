@@ -970,7 +970,6 @@ namespace CoFlows.Server.Quant
                     _KernelDataAdapter.CreateDB(KernelConnectString, new List<string> {
                         File.ReadAllText(@"sql/create.sql").Replace("DateTime", "timestamp"),
                         File.ReadAllText(@"sql/quant.sql").Replace("DateTime", "timestamp"),
-                        File.ReadAllText(@"sql/cluster.sql").Replace("DateTime", "timestamp"),
                         File.ReadAllText(@"sql/calendars.sql"),
                         File.ReadAllText(@"sql/fic.sql")
                     });
