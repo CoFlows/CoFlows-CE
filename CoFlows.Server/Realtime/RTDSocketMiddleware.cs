@@ -72,9 +72,10 @@ namespace CoFlows.Server.Realtime
 
                 QuantApp.Kernel.User quser = null;
 
+                string cokey = context.Request.Cookies["coflows"]; 
                 if(!context.User.Identity.IsAuthenticated)
                 {
-                    string cokey = context.Request.Cookies["coflows"]; 
+                    
                     if(cokey != null)
                     {
                         if(CoFlows.Server.Controllers.AccountController.sessionKeys.ContainsKey(cokey))
@@ -123,13 +124,17 @@ namespace CoFlows.Server.Realtime
                 var id = _socketManager.AddSocket(socket);
                 var address = context.Connection.RemoteIpAddress;
 
+                
+
                 if(path.StartsWith("/lab/"))
                 {
                     var wid = path.Replace("/lab/", "");
                     wid = wid.Substring(0, wid.IndexOf("/"));
 
+                    int labPort = CoFlows.Server.Controllers.MController.LabDB[cokey + wid];
+
                     var client = ProxyConnection.Client(socket,  path);
-                    client.Connect("ws://localhost:8888", headers);
+                    client.Connect("ws://localhost:" + labPort, headers);
 
                     var _socket = client.ClientWebSocket;
                     _proxies.TryAdd(socket.GetHashCode() + path, client);

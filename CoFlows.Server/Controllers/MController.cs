@@ -31,6 +31,8 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using QuantApp.Kernel;
 using QuantApp.Engine;
+using Python.Runtime;
+
 
 using System.Net.Mail;
 
@@ -948,7 +950,9 @@ namespace CoFlows.Server.Controllers
             return Ok(res);
         }
     
-
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, int> LabDB = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
+        private static int lastLabPort = 20000;
+        public readonly static object objLockLabGet = new object();
         [AllowAnonymous,HttpGet("/lab/{id}/{**url}")]
         public async Task LabGet(string id, string url = "")
         {
@@ -991,8 +995,42 @@ namespace CoFlows.Server.Controllers
             if(url == null) url = "";
             var queryString = Request.QueryString;
             url = "/lab/" + id + "/" + url + queryString.Value;
+            
+            int labPort = 0;
+            if(Program.useJupyter && !LabDB.ContainsKey(cokey + id))
+            {
+                QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUserBySecret(AccountController.sessionKeys[cokey]);
+                bool isRoot = quser.ID == "QuantAppSecure_root";
 
+                lastLabPort++;
+                LabDB[cokey + id] = lastLabPort;
 
+                var userName = System.Text.RegularExpressions.Regex.Replace(quser.Email, "[^a-zA-Z0-9 -]", "_");
+                var createUser = "import subprocess;newUser = '" + userName + "';userExists = newUser in list(map(lambda x: x.split(':')[0], subprocess.check_output(['getent', 'passwd']).decode('utf-8').split('\\n'))); print('User exists: ' + newUser) if userExists else subprocess.check_call(['adduser', '--gecos', '\"First Last,RoomNumber,WorkPhone,HomePhone\"', '--disabled-password', '--home', f'/app/mnt/home/{newUser}/', '--shell', '/bin/bash', f'{newUser}']); print('no need to edit .bashrc') if (('PS1=\"\\\\u:\\\\w> \"' in open(f'/app/mnt/home/{newUser}/.bashrc').read())) else open(f'/app/mnt/home/{newUser}/.bashrc', 'a').write('PS1=\"\\\\u:\\\\w> \"')";
+                // var createUser = "import subprocess;newUser = '" + userName + "';userExists = newUser in list(map(lambda x: x.split(':')[0], subprocess.check_output(['getent', 'passwd']).decode('utf-8').split('\\n'))); print('User exists: ' + newUser) if userExists else subprocess.check_call(['adduser', '--gecos', '\"First Last,RoomNumber,WorkPhone,HomePhone\"', '--disabled-password', '--home', f'/app/mnt/home/{newUser}/', '--shell', '/bin/bash', f'{newUser}']); print('no need to edit .bashrc') if (userExists and ('PS1=\"\\\\u:\\\\w> \"' in open(f'/app/mnt/home/{newUser}/.bashrc').read())) else open(f'/app/mnt/home/{newUser}/.bashrc', 'a').write('PS1=\"\\\\u:\\\\w> \"')";
+                // var createUser = "import subprocess;newUser = '" + userName + "';userExists = newUser in list(map(lambda x: x.split(':')[0], subprocess.check_output(['getent', 'passwd']).decode('utf-8').split('\\n'))); print('User exists: ' + newUser) if userExists else subprocess.check_call(['adduser', '--gecos', '\"First Last,RoomNumber,WorkPhone,HomePhone\"', '--disabled-password', '--home', f'/app/mnt/home/{newUser}/', '--shell', '/bin/bash', f'{newUser}']);";
+                var code = isRoot ? "import subprocess;subprocess.check_call(['jupyter', 'lab', '--port=" + lastLabPort + "', '--NotebookApp.notebook_dir=/app/mnt/', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'], cwd='/app/')" : "import subprocess;import os;subprocess.check_call(['sudo', '-u', '" + userName + "', 'jupyter', 'lab', '--port=" + lastLabPort + "', '--NotebookApp.notebook_dir=/app/mnt/', '--ip=*', '--NotebookApp.allow_remote_access=True', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'], cwd='/app/mnt/home/" + userName + "')";
+                
+                var th = new System.Threading.Thread(() => {
+                    using (Py.GIL())
+                    {
+                        Console.WriteLine("Starting Jupyter...");
+                        
+                        if(!isRoot)
+                        {
+                            Console.WriteLine(createUser);
+                            PythonEngine.Exec(createUser);
+                        }
+
+                        Console.WriteLine(code);
+                        PythonEngine.Exec(code);
+                    }
+                });
+                th.Start();
+                System.Threading.Thread.Sleep(1000 * 5);
+            }
+            
+            labPort = LabDB[cokey + id];
 
             var headers = new List<KeyValuePair<string, string>>();
 
@@ -1026,7 +1064,7 @@ namespace CoFlows.Server.Controllers
                 }
             }
 
-            var response = await _httpClient.GetAsync("http://localhost:8888" + url);
+            var response = await _httpClient.GetAsync("http://localhost:" + labPort + url);
             string _message = "";
             try
             {
@@ -1193,8 +1231,42 @@ namespace CoFlows.Server.Controllers
                         }
                     }
                 }
+
+                int labPort = 0;
+                if(Program.useJupyter && !LabDB.ContainsKey(cokey + id))
+                {
+                    QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUserBySecret(AccountController.sessionKeys[cokey]);
+                    bool isRoot = quser.ID == "QuantAppSecure_root";
+
+                    lastLabPort++;
+                    LabDB[cokey + id] = lastLabPort;
+
+                    var userName = System.Text.RegularExpressions.Regex.Replace(quser.Email, "[^a-zA-Z0-9 -]", "_");
+                    var createUser = "import subprocess;newUser = '" + userName + "';userExists = newUser in list(map(lambda x: x.split(':')[0], subprocess.check_output(['getent', 'passwd']).decode('utf-8').split('\\n'))); print('User exists: ' + newUser) if userExists else subprocess.check_call(['adduser', '--gecos', '\"First Last,RoomNumber,WorkPhone,HomePhone\"', '--disabled-password', '--home', f'/app/mnt/home/{newUser}/', '--shell', '/bin/bash', f'{newUser}']); print('no need to edit .bashrc') if (('PS1=\"\\\\u:\\\\w> \"' in open(f'/app/mnt/home/{newUser}/.bashrc').read())) else open(f'/app/mnt/home/{newUser}/.bashrc', 'a').write('PS1=\"\\\\u:\\\\w> \"')";
+                    // var createUser = "import subprocess;newUser = '" + userName + "';userExists = newUser in list(map(lambda x: x.split(':')[0], subprocess.check_output(['getent', 'passwd']).decode('utf-8').split('\\n'))); print('User exists: ' + newUser) if userExists else subprocess.check_call(['adduser', '--gecos', '\"First Last,RoomNumber,WorkPhone,HomePhone\"', '--disabled-password', '--home', f'/app/mnt/home/{newUser}/', '--shell', '/bin/bash', f'{newUser}']); print('no need to edit .bashrc') if userExists else open(f'/app/mnt/home/{newUser}/.bashrc', 'a').write('PS1=\"\\\\u:\\\\w> \"')";
+                    var code = isRoot ? "import subprocess;subprocess.check_call(['jupyter', 'lab', '--port=" + lastLabPort + "', '--NotebookApp.notebook_dir=/app/mnt/', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'], cwd='/app/')" : "import subprocess;subprocess.check_call(['sudo', '-u', '" + userName + "', 'jupyter', 'lab', '--port=" + lastLabPort + "', '--NotebookApp.notebook_dir=/app/mnt/', '--ip=*', '--NotebookApp.allow_remote_access=True', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'], cwd='/app/mnt/home/" + userName + "')";
+                    var th = new System.Threading.Thread(() => {
+                        using (Py.GIL())
+                        {
+                            Console.WriteLine("Starting Jupyter...");
+                            
+                            if(!isRoot)
+                            {
+                                Console.WriteLine(createUser);
+                                PythonEngine.Exec(createUser);
+                            }
+
+                            Console.WriteLine(code);
+                            PythonEngine.Exec(code);
+                        }
+                    });
+                    th.Start();
+                    System.Threading.Thread.Sleep(1000 * 5);
+                }
+                labPort = LabDB[cokey + id];
+                
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-                var response = await _httpClient.PostAsync("http://localhost:8888" + url, streamContent);
+                var response = await _httpClient.PostAsync("http://localhost:" + labPort + url, streamContent);
 
                 var content = await response.Content.ReadAsByteArrayAsync();
                 
@@ -1355,7 +1427,42 @@ namespace CoFlows.Server.Controllers
                         }
                     }
                 }
-                var response = await _httpClient.PutAsync("http://localhost:8888" + url, streamContent);
+
+                int labPort = 0;
+                if(Program.useJupyter && !LabDB.ContainsKey(cokey + id))
+                {
+                    QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUserBySecret(AccountController.sessionKeys[cokey]);
+                    bool isRoot = quser.ID == "QuantAppSecure_root";
+
+                    lastLabPort++;
+                    LabDB[cokey + id] = lastLabPort;
+
+                    var userName = System.Text.RegularExpressions.Regex.Replace(quser.Email, "[^a-zA-Z0-9 -]", "_");
+                    var createUser = "import subprocess;newUser = '" + userName + "';userExists = newUser in list(map(lambda x: x.split(':')[0], subprocess.check_output(['getent', 'passwd']).decode('utf-8').split('\\n'))); print('User exists: ' + newUser) if userExists else subprocess.check_call(['adduser', '--gecos', '\"First Last,RoomNumber,WorkPhone,HomePhone\"', '--disabled-password', '--home', f'/app/mnt/home/{newUser}/', '--shell', '/bin/bash', f'{newUser}']); print('no need to edit .bashrc') if (('PS1=\"\\\\u:\\\\w> \"' in open(f'/app/mnt/home/{newUser}/.bashrc').read())) else open(f'/app/mnt/home/{newUser}/.bashrc', 'a').write('PS1=\"\\\\u:\\\\w> \"')";
+                    // var createUser = "import subprocess;newUser = '" + userName + "';userExists = newUser in list(map(lambda x: x.split(':')[0], subprocess.check_output(['getent', 'passwd']).decode('utf-8').split('\\n'))); print('User exists: ' + newUser) if userExists else subprocess.check_call(['adduser', '--gecos', '\"First Last,RoomNumber,WorkPhone,HomePhone\"', '--disabled-password', '--home', f'/app/mnt/home/{newUser}/', '--shell', '/bin/bash', f'{newUser}']); print('no need to edit .bashrc') if userExists else open(f'/app/mnt/home/{newUser}/.bashrc', 'a').write('PS1=\"\\\\u:\\\\w> \"')";
+                    var code = isRoot ? "import subprocess;subprocess.check_call(['jupyter', 'lab', '--port=" + lastLabPort + "', '--NotebookApp.notebook_dir=/app/mnt/', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'], cwd='/app/')" : "import subprocess;subprocess.check_call(['sudo', '-u', '" + userName + "', 'jupyter', 'lab', '--port=" + lastLabPort + "', '--NotebookApp.notebook_dir=/app/mnt/', '--ip=*', '--NotebookApp.allow_remote_access=True', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'], cwd='/app/mnt/home/" + userName + "')";
+                    var th = new System.Threading.Thread(() => {
+                        using (Py.GIL())
+                        {
+                            Console.WriteLine("Starting Jupyter...");
+                            
+                            if(!isRoot)
+                            {
+                                Console.WriteLine(createUser);
+                                PythonEngine.Exec(createUser);
+                            }
+
+                            Console.WriteLine(code);
+                            PythonEngine.Exec(code);
+                        }
+                    });
+                    th.Start();
+                    System.Threading.Thread.Sleep(1000 * 5);
+                }
+                
+                labPort = LabDB[cokey + id];
+
+                var response = await _httpClient.PutAsync("http://localhost:" + labPort + url, streamContent);
                 var content = await response.Content.ReadAsByteArrayAsync();
                 
                 var rheaders = new List<KeyValuePair<string, string>>();
@@ -1516,7 +1623,42 @@ namespace CoFlows.Server.Controllers
                         }
                     }
                 }
-                var response = await _httpClient.PatchAsync("http://localhost:8888" + url, streamContent);
+
+                int labPort = 0;
+                if(Program.useJupyter && !LabDB.ContainsKey(cokey + id))
+                {
+                    QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUserBySecret(AccountController.sessionKeys[cokey]);
+                    bool isRoot = quser.ID == "QuantAppSecure_root";
+
+                    lastLabPort++;
+                    LabDB[cokey + id] = lastLabPort;
+
+                    var userName = System.Text.RegularExpressions.Regex.Replace(quser.Email, "[^a-zA-Z0-9 -]", "_");
+                    var createUser = "import subprocess;newUser = '" + userName + "';userExists = newUser in list(map(lambda x: x.split(':')[0], subprocess.check_output(['getent', 'passwd']).decode('utf-8').split('\\n'))); print('User exists: ' + newUser) if userExists else subprocess.check_call(['adduser', '--gecos', '\"First Last,RoomNumber,WorkPhone,HomePhone\"', '--disabled-password', '--home', f'/app/mnt/home/{newUser}/', '--shell', '/bin/bash', f'{newUser}']); print('no need to edit .bashrc') if (('PS1=\"\\\\u:\\\\w> \"' in open(f'/app/mnt/home/{newUser}/.bashrc').read())) else open(f'/app/mnt/home/{newUser}/.bashrc', 'a').write('PS1=\"\\\\u:\\\\w> \"')";
+                    // var createUser = "import subprocess;newUser = '" + userName + "';userExists = newUser in list(map(lambda x: x.split(':')[0], subprocess.check_output(['getent', 'passwd']).decode('utf-8').split('\\n'))); print('User exists: ' + newUser) if userExists else subprocess.check_call(['adduser', '--gecos', '\"First Last,RoomNumber,WorkPhone,HomePhone\"', '--disabled-password', '--home', f'/app/mnt/home/{newUser}/', '--shell', '/bin/bash', f'{newUser}']); print('no need to edit .bashrc') if userExists else open(f'/app/mnt/home/{newUser}/.bashrc', 'a').write('PS1=\"\\\\u:\\\\w> \"')";
+                    var code = isRoot ? "import subprocess;subprocess.check_call(['jupyter', 'lab', '--port=" + lastLabPort + "', '--NotebookApp.notebook_dir=/app/mnt/', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'], cwd='/app/')" : "import subprocess;subprocess.check_call(['sudo', '-u', '" + userName + "', 'jupyter', 'lab', '--port=" + lastLabPort + "', '--NotebookApp.notebook_dir=/app/mnt/', '--ip=*', '--NotebookApp.allow_remote_access=True', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'], cwd='/app/mnt/home/" + userName + "')";
+                    var th = new System.Threading.Thread(() => {
+                        using (Py.GIL())
+                        {
+                            Console.WriteLine("Starting Jupyter...");
+                            
+                            if(!isRoot)
+                            {
+                                Console.WriteLine(createUser);
+                                PythonEngine.Exec(createUser);
+                            }
+
+                            Console.WriteLine(code);
+                            PythonEngine.Exec(code);
+                        }
+                    });
+                    th.Start();
+                    System.Threading.Thread.Sleep(1000 * 5);
+                }
+                
+                labPort = LabDB[cokey + id];
+
+                var response = await _httpClient.PatchAsync("http://localhost:" + labPort + url, streamContent);
 
                 var content = await response.Content.ReadAsByteArrayAsync();
                 

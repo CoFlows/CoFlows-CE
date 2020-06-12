@@ -807,22 +807,29 @@ namespace CoFlows.Server
                             f.Start();
                         }
 
-                        #if MONO_LINUX || MONO_OSX
-                        if(useJupyter && !loadedJupyter)
-                        {
-                            loadedJupyter = true;
-                            var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/app/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
-                            var th = new System.Threading.Thread(() => {
-                                using (Py.GIL())
-                                {
-                                    Console.WriteLine("Starting Jupyter...");
-                                    Console.WriteLine(code);
-                                    PythonEngine.Exec(code);
-                                }
-                            });
-                            th.Start();
-                        }
-                        #endif
+                        // #if MONO_LINUX || MONO_OSX
+                        // if(useJupyter && !loadedJupyter)
+                        // {
+                        //     loadedJupyter = true;
+                        //     var userName = "arturo_rodriguez_coflows_com";
+                        //     var createUser = "import subprocess;newUser = '" + userName + "';userExists = newUser in list(map(lambda x: x.split(':')[0], subprocess.check_output(['getent', 'passwd']).decode('utf-8').split('\\n'))); print('User exists: ' + newUser) if userExists else subprocess.check_call(['adduser', '--gecos', '\"First Last,RoomNumber,WorkPhone,HomePhone\"', '--disabled-password', '--home', f'/app/mnt/home/{newUser}/', '--shell', '/bin/bash', f'{newUser}']); print('no need to edit .bashrc') if userExists else open(f'/app/mnt/home/{newUser}/.bashrc', 'a').write('PS1=\"\\\\u:\\\\w> \"')";
+                        //     var code = "import subprocess;subprocess.check_call(['sudo', '-u', '" + userName + "', 'jupyter', 'lab', '--port=8888', '--NotebookApp.notebook_dir=/app/mnt/', '--ip=*', '--NotebookApp.allow_remote_access=True', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'], cwd='/app/mnt/home/" + userName + "')";
+                            
+                        //     var th = new System.Threading.Thread(() => {
+                        //         using (Py.GIL())
+                        //         {
+                        //             Console.WriteLine("Starting Jupyter...");
+                                    
+                        //             Console.WriteLine(createUser);
+                        //             PythonEngine.Exec(createUser);
+
+                        //             Console.WriteLine(code);
+                        //             PythonEngine.Exec(code);
+                        //         }
+                        //     });
+                        //     th.Start();
+                        // }
+                        // #endif
 
                         
                     }
