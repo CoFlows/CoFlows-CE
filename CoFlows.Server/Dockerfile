@@ -142,7 +142,7 @@ RUN mv /app/jupyter/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kern
 RUN apt-get update && apt-get install -y procps
 RUN apt-get install -y git
 
-RUN apt-get install -y libpq-dev
+RUN apt-get install -y libpq-dev sudo
 
 ENV PATH /app:$PATH
 
