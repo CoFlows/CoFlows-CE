@@ -1781,7 +1781,6 @@ namespace CoFlows.Server.Controllers
                             if(DashDBScript[dashID] != item.Code)
                             {
                                 DashDBScript[dashID] = item.Code;
-                                
                                 codes.Add(new Tuple<string, string>(item.Name, item.Code));
                             
                                 Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
@@ -1800,26 +1799,28 @@ namespace CoFlows.Server.Controllers
                         return;
                     }
                 }
+
                 else
                 {
                     lastPort++;
                     port = lastPort;
                     DashDB.TryAdd(dashID, port);
-                
 
-                    var m = M.Base(wid);
-                    var res = m[x => true];
-                    if(res.Count > 0)
+                    var m = QuantApp.Kernel.M.Base(wid);
+                    var _res = m[x => true];
+                    if(_res.Count > 0)
                     {
-                        var workflow = res.FirstOrDefault() as Workflow;
+                        var workSpace = _res.FirstOrDefault() as Workflow;
                         var codes = new List<Tuple<string, string>>();
                         
-                        var wb = M.Base(wid + "--Queries");
-                        var wb_res = wb[x => M.V<string>(x, "ID") == qid];
+                        var wb = QuantApp.Kernel.M.Base(wid + "--Queries");
+                        var wb_res = wb[x => QuantApp.Kernel.M.V<string>(x, "ID") == qid];
                         if(wb_res.Count > 0)
                         {
                             var item = wb_res.FirstOrDefault() as CodeData;
                             codes.Add(new Tuple<string, string>(item.Name, item.Code));
+                            DashDBScript[dashID] = item.Code;
+                        
                             Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
                             var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
                         }
@@ -2010,7 +2011,6 @@ namespace CoFlows.Server.Controllers
                             if(DashDBScript[dashID] != item.Code)
                             {
                                 DashDBScript[dashID] = item.Code;
-                                
                                 codes.Add(new Tuple<string, string>(item.Name, item.Code));
                             
                                 Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
@@ -2029,28 +2029,28 @@ namespace CoFlows.Server.Controllers
                         return;
                     }
                 }
+
                 else
                 {
                     lastPort++;
                     port = lastPort;
                     DashDB.TryAdd(dashID, port);
 
-                    
-                    
-
-                    var m = M.Base(wid);
-                    var res = m[x => true];
-                    if(res.Count > 0)
+                    var m = QuantApp.Kernel.M.Base(wid);
+                    var _res = m[x => true];
+                    if(_res.Count > 0)
                     {
-                        var workflow = res.FirstOrDefault() as Workflow;
+                        var workSpace = _res.FirstOrDefault() as Workflow;
                         var codes = new List<Tuple<string, string>>();
                         
-                        var wb = M.Base(wid + "--Queries");
-                        var wb_res = wb[x => M.V<string>(x, "ID") == qid];
+                        var wb = QuantApp.Kernel.M.Base(wid + "--Queries");
+                        var wb_res = wb[x => QuantApp.Kernel.M.V<string>(x, "ID") == qid];
                         if(wb_res.Count > 0)
                         {
                             var item = wb_res.FirstOrDefault() as CodeData;
                             codes.Add(new Tuple<string, string>(item.Name, item.Code));
+                            DashDBScript[dashID] = item.Code;
+                        
                             Console.WriteLine("Dash starting server: " + "/dash/" + wid + "/" + qid + "/" );
                             var result = QuantApp.Engine.Utils.ExecuteCodeFunction(true, codes, "run", new object[]{port, "/dash/" + wid + "/" + qid + "/"});
                         }
@@ -2067,7 +2067,7 @@ namespace CoFlows.Server.Controllers
                     }
                 }
             }
-
+                    
             if(url == null) url = "";
             var queryString = Request.QueryString;
             if(queryString != null && queryString.HasValue)
