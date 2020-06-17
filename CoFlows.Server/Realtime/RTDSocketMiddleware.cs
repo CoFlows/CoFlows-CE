@@ -723,6 +723,40 @@ namespace CoFlows.Server.Realtime
 
         public void Send(IEnumerable<string> to, string from, string subject, string message)
         {
+            try
+            {
+                var mailMsg = new System.Net.Mail.MailMessage();
+
+                //// To
+                foreach(var pairs in to)
+                {
+                    var pair = pairs.Split(';');
+                    var email = pair[0];
+                    var name = pair[1];
+                    mailMsg.To.Add(new System.Net.Mail.MailAddress(email, name));
+                }
+
+                //// From
+                var pairFrom = from.Split(';');
+                var emailFrom = pairFrom[0];
+                var nameFrom = pairFrom[1];
+                mailMsg.From = new System.Net.Mail.MailAddress(emailFrom, nameFrom);
+
+                mailMsg.Subject = subject;
+                mailMsg.AlternateViews.Add(System.Net.Mail.AlternateView.CreateAlternateViewFromString(message, null, System.Net.Mime.MediaTypeNames.Text.Plain));
+                mailMsg.AlternateViews.Add(System.Net.Mail.AlternateView.CreateAlternateViewFromString(message.Replace(System.Environment.NewLine, "<br>"), null, System.Net.Mime.MediaTypeNames.Text.Html));
+
+                //// Init SmtpClient and send
+                var smtpClient = new System.Net.Mail.SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
+                var credentials = new System.Net.NetworkCredential("aqi", "Capital!1234");
+                smtpClient.Credentials = credentials;
+
+                smtpClient.Send(mailMsg);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
     }
 
