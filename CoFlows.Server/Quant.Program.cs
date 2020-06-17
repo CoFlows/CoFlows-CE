@@ -320,25 +320,27 @@ namespace CoFlows.Server.Quant
                     }
                 }
 
-
                 /// QuantSpecific START
-                Instrument.TimeSeriesLoadFromDatabaseIntraday = config["Quant"]["Intraday"].ToString().ToLower() == "true";
-                if(Instrument.TimeSeriesLoadFromDatabaseIntraday)
-                    Console.WriteLine("Intraday Timeseries");
-                else
-                    Console.WriteLine("Close Timeseries");
-                Strategy.Executer = true;
-                // Market.Initialize();
+                if(config["Quant"] != null)
+                {
+                    Instrument.TimeSeriesLoadFromDatabaseIntraday = config["Quant"]["Intraday"].ToString().ToLower() == "true";
+                    if(Instrument.TimeSeriesLoadFromDatabaseIntraday)
+                        Console.WriteLine("Intraday Timeseries");
+                    else
+                        Console.WriteLine("Close Timeseries");
+                    Strategy.Executer = true;
+                    // Market.Initialize();
 
-                var saveAll = config["Quant"]["AutoSave"].ToString().ToLower() == "true";
-                if (saveAll) {
-                    var ths = new System.Threading.Thread(x => (AQI.AQILabs.Kernel.Instrument.Factory as AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLInstrumentFactory).SaveAllLoop(5));
-                    ths.Start();
+                    var saveAll = config["Quant"]["AutoSave"].ToString().ToLower() == "true";
+                    if (saveAll) {
+                        var ths = new System.Threading.Thread(x => (AQI.AQILabs.Kernel.Instrument.Factory as AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLInstrumentFactory).SaveAllLoop(5));
+                        ths.Start();
+                    }
+                    else
+                        Console.WriteLine("Not saving timeseries");
                 }
-                else
-                    Console.WriteLine("Not saving timeseries");
-
                 /// QuantSpecific END
+                
                 
                 if(!sslFlag)
                     CoFlows.Server.Program.Init(new string[]{"--urls", "http://*:80"}, new Realtime.WebSocketListner(), typeof(Startup<CoFlows.Server.Realtime.RTDSocketMiddleware>));

@@ -5,7 +5,7 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
- 
+
 using System;
 using System.Text;
 using System.Net;
@@ -28,31 +28,27 @@ using System.Collections.Concurrent;
 using Newtonsoft.Json;
 
 using QuantApp.Kernel;
+using QuantApp.Engine;
+
 using AQI.AQILabs.Kernel;
 using AQI.AQILabs.Kernel.Factories;
 
-using QuantApp.Kernel;
-using QuantApp.Engine;
-using Python.Runtime;
-
-
 using CoFlows.Server.Utils;
-using CoFlows.Server.Realtime;
 
 namespace CoFlows.Server.Realtime
-{
+{    
     public class HttpProxyRequest
     {
         public string Url { get; set; }
         public string Content { get; set;}
         public List<KeyValuePair<string, string>> Headers { get; set; }
     }
+
     public class RTDSocketMiddleware
     {
         private readonly RequestDelegate _next;
         internal readonly RTDSocketManager _socketManager;
-        internal static ConcurrentDictionary<string, WebSocket> _proxies = new ConcurrentDictionary<string, WebSocket>();
-
+        internal static ConcurrentDictionary<string, ProxyConnection> _proxies = new ConcurrentDictionary<string, ProxyConnection>();
 
         public RTDSocketMiddleware(RequestDelegate next,  RTDSocketManager socketManager)
         {
@@ -78,9 +74,10 @@ namespace CoFlows.Server.Realtime
 
                 QuantApp.Kernel.User quser = null;
 
+                string cokey = context.Request.Cookies["coflows"]; 
                 if(!context.User.Identity.IsAuthenticated)
                 {
-                    string cokey = context.Request.Cookies["coflows"]; 
+                    
                     if(cokey != null)
                     {
                         if(CoFlows.Server.Controllers.AccountController.sessionKeys.ContainsKey(cokey))
@@ -105,6 +102,8 @@ namespace CoFlows.Server.Realtime
                     }
                 }
 
+
+
                 var queryString = context.Request.QueryString;
                 var path = context.Request.Path.ToString() + queryString;
 
@@ -123,36 +122,26 @@ namespace CoFlows.Server.Realtime
                     }
                 }
 
+                var socket = await context.WebSockets.AcceptWebSocketAsync();
+                var id = _socketManager.AddSocket(socket);
+                var address = context.Connection.RemoteIpAddress;
+
+                
+
                 if(path.StartsWith("/lab/"))
                 {
                     var wid = path.Replace("/lab/", "");
                     wid = wid.Substring(0, wid.IndexOf("/"));
 
-                    if(CoFlows.Server.Realtime.WebSocketListner.registered_workspaces_id.ContainsKey(wid))
-                    {
-                        var sid = CoFlows.Server.Realtime.WebSocketListner.registered_workspaces_id[wid];
-                        var _socket = WebSocketListner.registered_sockets[sid];
+                    int labPort = CoFlows.Server.Controllers.MController.LabDB[cokey + wid];
 
-                        var mess = new QuantApp.Kernel.RTDMessage { 
-                            Type = QuantApp.Kernel.RTDMessage.MessageType.ProxyOpen, 
-                            Content = new HttpProxyRequest { 
-                                Url = path, 
-                                Content = "ws://localhost:8888",
-                                Headers = headers
-                                } 
-                            };
+                    var client = ProxyConnection.Client(socket,  path);
+                    client.Connect("ws://localhost:" + labPort, headers);
 
-                        var mess_str = Newtonsoft.Json.JsonConvert.SerializeObject(mess);
-
-                        ArraySegment<byte> buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(mess_str));
-                        _socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
-                    }
+                    var _socket = client.ClientWebSocket;
+                    _proxies.TryAdd(socket.GetHashCode() + path, client);
                 }
 
-                var socket = await context.WebSockets.AcceptWebSocketAsync();
-                var id = _socketManager.AddSocket(socket);
-                var address = context.Connection.RemoteIpAddress;
-                
 
                 if(WebSocketListner.registered_address.ContainsKey(id))
                     WebSocketListner.registered_address[id] = address;
@@ -218,11 +207,8 @@ namespace CoFlows.Server.Realtime
                         offset += result.Count;
                         free -= result.Count;
                         if (result.EndOfMessage) 
-                        {
-                            // if(counter > 0)
-                                // Console.WriteLine("done: " + offset + " " + free);
                             break;
-                        }
+
                         if (free == 0)
                         {
                             if(counter > 5)
@@ -258,7 +244,6 @@ namespace CoFlows.Server.Realtime
                             counter++;
                         }
                     }
-                    // var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(buffer), cancellationToken: CancellationToken.None);
 
                     try
                     {
@@ -272,25 +257,25 @@ namespace CoFlows.Server.Realtime
                 catch (Exception e)
                 {
                     var id = WebSocketListner.manager.GetId(socket);
-                    if(WebSocketListner.registered_id_workspaces.ContainsKey(id))
+                    if(WebSocketListner.registered_id_workflows.ContainsKey(id))
                     {
-                        var wid = WebSocketListner.registered_id_workspaces[id];
+                        var wid = WebSocketListner.registered_id_workflows[id];
                         try
                         {
-                            var wsp_ais = QuantApp.Kernel.M.Base(wid)[x => true].FirstOrDefault() as Workflow;
-                            foreach(var fid in wsp_ais.Agents)
-                            {
-                                var f = F.Find(fid).Value;
-                                f.RemoteStop();
-                            }
+                        var wsp_ais = QuantApp.Kernel.M.Base(wid)[x => true].FirstOrDefault() as Workflow;
+                        foreach(var fid in wsp_ais.Agents)
+                        {
+                            var f = F.Find(fid).Value;
+                            f.RemoteStop();
+                        }
                         }
                         catch{}
 
                         string none = "";
-                        WebSocketListner.registered_id_workspaces.TryRemove(id, out none);
+                        WebSocketListner.registered_id_workflows.TryRemove(id, out none);
 
-                        if(WebSocketListner.registered_workspaces_id.ContainsKey(wid))
-                            WebSocketListner.registered_workspaces_id.TryRemove(wid, out none);
+                        if(WebSocketListner.registered_workflows_id.ContainsKey(wid))
+                            WebSocketListner.registered_workflows_id.TryRemove(wid, out none);
                         
                     }
 
@@ -312,9 +297,8 @@ namespace CoFlows.Server.Realtime
     {
         public static ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>> subscriptions = new ConcurrentDictionary<string, ConcurrentDictionary<string, WebSocket>>();
         public static ConcurrentDictionary<string, ConcurrentDictionary<string, QuantApp.Kernel.UserData>> users = new ConcurrentDictionary<string, ConcurrentDictionary<string, QuantApp.Kernel.UserData>>();
-        
-        public static ConcurrentDictionary<string, string> registered_id_workspaces = new ConcurrentDictionary<string, string>();
-        public static ConcurrentDictionary<string, string> registered_workspaces_id = new ConcurrentDictionary<string, string>();
+        public static ConcurrentDictionary<string, string> registered_id_workflows = new ConcurrentDictionary<string, string>();
+        public static ConcurrentDictionary<string, string> registered_workflows_id = new ConcurrentDictionary<string, string>();
         public static ConcurrentDictionary<string, System.Net.IPAddress> registered_address = new ConcurrentDictionary<string, System.Net.IPAddress>();
         public static ConcurrentDictionary<string, WebSocket> registered_sockets = new ConcurrentDictionary<string, WebSocket>();
         public static ConcurrentDictionary<string, string> traders = new ConcurrentDictionary<string, string>();
@@ -331,9 +315,6 @@ namespace CoFlows.Server.Realtime
 
         static int counter = 0;
 
-        private static System.Collections.Concurrent.ConcurrentDictionary<string, int> DashDB = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
-        // private static int lastPort = 10000;
-
         public static RTDMessageDelegate RTDMessageFunction = null;
 
         public static void appServer_NewMessageReceived(WebSocket session, string message_string, string path, List<KeyValuePair<string, string>> headers)
@@ -343,6 +324,7 @@ namespace CoFlows.Server.Realtime
                 string skey = manager == null ? null : manager.GetId(session);
                 if (!string.IsNullOrWhiteSpace(message_string))
                 {
+
                     DateTime t1 = DateTime.Now;
 
                     QuantApp.Kernel.RTDMessage message = null;
@@ -352,19 +334,13 @@ namespace CoFlows.Server.Realtime
                         var sessionID = session.GetHashCode() + path;
                         if(RTDSocketMiddleware._proxies.ContainsKey(sessionID))
                         {
-                            // Console.WriteLine("Got from browser and send(" + DateTime.Now.ToString("hh:mm:ss.fff") + "): " + sessionID);// + message_string);
-                            var _socket = RTDSocketMiddleware._proxies[sessionID];
-
-                            var mess = new QuantApp.Kernel.RTDMessage { Type = QuantApp.Kernel.RTDMessage.MessageType.ProxyContent, Content = new HttpProxyRequest { Url = path, Content = message_string } };
-                            var mess_str = Newtonsoft.Json.JsonConvert.SerializeObject(mess);
-
-                            ArraySegment<byte> buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(mess_str));
-                            _socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                            var _client = RTDSocketMiddleware._proxies[sessionID];
+                            _client.Send(message_string);
                         }
                         else
                              Console.WriteLine("Socket Not Found(" + path + "): " + message_string);
                     }
-                    
+
                     else
                     {
                         try
@@ -434,28 +410,6 @@ namespace CoFlows.Server.Realtime
                                     Console.WriteLine("Subsribe Exception: " + e + " " + skey);
                                 }
                             }
-                            // else if (message.Type == QuantApp.Kernel.RTDMessage.MessageType.RegisterWorkspace)
-                            // {
-                            //     try
-                            //     {
-                                    
-                            //         string workspace = message.Content.ToString();
-                                    
-                            //         Program.AddServicedWorkSpaces(workspace);
-
-                            //         if (!registered_id_workspaces.ContainsKey(skey))
-                            //             registered_id_workspaces.TryAdd(skey, workspace);
-
-                            //         if (!registered_workspaces_id.ContainsKey(workspace))
-                            //             registered_workspaces_id.TryAdd(workspace, skey);
-
-                            //         Console.WriteLine("Register: " + skey + " -- " + workspace);
-                            //     }
-                            //     catch (Exception e)
-                            //     {
-                            //         Console.WriteLine("Register Exception: " + e + " " + skey);
-                            //     }
-                            // }
 
                             else if (message.Type == QuantApp.Kernel.RTDMessage.MessageType.SaveM)
                             {
@@ -515,7 +469,7 @@ namespace CoFlows.Server.Realtime
                                     if(type == typeof(string) || qm.ValueType == null || type == typeof(Nullable))
                                         qm.Value = filtered_string;
 
-                                    else if(type != null)//((QuantApp.Kernel.M._systemAssemblies.ContainsKey(qm.ValueType) || QuantApp.Kernel.M._compiledAssemblies.ContainsKey(qm.ValueType)))
+                                    else if(type != null)
                                         qm.Value = JsonConvert.DeserializeObject(filtered_string, type);
                                     
                                 }
@@ -542,8 +496,7 @@ namespace CoFlows.Server.Realtime
                                 if(RTDSocketMiddleware._proxies.ContainsKey(sessionId))
                                 {
                                     var client = RTDSocketMiddleware._proxies[sessionId];
-                                    ArraySegment<byte> buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(pd.Content));
-                                    client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                                    client.Send(pd.Content);
                                 }
                                 else
                                 {
@@ -764,8 +717,6 @@ namespace CoFlows.Server.Realtime
                         
                     }
 
-                    DateTime t2 = DateTime.Now;
-                    //Console.WriteLine("Converting: (" + (t2 - t1) + ")" + counter + "-" + message.Counter + "/" + message_string);
                     counter++;
                 }
                 else
@@ -897,87 +848,8 @@ namespace CoFlows.Server.Realtime
             message.ExecutionTimestamp = DateTime.Now;
             message.Executed = true;
 
-            //if (Factory != null)
             Send(new QuantApp.Kernel.RTDMessage() { Type = QuantApp.Kernel.RTDMessage.MessageType.UpdateQueue, Content = message });
         }
-
-
-        // private static ConcurrentDictionary<string, object> call_responses = new ConcurrentDictionary<string, object>();
-        // public static async Task<object> Call(string workspaceID, string name, object args)
-        // {
-        //     try
-        //     {
-        //         var data = new CallResponseMessage {
-        //             Function = name,
-        //             Data = args,
-
-        //             ID = System.Guid.NewGuid().ToString(),
-        //             Executed = false,
-        //             CreationTimestamp = DateTime.Now,
-        //         };
-
-        //         object tmp = null;
-        //         if(call_responses.ContainsKey(data.ID))
-        //             call_responses.TryRemove(data.ID, out tmp);
-                
-                
-
-        //         while(true)
-        //         {
-        //             System.Threading.Thread.Sleep(250);
-        //             if(QuantApp.Server.Realtime.WebSocketListner.registered_workspaces_id.ContainsKey(workspaceID))
-        //             {
-        //                 var message = new QuantApp.Kernel.RTDMessage() { Type = QuantApp.Kernel.RTDMessage.MessageType.Call, Content = data };
-        //                 var sid = QuantApp.Server.Realtime.WebSocketListner.registered_workspaces_id[workspaceID];
-        //                 var socket = QuantApp.Server.Realtime.WebSocketListner.registered_sockets[sid];
-
-        //                 string message_string = JsonConvert.SerializeObject(message);
-        //                 Send(socket, message_string);
-        //                 break;
-        //             }
-        //         }
-
-                
-        //         while(true)
-        //         {
-        //             System.Threading.Thread.Sleep(250);
-        //             if(call_responses.ContainsKey(data.ID))
-        //             {
-        //                 var result = call_responses[data.ID];
-        //                 // object tmp = null;
-        //                 call_responses.TryRemove(data.ID, out tmp);
-        //                 return result;
-        //             }
-        //         }
-        //     }
-        //     catch(Exception e)
-        //     {
-        //         Console.WriteLine("CALL ERROR: " + e);
-        //     }
-            
-        //     return null;
-        // }
-
-        // public static object Responde(WebSocket socket, CallResponseMessage crm, object args)
-        // {
-        //     var data = new CallResponseMessage {
-        //         Function = crm.Function,
-        //         Data = args,
-
-        //         ID = crm.ID,
-        //         Executed = true,
-        //         CreationTimestamp = crm.CreationTimestamp,
-        //         ExecutionTimestamp = DateTime.Now
-        //     };
-            
-        //     var message = new QuantApp.Kernel.RTDMessage() { Type = QuantApp.Kernel.RTDMessage.MessageType.Response, Content = data };
-
-        //     string message_string = JsonConvert.SerializeObject(message);
-            
-        //     Send(socket, message_string);
-
-        //     return null;
-        // }
 
         private static ConcurrentDictionary<WebSocket, object> locks = new ConcurrentDictionary<WebSocket, object>();
         private readonly static object objLockSend = new object();
@@ -1012,9 +884,10 @@ namespace CoFlows.Server.Realtime
                             var permission = AccessType.View;
                             if(group != null && !string.IsNullOrEmpty(_user.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
                                 permission = group.Permission(_user);
-
                             if (ckey != skey && permission != AccessType.Denied)
+                            {
                                 Send(connection, message);
+                            }
                         }
                         catch (Exception e)
                         {
@@ -1035,8 +908,6 @@ namespace CoFlows.Server.Realtime
                                 WebSocket ip = null;
                                 WebSocketListner.registered_sockets.TryRemove(ckey, out ip);
                             }
-
-                            
                         }
                     }
             }
@@ -1136,7 +1007,6 @@ namespace CoFlows.Server.Realtime
                         //Console.WriteLine("Create Account Exception: " + e + " " + session.SecWebSocketKey);
                     }
                 }
-
 
                 if (manager != null && subscriptions.ContainsKey(topicID))
                     foreach (WebSocket connection in subscriptions[topicID].Values)
@@ -1298,7 +1168,6 @@ namespace CoFlows.Server.Realtime
 
     public class ProxyConnection : CoFlows.Core.Connection
     {
-        //new public static ProxyConnection Client = new ProxyConnection();
         private static ConcurrentDictionary<string, ProxyConnection> registered_sockets = new ConcurrentDictionary<string, ProxyConnection>();
 
         public new static ProxyConnection Client(WebSocket browserSocket, string path)
@@ -1325,7 +1194,6 @@ namespace CoFlows.Server.Realtime
 
         public ProxyConnection(WebSocket browserSocket, string path)
         {
-            // Console.WriteLine("ProxyConnection New: " + path);
             this.browserSocket = browserSocket;
             this.Path = path;
             
@@ -1360,8 +1228,8 @@ namespace CoFlows.Server.Realtime
                 if(!(webSocket == null || webSocket.State == System.Net.WebSockets.WebSocketState.Closed))
                 {
                     string uriPath = uri + this.Path;
-                    // Console.WriteLine("ProxyConnection waiting: " + uriPath);
-                    // Thread.Sleep(250);
+                    Console.WriteLine("ProxyConnection waiting: " + uriPath);
+                    
                     while(webSocket.State != System.Net.WebSockets.WebSocketState.Open)
                     {
                         if(webSocket.State == System.Net.WebSockets.WebSocketState.Closed)
@@ -1369,10 +1237,10 @@ namespace CoFlows.Server.Realtime
                         Thread.Sleep(250);
                     }
 
-                    // if(webSocket.State == System.Net.WebSockets.WebSocketState.Closed)
-                    //     Console.WriteLine("ProxyConnection Waiting Closed(" + DateTime.Now.ToString("hh:mm:ss.fff") + "): " + this.Path);
-                    // else
-                    //     Console.WriteLine("ProxyConnection Waiting Opened(" + DateTime.Now.ToString("hh:mm:ss.fff") + "): " + this.Path);
+                    if(webSocket.State == System.Net.WebSockets.WebSocketState.Closed)
+                        Console.WriteLine("ProxyConnection Waiting Closed(" + DateTime.Now.ToString("hh:mm:ss.fff") + "): " + this.Path);
+                    else
+                        Console.WriteLine("ProxyConnection Waiting Opened(" + DateTime.Now.ToString("hh:mm:ss.fff") + "): " + this.Path);
                 }
                 else
                 {
@@ -1382,7 +1250,7 @@ namespace CoFlows.Server.Realtime
                     string uriPath = uri + this.Path;
 
                     webSocket = new ClientWebSocket();
-                    //webSocket.Options.UseDefaultCredentials = true;
+                    
                     webSocket.Options.Cookies = new CookieContainer();
                     
 
@@ -1394,54 +1262,37 @@ namespace CoFlows.Server.Realtime
                             {
                                 var key = head.Key;
                                 if(!key.Contains("Sec-WebSocket") && !key.Contains("Upgrade") && !key.Contains("Cookie"))// && !key.Contains("Connection"))// || key.Contains("Sec-WebSocket-Key"))
-                                // if(!key.Contains("Sec-WebSocket") && !key.Contains("Cookie"))// && !key.Contains("Connection"))// || key.Contains("Sec-WebSocket-Key"))
                                 {
-                                    var val = head.Value.Replace(Program.hostName, "localhost:8888").Replace("https", "http");
-                                    
-                                    // Console.WriteLine("ProxyConnect Header(" + key + "): " + val.Replace("%7C", "|"));
+                                    var val = head.Value.Replace("coflows.quant.app", "localhost:8888").Replace("https", "http");
                                     webSocket.Options.SetRequestHeader(key, val.Replace("%7C", "|"));
                                 }
                                 else if(key == "Cookie")
                                 {
-                                    var valArr = head.Value.Replace(Program.hostName, "localhost:8888").Replace("https", "http").Split(';');
-                                    // var valArr = val;
+                                    var valArr = head.Value.Replace("coflows.quant.app", "localhost:8888").Replace("https", "http").Split(';');
                                     foreach(var val in valArr)
                                     {
                                         var cookieVal = val.Split('=');
                                         var cname = cookieVal[0].Trim();
                                         var cval = cookieVal[1].Replace("%7C", "|").Trim();
-                                        // Console.WriteLine("ProxyConnect Cookie(" + cname + "): " + cval);
                                         webSocket.Options.Cookies.Add(new Cookie(cname, cval){ Domain = "localhost" });
                                     }
                                 }
                             }
                             catch(Exception e)
                             {
-                                // Console.WriteLine(e);
+                                Console.WriteLine(e);
                             }
                         }
                     }
 
-                    // Console.WriteLine("ProxyConnect Connecting: " + uriPath + " " + DateTime.Now.ToString("hh:mm:ss.fff"));
                     await webSocket.ConnectAsync(new Uri(uriPath), CancellationToken.None);
 
-
-                    
-
-                    // Thread.Sleep(250);
                     while(webSocket.State != System.Net.WebSockets.WebSocketState.Open)
                     {
                         if(webSocket.State == System.Net.WebSockets.WebSocketState.Closed)
                             break;
                         Thread.Sleep(250);
                     }
-
-                    // Console.WriteLine("ProxyConnect Connection Done: " + uriPath + " " + DateTime.Now.ToString("hh:mm:ss.fff"));
-
-                    // if(webSocket.State == System.Net.WebSockets.WebSocketState.Open)
-                    //     Console.WriteLine("ProxyConnection Opened(" + DateTime.Now.ToString(" hh:mm:ss.fff") + "): " + this.Path);
-                    // else
-                    //     Console.WriteLine("ProxyConnection Closed WHILE(" + DateTime.Now.ToString(" hh:mm:ss.fff") + "): " + this.Path);
 
                     this.retryCounter = 0;
 
@@ -1451,48 +1302,14 @@ namespace CoFlows.Server.Realtime
                         {
                             string userMessage = Encoding.UTF8.GetString(buffer, 0, length);
 
-                            Console.WriteLine("ProxyConnection Closing(" + DateTime.Now.ToString("hh:mm:ss.fff") + "):" + this.Path);// + mess_str);
-                            
-                            // var mess = new RTDMessage { 
-                            //     Type = RTDMessage.MessageType.ProxyClose, 
-                            //     Content = new HttpProxyRequest { 
-                            //         Url = this.Path, 
-                            //         Content = userMessage,
-                            //         Headers = headers
-                            //     } 
-                            // };
-
-                            // var mess_str = Newtonsoft.Json.JsonConvert.SerializeObject(mess);
-
-                            
-
-                            // ArraySegment<byte> _buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(mess_str));
-                            // await browserSocket.SendAsync(_buffer, WebSocketMessageType.Text, true, CancellationToken.None);
-                            
-
-                            // Console.WriteLine("ProxyConnection Closing(" + DateTime.Now.ToString("hh:mm:ss.fff") + "):" + this.Path);// + mess_str);
+                            Console.WriteLine("ProxyConnection Closing(" + DateTime.Now.ToString("hh:mm:ss.fff") + "):" + this.Path);
                             await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
                             return;
                         }
                         else if (result.MessageType == WebSocketMessageType.Text)
                         {
                             string userMessage = Encoding.UTF8.GetString(buffer, 0, length);
-                            
-                            var mess = new QuantApp.Kernel.RTDMessage { 
-                                Type = QuantApp.Kernel.RTDMessage.MessageType.ProxyContent, 
-                                Content = new HttpProxyRequest { 
-                                    Url = this.Path, 
-                                    Content = userMessage,
-                                    Headers = headers
-                                } 
-                            };
-
-                            var mess_str = this.Path.StartsWith("/lab/__root") ? Encoding.UTF8.GetString(buffer, 0, length) : Newtonsoft.Json.JsonConvert.SerializeObject(mess);
-
-                            // Console.WriteLine("ProxyConnection from Jupyter(" + DateTime.Now.ToString("hh:mm:ss.fff") + "): " + this.Path);// + mess_str);
-                            // Console.WriteLine("ProxyConnection from Jupyter(" + DateTime.Now.ToString("hh:mm:ss.fff") + "): " + this.Path + " "  + mess_str);
-
-                            ArraySegment<byte> _buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(mess_str));
+                            ArraySegment<byte> _buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(userMessage));
                             browserSocket.SendAsync(_buffer, WebSocketMessageType.Text, true, CancellationToken.None);
                             return;
                         }
@@ -1507,22 +1324,6 @@ namespace CoFlows.Server.Realtime
             {
                 Console.WriteLine("Exception: {0}", ex);
             }
-            // finally
-            // {
-            //     if (webSocket != null)
-            //         webSocket.Dispose();
-            //     Console.WriteLine();
-
-            //     lock (consoleLock)
-            //     {
-            //         Console.ForegroundColor = ConsoleColor.Red;
-            //         Console.WriteLine("WebSocket closed @ " + DateTime.Now);
-            //         Console.ResetColor();
-            //     }
-
-                
-                
-            // }
         }
 
         private object sendLock = new object();
@@ -1544,7 +1345,6 @@ namespace CoFlows.Server.Realtime
                 {
                     if(webSocket.State == System.Net.WebSockets.WebSocketState.Open)
                     {
-                        // Console.WriteLine("Send to Jupyter: " + DateTime.Now.ToString("hh:mm:ss.fff") + " " + message);
                         ArraySegment<byte> buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(message));
                         webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
                     }
@@ -1568,33 +1368,6 @@ namespace CoFlows.Server.Realtime
 
         private async Task Receive(WebSocket socket, Action<WebSocketReceiveResult, int, byte[]> handleMessage)
         {
-            // var buffer = new byte[1024 * 10000];
-
-            
-            // while (socket.State == WebSocketState.Open)
-            // {
-            //     try
-            //     {
-            //         var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(buffer), cancellationToken: CancellationToken.None);
-
-            //         try
-            //         {
-            //             handleMessage(result, buffer);
-            //         }
-            //         catch(Exception t)
-            //         {
-            //             Console.WriteLine(t);
-            //         }
-            //     }
-            //     catch (Exception e)
-            //     {
-            //         Console.WriteLine(e);
-            //         break;
-            //     }
-            // }
-
-
-
             while (socket.State == WebSocketState.Open)
             {
                 try
@@ -1614,11 +1387,8 @@ namespace CoFlows.Server.Realtime
                         offset += result.Count;
                         free -= result.Count;
                         if (result.EndOfMessage) 
-                        {
-                            // if(counter > 0)
-                                // Console.WriteLine("done: " + offset + " " + free);
                             break;
-                        }
+
                         if (free == 0)
                         {
                             if(counter > 5)
@@ -1638,12 +1408,7 @@ namespace CoFlows.Server.Realtime
                             // No free space
                             // Resize the outgoing buffer
                             var newSize = buffer.Length + increaseSize;
-                            // Console.WriteLine("more data: " + offset + " " + newSize);
                             
-                            // Check if the new size exceeds a 
-                            
-                            // It should suit the data it receives
-                            // This limit however has a max value of 2 billion bytes (2 GB)
                             if (newSize > maxSize)
                                 throw new Exception ("Maximum size exceeded");
                             
@@ -1654,8 +1419,7 @@ namespace CoFlows.Server.Realtime
                             counter++;
                         }
                     }
-                    // var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(buffer), cancellationToken: CancellationToken.None);
-
+                    
                     try
                     {
                         handleMessage(result, offset, buffer);
