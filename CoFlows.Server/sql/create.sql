@@ -74,3 +74,13 @@ CREATE TABLE M (
     Type Text Not Null,
     PRIMARY KEY (ID,EntryID)
     );
+
+CREATE TABLE FileRepository (
+    ID Varchar(150) Not Null,
+    Name Varchar(150) Not Null,
+    UserID Varchar(150) Not Null,
+    Type Varchar(150) Not Null,
+    Timestamp DateTime Not Null,
+    Data Text Not Null,
+    PRIMARY KEY (ID)
+    );

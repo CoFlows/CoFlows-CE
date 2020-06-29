@@ -26,13 +26,16 @@ namespace CoFlows.Server.Controllers
     [Authorize, Route("[controller]/[action]")]   
     public class AdministrationController : Controller
     {        
-        public ActionResult SetPermission(string userid, string groupid, int accessType)
+        public ActionResult SetPermission(string pid, string groupid, int accessType)
         {
             string userId = this.User.QID();
             if (userId == null)
                 return null;
 
-            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userid);
+            QuantApp.Kernel.IPermissible permissible = QuantApp.Kernel.User.FindUser(pid);
+            if(permissible == null)
+                permissible = FileRepository.File(pid);
+
             QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
             if(group == null)
                 group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
@@ -40,43 +43,49 @@ namespace CoFlows.Server.Controllers
             if(group == null)
                 group = QuantApp.Kernel.Group.CreateGroup(groupid, groupid);
 
-            group.Add(user, typeof(QuantApp.Kernel.User), (AccessType)accessType);
+            group.Add(permissible, typeof(QuantApp.Kernel.User), (AccessType)accessType);
 
             return Ok(new { Data = "ok" });
         }
-        public ActionResult RemovePermission(string userid, string groupid)
+        public ActionResult RemovePermission(string pid, string groupid)
         {
             string userId = this.User.QID();
             if (userId == null)
                 return null;
 
-            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userid);
+            QuantApp.Kernel.IPermissible permissible = QuantApp.Kernel.User.FindUser(pid);
+            if(permissible == null)
+                permissible = FileRepository.File(pid);
+
             QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
             if(group == null)
                 group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
 
-            if(user != null)
+            if(permissible != null)
             {
-                group.Remove(user);
+                group.Remove(permissible);
 
                 return Ok(new { Data = "ok" });
             }
             return Ok(new { Data = "error" });
         }
 
-        public ActionResult GetPermission(string userid, string groupid)
+        public ActionResult GetPermission(string pid, string groupid)
         {
             string userId = this.User.QID();
             if (userId == null)
                 return null;
 
-            QuantApp.Kernel.User user = QuantApp.Kernel.User.FindUser(userid);
+            QuantApp.Kernel.IPermissible permissible = QuantApp.Kernel.User.FindUser(pid);
+            if(permissible == null)
+                permissible = FileRepository.File(pid);
+
             QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
             if(group == null)
                 group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
 
-            if(user != null)
-                return Ok(new { Data = group.Permission(user) });
+            if(permissible != null)
+                return Ok(new { Data = group.Permission(permissible) });
 
             return Ok(new { Data = AccessType.Denied });
         }
