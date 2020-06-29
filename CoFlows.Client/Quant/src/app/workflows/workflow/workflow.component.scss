@@ -1,10 +1,9 @@
 @import "../../../assets/fonts/simple-line-icons/simple-line-icons.css";
+@import "../../../assets/styles/scss/components/dropzone";
 
-
-.switch {
-  display: table;
-  margin: 0 auto;
-}
+:host >>> .CodeMirror {
+      height: auto;
+    }
 
 .switch {
   display: inline-block;

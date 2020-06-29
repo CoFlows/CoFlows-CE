@@ -196,6 +196,151 @@
         </ng-template>
     </ngb-tab>
 
+    <ngb-tab>
+        <ng-template ngbTabTitle>
+            <div class="f-headers text-color" (click)="tabBeforeChange(1)">Files</div>
+        </ng-template>
+
+        <ng-template ngbTabContent>
+
+            <div class="card">
+                <!-- <div class="card-header">Files</div> -->
+                <div class="scroll-y" style="max-height: 400px;">
+
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th width="50%">Name</th>
+                                <th>Size</th>
+                                <!-- <th>Progress</th> -->
+                                <th>Date</th>
+                                <th>Remove</th>
+                                <th>Permissions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr *ngFor="let item of groupFiles">
+                            <td><a (click)="downloadFile(item)" routerLinkActive="active" class="ff-headers text-color">{{ item.Name }}</a></td>
+                            
+                            <td  nowrap>{{ item.Size }}</td>
+                            <td  nowrap>{{ item.Date }}</td>
+                            
+                            <td nowrap>
+                                <a (click)="openRemoveFile(removefile, item)"  class="ff-headers text-color">
+                                    <div class="icon icon-arrows-circle-remove"></div>
+                                </a>
+                            </td>
+
+                            <td>
+                                <select class="form-control  form-control-sm" #selectF  (change)="setPermission(item.ID, item.Permission, selectF.value)">
+                                    <option [value]="-1" [selected]="item.Permission == -1">Denied</option>
+                                    <option [value]="0" [selected]="item.Permission == 0">View</option>
+                                    <option [value]="1" [selected]="item.Permission == 1">Read</option>
+                                    <option [value]="2" [selected]="item.Permission == 2">Write</option>
+                                </select>   
+                            </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card">
+                <div class="card-header">Upload</div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <p>Select files</p>
+              
+                      <div ng2FileDrop
+                        [ngClass]="{'nv-file-over': hasBaseDropZoneOver}"
+                        (fileOver)="fileOverBase($event)"
+                        [uploader]="uploader"
+                        class="well my-drop-zone">
+                        Base drop zone
+                      </div>
+                      Multiple
+                      <label class="custom-file mb-3">
+                        <input type="file" ng2FileSelect [uploader]="uploader" multiple>
+                        <!-- <span class="custom-file-control"></span> -->
+                      </label>
+                    </div>
+              
+                    <div class="col-md-9">
+                      <p>Upload queue</p>
+                      <p>Queue length: {{ uploader?.queue?.length }}</p>
+              
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th width="50%">Name</th>
+                            <th>Size</th>
+                            <th>Progress</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let item of uploader.queue">
+                          <td><strong>{{ item?.file?.name }}</strong></td>
+                          <td  nowrap>{{ item?.file?.size/1024/1024 | number:'.2' }} MB</td>
+                          <td >
+                            <div class="progress" style="margin-bottom: 0;">
+                              <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': item.progress + '%' }"></div>
+                            </div>
+                          </td>
+                          <td class="text-center">
+                            <span *ngIf="item.isSuccess"><i class="glyphicon glyphicon-ok"></i></span>
+                            <span *ngIf="item.isCancel"><i class="glyphicon glyphicon-ban-circle"></i></span>
+                            <span *ngIf="item.isError"><i class="glyphicon glyphicon-remove"></i></span>
+                          </td>
+                          <td nowrap>
+                            <button type="button" class="btn btn-success btn-sm"
+                              (click)="item.upload()" [disabled]="item.isReady || item.isUploading || item.isSuccess">
+                              <span class="glyphicon glyphicon-upload"></span> Upload
+                            </button>
+                            <button type="button" class="btn btn-warning btn-sm"
+                              (click)="item.cancel()" [disabled]="!item.isUploading">
+                              <span class="glyphicon glyphicon-ban-circle"></span> Cancel
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm"
+                              (click)="item.remove()">
+                              <span class="glyphicon glyphicon-trash"></span> Remove
+                            </button>
+                          </td>
+                        </tr>
+                        </tbody>
+                      </table>
+                      <div>
+                        <div>
+                            Queue progress:
+                            <div class="progress" style="">
+                                <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': uploader.progress + '%' }"></div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success btn-s"
+                                (click)="uploader.uploadAll()" [disabled]="!uploader.getNotUploadedItems().length">
+                            <span class="glyphicon glyphicon-upload"></span> Upload all
+                        </button>
+                        <button type="button" class="btn btn-warning btn-s"
+                                (click)="uploader.cancelAll()" [disabled]="!uploader.isUploading">
+                            <span class="glyphicon glyphicon-ban-circle"></span> Cancel all
+                        </button>
+                        <button type="button" class="btn btn-danger btn-s"
+                                (click)="uploader.clearQueue()" [disabled]="!uploader.queue.length">
+                            <span class="glyphicon glyphicon-trash"></span> Remove all
+                        </button>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </ng-template>
+    </ngb-tab>
+
     <ngb-tab *ngIf="permission == 2">
         <ng-template ngbTabTitle>
             <div class="f-headers text-color" (click)="tabBeforeChange(2)">Permissions</div>
@@ -447,12 +592,30 @@
         </button>
     </div>
     <div class="modal-body">
-        <p>Are you sure you want to remove the permission</p>
+        <p>Are you sure you want to remove the permission {{activePermission.Email}}</p>
         <p *ngIf="removeGroupMessage != ''">{{removePermissionMessage}}&hellip;</p>
     </div>
     <div class="modal-footer">
             
         <button type="button" class="btn btn-danger" (click)="removePermission()">Remove</button>
+        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>
+    </div>
+</ng-template>
+
+<ng-template #removefile let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h6 class="modal-title text-uppercase">Remove File</h6>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p>Are you sure you want to remove the file {{activeFile.Name}}</p>
+        <p *ngIf="removeGroupMessage != ''">{{removeFileMessage}}&hellip;</p>
+    </div>
+    <div class="modal-footer">
+            
+        <button type="button" class="btn btn-danger" (click)="removeFile()">Remove</button>
         <button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>
     </div>
 </ng-template>

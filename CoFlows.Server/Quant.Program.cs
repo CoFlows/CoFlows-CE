@@ -320,6 +320,19 @@ namespace CoFlows.Server.Quant
                     }
                 }
 
+                Group.FindPermissibleFunction = (Type type, string id) =>
+                {
+                    if (type == typeof(FilePermission) || type == typeof(FilePermission))
+                    {
+                        FilePermission file = FileRepository.File(id);
+
+                        if (file != null)
+                            return file;
+                    }
+
+                    return null;
+                };
+
                 /// QuantSpecific START
                 if(config["Quant"] != null)
                 {

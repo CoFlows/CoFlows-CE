@@ -1,10 +1,10 @@
-import { Component, ViewChild, Injectable } from '@angular/core';
+import { Component, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
-import { Observable, interval } from "rxjs"
-import { delay, takeWhile } from "rxjs/operators"
+import { interval } from "rxjs"
+import { takeWhile } from "rxjs/operators"
 
 
 import { MessagingService } from './messaging.service';
@@ -724,6 +724,21 @@ export class CoFlowsComponent implements  CanActivate  {
             // console.log(this.header)
             this.http.get(this.coflows_server + url, { headers: this.header })
             .toPromise().then(response => {  
+                func(response);
+            })
+        })
+    }
+
+    GetFile(url : string, func : any): void {        
+        this.CheckUser(() => {                    
+            this.http.get(
+                this.coflows_server + url, 
+                { 
+                    headers: this.header,
+                    responseType: 'blob'
+                }
+            )
+            .subscribe(response => {  
                 func(response);
             })
         })

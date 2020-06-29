@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { Chart } from 'angular-highcharts';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { FileUploader } from 'ng2-file-upload/ng2-file-upload';
 
 import { ActivatedRoute } from '@angular/router';
 
@@ -21,12 +21,7 @@ import * as CodeMirror from 'codemirror/lib/codemirror.js';
   selector: 'workflow-component',
   
   templateUrl: './workflow.component.html',
-  styles: [
-      `
-  :host >>> .CodeMirror {
-    height: auto;
-  }
-  `]
+  styleUrls: ['./workflow.component.scss']
 })
 export class WorkflowComponent {
     rows = []
@@ -56,6 +51,19 @@ export class WorkflowComponent {
 
     @ViewChild('logarea')
     private logArea:ElementRef
+
+    uploader: FileUploader
+    hasBaseDropZoneOver = false
+    hasAnotherDropZoneOver = false
+    response:string
+
+    fileOverBase(e: any): void {
+        this.hasBaseDropZoneOver = e
+    }
+
+    fileOverAnother(e: any): void {
+        this.hasAnotherDropZoneOver = e;
+    }
 
     
     private newPermission = 0
@@ -101,11 +109,44 @@ export class WorkflowComponent {
             this.search = 'No users found...'
         this.users_filtered = temp
     }
+    groupFiles = []
+
+    downloadFile(file) {
+        this.coflows.GetFile("files/file?id=" + file.ID, data => {
+            var blob = new Blob([data], { type: data.type });
+
+            var a = document.createElement("a");
+            a.setAttribute('style', 'display:none;');
+            document.body.appendChild(a);
+            var url = window.URL.createObjectURL(blob);
+            a.href = url;
+            a.download =  file.Name;
+            a.click();
+        })
+    }
 
     constructor(private activatedRoute: ActivatedRoute, private coflows: CoFlowsComponent, private modalService: NgbModal) {
 
         this.activatedRoute.params.subscribe(params => {
             this.wid = params['id'];
+
+            this.uploader = new FileUploader({
+                url: coflows.coflows_server + 'files/uploadfile?id=' + this.wid,
+                authToken: 'Bearer ' + localStorage.getItem('CoFlows-CoFlowsJWT'),
+            })
+
+            this.coflows.Get("files/files?id=" + this.wid, data => {
+                this.groupFiles = data
+            })
+
+            this.uploader.onAfterAddingFile = (file) => { file.withCredentials = false }
+            
+            this.uploader.response.subscribe( res => { 
+                this.coflows.Get("files/files?id=" + this.wid, data => {
+                    this.groupFiles = data
+                })
+                this.response = res 
+            } )
 
             this.subgroups = [ { Name: 'Master', ID: this.wid, Description: 'Master Group' }]
             this.activeGroupID = this.wid
@@ -415,7 +456,7 @@ export class WorkflowComponent {
     setPermission(id, permission_old, permission_new){
         console.log(id, permission_old, permission_new)
         if(permission_old != permission_new){
-            this.coflows.Get('administration/setpermission?userid=' + id + '&groupid=' + this.activeGroupID + '&accessType=' + permission_new,
+            this.coflows.Get('administration/setpermission?pid=' + id + '&groupid=' + this.activeGroupID + '&accessType=' + permission_new,
                 data => {
                     // console.log(data)
                     this.coflows.showMessage('Permission updated')
@@ -484,8 +525,6 @@ export class WorkflowComponent {
         this.coflows.Get('administration/RemoveGroup?id=' + this.activeGroupID,
             data => {
                 if(data.Data == "ok"){
-
-                    // this.search = 'Reloading permissions...'
                     this.modalService.dismissAll(this.activeModal)
 
                     this.coflows.Get("administration/subgroups?groupid=" + this.wid + "&aggregated=true", data => {
@@ -495,52 +534,59 @@ export class WorkflowComponent {
                         this.activeGroupID = this.subgroups[0].ID;
 
                         this.viewGroup(this.activeGroupID);
-                    });
+                    })
                 }
                 else
                     this.addGroupMessage = data.Data
-
-                console.log(data)
-            });
-        // AddPermission(string email, int accessType)
+            })
     }
      
-    activePermissionID = null
+    activePermission = null
     openRemovePermission(content, permission) {
-        // console.log(content, permission)
         this.activeModal = content
-        this.activePermissionID = permission.ID
-        this.modalService.open(content).result.then((result) => {
-            
-            
-
-        }, (reason) => {
-            // console.log(reason)
-            // this.modalService.dismissAll(content)
-        });
-
-        // this.modalMessage = ''
-        
+        this.activePermission = permission
+        this.modalService.open(content).result.then((result) => {}, (reason) => {})
     }
     removePermissionMessage = ''
     removePermission(){
-        let id = this.activePermissionID
-        // console.log(id)
+        let id = this.activePermission.ID
         this.search = 'Reloading permissions...'
                 
-        this.coflows.Get('administration/removepermission?userid=' + id + '&groupid=' + this.wid,
+        this.coflows.Get('administration/removepermission?pid=' + id + '&groupid=' + this.wid,
             data => {
                 let t0 = Date.now()
                 this.users_filtered = []
                 this.coflows.Get("administration/Users?groupid=" + this.wid, data => {
                     this.users = data
                     this.users_filtered = this.users
-                    // console.log(data, (Date.now() - t0) / 1000)
                     this.search = ''
                     this.modalService.dismissAll(this.activeModal)
-                });
-            });
+                })
+            })
     
+    }
+
+    activeFile = null
+    openRemoveFile(content, item) {
+        this.activeModal = content
+        this.activeFile = item
+        this.modalService.open(content).result.then((result) => {}, (reason) => {})
+        
+    }
+    removeFileMessage = ''
+    
+    removeFile(){
+        this.coflows.Get('administration/removepermission?pid=' + this.activeFile.ID,
+            data => {
+                this.coflows.showMessage('Permission updated')
+
+                this.coflows.GetFile("files/remove?id=" + this.activeFile.ID, data => {
+                    this.coflows.Get("files/files?id=" + this.wid, data => {
+                        this.groupFiles = data
+                        this.modalService.dismissAll(this.activeModal)
+                    })
+                })
+            })
     }
 
     tabBeforeChange(event){
