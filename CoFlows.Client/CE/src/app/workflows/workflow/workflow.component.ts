@@ -16,22 +16,11 @@ import 'codemirror/mode/vb/vb.js';
 import 'codemirror/mode/javascript/javascript.js';
 
 import * as CodeMirror from 'codemirror/lib/codemirror.js';
-import { MapTypeControlStyle } from '@agm/core/services/google-maps-types';
 
 @Component({
   selector: 'workflow-component',
-//   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './workflow.component.html',
-  styleUrls: ['./workflow.component.scss'],
-//   styles: [
-//       `
-//   :host >>> .CodeMirror {
-//     height: auto;
-//   }
-//   .my-drop-zone { border: dotted 3px lightgray; }
-//     .nv-file-over { border: dotted 3px red; } /* Default class applied to drop zones on over */
-//     .another-file-over-class { border: dotted 3px green; }
-//   `]
+  styleUrls: ['./workflow.component.scss']
 })
 export class WorkflowComponent {
     rows = []
@@ -62,11 +51,6 @@ export class WorkflowComponent {
     @ViewChild('logarea')
     private logArea:ElementRef
 
-    // uploader: FileUploader = new FileUploader({
-    //     // url: 'http://localhost/Files?id=' + this.wid,
-    //     authToken: 'Bearer ' + localStorage.getItem('CoFlows-CoFlowsJWT'),
-    //     isHTML5: true
-    // });
     uploader: FileUploader
     hasBaseDropZoneOver = false
     hasAnotherDropZoneOver = false
@@ -508,37 +492,31 @@ export class WorkflowComponent {
 
     addGroupMessage = ''
     addGroup(){
-        // console.log(this.newEmail, this.newPermission)
         this.coflows.Post('administration/newsubgroup', { 'Name': this.newGroup.Name, 'Description': this.newGroup.Description, 'ParentID': this.wid },
             data => {
                 if(data.Data == "ok"){
                     this.modalService.dismissAll(this.activeModal)
 
                     this.coflows.Get("administration/subgroups?groupid=" + this.wid + "&aggregated=true", data => {
-                        // console.log(data)
                         this.subgroups = [ { Name: 'Master', ID: this.wid, Description: 'Master Group'  }]
-                        this.subgroups = this.subgroups.concat(data);
-                        this.activeGroupID = this.subgroups[0].ID;
+                        this.subgroups = this.subgroups.concat(data)
+                        this.activeGroupID = this.subgroups[0].ID
 
-                        this.viewGroup(this.activeGroupID);
-                    });
+                        this.viewGroup(this.activeGroupID)
+                    })
                 }
                 else
                     this.addGroupMessage = data.Data
 
                 console.log(data)
-            });
-        // AddPermission(string email, int accessType)
+            })
     }
 
     removeGroupMessage = ''
     removeGroup(){
-        // console.log(this.newEmail, this.newPermission)
         this.coflows.Get('administration/RemoveGroup?id=' + this.activeGroupID,
             data => {
                 if(data.Data == "ok"){
-
-                    // this.search = 'Reloading permissions...'
                     this.modalService.dismissAll(this.activeModal)
 
                     this.coflows.Get("administration/subgroups?groupid=" + this.wid + "&aggregated=true", data => {
@@ -554,32 +532,19 @@ export class WorkflowComponent {
                     this.addGroupMessage = data.Data
 
                 console.log(data)
-            });
-        // AddPermission(string email, int accessType)
+            })
     }
      
     activePermission = null
     openRemovePermission(content, permission) {
-        // console.log(content, permission)
-        // console.log(permission)
         this.activeModal = content
         this.activePermission = permission
-        this.modalService.open(content).result.then((result) => {
-            
-            
+        this.modalService.open(content).result.then((result) => {}, (reason) => {})
 
-        }, (reason) => {
-            // console.log(reason)
-            // this.modalService.dismissAll(content)
-        });
-
-        // this.modalMessage = ''
-        
     }
     removePermissionMessage = ''
     removePermission(){
         let id = this.activePermission.ID
-        // console.log(id)
         this.search = 'Reloading permissions...'
                 
         this.coflows.Get('administration/removepermission?pid=' + id + '&groupid=' + this.wid,
@@ -589,7 +554,6 @@ export class WorkflowComponent {
                 this.coflows.Get("administration/Users?groupid=" + this.wid, data => {
                     this.users = data
                     this.users_filtered = this.users
-                    // console.log(data, (Date.now() - t0) / 1000)
                     this.search = ''
                     this.modalService.dismissAll(this.activeModal)
                 });
@@ -599,27 +563,15 @@ export class WorkflowComponent {
 
     activeFile = null
     openRemoveFile(content, item) {
-        // console.log(content, permission)
         this.activeModal = content
         this.activeFile = item
-        this.modalService.open(content).result.then((result) => {
-            
-            
-
-        }, (reason) => {
-            // console.log(reason)
-            // this.modalService.dismissAll(content)
-        });
-
-        // this.modalMessage = ''
-        
+        this.modalService.open(content).result.then((result) => {}, (reason) => {})
     }
     removeFileMessage = ''
     
     removeFile(){
         this.coflows.Get('administration/removepermission?pid=' + this.activeFile.ID,
             data => {
-                // console.log(data)
                 this.coflows.showMessage('Permission updated')
 
                 this.coflows.GetFile("files/remove?id=" + this.activeFile.ID, data => {
@@ -628,7 +580,7 @@ export class WorkflowComponent {
                         this.modalService.dismissAll(this.activeModal)
                     })
                 })
-            });
+            })
     }
 
     tabBeforeChange(event){
