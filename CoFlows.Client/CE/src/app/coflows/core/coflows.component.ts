@@ -1,5 +1,6 @@
 import { Component, ViewChild, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Http, ResponseContentType, RequestOptions } from '@angular/http';
 
 import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
@@ -21,6 +22,7 @@ export class CoFlowsComponent implements  CanActivate  {
     public coflows_server: string = ''
 
     private header : any = null
+    private headerFile : any = null
     
     public quser: any = null
 
@@ -252,9 +254,9 @@ export class CoFlowsComponent implements  CanActivate  {
                 let token = data.token                
                 if(!(token == null || token == "null" || token == "")){
                     // Read the result field from the JSON response.
-                    this.header = new HttpHeaders().set('Authorization', `Bearer ` + token);
+                    this.header = new HttpHeaders().set('Authorization', `Bearer ` + token)
                     
-                    localStorage.setItem('CoFlows-CoFlowsJWT', token);
+                    localStorage.setItem('CoFlows-CoFlowsJWT', token)
                     
                     this.http.get(this.coflows_server + 'account/whoami', { headers: this.header })
                         .toPromise().then(response => {  
@@ -721,9 +723,23 @@ export class CoFlowsComponent implements  CanActivate  {
 
     Get(url : string, func : any): void {        
         this.CheckUser(() => {
-            // console.log(this.header)
             this.http.get(this.coflows_server + url, { headers: this.header })
             .toPromise().then(response => {  
+                func(response);
+            })
+        })
+    }
+
+    GetFile(url : string, func : any): void {        
+        this.CheckUser(() => {                    
+            this.http.get(
+                this.coflows_server + url, 
+                { 
+                    headers: this.header,
+                    responseType: 'blob'
+                }
+            )
+            .subscribe(response => {  
                 func(response);
             })
         })

@@ -314,6 +314,20 @@ namespace CoFlows.Server
                     }
                 }
 
+                Group.FindPermissibleFunction = (Type type, string id) =>
+                {
+                    if (type == typeof(FilePermission) || type == typeof(FilePermission))
+                    {
+                        FilePermission file = FileRepository.File(id);
+
+                        if (file != null)
+                            return file;
+                    }
+
+                    return null;
+                };
+
+
 
                 if(!sslFlag)
                     Init(new string[]{"--urls", "http://*:80"}, new Realtime.WebSocketListner(), typeof(Startup<CoFlows.Server.Realtime.RTDSocketMiddleware>));
@@ -699,7 +713,7 @@ namespace CoFlows.Server
             if(!dbExists)
             {
                 Console.WriteLine("Creating table structure in: " + sqliteFile);
-                var script = File.ReadAllText(@"sql/create.sql");
+                var script = File.ReadAllText(@"sql/create.sql").Replace("Binary", "data ");
                 QuantApp.Kernel.Database.DB["Kernel"].ExecuteCommand(script);
             }
         }
@@ -722,11 +736,7 @@ namespace CoFlows.Server
                     var _KernelDataAdapter = new PostgresDataSetAdapter();
                     _KernelDataAdapter.ConnectString = KernelConnectString;
                     _KernelDataAdapter.CreateDB(KernelConnectString, new List<string> {
-                        File.ReadAllText(@"sql/create.sql").Replace("DateTime", "timestamp"),
-                        File.ReadAllText(@"sql/quant.sql").Replace("DateTime", "timestamp"),
-                        File.ReadAllText(@"sql/cluster.sql").Replace("DateTime", "timestamp"),
-                        File.ReadAllText(@"sql/calendars.sql"),
-                        File.ReadAllText(@"sql/fic.sql")
+                        File.ReadAllText(@"sql/create.sql").Replace("DateTime", "timestamp").Replace("Binary", "bytea")
                     });
                     var KernelDataAdapter = new PostgresDataSetAdapter();
                     KernelDataAdapter.ConnectString = KernelConnectString;
