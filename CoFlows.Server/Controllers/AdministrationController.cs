@@ -85,7 +85,7 @@ namespace CoFlows.Server.Controllers
                 group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
 
             if(permissible != null)
-                return Ok(new { Data = group.Permission(permissible) });
+                return Ok(new { Data = group.Permission(null, permissible) });
 
             return Ok(new { Data = AccessType.Denied });
         }
