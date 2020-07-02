@@ -132,7 +132,6 @@ export class WorkflowComponent {
 
             this.coflows.Get("account/getpermission?groupid=" + this.wid, data => {
                 this.permission = data.Data
-                console.log('permission', this.permission)
             })
 
             this.uploader = new FileUploader({
