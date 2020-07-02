@@ -245,7 +245,7 @@
             </div>
 
 
-            <div class="card">
+            <div class="card" *ngIf="permission == 2">
                 <div class="card-header">Upload</div>
                 <div class="card-body">
                   <div class="row">
@@ -259,7 +259,7 @@
                         class="well my-drop-zone">
                         Base drop zone
                       </div>
-                      Multiple
+                      &nbsp;
                       <label class="custom-file mb-3">
                         <input type="file" ng2FileSelect [uploader]="uploader" multiple>
                         <!-- <span class="custom-file-control"></span> -->

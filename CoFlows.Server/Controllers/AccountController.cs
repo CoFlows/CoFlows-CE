@@ -238,6 +238,7 @@ namespace CoFlows.Server.Controllers
         }
 
         [HttpGet, AllowAnonymous]
+     
         public async Task<ActionResult> WhoAmI()
         {
             var userId = User.QID();
@@ -354,6 +355,24 @@ namespace CoFlows.Server.Controllers
             {
                 return Ok();
             }
+        }
+        [HttpGet]
+        public ActionResult GetPermission(string groupid)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            QuantApp.Kernel.IPermissible permissible = QuantApp.Kernel.User.FindUser(userId);
+
+            QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
+            if(group == null)
+                group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
+
+            if(permissible != null)
+                return Ok(new { Data = group.Permission(null, permissible) });
+
+            return Ok(new { Data = AccessType.Denied });
         }
     }
 }

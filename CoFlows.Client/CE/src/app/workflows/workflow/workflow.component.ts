@@ -130,6 +130,10 @@ export class WorkflowComponent {
         this.activatedRoute.params.subscribe(params => {
             this.wid = params['id'];
 
+            this.coflows.Get("account/getpermission?groupid=" + this.wid, data => {
+                this.permission = data.Data
+            })
+
             this.uploader = new FileUploader({
                 url: coflows.coflows_server + 'files/uploadfile?id=' + this.wid,
                 authToken: 'Bearer ' + localStorage.getItem('CoFlows-CoFlowsJWT'),
@@ -163,9 +167,9 @@ export class WorkflowComponent {
 
                 this.workflow = data[0].Value
 
-                this.workflow.Permissions.forEach(x => {
-                    if(x.ID == this.coflows.quser.User.Email) this.permission = x.Permission
-                })
+                // this.workflow.Permissions.forEach(x => {
+                //     if(x.ID == this.coflows.quser.User.Email) this.permission = x.Permission
+                // })
 
                 
                 if(this.permission == 2){

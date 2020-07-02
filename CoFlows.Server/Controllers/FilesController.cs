@@ -38,174 +38,7 @@ using Newtonsoft.Json;
 
 namespace CoFlows.Server.Controllers
 {
-    // public class FilesController : Controller
-    // {
-
-    //     //[System.Web.Http.HttpPost]
-    //     //public string AddHighChart(string filename, string type, int width, string svg)
-    //     //{
-    //     //    string userId = this.User.QID();
-    //     //    if (userId == null)
-    //     //        return null;
-    //     //    DateTime dt = DateTime.Now;
-
-    //     //    string id = System.Guid.NewGuid().ToString();
-
-    //     //    svg = svg.Replace("_&l;_", "<").Replace("_&r;_", ">");
-
-    //     //    Exporter export = new Exporter(filename, type, width, svg);
-
-    //     //    MemoryStream outStream = new MemoryStream();
-    //     //    export.WriteToStream(outStream);
-    //     //    //BinaryReader breader = new BinaryReader(outStream);
-    //     //    byte[] data = outStream.ToArray();// breader.ReadBytes((int)outStream.Length);
-
-    //     //    FileRepository.AddFile(id, filename, "", type, data, dt, userId, null);
-
-    //     //    return id;
-    //     //}
-        
-    //     [HttpPost]
-    //     public string AutoAddFile(HttpPostedFileBase file, string groupID)
-    //     {
-    //         string userId = this.User.QID();
-    //         if (userId == null)
-    //             return null;
-
-    //         DateTime dt = DateTime.Now;
-
-    //         string id = System.Guid.NewGuid().ToString();
-
-    //         //svg = svg.Replace("_&l;_", "<").Replace("_&r;_", ">");
-
-    //         //Exporter export = new Exporter(filename, type, width, svg);
-
-    //         MemoryStream outStream = new MemoryStream();
-    //         //export.WriteToStream(outStream);
-    //         file.InputStream.CopyTo(outStream);
-    //         //BinaryReader breader = new BinaryReader(outStream);
-    //         byte[] data = outStream.ToArray();// breader.ReadBytes((int)outStream.Length);
-
-    //         FileRepository.AddFile(id, file.FileName, "", file.ContentType, data, dt, userId, groupID);
-
-    //         return @"{state: true, name: '" + file.FileName + "', size: '" + data.Length + "', extra: 'any_data, optional'}";
-    //     }
-
-    //     public FileContentResult File(string id)
-    //     {
-    //         string userId = this.User.QID();
-    //         if (userId == null)
-    //             return null;
-    //         //Sandbox sandbox = AQIEngine.Initialize(tenantName);
-
-    //         FilePermission filep = FileRepository.File(id);
-    //         if (filep != null)
-    //             return File(filep.Data, filep.Type, filep.Name);
-
-    //         if (id.Contains("."))
-    //         {
-    //             filep = FileRepository.File(id.Substring(0, id.LastIndexOf(".")));
-    //             if (filep != null)
-    //                 return File(filep.Data, filep.Type, filep.Name);
-    //         }
-
-    //         return null;
-    //     }
-
-    //     public ActionResult Files()
-    //     {
-    //         string userId = this.User.QID();
-    //         if (userId == null)
-    //             return null;
-
-    //         Dictionary<string, FilePermission> files = FileRepository.FilesByUser(userId);
-
-    //         if (files == null)
-    //             return null;
-
-    //         List<object> res = new List<object>();
-    //         foreach (string id in files.Keys)
-    //         {
-    //             string url = Url.Content("~/Files/File/") + id;
-    //             res.Add(new { thumb = url, image = url });
-    //         }
-
-    //         return new JsonpResult
-    //         {
-    //             Data = res,
-    //             JsonRequestBehavior = JsonRequestBehavior.AllowGet
-    //         };
-    //     }
-
-    //     public string Remove(string id)
-    //     {
-    //         string userId = this.User.QID();
-    //         if (userId == null)
-    //             return null;
-
-    //         FileRepository.Remove(id);
-
-    //         return "ok";
-    //     }
-
-    //     public string EditDescription(string id, string description)
-    //     {
-    //         string userId = this.User.QID();
-    //         if (userId == null)
-    //             return null;
-
-    //         FileRepository.EditDescription(id, description);
-
-    //         return "ok";
-    //     }
-
-    //     [AllowCrossSiteJson]
-    //     public ActionResult FilesApp(string groupid)
-    //     {
-    //         string userId = this.User.QID();
-    //         if (userId == null)
-    //             return null;
-
-    //         AQI.AQILabs.Kernel.User user = AQI.AQILabs.Kernel.User.FindUser(userId);
-    //         AQI.AQILabs.Kernel.Group role = AQI.AQILabs.Kernel.Group.FindGroup(groupid);
-
-
-            
-
-    //         List<object> jres = new List<object>();
-
-    //         List<AQI.AQILabs.Kernel.IPermissible> files = role.List(user, typeof(FilePermission), false);
-    //         foreach (FilePermission file_mem in files)
-    //         {
-    //             FilePermission file = FileRepository.File(file_mem.ID);
-    //             if (file != null)
-    //                 jres.Add(new { ID = file.ID, Name = file.Name, Owner = file.Owner.FirstName + " " + file.Owner.LastName, Size = file.Size, Date = (file.Timestamp.ToString("yyyy/MM/dd")), Type = file.Type, Description = file.Description, AccessType = role.Permission(null, file_mem).ToString() });
-    //             else
-    //                 role.Remove(file_mem);
-    //         }
-
-    //         files = role.List(user, typeof(AQICloud.FilePermission), false);
-    //         foreach (FilePermission file_mem in files)
-    //         {
-    //             FilePermission file = FileRepository.File(file_mem.ID);
-    //             if (file != null)
-    //                 jres.Add(new { ID = file.ID, Name = file.Name, Owner = file.Owner.FirstName + " " + file.Owner.LastName, Size = file.Size, Date = (file.Timestamp.ToString("yyyy/MM/dd")), Type = file.Type, Description = file.Description, AccessType = role.Permission(null, file_mem).ToString() });
-    //             else
-    //                 role.Remove(file_mem);
-    //         }
-
-    //         return new JsonpResult
-    //         {
-    //             Data = jres,
-    //             JsonRequestBehavior = JsonRequestBehavior.AllowGet
-    //         };
-    //     }
-    // }
-
-    // [Route("api/[controller]")]
     [Authorize, Route("[controller]/[action]")]
-    // [Authorize, Route("[controller]")]
-    // [Route("[controller]")]
     public class FilesController : Controller
     {
 
@@ -217,8 +50,6 @@ namespace CoFlows.Server.Controllers
                 return Unauthorized();
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
-
-            Console.WriteLine(id);
 			try
 			{
                 foreach(var file in Request.Form.Files)
@@ -236,7 +67,6 @@ namespace CoFlows.Server.Controllers
                             DateTime dt = DateTime.Now;
                             FileRepository.AddFile(fid, fileName, data, file.ContentType, dt, userId, id);
                         }
-                        Console.WriteLine("Saved: " + fileName);
                     }
                 }
 				return Json("Upload Successful.");
@@ -268,18 +98,6 @@ namespace CoFlows.Server.Controllers
                 else
                     role.Remove(file_mem);
             }
-
-            // files = role.List(user, typeof(FilePermission), false);
-            // foreach (FilePermission file_mem in files)
-            // {
-            //     FilePermission file = FileRepository.File(file_mem.ID);
-            //     if (file != null)
-            //         jres.Add(new { ID = file.ID, Name = file.Name, Owner = file.Owner.FirstName + " " + file.Owner.LastName, Size = file.Size, Date = (file.Timestamp.ToString("yyyy/MM/dd")), Type = file.Type, AccessType = role.Permission(null, file_mem).ToString() });
-            //     else
-            //         role.Remove(file_mem);
-            // }
-
-            // return Ok(new { Result = jres });
             return Ok(jres);
         }
 
@@ -287,7 +105,6 @@ namespace CoFlows.Server.Controllers
         public FileContentResult File(string id)
         {
             string userId = this.User.QID();
-            Console.WriteLine("----------: " + id + " <-> " + userId);
             if (userId == null)
                 return null;
             
