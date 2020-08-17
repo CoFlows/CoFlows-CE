@@ -38,6 +38,12 @@ namespace CoFlows.Server.Controllers
             public int id { get; set; }
             public string code { get; set; }
         }
+        /// <summary>
+        /// Submit strategy source code
+        /// </summary>
+        /// <param name="data">JSON object { 'id': id, 'code': 'strategy source code' }</param>
+        /// <returns>Success</returns>
+        /// <response code="200">Compilation result</response>
         [HttpPost]
         public async Task<IActionResult> SubmitCode([FromBody] SubmitCodeModel data)
         {
@@ -60,7 +66,14 @@ namespace CoFlows.Server.Controllers
 
             return NotFound(data.id);
         }
-                                
+
+        /// <summary>
+        /// Analyse strategy according to a given command
+        /// </summary>
+        /// <param name="id">Strategy id</param>
+        /// <param name="command">Analysis command</param>
+        /// <returns>Success</returns>
+        /// <response code="200">Compilation result</response>              
         [HttpGet, HttpPost]
         public async Task<IActionResult> Analyse(int id, string command)
         {
@@ -92,6 +105,13 @@ namespace CoFlows.Server.Controllers
             public object Value { get; set; }
         }
 
+        /// <summary>
+        /// Get strategy strategy package
+        /// </summary>
+        /// <param name="id">Strategy id</param>
+        /// <param name="calculate">true/false to calculate next portfolio weights</param>
+        /// <returns>Success</returns>
+        /// <response code="200">Strategy package JSON</response>
         [HttpGet]
         public async Task<IActionResult> Package(int id, bool calculate)
         {
@@ -109,6 +129,12 @@ namespace CoFlows.Server.Controllers
             return Ok(strategy.Package(calculate));
         }
         
+        /// <summary>
+        /// Calculate strategy given a strategy package
+        /// </summary>
+        /// <param name="package">serialised JSON version of package</param>
+        /// <returns>Success</returns>
+        /// <response code="200">Strategy package JSON</response>
         [HttpPost]
         public async Task<IActionResult> CalculatePackage(string package)
         {
@@ -132,6 +158,13 @@ namespace CoFlows.Server.Controllers
             return Ok(strategy.Package(true));
         }
         
+        /// <summary>
+        /// Create a new strategy given a package
+        /// </summary>
+        /// <param name="id">Strategy id</param>
+        /// <param name="package">true/false to calculate next portfolio weights</param>
+        /// <returns>Success</returns>
+        /// <response code="200">Strategy package JSON</response>
         [HttpPost]
         public async Task<IActionResult> SimulatePackage(int id, string package)
         {
@@ -409,6 +442,13 @@ namespace CoFlows.Server.Controllers
             return Ok("started");
         }
         
+        /// <summary>
+        /// Remove a strategy given a key
+        /// </summary>
+        /// <param name="id">Strategy id</param>
+        /// <param name="key">Simulation key</param>
+        /// <returns>Success</returns>
+        /// <response code="200">Strategy package JSON</response>
         [HttpPost]
         public async Task<IActionResult> RemoveSimulation(int id, string key)
         {
@@ -592,7 +632,12 @@ namespace CoFlows.Server.Controllers
             return jres;            
         }
 
-
+        /// <summary>
+        /// Get the portfolio structure of a strategy
+        /// </summary>
+        /// <param name="id">Strategy id</param>
+        /// <returns>Success</returns>
+        /// <response code="200">Portfolio structure</response>
         [HttpGet]
         public async Task<IActionResult> PortfolioStructure(int id)
         {
@@ -639,6 +684,12 @@ namespace CoFlows.Server.Controllers
                 });
         }
 
+        /// <summary>
+        /// Get a list of historical orders
+        /// </summary>
+        /// <param name="id">Strategy id</param>
+        /// <returns>Success</returns>
+        /// <response code="200">Portfolio structure</response>
         [HttpGet]
         public async Task<IActionResult> HistoricalOrders(int id)
         {
@@ -705,8 +756,14 @@ namespace CoFlows.Server.Controllers
         }
 
 
+        /// <summary>
+        /// Statistics of an aggregation of a list of strategies
+        /// </summary>
+        /// <param name="ids">Strategy ids</param>
+        /// <returns>Success</returns>
+        /// <response code="200">Aggregated statistics</response>
         [HttpPost]
-        public async Task<IActionResult> PortfolioList([FromBody] int[] ids)
+        public async Task<IActionResult> AggregatedStatistics([FromBody] int[] ids)
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -977,6 +1034,20 @@ namespace CoFlows.Server.Controllers
             return Ok(new { VaR = VaR, TimeSeries = ts_jres, MonthlyPerformance = monthly_jres, Statistics = stats_jres, Strategies = jres});            
         }
 
+        /// <summary>
+        /// Get indicators of a strategy
+        /// </summary>
+        /// <param name="id">Strategy id</param>
+        /// <param name="uid">Underlying id</param>
+        /// <param name="iid">Indicator id</param>
+        /// <param name="bid">Benchmark id</param>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// Result:
+        /// 
+        ///     [[date, indicator_value, benchmark_value], ...]
+        ///
+        /// </response>
         [HttpGet]
         public async Task<IActionResult> Indicator(int id, int uid, int iid, int bid)
         {

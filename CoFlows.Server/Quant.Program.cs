@@ -67,7 +67,8 @@ namespace CoFlows.Server.Quant
             if(string.IsNullOrEmpty(config_file))
                 config_file = "coflows_config.json";
 
-            JObject config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
+            CoFlows.Server.Program.config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
+            var config = CoFlows.Server.Program.config;
 
             CoFlows.Server.Program.workflow_name = config["Workflow"].ToString();
             CoFlows.Server.Program.hostName = config["Server"]["Host"].ToString();
@@ -333,7 +334,7 @@ namespace CoFlows.Server.Quant
                     return null;
                 };
 
-                /// QuantSpecific START
+                // QuantSpecific START
                 if(config["Quant"] != null)
                 {
                     Instrument.TimeSeriesLoadFromDatabaseIntraday = config["Quant"]["Intraday"].ToString().ToLower() == "true";
@@ -352,7 +353,7 @@ namespace CoFlows.Server.Quant
                     else
                         Console.WriteLine("Not saving timeseries");
                 }
-                /// QuantSpecific END
+                // QuantSpecific END
                 
                 
                 if(!sslFlag)
@@ -1090,9 +1091,9 @@ namespace CoFlows.Server.Quant
         }
 
 
-        public static IEnumerable<Workflow> GetDefaultWorkflows()
+        public static IEnumerable<Workflow> LocalWorkflows()
         {
-            return CoFlows.Server.Program.GetDefaultWorkflows();
+            return CoFlows.Server.Program.LocalWorkflows();
         }
 
         public static void AddServicedWorkflows(string id)

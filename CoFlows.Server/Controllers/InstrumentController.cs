@@ -9,29 +9,60 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+// using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.AspNetCore.Http;
+// using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-using CoFlows.Server.Models;
+// using CoFlows.Server.Models;
 using CoFlows.Server.Utils;
 
 using Microsoft.AspNetCore.Authorization;
 
-using Newtonsoft.Json;
+// using Newtonsoft.Json;
 using AQI.AQILabs.Kernel;
 using AQI.AQILabs.Kernel.Numerics.Util;
-using AQI.AQILabs.SDK.Strategies;
+// using AQI.AQILabs.SDK.Strategies;
 
 namespace CoFlows.Server.Controllers
 {
     [Authorize, Route("[controller]/[action]")]
     public class InstrumentController : Controller
     {
+        /// <summary>
+        /// Get the timeseries array
+        /// </summary>
+        /// <remarks>
+        /// Timeseries types (spot_type and b_type):
+        ///     
+        ///     Last = 1
+        ///     Open = 2
+        ///     High = 4
+        ///     Low  = 6
+        ///     Volume = 7
+        ///     AdjClose = 9
+        ///     Bid = 10
+        ///     Ask = 11
+        ///     Close = 12
+        ///     AdjPriceReturn = 14
+        /// 
+        /// </remarks>
+        /// <param name="id">Instrument ID</param>
+        /// <param name="spot_type">Spot type</param>
+        /// <param name="lastDate">Last day in the timeseries, if left empty then data the timeseries is until the last available date</param>
+        /// <param name="days">Nr of days in the standard deviation calculation</param>
+        /// <param name="bid">Benchmark ID, if left empty then no benchmark is used</param>
+        /// <param name="b_type">Type of benchmark timeseries</param>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// Result:
+        /// 
+        ///     [[date, timeseries_value, volatility, max_drawdown, benchmark_value], ...]
+        ///
+        /// </response>
         [HttpGet]
-        public async Task<IActionResult> TimeSeries(int id, string spot_type, string lastDate, int days = 20, int bid = -1, string b_type = "", int strategyid = -1)
+        public async Task<IActionResult> TimeSeries(int id, string spot_type, string lastDate, int days = 20, int bid = -1, string b_type = "")
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -42,8 +73,6 @@ namespace CoFlows.Server.Controllers
             Instrument instrument = Instrument.FindInstrument(id);
 
             TimeSeries ts_close = instrument.GetTimeSeries(instrument.InstrumentType == InstrumentType.ETF || instrument.InstrumentType == InstrumentType.Equity ? TimeSeriesType.AdjClose : TimeSeriesType.Close, DataProvider.DefaultProvider, true);
-
-            // Dictionary<DateTime, Comment> flags = strategyid == -1 ? CommentRepository.InstrumentFlags(id, user) : CommentRepository.InstrumentFlags(id, strategyid, user);
 
             if (instrument.InstrumentType == InstrumentType.Strategy && spot_type != null && spot_type.Trim() != "" && spot_type.Trim() != "spot_close")
             {
@@ -141,7 +170,7 @@ namespace CoFlows.Server.Controllers
                     if (bm_close != null)
                         bm_spot = bm_close[date, AQI.AQILabs.Kernel.Numerics.Util.TimeSeries.DateSearchType.Previous];
 
-                    jres.Add(new object[] { Utils.Utils.ToJSTimestamp(ts_close.DateTimes[i]), spot, vol * 100, maxdd * (isStrategy ? 1 : 100), "", "", bm_spot });
+                    jres.Add(new object[] { Utils.Utils.ToJSTimestamp(ts_close.DateTimes[i]), spot, vol * 100, maxdd * (isStrategy ? 1 : 100), bm_spot });
                     //jres.Add(new object[] { Utils.Utils.ToJSTimestamp(ts_close.DateTimes[i]), spot, vol, maxdd, flags.ContainsKey(date.Date) ? flags[date.Date].Content : "", flags.ContainsKey(date.Date) ? flags[date.Date].ID : "", bm_spot });
                 }
             }
@@ -149,6 +178,17 @@ namespace CoFlows.Server.Controllers
             return Ok(jres);
         }
 
+        /// <summary>
+        /// Get an intraday timeseries array
+        /// </summary>
+        /// <param name="id">Instrument ID</param>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// Result:
+        /// 
+        ///     [[date, timeseries_value], ...]
+        ///
+        /// </response>
         [HttpGet]
         public async Task<IActionResult> IntradayTimeSeries(int id)
         {
@@ -181,6 +221,20 @@ namespace CoFlows.Server.Controllers
             return Ok(jres);
         }
 
+        /// <summary>
+        /// Get monthly and yearly performances of an instrument
+        /// </summary>
+        /// <param name="id">Instrument ID</param>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// Result:
+        /// 
+        ///     jres.Add(new { Year = yearly_result[0], Jan = yearly_result[1], Feb = yearly_result[2], Mar = yearly_result[3], Apr = yearly_result[4], May = yearly_result[5], Jun = yearly_result[6], Jul = yearly_result[7], Aug = yearly_result[8], Sep = yearly_result[9], Oct = yearly_result[10], Nov = yearly_result[11], Dec = yearly_result[12], Yearly = yearly_result[13] });
+        ///     [{
+        ///         'Year': year, 'Jan': jan_return, 'Feb': feb_return, 'Mar': mar_return, 'Apr': apr_return, 'May': may_return, 'Jun': jun_return, 'Jul': jul_return, 'Aug': aug_return, 'Sep': sep_return, 'Oct': oct_return, 'Nov': nov_return, 'Dec': dec_return, 'Yearly': yearly_return
+        ///      }, ...]
+        ///
+        /// </response>
         [HttpGet]
         public async Task<IActionResult> MonthlyPerformance(int id)
         {
@@ -261,8 +315,37 @@ namespace CoFlows.Server.Controllers
             return Ok(jres);
         }
 
+        /// <summary>
+        /// Get monthly and yearly performances of an instrument
+        /// </summary>
+        /// <param name="id">Instrument ID</param>
+        /// <param name="days">Nr of days in the standard deviation calculation, default is 20</param>
+        /// <param name="bid">Benchmark ID, if left empty then no benchmark is used</param>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// Result:
+        /// 
+        ///     jres.Add(new { Year = yearly_result[0], Jan = yearly_result[1], Feb = yearly_result[2], Mar = yearly_result[3], Apr = yearly_result[4], May = yearly_result[5], Jun = yearly_result[6], Jul = yearly_result[7], Aug = yearly_result[8], Sep = yearly_result[9], Oct = yearly_result[10], Nov = yearly_result[11], Dec = yearly_result[12], Yearly = yearly_result[13] });
+        ///     [{
+        ///         'One Day Performance': value, 
+        ///         'Five Day Performance': value, 
+        ///         'MTD Performance': value, 
+        ///         'YTD Performance': value, 
+        ///         'Current Volatility': value, 
+        ///         'Average Volatility': value, 
+        ///         'Maximum Volatility': value, 
+        ///         'Minimum Volatility': value, 
+        ///         'Current Drawdown': value, 
+        ///         'Average Drawdown': value, 
+        ///         'Maximum Drawdown': value, 
+        ///         'Annual Return': value, 
+        ///         'Sharpe Ratio': value, 
+        ///         'Turnover': value
+        ///      }, ...]
+        ///
+        /// </response>
         [HttpGet]
-        public async Task<IActionResult> Statistics(int id, int days, int benchMarkID = -1)
+        public async Task<IActionResult> Statistics(int id, int days, int bid = -1)
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -274,18 +357,14 @@ namespace CoFlows.Server.Controllers
             if (ts == null || (ts != null && ts.Count == 0))
                 ts = instrument.GetTimeSeries(TimeSeriesType.Last, DataProvider.DefaultProvider, true);
 
-            Instrument bmIns = Instrument.FindInstrument(benchMarkID);
+            Instrument bmIns = Instrument.FindInstrument(bid);
             if (bmIns == null) bmIns = Instrument.FindInstrument(1663);
             TimeSeries bm_ts = bmIns.GetTimeSeries(bmIns.InstrumentType == InstrumentType.ETF || bmIns.InstrumentType == InstrumentType.Equity ? TimeSeriesType.AdjClose : (bmIns.InstrumentType == InstrumentType.Strategy ? TimeSeriesType.Close : TimeSeriesType.Close), DataProvider.DefaultProvider, true);
 
-            //var jres = new List<object[]>();
             var jres = new List<object>();
 
             if (ts != null && ts.Count > 1)
             {
-                //ts = ts.GetRange(ts.DateTimes[0], DateTime.Today, AQI.AQILabs.Kernel.Numerics.Util.TimeSeries.RangeFillType.None);
-                //bm_ts = bm_ts.GetRange(ts.DateTimes[0], DateTime.Today, AQI.AQILabs.Kernel.Numerics.Util.TimeSeries.RangeFillType.None);
-
                 List<double> vols = new List<double>();
                 List<double> maxdds = new List<double>();
 
@@ -298,7 +377,6 @@ namespace CoFlows.Server.Controllers
                 double bm_last_vol = 0.0;
                 double bm_last_dd = 0.0;
 
-                //if (ts != null && ts.Count != 0)
                 {
                     int count = ts.Count;
 
@@ -400,6 +478,12 @@ namespace CoFlows.Server.Controllers
             return Ok(jres);
         }
 
+        /// <summary>
+        /// Get Timeseries in CSV format
+        /// </summary>
+        /// <param name="id">Instrument ID</param>
+        /// <returns>Success</returns>
+        /// <response code="200">CSV file</response>
         [HttpGet, AllowAnonymous]
         public FileContentResult TimeSeriesCSV(int id)
         {

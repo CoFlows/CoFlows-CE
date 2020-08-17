@@ -133,7 +133,7 @@ namespace CoFlows.Server.Realtime
                     var wid = path.Replace("/lab/", "");
                     wid = wid.Substring(0, wid.IndexOf("/"));
 
-                    int labPort = CoFlows.Server.Controllers.MController.LabDB[cokey + wid];
+                    int labPort = CoFlows.Server.Controllers.LabController.LabDB[cokey + wid];
 
                     var client = ProxyConnection.Client(socket,  path);
                     client.Connect("ws://localhost:" + labPort, headers);

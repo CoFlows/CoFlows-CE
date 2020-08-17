@@ -76,7 +76,7 @@ export class QAStrategiesComponent {
     }
 
     SetStrategies(strategyIDs){
-        this.coflows.Post('strategy/portfoliolist',strategyIDs,
+        this.coflows.Post('strategy/aggregatedstatistics',strategyIDs,
         data => {
             
             this.strategies = []
@@ -253,7 +253,7 @@ export class QAStrategiesComponent {
     onChangeActiveFunction(id, item){     
         console.log(id, item)
 
-        this.coflows.Get('m/activetoggle?id=' + id ,
+        this.coflows.Get('flow/activeagenttoggle?id=' + id ,
             data => {
                 console.log(data)
 

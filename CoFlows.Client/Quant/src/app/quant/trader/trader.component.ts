@@ -397,14 +397,14 @@ export class TraderComponent {
 
         this.coflows.Get('instrument/timeseries?id=' + id + '&days=20&spot_type=spot_close',
         data => {
-            var spot = [], vlm = [], opn = [], vol = [], maxdd = [], flags = [], dataLength = data.length;
+            var spot = [], vlm = [], opn = [], vol = [], maxdd = [], dataLength = data.length;
             for (var i = 0; i < dataLength; i++) {
                 spot.push([data[i][0], data[i][1]]);
                 vol.push([data[i][0], data[i][2]]);
                 maxdd.push([data[i][0], data[i][3]]);
-                if (data[i][4] != "") {
-                    flags.push({ x: data[i][0], title: i + 1, text: data[i][4] });
-                }                
+                // if (data[i][4] != "") {
+                //     flags.push({ x: data[i][0], title: i + 1, text: data[i][4] });
+                // }                
             }
 
             if(node.children.length != 0){            

@@ -6,6 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthenticationRoutes } from './authentication.routing';
 import { SigninComponent } from './signin/signin.component';
 import { SignupComponent } from './signup/signup.component';
+import { TokenComponent } from './token/token.component';
 import { ForgotComponent } from './forgot/forgot.component';
 
 @NgModule({
@@ -15,7 +16,7 @@ import { ForgotComponent } from './forgot/forgot.component';
     FormsModule,
     ReactiveFormsModule
   ],
-  declarations: [SigninComponent, SignupComponent, ForgotComponent]
+  declarations: [SigninComponent, SignupComponent, TokenComponent, ForgotComponent]
 })
 
 export class AuthenticationModule {}
