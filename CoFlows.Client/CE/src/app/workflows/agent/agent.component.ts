@@ -255,8 +255,6 @@ export class AgentComponent{
             let wid = params['wid'];
 
         
-        //this.coflows.Get('m/workflow?id=Freepoint_Workflow',
-        //    data =>
             this.coflows.LinkAction(wid,
                 data => { //Load
 
@@ -344,7 +342,7 @@ export class AgentComponent{
     onChangeActive(val){
         //this.func.Started = val == "0"
 
-        this.coflows.Get('m/activetoggle?id=' + this.func.ID ,
+        this.coflows.Get('flow/activeagenttoggle?id=' + this.func.ID ,
         data => {
             console.log(data)
 
@@ -360,7 +358,7 @@ export class AgentComponent{
     compilationResult = ''
     submitCode(){
         console.log(this.func)
-        this.coflows.Post('m/createf', 
+        this.coflows.Post('flow/createagent', 
         this.func,
         data => {                        
             this.compilationResult = data.Result;

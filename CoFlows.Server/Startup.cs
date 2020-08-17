@@ -7,29 +7,25 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
-using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
-
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.AzureADB2C.UI;
+
 using Microsoft.IdentityModel.Tokens;
 
+using Microsoft.OpenApi.Models;
+
 // Lets Encrypt
-using Microsoft.Extensions.DependencyInjection;
 using Certes;
 using FluffySpoon.AspNet.LetsEncrypt.Certes;
 using FluffySpoon.AspNet.LetsEncrypt;
-using System.IO;
 
 using CoFlows.Server.Realtime;
 
@@ -50,6 +46,12 @@ namespace CoFlows.Server
 
     public class Startup<T>
     {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -62,27 +64,96 @@ namespace CoFlows.Server
                         });
                 });
 
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen();
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "CoFlows Community Edition",
+                    Description = "CoFlows CE (Community Edition) is a Containerized Polyglot Runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. CoFlows enables developers to create rich Web-APIs with almost zero boiler plate and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with full interop.",
+                    TermsOfService = new Uri("https://github.com/CoFlows/CoFlows-CE#license"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "CoFlows Community",
+                        Email = "arturo@coflows.com",
+                        Url = new Uri("https://www.coflows.com"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Use under MIT",
+                        Url = new Uri("https://github.com/CoFlows/CoFlows-CE#license"),
+                    }
+                });
+
+                var filePath = System.IO.Path.Combine(System.AppContext.BaseDirectory, "CoFlows.Server.lnx.xml");
+                c.IncludeXmlComments(filePath);
+            });
+
             services
                 .AddMvc(option => option.EnableEndpointRouting = false)
                 .AddNewtonsoftJson(options =>
                     options.SerializerSettings.ContractResolver =
                         new Newtonsoft.Json.Serialization.DefaultContractResolver());
 
-            services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+            if(Program.config["Server"]["OAuth"] != null && Program.config["Server"]["OAuth"]["AzureAdB2C"] != null)
             {
-                options.TokenValidationParameters = new TokenValidationParameters
+                services
+                    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            ValidIssuer = "coflows-ce",
+                            ValidAudience = "coflows-ce",
+                            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Program.jwtKey))
+                        };
+                    })
+                    .AddAzureADB2CBearer(options => {
+                        options.Instance = Program.config["Server"]["OAuth"]["AzureAdB2C"]["Instance"].ToString();
+                        options.ClientId = Program.config["Server"]["OAuth"]["AzureAdB2C"]["ClientId"].ToString();
+                        options.Domain = Program.config["Server"]["OAuth"]["AzureAdB2C"]["Domain"].ToString();
+                        options.SignUpSignInPolicyId = Program.config["Server"]["OAuth"]["AzureAdB2C"]["SignUpSignInPolicyId"].ToString();
+                    });
+
+                services.AddAuthorization(options =>
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = "quant.app",
-                    ValidAudience = "quant.app",
-                    IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("___Secret-QuantApp-Capital!1234"))
-                };
-            });
+                    var defaultAuthorizationPolicyBuilder = 
+                        new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder(
+                            JwtBearerDefaults.AuthenticationScheme,
+                            AzureADB2CDefaults.BearerAuthenticationScheme)
+                        .RequireAuthenticatedUser();
+
+                    options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+                });
+            }
+            else
+            {
+                services
+                    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            ValidIssuer = "coflows-ce",
+                            ValidAudience = "coflows-ce",
+                            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Program.jwtKey))
+                        };
+                    });
+            }
+
+
+            
 
             
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -174,6 +245,16 @@ namespace CoFlows.Server
                 app.UseHttpsRedirection();
             }
 
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoFlows API V1");
+            });
+
             app.UseStatusCodePagesWithReExecute("/");
             app.UseDefaultFiles();
             app.UseStaticFiles();
@@ -185,10 +266,8 @@ namespace CoFlows.Server
                 );
 
             app.UseWebSockets();
-            // app.UseMiddleware<RTDSocketMiddleware>();
             app.UseMiddleware<T>();
-
-
+            
             app.UseAuthentication();
             app.UseMvc();
         }

@@ -30,7 +30,7 @@ export class DashboardComponent {
 
     constructor(private coflows: CoFlowsComponent) {
 
-        this.coflows.Get("m/servicedworkflows", data => {
+        this.coflows.Get('flow/servicedworkflows', data => {
             // console.log(data)
             this.workflows = data
 
@@ -404,7 +404,7 @@ export class DashboardComponent {
     }
 
     onChangeActiveFunction(id, item){     
-        this.coflows.Get('m/activetoggle?id=' + id ,
+        this.coflows.Get('flow/activeagenttoggle?id=' + id ,
             data => {
                 // console.log(data)
             })
@@ -515,7 +515,7 @@ export class DashboardComponent {
         }
         console.log(templateCode)
 
-        this.coflows.Post('m/createf',
+        this.coflows.Post('flow/createagent',
             templateCode
             ,
             //this.coflows.Post('strategy/portfoliolist',[93437],
@@ -592,7 +592,7 @@ def pkg():
         }
         console.log(templateCode)
 
-        this.coflows.Post('m/createf',
+        this.coflows.Post('flow/createagent',
             templateCode
             ,
             //this.coflows.Post('strategy/portfoliolist',[93437],
@@ -673,7 +673,7 @@ public class CSharpAgent
         }
         console.log(templateCode)
 
-        this.coflows.Post('m/createf',
+        this.coflows.Post('flow/createagent',
             templateCode
             ,
             //this.coflows.Post('strategy/portfoliolist',[93437],
@@ -758,7 +758,7 @@ public class CSharpAgent
         }
         console.log(templateCode)
 
-        this.coflows.Post('m/createf',
+        this.coflows.Post('flow/createagent',
             templateCode
             ,
             //this.coflows.Post('strategy/portfoliolist',[93437],
@@ -837,7 +837,7 @@ let pkg = new qengine.FPKG(
         }
         console.log(templateCode)
 
-        this.coflows.Post('m/createf',
+        this.coflows.Post('flow/createagent',
             templateCode
             ,
             //this.coflows.Post('strategy/portfoliolist',[93437],

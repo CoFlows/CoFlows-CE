@@ -36,11 +36,25 @@
       <div class="row">
       
           <button class="text-color col-lg-6 col-md-6 col-sm-6 btn btn-warning btn-sm" type="submit" [disabled]="!form.valid">Login</button>
-        
-        
           <a class="text-color col-lg-6 col-md-6 col-sm-6 btn btn-outline-warning btn-link btn-sm" [routerLink]="['/authentication/signup']">Create an account!</a>
         
       </div>
+
+
+      <div class="row" *ngIf="oauth.GitHub">
+        <a href="{{oauth.GitHub}}" class="text-color">
+          <i class="widget-icon rounded-circle icon icon-social-github"></i>
+          <label class="form-control-label">&nbsp;&nbsp;GitHub Signin</label>
+        </a>
+      </div>
+
+      <div class="row" *ngIf="oauth.AzureAD">
+        <a href="{{oauth.AzureAD}}" class="text-color">
+          <i class="widget-icon rounded-circle icon icon-grid"></i>
+          <label class="form-control-label">&nbsp;&nbsp;Azure AD Signin</label>
+        </a>
+      </div>  
+      
       
     </form>
   </div>

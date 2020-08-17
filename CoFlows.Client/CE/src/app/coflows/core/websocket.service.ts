@@ -15,7 +15,8 @@ export class WebsocketService {
         // console.log("Successfully connected: " + url);
         // } 
         // return this.subject;
-        this.ws = new WebSocket(url);
+
+        this.ws = new WebSocket(url)
         return null;
     }
 
@@ -46,10 +47,8 @@ export class WebsocketService {
         })
     let observer = {
             next: (data: any) => {   
-                
                 if (this.ws.readyState === 1) {
                     this.ws.send(JSON.stringify(data));
-                    console.log('sent', data)
                 }
             }
         }

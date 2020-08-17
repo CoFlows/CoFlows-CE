@@ -5,7 +5,7 @@
     <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <DefaultItemExcludes>Client\**;ref\**;mnt\**</DefaultItemExcludes>
-    <NoWarn>CS1998;CS0168;CS0105;CS0162;CS0105;CS4014</NoWarn>  
+    <NoWarn>CS1998;CS0168;CS0105;CS0162;CS0105;CS4014;CS1591</NoWarn>  
   </PropertyGroup>
 
   <PropertyGroup>

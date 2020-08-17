@@ -12,7 +12,7 @@ In C# you simply need to define a class with static functions. In F# its a modul
 The WebAPI url structure is defined by
 
  
-    http(s)://[host]/m/getwb?workbook=[WorkflowID]&id=[QueryID]&name=[Function]&p[0]=x&p[1]=y...
+    http(s)://[host]/flow/getwb?workbook=[WorkflowID]&id=[QueryID]&name=[Function]&p[0]=x&p[1]=y...
 
 where the
 

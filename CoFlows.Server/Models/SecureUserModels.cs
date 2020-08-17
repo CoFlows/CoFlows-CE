@@ -30,12 +30,12 @@ namespace CoFlows.Server.Models
 
         public string GroupID { get; set; }
 
-        public bool RequireSecure { get; set; }
+        // public bool RequireSecure { get; set; }
     }
 
     public class SecureRegisterViewModel
     {
-        public string ReturnUrl { get; set; }
+        // public string ReturnUrl { get; set; }
 
         public string GroupID { get; set; }
 
@@ -63,37 +63,16 @@ namespace CoFlows.Server.Models
         [Display(Name = "Password")]
         public string Password { get; set; }
 
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm Password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; }
+        // [DataType(DataType.Password)]
+        // [Display(Name = "Confirm Password")]
+        // [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        // public string ConfirmPassword { get; set; }
 
         [Display(Name = "Encoded Secret")]
-        public string EncodedSecret { get; set; }
+        public string Secret { get; set; }
     }
 
-    public class SecureEditAccountViewModel
-    {
-        [Required(AllowEmptyStrings = false, ErrorMessage = "You need to specify a first name."),
-        DisplayName("First Name")]
-        public string FirstName { get; set; }
+    // public class
+    
 
-        [Required(AllowEmptyStrings = false, ErrorMessage = "You need to specify a last name."),
-        DisplayName("Last Name")]
-        public string LastName { get; set; }
-
-        //[Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Password")]
-        public string Password { get; set; }
-
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm Password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; }
-
-        [Display(Name = "Encoded Secret")]
-        public string EncodedSecret { get; set; }
-    }
 }

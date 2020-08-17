@@ -1,0 +1,18 @@
+
+/* The only rule that matters */
+#video-background {
+    /*  making the video fullscreen  */      
+      //z-index: -100;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: auto;
+      height: auto;
+      min-width: 100%;
+      min-height: 100%;
+      -webkit-transform: translate(-50%, -50%);
+      -moz-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+      opacity: 0.7;
+    }

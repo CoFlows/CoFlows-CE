@@ -6,41 +6,28 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-using System.Net;
-using System.Net.Http;
-using System.Data;
-using System.IO;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-using CoFlows.Server.Models;
 using CoFlows.Server.Utils;
 
 using Microsoft.AspNetCore.Authorization;
-
-using Newtonsoft.Json;
-using QuantApp.Kernel;
-using QuantApp.Engine;
 
 namespace CoFlows.Server.Controllers
 {
     public class GetDataTableModel
     {
-        public string dbname;
-        public string table;
-        public string target;
-        public string search;
+        public string dbname { get; set; }
+        public string table { get; set; }
+        public string target { get; set; }
+        public string search { get; set; }
     }
 
     public class ExecuteDataTable
     {
-        public string dbname;
-        public string table;
-        public string command;
+        public string dbname { get; set; }
+        public string table { get; set; }
+        public string command { get; set; }
     }
     /// <summary>
     /// Database Controller

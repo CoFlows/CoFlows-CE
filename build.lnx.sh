@@ -22,4 +22,4 @@ cd CoFlows.Server
 
 docker build -t coflows/ce .
 docker tag coflows/ce coflows/ce:latest
-docker push coflows/ce:latest
+# docker push coflows/ce:latest

@@ -2,7 +2,7 @@
 
   <PropertyGroup>    
     <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
-    <NoWarn>FS0020;FS0025;FS0049;FS0058;FS0064;FS0760;FS0066;FS0104;MSB3243;MSB3245;NU1605</NoWarn>  
+    <NoWarn>FS0020;FS0025;FS0049;FS0058;FS0064;FS0760;FS0066;FS0104;MSB3243;MSB3245;NU1605;CS1591</NoWarn>  
   </PropertyGroup>
 
   <PropertyGroup>

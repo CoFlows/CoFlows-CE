@@ -138,7 +138,7 @@ export class CFQueryComponent {
         let t00 = Date.now()
         this.status = 'thinking... ' + t0.toTimeString()//.getHours() + ":" + t0.getMinutes() + ":" + t0.getSeconds() + ":" + t0.getMilliseconds()
         
-        this.coflows.Post('m/postec', 
+        this.coflows.Post('flow/createquery', 
         {
             Code: workbook,
             Function: {
@@ -576,7 +576,7 @@ export class CFQueryComponent {
     addItem(items, name, item){
         if(item.D_link != undefined || name == 'D_link'){
             this.coflows.Get(
-                'm/getquery?wid=' + this.selectedWB.WorkflowID + '&qid=' + this.selectedWB.ID + '&uid=' + this.coflows.quser.User.Secret + '&' + (item.D_link != undefined ? item.D_link : item), 
+                'flow/getquery?wid=' + this.selectedWB.WorkflowID + '&qid=' + this.selectedWB.ID + '&_cokey=' + this.coflows.quser.User.Secret + '&' + (item.D_link != undefined ? item.D_link : item), 
                 data => { 
                     this.addItem_internal(items, name, data)
                  });
@@ -602,7 +602,7 @@ export class CFQueryComponent {
     removeCode(workbook){
         this.status = 'thinking...'
         let t0 = Date.now()
-        this.coflows.Post('m/removeec', 
+        this.coflows.Post('flow/removequery', 
         workbook,
         data => {
             let tEnd = Date.now()

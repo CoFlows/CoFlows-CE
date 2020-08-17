@@ -2,11 +2,12 @@
 
   <PropertyGroup>  
     <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
-    <NoWarn>CS0109;CS0168;CS0162;CS0219;CS3021</NoWarn>
+    <NoWarn>CS0109;CS0168;CS0162;CS0219;CS3021;CS1591</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DefineConstants>NETSTANDARD;TRACE;DEBUG;PYTHON3;PYTHON37;UCS2</DefineConstants>    
   </PropertyGroup>
 
@@ -30,5 +31,7 @@
     <PackageReference Include="System.Data.SQLite" Version="1.0.112" />
     <PackageReference Include="Npgsql" Version="4.1.3.1" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.0" />
   </ItemGroup>
 </Project>
