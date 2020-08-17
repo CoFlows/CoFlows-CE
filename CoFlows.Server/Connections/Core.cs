@@ -445,12 +445,12 @@ namespace CoFlows.Core
 
         public string PublishPackage(QuantApp.Engine.PKG pkg)
         {
-            return GetString("m/CreatePKGFromJSON",  pkg);
+            return GetString("flow/CreateWorkflow",  pkg);
         }
 
         public string BuildPackage(QuantApp.Engine.PKG pkg)
         {
-            return GetString("m/CompileFromJSON",  pkg);
+            return GetString("flow/CompileWorkflow",  pkg);
         }
 
         public class CreateComputeResult
@@ -460,7 +460,7 @@ namespace CoFlows.Core
         }
         public Compute CreateCompute(QuantApp.Engine.PKG pkg)
         {
-            var res = GetObject<CreateComputeResult>("m/CreateComputeFromJSON",  pkg);
+            var res = GetObject<CreateComputeResult>("flow/CreateComputeFromJSON",  pkg);
             var comp = new Compute(pkg, this, res);
             return comp;
         }
@@ -469,7 +469,7 @@ namespace CoFlows.Core
         {
             var workflow = QuantApp.Kernel.M.Base(workflowID)[x => true].First() as Workflow;
             var pkg = QuantApp.Engine.Code.ProcessPackageWorkflow(workflow);
-            var res = GetObject<CreateComputeResult>("m/CreateComputeFromJSON",  pkg);
+            var res = GetObject<CreateComputeResult>("flow/CreateComputeFromJSON",  pkg);
             var comp = new Compute(pkg, this, res);
             return comp;
         }
@@ -477,7 +477,7 @@ namespace CoFlows.Core
         public string RemoteLogID(string workflowID)
         {
             var podname = workflowID;
-            string res = GetURL("m/PodLog?id=" + podname);
+            string res = GetURL("flow/PodLog?id=" + podname);
 
             var jobj = Newtonsoft.Json.Linq.JObject.Parse(res);
 
@@ -498,7 +498,7 @@ namespace CoFlows.Core
         public string RemoteRestart(QuantApp.Engine.PKG pkg)
         {
             var podname = pkg.ID;
-            string res = GetURL("m/RestartPod?id=" + podname);
+            string res = GetURL("flow/RestartPod?id=" + podname);
 
             var jobj = Newtonsoft.Json.Linq.JObject.Parse(res);
 
@@ -509,7 +509,7 @@ namespace CoFlows.Core
         public string RemoteRemoveID(string workflowID)
         {
             var podname = workflowID;
-            string res = GetURL("m/RemovePod?id=" + podname);
+            string res = GetURL("flow/RemovePod?id=" + podname);
 
             var jobj = Newtonsoft.Json.Linq.JObject.Parse(res);
 
@@ -531,7 +531,7 @@ namespace CoFlows.Core
 
         public object Execute(string code, string code_name, string workflowID, string queryID, string funcName, params object[] parameters)
         {
-            var res = GetString("m/PostEC",  new CallData(){ 
+            var res = GetString("flow/createquery",  new CallData(){ 
                 Code = new QuantApp.Engine.CodeData(code_name, queryID, code, workflowID),
                 Function = new FunctionData() { Name = funcName, Parameters = parameters }
             });
@@ -558,7 +558,7 @@ namespace CoFlows.Core
 
         public object Execute(string workflowID, string queryID, string funcName, params object[] parameters)
         {
-            var res = GetString("m/PostEC",  new CallData(){ 
+            var res = GetString("flow/createquery",  new CallData(){ 
                 Code = new QuantApp.Engine.CodeData("", queryID, "", workflowID),
                 Function = new FunctionData() { Name = funcName, Parameters = parameters }
             });

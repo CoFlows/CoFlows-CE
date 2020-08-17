@@ -85,7 +85,7 @@ export class MenuComponent {
 
     private coflows: CoFlowsComponent,
     public translate: TranslateService) {
-        this.coflows.Get("m/servicedworkflows", data => {
+        this.coflows.Get('flow/servicedworkflows', data => {
             let wp = []
             data.forEach(element => {
                 wp.push({

@@ -11,7 +11,7 @@ F# Query example
 
 ### Get
 
-    http(s)://[host]/m/getwb?workbook=[WorkflowID]&id=[QueryID]&name=getName
+    http(s)://[host]/flow/getwb?workbook=[WorkflowID]&id=[QueryID]&name=getName
 
 ### Result
 
@@ -21,7 +21,7 @@ F# Query example
 
 ### Get
 
-    http(s)://[host]/m/getwb?workbook=[WorkflowID]&id=[QueryID]&name=Add&p[0]=100&p[1]=200
+    http(s)://[host]/flow/getwb?workbook=[WorkflowID]&id=[QueryID]&name=Add&p[0]=100&p[1]=200
 
 ### Result
 

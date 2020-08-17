@@ -12,14 +12,9 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 using System.Security.Claims;
-using System.Net.Mail;
 
 using System.Text;
-using System.IO;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading;
 
 using System.Linq;
 
@@ -33,13 +28,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Identity;
 
 using CoFlows.Server.Models;
 using CoFlows.Server.Utils;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 using QuantApp.Kernel;
 
@@ -55,6 +48,10 @@ namespace CoFlows.Server.Controllers
     {        
         private static Dictionary<string, string> _secrets = new Dictionary<string, string>();
 
+        /// <summary>
+        /// User logout
+        /// </summary>
+        /// <response code="200">Success</response>
         [HttpGet, HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -64,6 +61,10 @@ namespace CoFlows.Server.Controllers
                 var outk = "";
                 if(sessionKeys.ContainsKey(key))
                     sessionKeys.Remove(key, out outk);
+
+                var _outk = "";
+                if(revSessionKeys.ContainsKey(outk))
+                    revSessionKeys.Remove(outk, out _outk);
             }
 
             Response.Cookies.Delete("coflows");  
@@ -89,7 +90,25 @@ namespace CoFlows.Server.Controllers
         }
 
         public static ConcurrentDictionary<string, string> sessionKeys = new ConcurrentDictionary<string, string>();
+        public static ConcurrentDictionary<string, string> revSessionKeys = new ConcurrentDictionary<string, string>();
 
+        /// <summary>
+        /// User login
+        /// </summary>
+        /// <param name="model">
+        /// Updated User Data:
+        ///
+        ///     {
+        ///         "Username": "Email",
+        ///         "Password": "Password",
+        ///         "Code": "If a username/password is not provided, the user can login with a secret code",
+        ///         "GroupID": "Group to which the login should be authorised to."
+        ///     }
+        ///
+        /// </param>
+        /// <returns>Success</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Could not verify user</response>
         [HttpPost, AllowAnonymous]
         public async Task<ActionResult> Login([FromBody] SecureLogOnViewModel model)
         {
@@ -113,7 +132,7 @@ namespace CoFlows.Server.Controllers
                 }
             }
             else
-                return BadRequest("Could not verify user");
+                return BadRequest(new { Data = "Could not verify user" });
 
             var group = QuantApp.Kernel.Group.FindGroup(model.GroupID);
 
@@ -128,15 +147,15 @@ namespace CoFlows.Server.Controllers
 
                 var claims = new[]
                 {
-                    new Claim(ClaimTypes.Name, id)
+                    new Claim(ClaimTypes.Email, model.Username)
                 };
 
-                var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("___Secret-QuantApp-Capital!1234"));
+                var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Program.jwtKey));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                 var token = new JwtSecurityToken(
-                    issuer: "quant.app",
-                    audience: "quant.app",
+                    issuer: "coflows-ce",
+                    audience: "coflows-ce",
                     claims: claims,
                     expires: DateTime.Now.AddDays(10),
                     signingCredentials: creds);
@@ -149,6 +168,7 @@ namespace CoFlows.Server.Controllers
 
                 var sessionKey = System.Guid.NewGuid().ToString();
                 sessionKeys.TryAdd(sessionKey, user.Secret);
+                revSessionKeys.TryAdd(user.Secret, sessionKey);
                 Response.Cookies.Append("coflows", sessionKey, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });
 
                 return Ok(new
@@ -159,9 +179,28 @@ namespace CoFlows.Server.Controllers
                     Session = sessionKey
                 });
             }
-            return BadRequest("Could not verify user");
+            return BadRequest(new { Data = "Could not verify user" });
         }
 
+        /// <summary>
+        /// User registration
+        /// </summary>
+        /// <param name="model">
+        /// Updated User Data:
+        ///
+        ///     {
+        ///         "FirstName": "User's first name",
+        ///         "LastName": "User's last name",
+        ///         "Email": "User's email",
+        ///         "Password": "User's password",
+        ///         "Secret": "User's secret code that is used to login without username/password",
+        ///         "GroupID": "Group to which the login should be authorised to."
+        ///     }
+        ///
+        /// </param>
+        /// <returns>Success</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Could not verify user</response>
         [HttpPost, AllowAnonymous]
         public async Task<ActionResult> Register([FromBody] SecureRegisterViewModel model)
         {
@@ -182,27 +221,28 @@ namespace CoFlows.Server.Controllers
                     user.TenantName = id;
                     user.Hash = QuantApp.Kernel.Adapters.SQL.Factories.SQLUserFactory.GetMd5Hash(model.Password);
 
-                    if (model.EncodedSecret != null)
+                    if (model.Secret != null)
                     {
-                        if (_secrets.ContainsKey(model.EncodedSecret))
-                            user.Secret = _secrets[model.EncodedSecret];
+                        if (_secrets.ContainsKey(model.Secret))
+                            user.Secret = _secrets[model.Secret];
                     }
 
                     var sessionKey = System.Guid.NewGuid().ToString();
                     sessionKeys.TryAdd(sessionKey, user.Secret);
+                    revSessionKeys.TryAdd(user.Secret, sessionKey);
                     Response.Cookies.Append("coflows", sessionKey, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });  
 
                     var claims = new[]
                         {
-                            new Claim(ClaimTypes.Name, id)
+                            new Claim(ClaimTypes.Email, user.Email)
                         };
 
-                    var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("___Secret-QuantApp-Capital!1234"));
+                    var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Program.jwtKey));
                     var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                     var token = new JwtSecurityToken(
-                        issuer: "quant.app",
-                        audience: "quant.app",
+                        issuer: "coflows-ce",
+                        audience: "coflows-ce",
                         claims: claims,
                         expires: DateTime.Now.AddDays(10),
                         signingCredentials: creds);
@@ -213,7 +253,6 @@ namespace CoFlows.Server.Controllers
                     QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup("Public");
                     group.Add(quser, typeof(QuantApp.Kernel.User), AccessType.Invited);
 
-                    // QuantApp.Kernel.Group gp = GroupRepository.FindByProfile(profile);
                     QuantApp.Kernel.Group gp = Group.FindGroup(profile);
                     if (gp != null)
                         gp.Add(quser, typeof(QuantApp.Kernel.User), AccessType.Invited);
@@ -227,7 +266,7 @@ namespace CoFlows.Server.Controllers
                     });
                 }
                 else
-                    return Ok(new { Value = false, ID = "Email is already in use..." });
+                    return BadRequest(new { Value = false, ID = "Email is already in use..." });
             }
 
             string messages = string.Join("<br\\> ", ModelState.Values
@@ -237,14 +276,37 @@ namespace CoFlows.Server.Controllers
             return Ok(new { Value = false, ID = messages });
         }
 
-        [HttpGet, AllowAnonymous]
-     
+        /// <summary>
+        /// Returns information about user that is logged in
+        /// </summary>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// Result:
+        ///
+        ///     {
+        ///         "User":
+        ///            {
+        ///                "Loggedin" = true / false,
+        ///                "ID" = "Current user's ID",
+        ///                "Name" = "Current user's full name",
+        ///                "FirstName" = "Current user's first name",
+        ///                "LastName" = "Current user's last name",
+        ///                "Email" = "Current user's email",
+        ///                "MetaData" = "Current user's metadata",
+        ///                "Secret" = "Current user's secret",
+        ///                "Session" = "Current user's session key",
+        ///            }
+        ///     }
+        ///
+        /// </response>
+        /// <response code="400">Group ID was not found</response>
+        [HttpGet]
         public async Task<ActionResult> WhoAmI()
         {
             var userId = User.QID();
 
             if (userId == null)
-                userId = "anonymous";
+                return Unauthorized();
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
 
@@ -255,19 +317,11 @@ namespace CoFlows.Server.Controllers
             string firstname = "";
             string lastname = "";
             string email = "";
-            // string groupID = "";
-            // string groupName = "";
-            // string groupDescription = "";
-            // string groupPermission = "";
-            // string masterGroupID = "";
-            // string masterGroupName = "";
-            // string masterGroupDescription = "";
-            // string masterGroupPermission = "";
-            string metadata = "";
+           string metadata = "";
 
             string secret = "";
 
-            if (quser != null && quser.ID != "anonymous")            
+            if (quser != null)
             {
                 List<object> groups_serialized = new List<object>();
                 loggedin = true;
@@ -280,43 +334,13 @@ namespace CoFlows.Server.Controllers
 
                 secret = quser.Secret;
 
-                // Response.Cookies.Append("coflows", quser.Secret, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });  
 
-                // var appCookie = Request.Cookies["QuantAppProfile"];
-
-                // string profile = appCookie != null ? appCookie : null;
-
-                // QuantApp.Kernel.Group group = string.IsNullOrWhiteSpace(profile) ? null : GroupRepository.FindByProfile(profile);
-                // if (group == null)
-                // {
-                //     var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}");
-                //     group = GroupRepository.FindByURL(location.AbsoluteUri);
-                // }
-
-                // groupID = (group != null ? group.ID : "Public");
-
-                // var qgroup = QuantApp.Kernel.Group.FindGroup(groupID);
-
-                // groupName = qgroup.Name;
-                // groupPermission = qgroup.Permission(null, quser).ToString();
-
-                // masterGroupID = qgroup.Master.ID;
-                // masterGroupName = qgroup.Master.Name;
-                // masterGroupPermission = qgroup.Master.Permission(null, quser).ToString();
-
-                // var groups = quser.MasterGroups();
-                // if (groups != null)
-                //     foreach (var s_group in groups)
-                //     {
-                //         groups_serialized.Add(new
-                //         {
-                //             ID = s_group.ID,
-                //             Name = (s_group.Name.StartsWith("Personal:") ? "Personal" : s_group.Name),
-                //             Permission = s_group.Permission(null, quser).ToString()
-                //         });
-                //     }
-
-                // List<string> lastLogin = UserRepository.LastUserHistory(quser.ID);
+                if(!revSessionKeys.ContainsKey(secret))
+                {
+                    var session = System.Guid.NewGuid().ToString();
+                    sessionKeys.TryAdd(session, secret);
+                    revSessionKeys.TryAdd(secret, session);
+                }
 
                 return Ok(new
                 {
@@ -328,34 +352,40 @@ namespace CoFlows.Server.Controllers
                         FirstName = firstname,
                         LastName = lastname,
                         Email = email,
-                        // Administrator = QuantApp.Kernel.Group.FindGroup("Administrator").Permission(null, quser).ToString(),
                         MetaData = metadata,
-                        // LastLoginDate = lastLogin == null ? null : lastLogin[0],
-                        // LastLoginIP = lastLogin == null ? null : lastLogin[1],
-                        Secret = secret
-                    },
-                    // Group = new
-                    // {
-                    //     ID = groupID,
-                    //     Name = groupName,
-                    //     Description = groupDescription,
-                    //     Permission = groupPermission
-                    // },
-                    // MasterGroup = new
-                    // {
-                    //     ID = masterGroupID,
-                    //     Name = masterGroupName,
-                    //     Description = masterGroupDescription,
-                    //     Permission = masterGroupPermission
-                    // },
-                    // Groups = groups_serialized,
+                        Secret = secret,
+                        Session = revSessionKeys.ContainsKey(secret) ? revSessionKeys[secret] : ""
+                    }
                 });
             }
             else
             {
-                return Ok();
+                return BadRequest(new { Data = "User not logged in"});
             }
         }
+
+        /// <summary>
+        /// Get the current user's Permission (accessType) to a group (groupid)
+        /// </summary>
+        /// <param name="groupid">Group ID</param>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// Result:
+        ///
+        ///     {
+        ///         'Data': accessType
+        ///     }
+        ///
+        /// Where accessType is:
+        ///
+        ///         Invited = -2
+        ///         Denied = -1
+        ///         View = 0
+        ///         Read = 1
+        ///         Write = 2
+        ///
+        /// </response>
+        /// <response code="400">Permissible ID was not found or Group ID was not found</response>
         [HttpGet]
         public ActionResult GetPermission(string groupid)
         {
@@ -374,5 +404,71 @@ namespace CoFlows.Server.Controllers
 
             return Ok(new { Data = AccessType.Denied });
         }
+
+        /// <summary>
+        /// Get user data. This is a json object with any type of information linked to a group (groupid)
+        /// </summary>
+        /// <param name="groupid">Group ID</param>
+        /// <param name="type">Type of data</param>
+        /// <returns>Success</returns>
+        /// <response code="200">Json object</response>
+        [HttpGet]
+        public async Task<IActionResult> UserData(string groupid, string type)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return Unauthorized();
+
+            QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
+
+            QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
+
+            return Ok(Newtonsoft.Json.JsonConvert.DeserializeObject(quser.GetData(group, type)));
+        }
+
+        public class SaveUserDataClass
+        {
+            public string UserID { get; set; }
+            public string GroupID { get; set; }
+            public string Type { get; set; }
+            public Newtonsoft.Json.Linq.JObject data { get; set; }
+        }
+        /// <summary>
+        /// Save user data. This is a json object with any type of information linked to a group (groupid)
+        /// </summary>
+        /// <param name="data">
+        /// Data:
+        ///
+        ///     {
+        ///         "UserID": "User's ID",
+        ///         "GroupID": "Group linked to the data",
+        ///         "Type": "Type of data (ID)",
+        ///         "data": "JSON object"
+        ///     }
+        ///
+        /// </param>
+        /// <returns>Success</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Group not found</response>
+        [HttpPost]
+        public async Task<IActionResult> SaveUserData([FromBody] SaveUserDataClass data)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return Unauthorized();
+
+            QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(data.UserID);
+
+            QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(data.GroupID);
+            if(group == null)
+                return BadRequest(new { Data = "Group not found" });
+
+            quser.SaveData(group, data.Type, data.ToString());
+
+            return Ok(new { Result = "ok" });
+        }
+
+        
+
     }
 }

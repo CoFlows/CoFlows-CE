@@ -54,6 +54,10 @@ namespace CoFlows.Server
         public static bool useJupyter = false;
         public static bool loadedJupyter = false;
 
+        public static string jwtKey = System.Guid.NewGuid().ToString();
+
+        internal static JObject config;
+
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
         {
@@ -79,7 +83,7 @@ namespace CoFlows.Server
             if(string.IsNullOrEmpty(config_file))
                 config_file = "coflows_config.json";
 
-            JObject config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
+            config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
             workflow_name = config["Workflow"].ToString();
             hostName = config["Server"]["Host"].ToString();
             var secretKey = config["Server"]["SecretKey"].ToString();
@@ -90,8 +94,6 @@ namespace CoFlows.Server
             var sslFlag = hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(letsEncryptEmail);
 
             useJupyter = config["Jupyter"].ToString().ToLower() == "true";
-
-            // var connectionString = config["Database"].ToString();
 
             var cloudHost = config["Cloud"]["Host"].ToString();
             var cloudKey = config["Cloud"]["SecretKey"].ToString();
@@ -428,9 +430,13 @@ namespace CoFlows.Server
                 //var result = Connection.Client.Execute(code, code_name, pkg.ID, queryID, funcName, parameters);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
-                
+
                 Console.WriteLine("Result: ");
-                Console.WriteLine(result);
+                if(funcName == "?")                    
+                    Console.WriteLine(OpenAPI(result, ""));
+                
+                else
+                    Console.WriteLine(result);
             }
             //Azure Container Instance
             else if(args != null && args.Length > 1 && args[0] == "aci" && args[1] == "deploy")
@@ -860,9 +866,91 @@ namespace CoFlows.Server
             return QuantApp.Engine.Utils.ActiveWorkflowList;
         }
 
+        public static string OpenAPI(object _result, string _path)
+        {
+            
+            dynamic result = _result;
+            dynamic info = result.Result[0].Item2;
+            var json = new Dictionary<string, object>() { 
+                {"openapi", "3.0.0"},
+                {"info", 
+                    new { 
+                        title = info.Title,
+                        description = info.Description,
+                        version = info.Version,
+                        termsOfService = info.TermsOfService,
+                        license = new { name = info.License.Name, url = info.License.URL },
+                        contact = new { name = info.Contact.Name, url = info.Contact.URL, email = info.Contact.Email }
+                        }
+                    },
+                {"servers", new List<object>() { new { url = (string.IsNullOrEmpty(Program.letsEncryptEmail) ? "http://" : "https://") + Program.hostName + _path}}}
+            };
+
+            var apis = new Dictionary<string, object>();
+
+            for(int i = 1; i < result.Result.Length; i++)
+            {
+                var name = result.Result[i].Item1;
+                dynamic api = result.Result[i].Item2;
+                if(api != null)
+                {
+                    var pars = new List<object>();
+                    foreach(var par in api.Parameters)                            
+                        pars.Add(new Dictionary<string, object>(){
+                            {"name", par.Name},
+                            {"in", "query"},
+                            {"required", true},
+                            {"description", par.Description},
+                            {"schema", new { type = par.Type }},
+                        });
+
+                    pars.Add(new Dictionary<string, object>(){
+                            {"name", "_cokey"},
+                            {"in", "query"},
+                            {"required", false},
+                            {"description", "CoFlows User Key. This value can also be set in the Header"},
+                            {"schema", new { type = "string" }},
+                        });
+                    
+
+                    apis.Add(
+                        "/" + name, 
+                        new { 
+                            get = new {
+                                description = api.Description,
+                                parameters = pars,
+                                responses = new Dictionary<string, object>() { 
+                                    {"200", new { description = api.Returns } }
+                                    }
+                            }}
+                        );
+                }
+                else
+                    apis.Add(
+                        "/" + name, 
+                        new { 
+                            get = new {
+                                description = "not found",
+                                responses = new Dictionary<string, object>() { 
+                                    {"200", new { description = "not found" } }
+                                    }
+                            }}
+                        );
+            }
+
+            json.Add("paths", apis);
+
+            var expConverter = new Newtonsoft.Json.Converters.ExpandoObjectConverter();
+            dynamic deserializedObject = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(JsonConvert.SerializeObject(json, Formatting.Indented), expConverter);
+
+            var serializer = new YamlDotNet.Serialization.Serializer();
+            string yaml = serializer.Serialize(deserializedObject);
+            return yaml;
+        }
+
 
         private static readonly object logLock = new object();
-        public static IEnumerable<Workflow> GetDefaultWorkflows()
+        public static IEnumerable<Workflow> LocalWorkflows()
         {
             return QuantApp.Engine.Utils.ActiveWorkflowList;
         }
@@ -926,7 +1014,6 @@ namespace CoFlows.Server
 
         public static void Init(string[] args, QuantApp.Kernel.Factories.IRTDEngineFactory socketFactory, Type startup)
         {
-            // QuantApp.Kernel.RTDEngine.Factory = new Realtime.WebSocketListner();
             QuantApp.Kernel.RTDEngine.Factory = socketFactory;
 
             if (args == null || args.Length == 0 || args[0] == "server")
@@ -937,15 +1024,6 @@ namespace CoFlows.Server
                     {
                         webBuilder.UseUrls(new string[] { "http://*", "https://*" });
                         webBuilder
-                        // .ConfigureKestrel(serverOptions =>
-                        // {
-                        //     serverOptions.Listen(System.Net.IPAddress.Any, 80, listenOptions => {});
-                        //     serverOptions.Listen(System.Net.IPAddress.Any, 443, listenOptions =>
-                        //     {
-                        //         // listenOptions.UseHttps();//ssl_cert, ssl_password);
-                        //     });
-                        // })
-                        // .UseStartup<Startup>();
                         .UseStartup(startup);
                     })
                     .Build()
@@ -955,11 +1033,7 @@ namespace CoFlows.Server
             {
                 Console.WriteLine("SSL encryption is not used....");
                 Host.CreateDefaultBuilder(args)
-                    .ConfigureWebHostDefaults(webBuilder =>
-                    {
-                        // webBuilder.UseStartup<Startup>();
-                        webBuilder.UseStartup(startup);
-                    })
+                    .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(startup))
                     .Build()
                     .Run();
             }

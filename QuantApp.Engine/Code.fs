@@ -30,6 +30,7 @@ open Python.Runtime
 open QuantApp.Kernel.JVM
 
 open System.Xml
+open System.Xml.Linq
 open System.Net
 
 open FSharp.Interop.Dynamic
@@ -419,6 +420,88 @@ module Code =
                 let jvFlag = "//java"
                 let scFlag = "//scala"
 
+                let documentation = 
+                    if functionName = "?" then
+                        codes_all
+                        |> List.map(fun (name, code) ->
+                            try
+                                let codes = code.Split([|"\r\n"; "\r"; "\n"|], StringSplitOptions.None)
+                                let xmlString = codes |> Array.fold(fun acc line -> acc + if line.TrimStart().StartsWith("///") || line.TrimStart().StartsWith("###") || line.TrimStart().StartsWith("'''") then line.Replace("///", "").Replace("###", "").Replace("'''", "") else "") ""
+                                let doc = XDocument.Parse("<root>" + xmlString + "</root>")
+
+                                let xn s = XName.Get(s)
+                                let info = doc.Element(xn "root").Element(xn "info")
+
+                                let info_title = if info |> isNull || info.Element(xn "title") |> isNull then name else info.Element(xn "title").Value
+                                let info_version = if info |> isNull || info.Attribute(xn "version") |> isNull then "0.0.1" else info.Attribute(xn "version").Value;
+                                let info_description = if info |> isNull || info.Element(xn "description") |> isNull then "no description found" else info.Element(xn "description").Value
+                                let info_termsOfService = if info |> isNull || info.Element(xn "termsOfService") |> isNull then "" else info.Element(xn "termsOfService").Attribute(xn "url").Value
+
+                                let info_contact = if info |> isNull then null else info.Element(xn "contact")
+                                let info_contact_name = if info_contact |> isNull || info_contact.Attribute(xn "name") |> isNull then "" else info_contact.Attribute(xn "name").Value
+                                let info_contact_url = if info_contact |> isNull || info_contact.Attribute(xn "url") |> isNull then "" else info_contact.Attribute(xn "url").Value
+                                let info_contact_email = if info_contact |> isNull || info_contact.Attribute(xn "email") |> isNull then "" else info_contact.Attribute(xn "email").Value
+
+                                let info_license = if info |> isNull then null else info.Element(xn "license")
+                                let info_license_name = if info_license |> isNull || info_license.Attribute(xn "name") |> isNull then "" else info_license.Attribute(xn "name").Value
+                                let info_license_url = if info_license |> isNull || info_license.Attribute(xn "url") |> isNull then "" else info_license.Attribute(xn "url").Value
+
+                                let info_pair = (
+                                    "#info", 
+                                    {| 
+                                        Title = info_title; 
+                                        Version = info_version; 
+                                        Description = info_description; 
+                                        TermsOfService = info_termsOfService; 
+                                        Contact = {| Name = info_contact_name; URL = info_contact_url; Email = info_contact_email |};
+                                        License = {| Name = info_license_name; URL = info_license_url |};
+                                    |} :> obj)
+                                info_pair |> resdb.Add
+
+                                let apis = doc.Elements(xn "root").Elements(xn "api")
+
+                                name.ToLower(),
+                                apis 
+                                |> Seq.map(fun api -> 
+                                    let functionName = if api.Attribute(xn "name") |> isNull then "" else api.Attribute(xn "name").Value;
+                                    let description = if api.Element(xn "description") |> isNull then "" else api.Element(xn "description").Value
+                                    let returns = if api.Element(xn "returns") |> isNull then "" else api.Element(xn "returns").Value
+
+                                    let parametersDoc = api.Elements(xn "param")
+                                    let parameters =
+                                        if parametersDoc |> isNull then 
+                                            Seq.empty
+                                        else 
+                                            parametersDoc 
+                                            |> Seq.map(fun parameter -> 
+                                                let parName = if parameter.Attribute(xn "name") |> isNull then "" else parameter.Attribute(xn "name").Value
+                                                let parType = if parameter.Attribute(xn "type") |> isNull then null else parameter.Attribute(xn "type").Value
+                                                let parValue = parameter.Value
+
+                                                {|
+                                                    Name = parName;
+                                                    Description = parValue;
+                                                    Type = parType
+                                                |})
+
+                                    functionName,
+                                    {|
+                                        Name = functionName;
+                                        Description = description;
+                                        Returns = returns;
+                                        Parameters = parameters
+                                    |} :> obj
+                                    )
+                                
+                                // |> Seq.append(seq { "#info", info.ToString() :> obj})
+                                |> Map.ofSeq
+                            with _ ->
+                                name.ToLower(), Seq.empty |> Map.ofSeq
+                            )
+                        |> List.toSeq |> Map.ofSeq
+                    else
+                        Seq.empty |> Map.ofSeq
+                        
                 let libs() =
                     #if NETCOREAPP3_1
                     let sysDir_base = Path.GetDirectoryName(@"ref/netcoreapp3.1/")
@@ -509,8 +592,7 @@ module Code =
                             | :? ReflectionTypeLoadException as ex -> 
                                 ex.Types |> Array.filter(isNull >> not)
                             |> Array.iter(fun t ->
-
-
+                                
                                 let methods = t.GetMethods()
                                 for m in methods do
                                     try
@@ -518,7 +600,7 @@ module Code =
                                             let name = m.Name.Replace("get_","")
                                             try
                                                 let parameterInfo = m.GetParameters() |> Seq.toArray |> Array.map(fun pi -> pi.ParameterType)
-                                                if functionName |> String.IsNullOrWhiteSpace |> not then
+                                                if functionName |> String.IsNullOrWhiteSpace |> not && functionName = "?" |> not then
                                                     if functionName = name then
                                                         let t0 = DateTime.Now
                                                         "Executing: " + m.Name + " " + t0.ToString() |> Console.WriteLine
@@ -548,6 +630,15 @@ module Code =
                                                         let pair = (name, res)
                                                         // "Executed: " + m.Name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                         pair |> resdb.Add
+                                                elif functionName = "?" then
+                                                    // List all functions
+                                                    let fname = t.ToString().ToLower()
+                                                    let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".cs") then documentation.[fname + ".cs"] elif documentation.ContainsKey(fname + ".fs") then documentation.[fname + ".fs"] elif documentation.ContainsKey(fname + ".vb") then documentation.[fname + ".vb"] else (Seq.empty |> Map.ofSeq)
+                                                    
+                                                    // let pair = (name, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
+                                                    let pair = (name, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
+                                                    pair |> resdb.Add
+
                                                 elif parameterInfo |> Array.isEmpty && t.Namespace |> isNull then
                                                     let res = m.Invoke(null, null)
                                                     let pair = (name, res)
@@ -758,7 +849,7 @@ module Code =
                         using (Py.GIL()) (fun _ ->
                             setPythonOut |> PythonEngine.RunSimpleString
 
-                            let pyModule = 
+                            let pyName, pyModule = 
                                 let pathTemp = Path.GetTempPath()
 
                                 pathTemp |> setPythonImportPath |> PythonEngine.RunSimpleString
@@ -770,11 +861,12 @@ module Code =
                                     codes 
                                     |> List.map(fun (name : string, code : string) ->
                                         try
+                                            let _name = name
                                             let code = code.Replace("from . ", "").Replace("from .. ", "").Replace("from ..", "from ").Replace("from .", "from ")
                                             let hash = code |> GetMd5Hash
                                            
                                             if hash |> CompiledPythonModules.ContainsKey && name |> CompiledPythonModulesNameHash.ContainsKey && CompiledPythonModulesNameHash.[name] = hash then
-                                                CompiledPythonModules.[hash]
+                                                name, CompiledPythonModules.[hash]
                                             else
 
                                                 try
@@ -817,27 +909,28 @@ module Code =
                                                 // the native kernel which is different to the VM used in Mac and Win.
                                                 
                                                 let namesplit = name.Split('/')
+                                                
                                                 if name.Contains("Base") && namesplit.Length > 2 then
                                                     
                                                     let pkgName = namesplit.[1]
                                                     pkgName |> InstallPip
-                                                    null
+                                                    _name, null
                                                 else
                                                 
                                                     let pyMod = PythonEngine.CompileToModule(name, code, pyFile)
                                                     if pyMod |> isNull then 
                                                         "Error loading: " + name |> Console.WriteLine
-                                                        null 
+                                                        _name, null 
                                                     else
                                                         (hash, pyMod) |> CompiledPythonModules.TryAdd
                                                         if modFlag |> not then (modName, modName) |> CompiledPythonModulesName.TryAdd |> ignore 
-                                                        pyMod
+                                                        _name, pyMod
                                         with
                                         | ex -> 
                                             ex |> Console.WriteLine
                                             if "required positional argument" |> ex.Message.Contains |> not then
                                                 ex.Message |> sbuilder.AppendLine |> ignore
-                                            null
+                                            "", null
                                     )
 
                                 modules |> List.last
@@ -947,7 +1040,7 @@ module Code =
                                                 |> Newtonsoft.Json.JsonConvert.SerializeObject
                                                 |> Newtonsoft.Json.JsonConvert.DeserializeObject
 
-                                    if functionName |> isNull then
+                                    if functionName |> isNull || functionName = "?" then
                                         let names = pyModule.Dir()
                                         for n in names do
                                             let n_str = n.ToString()
@@ -971,7 +1064,16 @@ module Code =
                                                         | _ -> ""
                                                     
                                                     if funcModuleName |> String.IsNullOrWhiteSpace || moduleName.Contains(funcModuleName) then
-                                                        let obje = cls |> obje_func(func, n.ToString())
+                                                        // List all function names "?"
+                                                        let obje = 
+                                                            if functionName = "?" then 
+                                                                let fname = pyName.ToLower()
+                                                                let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".cs") then documentation.[fname + ".cs"] elif documentation.ContainsKey(fname + ".fs") then documentation.[fname + ".fs"] elif documentation.ContainsKey(fname + ".vb") then documentation.[fname + ".vb"] else (Seq.empty |> Map.ofSeq)
+                                                                let name = n.ToString()
+                                                                // (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj
+                                                                (if doc.ContainsKey(name) then doc.[name] else null) :> obj
+                                                            else 
+                                                                cls |> obje_func(func, n.ToString())
                                                         if obje |> isNull |> not then
                                                             let pair = (n.ToString(), obje)
                                                             pair |> resdb.Add
@@ -1070,7 +1172,7 @@ module Code =
                                         
                                         if isEnum && name <> "jsWrapper" && valu |> isNull |> not && not(valu.ToString().StartsWith("[Namespace:")) then 
 
-                                            if functionName |> String.IsNullOrWhiteSpace |> not then
+                                            if functionName |> String.IsNullOrWhiteSpace |> not && functionName = "?" |> not then
                                                 if functionName = name then
                                                     let t0 = DateTime.Now
                                                     // "Executing: " + name + " " + t0.ToString() |> Console.WriteLine
@@ -1116,41 +1218,53 @@ module Code =
                                                         pair |> resdb.Add
                                             elif name.StartsWith("__") |> not then
                                                 let valu_s = valu.ToString()
+                                                
                                                 if valu_s.StartsWith("function()") then
                                                     let func = valu.ToObject() :?> Func<Jint.Native.JsValue,Jint.Native.JsValue[],Jint.Native.JsValue>
                                                     let func_obj = valu :?> Jint.Native.Function.ScriptFunctionInstance
                                                     let pars = func_obj.FormalParameters
-                                                    if pars.Length = 0 then
-                                                        let res =
-                                                            func.Invoke(
-                                                                Jint.Native.JsValue.Undefined,
-                                                                if parameters |> isNull then
+                                                    
+                                                    if functionName = "?" || pars.Length = 0 then
+                                                        if functionName = "?" |> not then
+                                                            let res =
+                                                                func.Invoke(
+                                                                    Jint.Native.JsValue.Undefined,
+                                                                    if parameters |> isNull then
+                                                                        null
+                                                                    else
+                                                                        parameters 
+                                                                        |> Array.map(fun x -> 
+                                                                            if x.ToString().StartsWith("{\"") then
+                                                                                let objr = x :> obj
+                                                                                let res = Jint.Native.Json.JsonParser(engine).Parse(objr.ToString()) :> JsValue
+                                                                            
+                                                                                res
+                                                                            
+                                                                            elif x.ToString().StartsWith("{") then
+                                                                                let str = Newtonsoft.Json.JsonConvert.SerializeObject(x) 
+                                                                                let res = Jint.Native.Json.JsonParser(engine).Parse(str) :> JsValue
+                                                                                
+                                                                                res
+                                                                            else
+                                                                                Jint.Native.JsValue.FromObject(engine, x)
+                                                                            )
+                                                                        )
+                                                            let res = 
+                                                                if res = Jint.Native.JsValue.Undefined then
                                                                     null
                                                                 else
-                                                                    parameters 
-                                                                    |> Array.map(fun x -> 
-                                                                        if x.ToString().StartsWith("{\"") then
-                                                                            let objr = x :> obj
-                                                                            let res = Jint.Native.Json.JsonParser(engine).Parse(objr.ToString()) :> JsValue
-                                                                        
-                                                                            res
-                                                                        
-                                                                        elif x.ToString().StartsWith("{") then
-                                                                            let str = Newtonsoft.Json.JsonConvert.SerializeObject(x) 
-                                                                            let res = Jint.Native.Json.JsonParser(engine).Parse(str) :> JsValue
-                                                                            
-                                                                            res
-                                                                        else
-                                                                            Jint.Native.JsValue.FromObject(engine, x)
-                                                                        )
-                                                                    )
-                                                        let res = 
-                                                            if res = Jint.Native.JsValue.Undefined then
-                                                                null
-                                                            else
-                                                                res.ToObject() :> obj
-                                                        let pair = (name, res)
-                                                        pair |> resdb.Add
+                                                                    res.ToObject() :> obj
+                                                            let pair = (name, res)
+                                                            pair |> resdb.Add
+                                                        else
+                                                            let fname, _ = codes |> List.last
+                                                            let fname = fname.ToLower()
+                                                            let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".js") then documentation.[fname + ".js"] else (Seq.empty |> Map.ofSeq)
+                                                            // let docVal = (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj
+                                                            let docVal = (if doc.ContainsKey(name) then doc.[name] else null) :> obj
+
+                                                            let pair = (name, docVal)
+                                                            pair |> resdb.Add
                                                 else
                                                     let pair = (name, valu.ToObject() :> obj)
                                                     pair |> resdb.Add
@@ -1290,8 +1404,7 @@ module Code =
                                             let funcName = key.Substring(0, key.IndexOf("-"))
                                             let argSignature = key.Substring(key.IndexOf("-") + 1)
                                             
-                                            
-                                            if (if functionName |> isNull then ("-" |> key.EndsWith) else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
+                                            if (if functionName |> isNull || (functionName = "?" && (funcName.Contains("$") |> not) && (key = "equals-Ljava/lang/Object;" |> not)) then ("-" |> key.EndsWith || functionName = "?") else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
 
                                                 let parameters =
                                                     if parameters |> isNull then 
@@ -1344,10 +1457,20 @@ module Code =
                                                                     p :> obj)
                                                 
                                                 try
-                                                    let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
+                                                    if functionName = "?" |> not then
+                                                        let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
 
-                                                    if value |> isNull |> not then
-                                                        let pair = (funcName, value)
+                                                        if value |> isNull |> not then
+                                                            let pair = (funcName, value)
+                                                            pair |> resdb.Add
+                                                    else
+
+                                                        // "------ JAVA: " + className |> Console.WriteLine
+                                                        let fname = className.ToLower()
+                                                        let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".java") then documentation.[fname + ".java"] else (Seq.empty |> Map.ofSeq)
+                                                        let name = funcName
+                                                        // let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
+                                                        let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
                                                         pair |> resdb.Add
                                                 with
                                                 | ex -> 
@@ -1482,8 +1605,7 @@ module Code =
                                                 let funcName = key.Substring(0, key.IndexOf("-"))
                                                 let argSignature = key.Substring(key.IndexOf("-") + 1)
                                                 
-                                                
-                                                if (if functionName |> isNull then ("-" |> key.EndsWith) else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
+                                                if (if functionName |> isNull || (functionName = "?" && (funcName.Contains("$") |> not) && (key = "equals-Ljava/lang/Object;" |> not)) then ("-" |> key.EndsWith || functionName = "?") else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
                                                     let parameters =
                                                         if parameters |> isNull then 
                                                             [||] 
@@ -1535,10 +1657,20 @@ module Code =
                                                                         p :> obj)
                                                     
                                                     try
-                                                        let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
+                                                        if functionName = "?" |> not then
+                                                            let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
 
-                                                        if value |> isNull |> not then
-                                                            let pair = (funcName, value)
+                                                            if value |> isNull |> not then
+                                                                let pair = (funcName, value)
+                                                                pair |> resdb.Add
+                                                        else
+                                                            
+                                                            let fname = className.ToLower()
+                                                            let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".scala") then documentation.[fname + ".scala"] else (Seq.empty |> Map.ofSeq)
+                                                            let name = funcName
+                                                            // let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
+                                                            let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
+                                                            
                                                             pair |> resdb.Add
                                                     with
                                                     | ex -> 

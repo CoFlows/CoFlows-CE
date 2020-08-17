@@ -112,7 +112,7 @@ export class WorkflowComponent {
     groupFiles = []
 
     downloadFile(file) {
-        this.coflows.GetFile("files/file?id=" + file.ID, data => {
+        this.coflows.GetFile("files/file?fid=" + file.ID, data => {
             var blob = new Blob([data], { type: data.type });
 
             var a = document.createElement("a");
@@ -135,11 +135,11 @@ export class WorkflowComponent {
             })
 
             this.uploader = new FileUploader({
-                url: coflows.coflows_server + 'files/uploadfile?id=' + this.wid,
+                url: coflows.coflows_server + 'files/uploadfile?groupid=' + this.wid,
                 authToken: 'Bearer ' + localStorage.getItem('CoFlows-CoFlowsJWT'),
             })
 
-            this.coflows.Get("files/files?id=" + this.wid, data => {
+            this.coflows.Get("files/files?groupid=" + this.wid, data => {
                 this.groupFiles = data
             })
 
@@ -147,7 +147,7 @@ export class WorkflowComponent {
             
             // this.response = ''        
             this.uploader.response.subscribe( res => { 
-                this.coflows.Get("files/files?id=" + this.wid, data => {
+                this.coflows.Get("files/files?groupid=" + this.wid, data => {
                     this.groupFiles = data
                 })
                 this.response = res 
@@ -426,7 +426,7 @@ export class WorkflowComponent {
     onChangeActiveFunction(id, item){     
         // console.log(id, item)
 
-        this.coflows.Get('m/activetoggle?id=' + id ,
+        this.coflows.Get('flow/activeagenttoggle?id=' + id ,
             data => {
                 console.log(data)
 
@@ -578,8 +578,8 @@ export class WorkflowComponent {
             data => {
                 this.coflows.showMessage('Permission updated')
 
-                this.coflows.GetFile("files/remove?id=" + this.activeFile.ID, data => {
-                    this.coflows.Get("files/files?id=" + this.wid, data => {
+                this.coflows.GetFile("files/remove?fid=" + this.activeFile.ID, data => {
+                    this.coflows.Get("files/files?groupid=" + this.wid, data => {
                         this.groupFiles = data
                         this.modalService.dismissAll(this.activeModal)
                     })
@@ -884,7 +884,7 @@ export class WorkflowComponent {
         }
         // console.log(templateCode)
 
-        this.coflows.Post('m/createf',
+        this.coflows.Post('flow/createagent',
             templateCode
             ,
             data => {
@@ -960,7 +960,7 @@ def pkg():
         }
         // console.log(templateCode)
 
-        this.coflows.Post('m/createf',
+        this.coflows.Post('flow/createagent',
             templateCode
             ,
             data => {
@@ -1040,7 +1040,7 @@ public class CSharpAgent
         }
         // console.log(templateCode)
 
-        this.coflows.Post('m/createf',
+        this.coflows.Post('flow/createagent',
             templateCode
             ,
             data => {
@@ -1124,7 +1124,7 @@ public class CSharpAgent
         }
         console.log(templateCode)
 
-        this.coflows.Post('m/createf',
+        this.coflows.Post('flow/createagent',
             templateCode
             ,
             data => {
@@ -1201,7 +1201,7 @@ let pkg = new qengine.FPKG(
 
         }
         
-        this.coflows.Post('m/createf',
+        this.coflows.Post('flow/createagent',
             templateCode
             ,
             data => {

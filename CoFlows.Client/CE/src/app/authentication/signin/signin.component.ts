@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+
 
 import { CoFlowsComponent } from '../../coflows/core/coflows.component';
 
@@ -11,9 +13,16 @@ import { CoFlowsComponent } from '../../coflows/core/coflows.component';
 })
 export class SigninComponent implements OnInit {
 
+  oauth:any = { AzureAD: null, GitHub: null }
+
   public form: FormGroup;
-  constructor(private fb: FormBuilder, private router: Router, private coflows: CoFlowsComponent) {
+  constructor(private http: HttpClient, private fb: FormBuilder, private router: Router, private coflows: CoFlowsComponent) {
     this.coflows.logout(false)
+
+    this.http.get(this.coflows.coflows_server + 'oauth/data') 
+        .subscribe(data => {
+          this.oauth = data
+        })
   }
 
   bgVideo = ['shutterstock_v2123993.mp4', 'shutterstock_v3389084.mp4', 'shutterstock_v5941457.mp4']

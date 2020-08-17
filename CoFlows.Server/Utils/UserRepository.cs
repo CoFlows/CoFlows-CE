@@ -26,6 +26,7 @@ namespace CoFlows.Server.Utils
 {
     public static class UserExtensions
     {
+
         public static string QID(this IPrincipal user)
         {
             if (user == null)
@@ -34,15 +35,54 @@ namespace CoFlows.Server.Utils
             var identity = user.Identity as ClaimsIdentity;
             if (identity != null)
             {
-                var tenantClaim = identity.Claims.SingleOrDefault(c => c.Type.Equals("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name", StringComparison.OrdinalIgnoreCase));
+                var email = identity.Claims.SingleOrDefault(c => c.Type.Equals(ClaimTypes.Email, StringComparison.OrdinalIgnoreCase));
+                if(email == null)
+                    email = identity.Claims.SingleOrDefault(c => c.Type.Equals("emails", StringComparison.OrdinalIgnoreCase));
 
-                if (tenantClaim != null && !string.IsNullOrEmpty(tenantClaim.Value))
-                    return tenantClaim.Value;
+                if (email != null && !string.IsNullOrEmpty(email.Value))
+                {
+                    AzureAD.Sync();
+
+                    var id = "QuantAppSecure_" + email.Value.ToLower().Replace('@', '.').Replace(':', '.');
+                    var quser = QuantApp.Kernel.User.FindUser(id);
+                    if(quser == null)
+                    {
+                        
+
+                        var nuser = UserRepository.CreateUser(System.Guid.NewGuid().ToString(), "QuantAppSecure");
+
+                        var firstName = identity.Claims.SingleOrDefault(c => c.Type.Equals(ClaimTypes.GivenName, StringComparison.OrdinalIgnoreCase));
+                        var lastName = identity.Claims.SingleOrDefault(c => c.Type.Equals(ClaimTypes.Surname, StringComparison.OrdinalIgnoreCase));
+
+                        nuser.FirstName = firstName != null ? firstName.Value : "No first name";
+                        nuser.LastName = lastName != null ? lastName.Value : "No last name";
+                        nuser.Email = email.Value.ToLower();
+
+                        nuser.TenantName = id;
+                        nuser.Hash = QuantApp.Kernel.Adapters.SQL.Factories.SQLUserFactory.GetMd5Hash(System.Guid.NewGuid().ToString());
+
+                        nuser.Secret = QuantApp.Engine.Code.GetMd5Hash(id);
+
+                        quser = QuantApp.Kernel.User.FindUser(id);
+                        QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup("Public");
+                        group.Add(quser, typeof(QuantApp.Kernel.User), AccessType.Invited);
+
+                        // QuantApp.Kernel.Group gp = GroupRepository.FindByProfile(profile);
+                        var defGroupId =  Program.config["Server"]["OAuth"] != null && Program.config["Server"]["OAuth"]["AzureAdB2C"] != null && Program.config["Server"]["OAuth"]["AzureAdB2C"]["DefaultGroupId"] != null ? Program.config["Server"]["OAuth"]["AzureAdB2C"]["DefaultGroupId"].ToString() : "";
+                        QuantApp.Kernel.Group gp = Group.FindGroup(defGroupId);
+                        if (gp != null)
+                            gp.Add(quser, typeof(QuantApp.Kernel.User), AccessType.View);
+
+                    }
+                    return id;
+                }
+                
 
                 else if (user.Identity.Name != null && user.Identity.Name.StartsWith("QuantAppSecure_"))
                     return user.Identity.Name;
             }
 
+            Console.WriteLine("--------- NOTHING " + user);
             return null;
         }
     }

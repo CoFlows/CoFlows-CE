@@ -33,7 +33,7 @@ We must now both get a **CoFlows** key and a **GitHub** token in order to allow 
 In the **GitHub** page goto
 * Click on _Settings_ and then _Webhooks_
 * Click on _Add Webhooks_ and make sure the options look as follows:  
-  Payload URL: https://coflows.quant.app/m/githubpost?key={CoFlowsKey}&token={GitHubToken}  
+  Payload URL: https://coflows.quant.app/flow/githubpost?key={CoFlowsKey}&token={GitHubToken}  
   Content Type: application/json  
   Secret: blank  
   SSL: enable  

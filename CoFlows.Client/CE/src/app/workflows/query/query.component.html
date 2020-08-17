@@ -23,6 +23,11 @@
     </div>
 </div>
 
+<div class="col-sm-12 col-md-12">
+    <a target="blank" href="{{coflows.coflows_server}}flow/openapi/{{selectedWB.WorkflowID}}/{{selectedWB.ID}}?_cokey={{coflows.quser.User.Secret}}">OpenAPI Specification</a>
+</div>
+<br/>
+
 <ngb-alert [type]="'warning'" [dismissible]="false" *ngIf="cfquery.status.indexOf('thinking...') > -1 && cfquery.visibleCode">{{cfquery.status}} <div class="loader10"></div></ngb-alert>
 <ngb-alert [type]="'danger'" [dismissible]="false" *ngIf="cfquery.status.indexOf('thinking...') == -1 && cfquery.compilationResult != '' && cfquery.compilationResult != undefined && cfquery.visibleCode">Error... please see below for details.</ngb-alert>
 <codemirror [(ngModel)]="selectedWB.Code" *ngIf="permissionSet && cfquery.visibleCode && pyCode && selectedWB != undefined"
@@ -48,7 +53,7 @@
 </codemirror> 
 
 <div class="col-sm-12 col-md-12">
-    {{coflows.coflows_server}}m/getquery?wid={{selectedWB.WorkflowID}}&qid={{selectedWB.ID}}&name=
+    {{coflows.coflows_server}}flow/getquery?wid={{selectedWB.WorkflowID}}&qid={{selectedWB.ID}}&name=
 </div>
 <coflows-query  #cfquery></coflows-query>
 
