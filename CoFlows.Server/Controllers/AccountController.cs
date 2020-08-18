@@ -147,7 +147,7 @@ namespace CoFlows.Server.Controllers
 
                 var claims = new[]
                 {
-                    new Claim(ClaimTypes.Email, model.Username)
+                    new Claim(ClaimTypes.Email, user.Email)
                 };
 
                 var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Program.jwtKey));
