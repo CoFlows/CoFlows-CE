@@ -34,9 +34,9 @@ export class MessagingService {
         this.CHAT_URL = (this.secure ? 'wss' : 'ws') + '://' + this.server + '/live'
     }
 
-    subscribe(handler, key): void{
+    subscribe(handler, key, func): void{
         // console.log('--- CONNECT: ' + this.CHAT_URL + "?_session=" + key)
-        this.wsService.connect(this.CHAT_URL + "?_session=" + key);
+        this.wsService.connect(this.CHAT_URL + "?_session=" + key, func)
         this.wsService.onmessage(
             response => {
             

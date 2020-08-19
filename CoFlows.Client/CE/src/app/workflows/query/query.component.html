@@ -23,7 +23,7 @@
     </div>
 </div>
 
-<div class="col-sm-12 col-md-12">
+<div class="col-sm-12 col-md-12" *ngIf="coflows.quser != null">
     <a target="blank" href="{{coflows.coflows_server}}flow/openapi/{{selectedWB.WorkflowID}}/{{selectedWB.ID}}?_cokey={{coflows.quser.User.Secret}}">OpenAPI Specification</a>
 </div>
 <br/>

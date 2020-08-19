@@ -98,24 +98,19 @@ export class CoFlowsComponent implements  CanActivate  {
         let waiting = false
         let iid = setInterval(x => {
             try{
-                // console.log('checking user')
                 if(!(this.quser != null && this.quser.User.Loggedin) && this.header != null && !waiting){
                     waiting = true
-                    // console.log('CHECK USER', this.header)
                     this.http.get(this.coflows_server + 'account/whoami', { headers: this.header })
                     .toPromise().then(response => {  
-                        // console.log(this.quser, this.header, response)
                         this.quser = response
                         waiting = false
 
-                        this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session)
+                        this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, func)
                         this.msService.onClose(event => {
                             console.log('connection closed', event, this.msService)
-                            // this.checkLogin(this.router.url)
                             this.logout(true)
                         })
 
-                        func()
                         clearInterval(iid)
                         return
 
@@ -168,7 +163,7 @@ export class CoFlowsComponent implements  CanActivate  {
                         // if(this.msService.reOpen()){                
                             // location.rseload();
                             // this.msService.subscribe(msg => {this.ProcessMessage(msg);});
-                            this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session)
+                            this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, x => {})
                             this.msService.onClose(event => {
                                 console.log('connection closed', event, this.msService)
                                 // this.checkLogin(this.router.url)
@@ -247,7 +242,7 @@ export class CoFlowsComponent implements  CanActivate  {
 
                     localStorage.setItem('CoFlowsURL', null);
 
-                    this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session)
+                    this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, x => {})
                     this.msService.onClose(event => {
                         console.log('connection closed', event, this.msService)
                         // this.checkLogin(this.router.url)
@@ -291,7 +286,7 @@ export class CoFlowsComponent implements  CanActivate  {
 
                             localStorage.setItem('CoFlowsURL', null);
 
-                            this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session)
+                            this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, x => {})
                             this.msService.onClose(event => {
                                 console.log('connection closed', event, this.msService)
                                 // this.checkLogin(this.router.url)
@@ -371,7 +366,6 @@ export class CoFlowsComponent implements  CanActivate  {
             Type: 1,
             Content: id
         };
-        // console.log('subscribe: ' + id)
         this.msService.send(mess);
     };
 
@@ -446,7 +440,6 @@ export class CoFlowsComponent implements  CanActivate  {
 
     ProcessMessage(event): void {
         var message = event;//JSON.parse(message_str);
-        
 
         var content = message.Content;
         var counter = message.Counter;
@@ -626,7 +619,7 @@ export class CoFlowsComponent implements  CanActivate  {
                 }
                 catch (err) { }
 
-                // console.log(message, data, obj)
+                //console.log(message, data, obj)
                 
 
                 obj = { Key: message.ID, Value: obj }
@@ -708,7 +701,6 @@ export class CoFlowsComponent implements  CanActivate  {
                         return {Key: x.EntryID, Value: obj }
                     })
 
-                    //console.log(resp)
                     if (this.UserData.has(key)) {
                         this.UserData.get(key).Value = resp;
                     }

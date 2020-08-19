@@ -15,7 +15,7 @@
                 <div class="f-headers text-color" (click)="onTabClick(result.Item1)">{{result.Item1}}</div>
             </ng-template>
             <ng-template ngbTabContent>
-                <div class="col-sm-12 col-md-12">
+                <div class="col-sm-12 col-md-12" *ngIf="coflows.quser != null">
                     <a class="f-headers text-color"  target="_blank" href="{{coflows.coflows_server}}flow/getquery?wid={{selectedWB.WorkflowID}}&qid={{selectedWB.ID}}&_cokey={{coflows.quser.User.Secret}}&name={{result.Item1}}">{{coflows.coflows_server}}flow/getquery?wid={{selectedWB.WorkflowID}}&qid={{selectedWB.ID}}&_cokey={{coflows.quser.User.Secret}}&name={{result.Item1}}</a>
                 </div>
                 <div *ngIf="result.IsDash" class="col-sm-12 col-md-12">
