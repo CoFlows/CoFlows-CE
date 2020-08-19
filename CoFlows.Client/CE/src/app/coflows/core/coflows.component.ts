@@ -664,14 +664,13 @@ export class CoFlowsComponent implements  CanActivate  {
         
         
             var key = "--" + type + "-" + scope.User.ID;
-            this.http.get(this.coflows_server + '/CoFlows/GetUserData?groupid=' + scope.Group.ID + '&type=' + type, { headers: this.header })
+            this.http.get(this.coflows_server + 'account/userdata?groupid=' + scope.Group.ID + '&type=' + type, { headers: this.header })
             .toPromise().then(function(resp){
                 
                 if (this.UserData.containsKey(key)) {
                     this.UserData.get(key).Value = resp;
                 }
                 else {
-                    console.log('---GetUserData')
                     this.Subscribe(key);
                     var container = { Key: key, Value: resp };
                     this.UserData.put(key, container);
