@@ -34,8 +34,9 @@ export class MessagingService {
         this.CHAT_URL = (this.secure ? 'wss' : 'ws') + '://' + this.server + '/live'
     }
 
-    subscribe(handler): void{
-        this.wsService.connect(this.CHAT_URL);
+    subscribe(handler, key, func): void{
+        // console.log('--- CONNECT: ' + this.CHAT_URL + "?_session=" + key)
+        this.wsService.connect(this.CHAT_URL + "?_session=" + key, func)
         this.wsService.onmessage(
             response => {
             
@@ -53,13 +54,14 @@ export class MessagingService {
         this.wsService.onclose(process);
     }
 
-    reOpen(): boolean{
-        if(this.wsService.ws.readyState !== 1){
-            this.wsService.connect(this.CHAT_URL);
-            console.log('connetion reopened');
-            return true;
-        }    
-        else
-            return false;    
-    }
+    // reOpen(): boolean{
+    //     // console.log('-- reOpen: ', this.wsService.ws.readyState)
+    //     if(this.wsService.ws.readyState !== 1){
+    //         this.wsService.connect(this.CHAT_URL);
+    //         console.log('connetion reopened');
+    //         return true;
+    //     }    
+    //     else
+    //         return false;    
+    // }
 }

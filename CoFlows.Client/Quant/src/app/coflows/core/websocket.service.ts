@@ -9,13 +9,12 @@ export class WebsocketService {
 
     private subject: Rx.Subject<MessageEvent>;
 
-    public connect(url): Rx.Subject<MessageEvent> {
-        // if (!this.subject) {
-        // this.subject = this.create(url);
-        // console.log("Successfully connected: " + url);
-        // } 
-        // return this.subject;
-        this.ws = new WebSocket(url);
+    delay(ms: number) {
+        return new Promise( resolve => setTimeout(resolve, ms) );
+    }
+    public connect(url, func): Rx.Subject<MessageEvent> {
+        this.ws = new WebSocket(url)
+        this.ws.onopen = x => { func() }
         return null;
     }
 
@@ -46,10 +45,8 @@ export class WebsocketService {
         })
     let observer = {
             next: (data: any) => {   
-                
                 if (this.ws.readyState === 1) {
                     this.ws.send(JSON.stringify(data));
-                    console.log('sent', data)
                 }
             }
         }
