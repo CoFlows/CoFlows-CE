@@ -78,7 +78,8 @@ namespace CoFlows.Core
 
     public class Connection
     {
-        private int timeout = 1000 * 60 * 20;
+        // private int timeout = 1000 * 60 * 20;
+        public static int timeout = 5;
         public static Connection Client = new Connection();
 
         public string server = "localhost";
@@ -292,12 +293,11 @@ namespace CoFlows.Core
         public string GetString(string path, object arg)
         {
             HttpClient httpClient = new HttpClient();
-            httpClient.Timeout = Timeout.InfiniteTimeSpan;
+            httpClient.Timeout = new TimeSpan(0,0,timeout);
             
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             
             if(_token != null && path != "account/login")
-            
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             
             var res = httpClient.PostAsync(QuantAppURL.AbsoluteUri + path, arg.AsJson()).Result;
@@ -307,7 +307,7 @@ namespace CoFlows.Core
         public string GetURL(string path)
         {
             HttpClient httpClient = new HttpClient();
-            httpClient.Timeout = Timeout.InfiniteTimeSpan;
+            httpClient.Timeout = new TimeSpan(0,0,timeout);
             
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             
@@ -388,6 +388,9 @@ namespace CoFlows.Core
 
         public Boolean Login(string key)
         {
+            _token = null;
+            _session = null; 
+
             _code = key;
             
             LogOnResult logonRes = GetObject<LogOnResult>("account/login", new { Code = key });
@@ -460,7 +463,7 @@ namespace CoFlows.Core
         }
         public Compute CreateCompute(QuantApp.Engine.PKG pkg)
         {
-            var res = GetObject<CreateComputeResult>("flow/CreateComputeFromJSON",  pkg);
+            var res = GetObject<CreateComputeResult>("cluster/CreateComputeFromJSON",  pkg);
             var comp = new Compute(pkg, this, res);
             return comp;
         }
@@ -469,7 +472,7 @@ namespace CoFlows.Core
         {
             var workflow = QuantApp.Kernel.M.Base(workflowID)[x => true].First() as Workflow;
             var pkg = QuantApp.Engine.Code.ProcessPackageWorkflow(workflow);
-            var res = GetObject<CreateComputeResult>("flow/CreateComputeFromJSON",  pkg);
+            var res = GetObject<CreateComputeResult>("cluster/CreateComputeFromJSON",  pkg);
             var comp = new Compute(pkg, this, res);
             return comp;
         }
@@ -477,7 +480,7 @@ namespace CoFlows.Core
         public string RemoteLogID(string workflowID)
         {
             var podname = workflowID;
-            string res = GetURL("flow/PodLog?id=" + podname);
+            string res = GetURL("cluster/PodLog?id=" + podname);
 
             var jobj = Newtonsoft.Json.Linq.JObject.Parse(res);
 
@@ -492,13 +495,13 @@ namespace CoFlows.Core
                 return log_str.ToString();
             }
 
-            return (string)jobj["Result"];
+            return (string)jobj["Result"]; 
         }
 
         public string RemoteRestart(QuantApp.Engine.PKG pkg)
         {
             var podname = pkg.ID;
-            string res = GetURL("flow/RestartPod?id=" + podname);
+            string res = GetURL("cluster/RestartPod?id=" + podname);
 
             var jobj = Newtonsoft.Json.Linq.JObject.Parse(res);
 
@@ -509,7 +512,7 @@ namespace CoFlows.Core
         public string RemoteRemoveID(string workflowID)
         {
             var podname = workflowID;
-            string res = GetURL("flow/RemovePod?id=" + podname);
+            string res = GetURL("cluster/RemovePod?id=" + podname);
 
             var jobj = Newtonsoft.Json.Linq.JObject.Parse(res);
 
