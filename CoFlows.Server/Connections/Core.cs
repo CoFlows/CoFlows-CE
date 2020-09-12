@@ -329,7 +329,7 @@ namespace CoFlows.Core
                 header.Add("Authorization", "Bearer " + _token);
                 req.Headers = header;
             }
-            req.Timeout = timeout;
+            req.Timeout = timeout * 1000;
 
             string requestContent = "";
             req.ContentLength = requestContent.Length;
