@@ -82,7 +82,6 @@ namespace CoFlows.Server.Utils
                     return user.Identity.Name;
             }
 
-            Console.WriteLine("--------- NOTHING " + user);
             return null;
         }
     }

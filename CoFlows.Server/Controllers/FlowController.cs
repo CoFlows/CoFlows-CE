@@ -161,12 +161,13 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User.ContextUser = quser.ToUserData();
 
-            var res = Code.ProcessPackageJSON(data);
-
-            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
 
             try
             {
+                var res = Code.ProcessPackageJSON(data);
+
+                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+
                 var wsp = QuantApp.Kernel.M.Base(data.ID)[x => true][0] as Workflow;
                 
                 var _pkg = QuantApp.Engine.Code.ProcessPackageWorkflow(wsp);
@@ -203,13 +204,31 @@ namespace CoFlows.Server.Controllers
                 }
 
                 Program.AddServicedWorkflows(wsp.ID);
+
+                return Ok(new {Result = res});
             }
             catch(Exception e)
             {
+                workflow_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows");
+
+                Console.WriteLine("------- FLOW ERROR");
+
+                foreach(var rr in workflow_ids[x => true])
+                    Console.WriteLine(rr.ToString());
+                
+                if(workflow_ids[x => true].Where(x => x.ToString() == data.ID).Count() > 0)
+                {
+                    Console.WriteLine("Remove this workflow from startup...");
+                    workflow_ids.Remove(data.ID);
+                    workflow_ids.Save();
+                }
+
                 Console.WriteLine(e);
+
+                throw e;
             }
 
-            return Ok(new {Result = res});
+            
         }
         
         /// <summary>
@@ -798,9 +817,42 @@ namespace CoFlows.Server.Controllers
 
                     codes.Add(new Tuple<string, string>(wb.Name, wb.Code));
 
+                    // Check permissions from meta data
+                    var meta_data = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, "?", null);
 
-                    var execution = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, name, p.Length == 0 ? null : p);
+                    var hasPermission = false;
+                    var setPermission = false;
+                    var costPermission = -1.0;
+
+                    if(meta_data != null)
+                    {
+                        foreach(dynamic func in meta_data.Result)
+                        {
+                            if(func != null && func.Item1 == name)
+                            {
+                                var pp = func.Item2;
+                                if(pp != null && pp.Permissions != null)
+                                    foreach(var perm in pp.Permissions)
+                                    {
+                                        hasPermission = true;
+                                        var permAccess = QuantApp.Kernel.User.PermissionContext(perm.GroupID);
+                                        setPermission = !setPermission ? (int)permAccess >= (int)perm.Access : setPermission;
+                                        if(costPermission == -1.0)
+                                            costPermission = perm.Cost;
+                                        else
+                                            costPermission = Math.Min(costPermission, perm.Cost);
+                                    }
+                            }
+                        }
+                        
+                    }
+
+                    if(hasPermission && !setPermission)
+                        return Unauthorized();
+                    // execute code
                     
+                    var execution = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, name, p.Length == 0 ? null : p);
+
                     var execution_result = execution.Result;
                     if(execution_result.Length == 0)
                     {
