@@ -628,10 +628,9 @@ module Code =
                                             try
                                                 let parameterInfo = m.GetParameters() |> Seq.toArray |> Array.map(fun pi -> pi.ParameterType)
                                                 if functionName |> String.IsNullOrWhiteSpace |> not && functionName = "?" |> not then
-                                                    if functionName = name then
+                                                    if functionName = name && (if parameterInfo |> isNull |> not && parameters |> isNull |> not then parameterInfo.Length = parameters.Length else true) then
                                                         let t0 = DateTime.Now
-                                                        "Executing: " + m.Name + " " + t0.ToString() |> Console.WriteLine
-
+                                                        
                                                         let res = m.Invoke(
                                                             null, 
                                                             if parameters |> isNull then 
