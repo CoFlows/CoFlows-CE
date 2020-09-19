@@ -53,7 +53,8 @@
 </codemirror> 
 
 <div class="col-sm-12 col-md-12">
-    {{coflows.coflows_server}}flow/getquery?wid={{selectedWB.WorkflowID}}&qid={{selectedWB.ID}}&name=
+    <!-- {{coflows.coflows_server}}flow/getquery?wid={{selectedWB.WorkflowID}}&qid={{selectedWB.ID}}&name= -->
+    {{coflows.coflows_server}}flow/query/{{selectedWB.WorkflowID}}/{{selectedWB.ID}}/"name"?_cokey={{coflows.quser.User.Secret}}&p[0]=1&p[1]=2&p[2]3...
 </div>
 <coflows-query  #cfquery></coflows-query>
 
