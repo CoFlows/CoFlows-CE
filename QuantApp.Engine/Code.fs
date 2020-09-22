@@ -421,7 +421,7 @@ module Code =
                 let scFlag = "//scala"
 
                 let documentation = 
-                    if functionName = "?" then
+                    if functionName = "?" || functionName = "??" then
                         codes_all
                         |> List.map(fun (name, code) ->
                             try
@@ -463,7 +463,7 @@ module Code =
                                 name.ToLower(),
                                 apis 
                                 |> Seq.map(fun api -> 
-                                    let functionName = if api.Attribute(xn "name") |> isNull then "" else api.Attribute(xn "name").Value;
+                                    let _functionName = if api.Attribute(xn "name") |> isNull then "" else api.Attribute(xn "name").Value;
                                     let description = if api.Element(xn "description") |> isNull then "" else api.Element(xn "description").Value
                                     let returns = if api.Element(xn "returns") |> isNull then "" else api.Element(xn "returns").Value
 
@@ -510,14 +510,18 @@ module Code =
                                                     Access = accessType
                                                 |})
 
-                                    functionName,
-                                    {|
-                                        Name = functionName;
-                                        Description = description;
-                                        Returns = returns;
-                                        Parameters = parameters;
-                                        Permissions = permissions
-                                    |} :> obj
+                                    let api_pair = 
+                                        _functionName,
+                                        {|
+                                            Name = _functionName;
+                                            Description = description;
+                                            Returns = returns;
+                                            Parameters = parameters;
+                                            Permissions = permissions
+                                        |} :> obj
+                                    if functionName = "??" then
+                                        api_pair |> resdb.Add
+                                    api_pair
                                     )
                                 
                                 // |> Seq.append(seq { "#info", info.ToString() :> obj})
@@ -528,730 +532,684 @@ module Code =
                         |> List.toSeq |> Map.ofSeq
                     else
                         Seq.empty |> Map.ofSeq
+
+                if functionName = "??" |> not then    
+                    let libs() =
+                        #if NETCOREAPP3_1
+                        let sysDir_base = Path.GetDirectoryName(@"ref/netcoreapp3.1/")
+                        #endif
+
+                        #if NET461
+                        let sysDir_base = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory()
+                        #endif
+
+                        let dir_sys = DirectoryInfo(sysDir_base)
+                        let files_sys =  dir_sys.GetFiles()
                         
-                let libs() =
-                    #if NETCOREAPP3_1
-                    let sysDir_base = Path.GetDirectoryName(@"ref/netcoreapp3.1/")
-                    #endif
-
-                    #if NET461
-                    let sysDir_base = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory()
-                    #endif
-
-                    let dir_sys = DirectoryInfo(sysDir_base)
-                    let files_sys =  dir_sys.GetFiles()
-                    
-                    let fsDir_base = Path.GetDirectoryName(Uri.UnescapeDataString((UriBuilder(Assembly.GetAssembly(typeof<List<int>>).CodeBase)).Path))// + "/publish"
-                    
-                    let libDir_base = Path.GetDirectoryName(Uri.UnescapeDataString((UriBuilder(Assembly.GetAssembly(typeof<QuantApp.Kernel.M>).CodeBase)).Path))// + "/publish"
-                    let dir_lib = DirectoryInfo(libDir_base)
-                    let files_lib =  dir_lib.GetFiles()
-
-                    let listFiles assemblies =
-                        let listFiles (assembly : Assembly) = try [Uri.UnescapeDataString((UriBuilder(assembly.CodeBase)).Path)] with | _ -> []
-                        assemblies
-                        |> List.map(fun assembly -> assembly |> listFiles)
-                        |> List.fold(fun acc lst -> acc |> List.append(lst)) []
+                        let fsDir_base = Path.GetDirectoryName(Uri.UnescapeDataString((UriBuilder(Assembly.GetAssembly(typeof<List<int>>).CodeBase)).Path))// + "/publish"
                         
-                    
-                    let (++) a b = System.IO.Path.Combine(a,b)
-                    let sysPath nm = sysDir_base ++ nm
-                    let fsPath nm = fsDir_base ++ nm
-                    let libPath nm = libDir_base ++ nm
+                        let libDir_base = Path.GetDirectoryName(Uri.UnescapeDataString((UriBuilder(Assembly.GetAssembly(typeof<QuantApp.Kernel.M>).CodeBase)).Path))// + "/publish"
+                        let dir_lib = DirectoryInfo(libDir_base)
+                        let files_lib =  dir_lib.GetFiles()
 
-
-                    let assemblyList = 
-                        M._compiledAssemblies.Values |> Seq.toList
-                        |> List.append(
-                            [
-                                typeof<Newtonsoft.Json.JsonConverter>
-                                typeof<System.Data.SqlClient.SqlDataReader>
-                                typeof<System.Data.DataRowExtensions>
-
-                                typeof<QuantApp.Kernel.M>
-                                typeof<QuantApp.Engine.F>
-
-                                typeof<Jint.Native.Array.ArrayConstructor>
-                                
-                                typeof<FSharp.Core.MeasureAttribute>
-                            ]
-                            |> List.map(Assembly.GetAssembly)
-                        )
-
-                    [|  
-                        for r in (files_sys |> Array.map(fun f -> sysPath (f.ToString())) |> List.ofArray |> List.filter(fun f -> (f.Contains("netstandard.") || f.Contains("System.") || f.Contains("Microsoft.CSharp") || f.Contains("Microsoft.Win") || f.Contains("WindowsBase") || f.Contains("mscorlib") ) && not(f.Contains("System.Enterprise")) && f.EndsWith(".dll"))) do yield r //COMPILES!
-                        for r in (listFiles assemblyList) do yield r
-                        for r in (files_lib 
-                            |> Array.map(fun f -> libPath (f.ToString()))
-                            |> List.ofArray 
-                            |> List.filter(fun f -> 
-                                let f = f |> Path.GetFileName
-                                (
-                                    not(f.Contains("CoFlows.Server.")) && 
-                                    not(f.Contains("_")) && 
-                                    not(f.Contains("-")) && 
-                                    not(f.Contains("clr")) && 
-                                    not(f.Contains("dbgshim")) && 
-                                    not(f.Contains("ucrtbase")) && 
-                                    not(f.Contains("sni.dll")) && 
-                                    not(f.Contains("sos.dll")) && 
-                                    not(f.Contains("Microsoft.")) && 
-                                    not(f.Contains("WindowsBase")) && 
-                                    not(f.Contains("System.")) && 
-                                    not(f.Contains("libuv")) && 
-                                    not(f.Contains("FSharp.Data")) && 
-                                    not(f.Contains("FSharp.Core")) && 
-                                    not(f.Contains("hostfxr.dll")) && 
-                                    not(f.Contains("mscor")) && 
-                                    not(f.Contains("hostpolicy.dll")) && 
-                                    // not(f.Contains("netstandard")) && 
-                                    f.EndsWith(".dll")
-                                ))) do yield r
-                    |]
-                    |> Array.toSeq |> Seq.distinct |> Seq.toArray
-
-                let executeAssembly (a: Assembly) =
-                    if execute then
-                        try 
-                            try
-                                a.GetTypes()
-                            with
-                            | :? ReflectionTypeLoadException as ex -> 
-                                ex.Types |> Array.filter(isNull >> not)
-                            |> Array.iter(fun t ->
-                                
-                                let methods = t.GetMethods()
-                                for m in methods do
-                                    try
-                                        if m.IsStatic then
-                                            let name = m.Name.Replace("get_","")
-                                            try
-                                                let parameterInfo = m.GetParameters() |> Seq.toArray |> Array.map(fun pi -> pi.ParameterType)
-                                                if functionName |> String.IsNullOrWhiteSpace |> not && functionName = "?" |> not then
-                                                    if functionName = name && (if parameterInfo |> isNull |> not && parameters |> isNull |> not then parameterInfo.Length = parameters.Length else true) then
-                                                        let t0 = DateTime.Now
-                                                        
-                                                        let res = m.Invoke(
-                                                            null, 
-                                                            if parameters |> isNull then 
-                                                                null 
-                                                            else 
-                                                                parameters 
-                                                                |> Array.mapi(fun i x -> 
-                                                                    let ptype = parameterInfo.[i]
-                                                                    
-                                                                    match ptype with
-                                                                    | p when p = typeof<System.Int32> -> System.Int32.Parse(x.ToString()) :> obj
-                                                                    | p when p = typeof<System.Int64> -> System.Int64.Parse(x.ToString()) :> obj
-                                                                    | p when p = typeof<System.Double> -> System.Double.Parse(x.ToString()) :> obj
-                                                                    | p when p = typeof<System.Boolean> -> System.Boolean.Parse(x.ToString()) :> obj
-                                                                    | p when p = typeof<System.DateTime> -> System.DateTime.Parse(x.ToString()) :> obj
-                                                                    | p when p = typeof<System.Decimal> -> System.Decimal.Parse(x.ToString()) :> obj
-                                                                    | p when p = typeof<System.Byte> -> System.Byte.Parse(x.ToString()) :> obj
-                                                                    | p when p = typeof<System.Char> -> System.Char.Parse(x.ToString()) :> obj
-                                                                    | p when p = typeof<System.Int16> -> System.Int16.Parse(x.ToString()) :> obj
-                                                                    | _ -> x
-                                                                    )
-                                                            )
-                                                        let pair = (name, res)
-                                                        // "Executed: " + m.Name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
-                                                        pair |> resdb.Add
-                                                elif functionName = "?" then
-                                                    // List all functions
-                                                    let fname = t.ToString().ToLower()
-                                                    let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".cs") then documentation.[fname + ".cs"] elif documentation.ContainsKey(fname + ".fs") then documentation.[fname + ".fs"] elif documentation.ContainsKey(fname + ".vb") then documentation.[fname + ".vb"] else (Seq.empty |> Map.ofSeq)
-                                                    
-                                                    // let pair = (name, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
-                                                    let pair = (name, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
-                                                    pair |> resdb.Add
-
-                                                elif parameterInfo |> Array.isEmpty && t.Namespace |> isNull then
-                                                    let res = m.Invoke(null, null)
-                                                    let pair = (name, res)
-                                                    pair |> resdb.Add
-                                            with
-                                            | ex ->
-                                                (name, ex.InnerException.ToString() :> obj)
-                                                |> resdb.Add
-                                    with
-                                    | ex -> 
-                                        ex.ToString() |> sbuilder.AppendLine |> ignore
-                                    )
-
-                            if a.EntryPoint |> isNull |> not then
-                                a.EntryPoint.Invoke(null, null) |> ignore
-
-                        with
-                            | :? TargetInvocationException as tex -> "Execution failed with: " + (tex.InnerException.ToString()) |> sbuilder.AppendLine |> ignore
-                            | ex -> "Execution cannot start, reason: " + ex.ToString() |> Console.WriteLine
-
-                    resdb |> Seq.toList
-                
-                let compileFS (codes : (string * string) list) =
-                    let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
-                    let hash = str |> GetMd5Hash
-                    if hash |> CompiledAssemblies.ContainsKey |> not then
-
-                        let _compileFS (codes : (string * string) list) =
-                            // let checker = FSharpChecker.Create()
-                            let fn = Path.GetTempFileName()
-                            let dllFile = Path.ChangeExtension(fn, ".dll")
-                            let fsFiles =
-                                codes
-                                |> List.map(fun (name, code) ->
-                                    let name = name.Replace("/","_")
-                                    let fn = Path.GetTempFileName() + "-" + name
-                                    let fsFile = Path.ChangeExtension(fn, ".fs")
-                                    File.WriteAllText(fsFile, code)
-                                    fsFile)
-
-                            let args =
-                                    [|  
-                                        yield "";//fsc.exe";
-                                        yield "--noframework";
-                                        yield "--targetprofile:netcore" 
-                                        yield "--optimize-" 
-                                        yield "--target:library" 
-                                        yield "-o"; yield dllFile; 
-                                        yield "-a"; for r in fsFiles do yield " " + r
-                                        for r in libs() do yield "-r:" + r
-                                    |]
-                                    |> Array.toSeq |> Seq.distinct |> Seq.toArray
-
-                            let errors, exitCode, assembly = 
-                                let errors, exitCode = args |> FSharpChecker.Create().Compile |> Async.RunSynchronously
-                                
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
-                                #if MONO_LINUX || MONO_OSX
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
-                                #endif
-                                let assembly = System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile)
-
-                                if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("namespace") then
-                                    M._compiledAssemblies.TryAdd(hash, assembly) |> ignore
-                                    try
-                                        assembly.GetTypes()
-                                        |> Seq.iter(fun t -> 
-                                            let name = t.ToString()
-                                            M._compiledAssemblyNames.[name] <- hash
-                                            )
-                                    with
-                                    | _-> ()
-                                
-                                errors, exitCode, assembly
-
-                            if errors |> Seq.filter(fun e -> e.ToString().Contains("error")) |> Seq.isEmpty && (assembly |> isNull |> not)  then
-                                assembly
-                            else
-                                null
-
-                        let assembly = codes |> _compileFS
-                        if assembly |> isNull |> not then
-                            (hash, assembly) |> CompiledAssemblies.TryAdd |> ignore
-                            assembly |> executeAssembly |> ignore
-
-                    else
-                        CompiledAssemblies.[hash] |> executeAssembly |> ignore
-
-                let compileCS (codes : (string * string) list) =
-                    let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
-                    let hash = str |> GetMd5Hash
-                    if hash |> CompiledAssemblies.ContainsKey |> not then
-
-                        let compileCS (codes : (string * string) list) =
-                            let fn = Path.GetTempFileName()
-                            let dllFile = Path.ChangeExtension(fn, ".dll")
-                                                       
-                            let asname = System.Guid.NewGuid().ToString()
-                            let compilation = 
-                                let stree = 
-                                    codes 
-                                    |> List.map(fun (name, code) -> 
-                                        CSharpSyntaxTree.ParseText(code, null, name, null)) 
-                                    |> List.toArray
-                                let asms : MetadataReference[] = 
-                                    [| 
-                                        for lib in libs() do yield MetadataReference.CreateFromFile(Uri.UnescapeDataString(lib))
-                                    |]
-
-                                CSharpCompilation.Create(asname, stree, asms, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-
-                            let emitResult = compilation.Emit(dllFile)
+                        let listFiles assemblies =
+                            let listFiles (assembly : Assembly) = try [Uri.UnescapeDataString((UriBuilder(assembly.CodeBase)).Path)] with | _ -> []
+                            assemblies
+                            |> List.map(fun assembly -> assembly |> listFiles)
+                            |> List.fold(fun acc lst -> acc |> List.append(lst)) []
                             
-                            let errors, exitCode, assembly = 
-                                let errors = emitResult.Diagnostics |> Seq.map(fun d -> d.ToString())
-                                let exitCode = if emitResult.Success then 0 else 1
-                                let assembly = if emitResult.Success then System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile) else null
+                        
+                        let (++) a b = System.IO.Path.Combine(a,b)
+                        let sysPath nm = sysDir_base ++ nm
+                        let fsPath nm = fsDir_base ++ nm
+                        let libPath nm = libDir_base ++ nm
 
-                                if emitResult.Success && (snd codes.[0]).ToLower().Contains("namespace") then 
-                                    M._compiledAssemblies.TryAdd(hash, assembly) |> ignore
-                                    try
-                                        assembly.GetTypes()
-                                        |> Seq.iter(fun t -> 
-                                            let name = t.ToString()
-                                            M._compiledAssemblyNames.[name] <- hash
-                                            )
-                                    with
-                                    | _-> ()
 
-                                errors, exitCode, assembly
+                        let assemblyList = 
+                            M._compiledAssemblies.Values |> Seq.toList
+                            |> List.append(
+                                [
+                                    typeof<Newtonsoft.Json.JsonConverter>
+                                    typeof<System.Data.SqlClient.SqlDataReader>
+                                    typeof<System.Data.DataRowExtensions>
 
-                            if exitCode = 0  then
-                                assembly
-                            else
-                                #if MONO_LINUX || MONO_OSX
-                                errors |> Seq.iter(Console.WriteLine)
-                                #endif
-                                errors |> Seq.map(fun err -> err.ToString()) |> Seq.iter(sbuilder.AppendLine >> ignore)
-                                null
+                                    typeof<QuantApp.Kernel.M>
+                                    typeof<QuantApp.Engine.F>
 
-                        let assembly = codes |> compileCS
-
-                        if assembly |> isNull |> not then
-                            (hash, assembly) |> CompiledAssemblies.TryAdd |> ignore
-                            assembly |> executeAssembly |> ignore
-                    else
-                        CompiledAssemblies.[hash] |> executeAssembly |> ignore
-
-                let compileVB (codes : (string * string) list) =
-                    let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
-                    let hash = str |> GetMd5Hash
-                    if hash |> CompiledAssemblies.ContainsKey |> not then
-
-                        let compileVB (codes : (string * string) list) =
-                            let fn = Path.GetTempFileName()
-                            let dllFile = Path.ChangeExtension(fn, ".dll")
-
-                            let asname = System.Guid.NewGuid().ToString()
-                            let compilation = 
-                                let stree = codes |> List.map(fun (name, code) -> VisualBasicSyntaxTree.ParseText(code, null, name, null)) |> List.toArray
-                                let asms : MetadataReference[] = 
-                                    [| 
-                                        for lib in libs() do yield MetadataReference.CreateFromFile(Uri.UnescapeDataString(lib))
-                                    |]
-                                VisualBasicCompilation.Create(asname, stree, asms, VisualBasicCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-
-                            
-                            let emitResult = compilation.Emit(dllFile)
-                            
-                            let errors, exitCode, assembly = 
-                                let errors = emitResult.Diagnostics |> Seq.map(fun d -> d.ToString())
-                                let exitCode = if emitResult.Success then 0 else 1
-                                let assembly = if emitResult.Success then System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile) else null
-
-                                if emitResult.Success && (snd codes.[0]).ToLower().Contains("namespace") then 
-                                    M._compiledAssemblies.TryAdd(hash, assembly) |> ignore
-                                    try
-                                        assembly.GetTypes()
-                                        |> Seq.iter(fun t -> 
-                                            let name = t.ToString()
-                                            M._compiledAssemblyNames.[name] <- hash
-                                            )
-                                    with
-                                    | _-> ()
+                                    typeof<Jint.Native.Array.ArrayConstructor>
                                     
-                                errors, exitCode, assembly
+                                    typeof<FSharp.Core.MeasureAttribute>
+                                ]
+                                |> List.map(Assembly.GetAssembly)
+                            )
 
-                            if exitCode = 0  then
-                                assembly
-                            else
-                                #if MONO_LINUX || MONO_OSX
-                                errors |> Seq.iter(Console.WriteLine)
-                                #endif
-                                errors |> Seq.iter(fun err -> sbuilder.AppendLine(err.ToString()) |> ignore)
-                                null
+                        [|  
+                            for r in (files_sys |> Array.map(fun f -> sysPath (f.ToString())) |> List.ofArray |> List.filter(fun f -> (f.Contains("netstandard.") || f.Contains("System.") || f.Contains("Microsoft.CSharp") || f.Contains("Microsoft.Win") || f.Contains("WindowsBase") || f.Contains("mscorlib") ) && not(f.Contains("System.Enterprise")) && f.EndsWith(".dll"))) do yield r //COMPILES!
+                            for r in (listFiles assemblyList) do yield r
+                            for r in (files_lib 
+                                |> Array.map(fun f -> libPath (f.ToString()))
+                                |> List.ofArray 
+                                |> List.filter(fun f -> 
+                                    let f = f |> Path.GetFileName
+                                    (
+                                        not(f.Contains("CoFlows.Server.")) && 
+                                        not(f.Contains("_")) && 
+                                        not(f.Contains("-")) && 
+                                        not(f.Contains("clr")) && 
+                                        not(f.Contains("dbgshim")) && 
+                                        not(f.Contains("ucrtbase")) && 
+                                        not(f.Contains("sni.dll")) && 
+                                        not(f.Contains("sos.dll")) && 
+                                        not(f.Contains("Microsoft.")) && 
+                                        not(f.Contains("WindowsBase")) && 
+                                        not(f.Contains("System.")) && 
+                                        not(f.Contains("libuv")) && 
+                                        not(f.Contains("FSharp.Data")) && 
+                                        not(f.Contains("FSharp.Core")) && 
+                                        not(f.Contains("hostfxr.dll")) && 
+                                        not(f.Contains("mscor")) && 
+                                        not(f.Contains("hostpolicy.dll")) && 
+                                        // not(f.Contains("netstandard")) && 
+                                        f.EndsWith(".dll")
+                                    ))) do yield r
+                        |]
+                        |> Array.toSeq |> Seq.distinct |> Seq.toArray
 
-                        let assembly = codes |> compileVB
-
-                        if assembly |> isNull |> not then
-                            (hash, assembly) |> CompiledAssemblies.TryAdd |> ignore
-                            assembly |> executeAssembly |> ignore
-                    else
-                        CompiledAssemblies.[hash]
-                         |> executeAssembly |> ignore
-
-                let runPython (codes : (string * string) list) =
-                    try
-                        using (Py.GIL()) (fun _ ->
-                            setPythonOut |> PythonEngine.RunSimpleString
-
-                            let pyName, pyModule = 
-                                let pathTemp = Path.GetTempPath()
-
-                                pathTemp |> setPythonImportPath |> PythonEngine.RunSimpleString
-                                pathTemp + Path.DirectorySeparatorChar.ToString() + "Base" |> setPythonImportPath |> PythonEngine.RunSimpleString
-                                
-                                "/app/mnt/Base" |> setPythonImportPath |> PythonEngine.RunSimpleString
-
-                                let modules = 
-                                    codes 
-                                    |> List.map(fun (name : string, code : string) ->
+                    let executeAssembly (a: Assembly) =
+                        if execute then
+                            try 
+                                try
+                                    a.GetTypes()
+                                with
+                                | :? ReflectionTypeLoadException as ex -> 
+                                    ex.Types |> Array.filter(isNull >> not)
+                                |> Array.iter(fun t ->
+                                    
+                                    let methods = t.GetMethods()
+                                    for m in methods do
                                         try
-                                            let _name = name
-                                            let code = code.Replace("from . ", "").Replace("from .. ", "").Replace("from ..", "from ").Replace("from .", "from ")
-                                            let hash = code |> GetMd5Hash
-                                           
-                                            if hash |> CompiledPythonModules.ContainsKey && name |> CompiledPythonModulesNameHash.ContainsKey && CompiledPythonModulesNameHash.[name] = hash then
-                                                name, CompiledPythonModules.[hash]
-                                            else
-
+                                            if m.IsStatic then
+                                                let name = m.Name.Replace("get_","")
                                                 try
-                                                    if name |> CompiledPythonModulesNameHash.ContainsKey then
-                                                        let lastHash = CompiledPythonModulesNameHash.[name]
-                                                        if lastHash |> CompiledPythonModules.ContainsKey then
-                                                            let lastMod = CompiledPythonModules.[lastHash]
-                                                            let name = "A" + lastHash + name
+                                                    let parameterInfo = m.GetParameters() |> Seq.toArray |> Array.map(fun pi -> pi.ParameterType)
+                                                    if functionName |> String.IsNullOrWhiteSpace |> not && functionName = "?" |> not then
+                                                        if functionName = name && (if parameterInfo |> isNull |> not && parameters |> isNull |> not then parameterInfo.Length = parameters.Length else true) then
+                                                            let t0 = DateTime.Now
                                                             
-                                                            let delCommand =
-                                                                "import sys \n" +
-                                                                "import " + name.Replace(".py","") + "  \n" +
-                                                                "del sys.modules['" + name + "'] \n" +
-                                                                "del " + name.Replace(".py","")
+                                                            let res = m.Invoke(
+                                                                null, 
+                                                                if parameters |> isNull then 
+                                                                    null 
+                                                                else 
+                                                                    parameters 
+                                                                    |> Array.mapi(fun i x -> 
+                                                                        let ptype = parameterInfo.[i]
+                                                                        
+                                                                        match ptype with
+                                                                        | p when p = typeof<System.Int32> -> System.Int32.Parse(x.ToString()) :> obj
+                                                                        | p when p = typeof<System.Int64> -> System.Int64.Parse(x.ToString()) :> obj
+                                                                        | p when p = typeof<System.Double> -> System.Double.Parse(x.ToString()) :> obj
+                                                                        | p when p = typeof<System.Boolean> -> System.Boolean.Parse(x.ToString()) :> obj
+                                                                        | p when p = typeof<System.DateTime> -> System.DateTime.Parse(x.ToString()) :> obj
+                                                                        | p when p = typeof<System.Decimal> -> System.Decimal.Parse(x.ToString()) :> obj
+                                                                        | p when p = typeof<System.Byte> -> System.Byte.Parse(x.ToString()) :> obj
+                                                                        | p when p = typeof<System.Char> -> System.Char.Parse(x.ToString()) :> obj
+                                                                        | p when p = typeof<System.Int16> -> System.Int16.Parse(x.ToString()) :> obj
+                                                                        | _ -> x
+                                                                        )
+                                                                )
+                                                            let pair = (name, res)
+                                                            // "Executed: " + m.Name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
+                                                            pair |> resdb.Add
+                                                    elif functionName = "?" then
+                                                        // List all functions
+                                                        let fname = t.ToString().ToLower()
+                                                        let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".cs") then documentation.[fname + ".cs"] elif documentation.ContainsKey(fname + ".fs") then documentation.[fname + ".fs"] elif documentation.ContainsKey(fname + ".vb") then documentation.[fname + ".vb"] else (Seq.empty |> Map.ofSeq)
+                                                        
+                                                        // let pair = (name, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
+                                                        let pair = (name, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
+                                                        pair |> resdb.Add
 
-                                                            delCommand |> PythonEngine.Exec
-                                                            CompiledPythonModules.TryRemove(lastHash) |> ignore
-                                                with 
-                                                | e -> e |> Console.WriteLine
-
-                                                let modFlag = "Base/" |> name.StartsWith |> not
-                                                CompiledPythonModulesNameHash.[name] <- hash
-
-                                                let name = (if modFlag then ("A" + hash) else "") + name
-
-                                                let pyFile = pathTemp + name.Replace("/", Path.DirectorySeparatorChar.ToString())
-
-                                                pyFile |> Path.GetDirectoryName |> Directory.CreateDirectory
-
-                                                File.WriteAllText(pyFile, code)
-
-
-                                                let modName = "<module '" + name + "' from '" + pyFile + "'>"
-
-                                                // Bug fix
-                                                // PythonEngine.ImportModule(name) should work.
-                                                // It works in Docker Mac and Windows (Alpine Linux Kernel).
-                                                // But randomly in Azure Ubuntu (older kernel version).
-                                                // This happens because Docker Engine on Linux leverages off
-                                                // the native kernel which is different to the VM used in Mac and Win.
-                                                
-                                                let namesplit = name.Split('/')
-                                                
-                                                if name.Contains("Base") && namesplit.Length > 2 then
-                                                    
-                                                    let pkgName = namesplit.[1]
-                                                    pkgName |> InstallPip
-                                                    _name, null
-                                                else
-                                                
-                                                    let pyMod = PythonEngine.CompileToModule(name, code, pyFile)
-                                                    if pyMod |> isNull then 
-                                                        "Error loading: " + name |> Console.WriteLine
-                                                        _name, null 
-                                                    else
-                                                        (hash, pyMod) |> CompiledPythonModules.TryAdd
-                                                        if modFlag |> not then (modName, modName) |> CompiledPythonModulesName.TryAdd |> ignore 
-                                                        _name, pyMod
+                                                    elif parameterInfo |> Array.isEmpty && t.Namespace |> isNull then
+                                                        let res = m.Invoke(null, null)
+                                                        let pair = (name, res)
+                                                        pair |> resdb.Add
+                                                with
+                                                | ex ->
+                                                    (name, ex.InnerException.ToString() :> obj)
+                                                    |> resdb.Add
                                         with
                                         | ex -> 
-                                            ex |> Console.WriteLine
-                                            if "required positional argument" |> ex.Message.Contains |> not then
-                                                ex.Message |> sbuilder.AppendLine |> ignore
-                                            "", null
-                                    )
+                                            ex.ToString() |> sbuilder.AppendLine |> ignore
+                                        )
 
-                                modules |> List.last
+                                if a.EntryPoint |> isNull |> not then
+                                    a.EntryPoint.Invoke(null, null) |> ignore
 
-                            if pyModule |> isNull |> not then
-                                let moduleName = pyModule.ToString()
-                                if execute then
-                                    let rec obje_func (func : PyObject, name : string) cls = 
-                                        if cls = "type" || cls = "CLR.CLR Metatype" || cls = "CLR.ModuleObject" || cls = "module" then
-                                            null
-                                        else
-                                            let func_str = func.ToString()
-                                            let inner_call =
-                                                if 
-                                                    func.IsCallable() |> not
-                                                    || (cls |> M._systemAssemblies.ContainsKey)
-                                                    || (cls |> M._compiledAssemblyNames.ContainsKey)
-                                                    || (moduleName |> CompiledPythonModulesName.ContainsKey)
-                                                then
-                                                    null
-                                                else
-                                                    try
-                                                        let par = if parameters |> isNull then [||] else parameters |> Array.map(fun x -> PyString(x.ToString()) :> PyObject )
-                                                        let result = pyModule.InvokeMethod(name, par)
+                            with
+                                | :? TargetInvocationException as tex -> "Execution failed with: " + (tex.InnerException.ToString()) |> sbuilder.AppendLine |> ignore
+                                | ex -> "Execution cannot start, reason: " + ex.ToString() |> Console.WriteLine
 
-                                                        let cls = result.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
-                                                        if cls |> M._systemAssemblies.ContainsKey then
-                                                            let ttype = M._systemAssemblies.[cls].GetType(cls)
+                        resdb |> Seq.toList
+                    
+                    let compileFS (codes : (string * string) list) =
+                        let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
+                        let hash = str |> GetMd5Hash
+                        if hash |> CompiledAssemblies.ContainsKey |> not then
 
-                                                            result.AsManagedObject(ttype)
+                            let _compileFS (codes : (string * string) list) =
+                                // let checker = FSharpChecker.Create()
+                                let fn = Path.GetTempFileName()
+                                let dllFile = Path.ChangeExtension(fn, ".dll")
+                                let fsFiles =
+                                    codes
+                                    |> List.map(fun (name, code) ->
+                                        let name = name.Replace("/","_")
+                                        let fn = Path.GetTempFileName() + "-" + name
+                                        let fsFile = Path.ChangeExtension(fn, ".fs")
+                                        File.WriteAllText(fsFile, code)
+                                        fsFile)
 
-                                                        elif cls |> M._compiledAssemblyNames.ContainsKey then
-                                                            let ttype = M._compiledAssemblies.[M._compiledAssemblyNames.[cls]].GetType(cls)
+                                let args =
+                                        [|  
+                                            yield "";//fsc.exe";
+                                            yield "--noframework";
+                                            yield "--targetprofile:netcore" 
+                                            yield "--optimize-" 
+                                            yield "--target:library" 
+                                            yield "-o"; yield dllFile; 
+                                            yield "-a"; for r in fsFiles do yield " " + r
+                                            for r in libs() do yield "-r:" + r
+                                        |]
+                                        |> Array.toSeq |> Seq.distinct |> Seq.toArray
 
-                                                            result.AsManagedObject(ttype)
-                                                        else
-                                                            (cls |> obje_func(result, name)) :> obj
+                                let errors, exitCode, assembly = 
+                                    let errors, exitCode = args |> FSharpChecker.Create().Compile |> Async.RunSynchronously
+                                    
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
+                                    #if MONO_LINUX || MONO_OSX
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
+                                    #endif
+                                    let assembly = System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile)
+
+                                    if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("namespace") then
+                                        M._compiledAssemblies.TryAdd(hash, assembly) |> ignore
+                                        try
+                                            assembly.GetTypes()
+                                            |> Seq.iter(fun t -> 
+                                                let name = t.ToString()
+                                                M._compiledAssemblyNames.[name] <- hash
+                                                )
+                                        with
+                                        | _-> ()
+                                    
+                                    errors, exitCode, assembly
+
+                                if errors |> Seq.filter(fun e -> e.ToString().Contains("error")) |> Seq.isEmpty && (assembly |> isNull |> not)  then
+                                    assembly
+                                else
+                                    null
+
+                            let assembly = codes |> _compileFS
+                            if assembly |> isNull |> not then
+                                (hash, assembly) |> CompiledAssemblies.TryAdd |> ignore
+                                assembly |> executeAssembly |> ignore
+
+                        else
+                            CompiledAssemblies.[hash] |> executeAssembly |> ignore
+
+                    let compileCS (codes : (string * string) list) =
+                        let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
+                        let hash = str |> GetMd5Hash
+                        if hash |> CompiledAssemblies.ContainsKey |> not then
+
+                            let compileCS (codes : (string * string) list) =
+                                let fn = Path.GetTempFileName()
+                                let dllFile = Path.ChangeExtension(fn, ".dll")
                                                         
-                                                    with
-                                                    | e when 
-                                                        e :? Python.Runtime.PythonException && 
-                                                        (e.ToString().Contains("RuntimeError") |> not) &&
-                                                        (e.ToString().Contains("NameError") |> not) -> 
+                                let asname = System.Guid.NewGuid().ToString()
+                                let compilation = 
+                                    let stree = 
+                                        codes 
+                                        |> List.map(fun (name, code) -> 
+                                            CSharpSyntaxTree.ParseText(code, null, name, null)) 
+                                        |> List.toArray
+                                    let asms : MetadataReference[] = 
+                                        [| 
+                                            for lib in libs() do yield MetadataReference.CreateFromFile(Uri.UnescapeDataString(lib))
+                                        |]
 
+                                    CSharpCompilation.Create(asname, stree, asms, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+
+                                let emitResult = compilation.Emit(dllFile)
+                                
+                                let errors, exitCode, assembly = 
+                                    let errors = emitResult.Diagnostics |> Seq.map(fun d -> d.ToString())
+                                    let exitCode = if emitResult.Success then 0 else 1
+                                    let assembly = if emitResult.Success then System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile) else null
+
+                                    if emitResult.Success && (snd codes.[0]).ToLower().Contains("namespace") then 
+                                        M._compiledAssemblies.TryAdd(hash, assembly) |> ignore
+                                        try
+                                            assembly.GetTypes()
+                                            |> Seq.iter(fun t -> 
+                                                let name = t.ToString()
+                                                M._compiledAssemblyNames.[name] <- hash
+                                                )
+                                        with
+                                        | _-> ()
+
+                                    errors, exitCode, assembly
+
+                                if exitCode = 0  then
+                                    assembly
+                                else
+                                    #if MONO_LINUX || MONO_OSX
+                                    errors |> Seq.iter(Console.WriteLine)
+                                    #endif
+                                    errors |> Seq.map(fun err -> err.ToString()) |> Seq.iter(sbuilder.AppendLine >> ignore)
+                                    null
+
+                            let assembly = codes |> compileCS
+
+                            if assembly |> isNull |> not then
+                                (hash, assembly) |> CompiledAssemblies.TryAdd |> ignore
+                                assembly |> executeAssembly |> ignore
+                        else
+                            CompiledAssemblies.[hash] |> executeAssembly |> ignore
+
+                    let compileVB (codes : (string * string) list) =
+                        let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
+                        let hash = str |> GetMd5Hash
+                        if hash |> CompiledAssemblies.ContainsKey |> not then
+
+                            let compileVB (codes : (string * string) list) =
+                                let fn = Path.GetTempFileName()
+                                let dllFile = Path.ChangeExtension(fn, ".dll")
+
+                                let asname = System.Guid.NewGuid().ToString()
+                                let compilation = 
+                                    let stree = codes |> List.map(fun (name, code) -> VisualBasicSyntaxTree.ParseText(code, null, name, null)) |> List.toArray
+                                    let asms : MetadataReference[] = 
+                                        [| 
+                                            for lib in libs() do yield MetadataReference.CreateFromFile(Uri.UnescapeDataString(lib))
+                                        |]
+                                    VisualBasicCompilation.Create(asname, stree, asms, VisualBasicCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+
+                                
+                                let emitResult = compilation.Emit(dllFile)
+                                
+                                let errors, exitCode, assembly = 
+                                    let errors = emitResult.Diagnostics |> Seq.map(fun d -> d.ToString())
+                                    let exitCode = if emitResult.Success then 0 else 1
+                                    let assembly = if emitResult.Success then System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile) else null
+
+                                    if emitResult.Success && (snd codes.[0]).ToLower().Contains("namespace") then 
+                                        M._compiledAssemblies.TryAdd(hash, assembly) |> ignore
+                                        try
+                                            assembly.GetTypes()
+                                            |> Seq.iter(fun t -> 
+                                                let name = t.ToString()
+                                                M._compiledAssemblyNames.[name] <- hash
+                                                )
+                                        with
+                                        | _-> ()
+                                        
+                                    errors, exitCode, assembly
+
+                                if exitCode = 0  then
+                                    assembly
+                                else
+                                    #if MONO_LINUX || MONO_OSX
+                                    errors |> Seq.iter(Console.WriteLine)
+                                    #endif
+                                    errors |> Seq.iter(fun err -> sbuilder.AppendLine(err.ToString()) |> ignore)
+                                    null
+
+                            let assembly = codes |> compileVB
+
+                            if assembly |> isNull |> not then
+                                (hash, assembly) |> CompiledAssemblies.TryAdd |> ignore
+                                assembly |> executeAssembly |> ignore
+                        else
+                            CompiledAssemblies.[hash]
+                            |> executeAssembly |> ignore
+
+                    let runPython (codes : (string * string) list) =
+                        try
+                            using (Py.GIL()) (fun _ ->
+                                setPythonOut |> PythonEngine.RunSimpleString
+
+                                let pyName, pyModule = 
+                                    let pathTemp = Path.GetTempPath()
+
+                                    pathTemp |> setPythonImportPath |> PythonEngine.RunSimpleString
+                                    pathTemp + Path.DirectorySeparatorChar.ToString() + "Base" |> setPythonImportPath |> PythonEngine.RunSimpleString
+                                    
+                                    "/app/mnt/Base" |> setPythonImportPath |> PythonEngine.RunSimpleString
+
+                                    let modules = 
+                                        codes 
+                                        |> List.map(fun (name : string, code : string) ->
+                                            try
+                                                let _name = name
+                                                let code = code.Replace("from . ", "").Replace("from .. ", "").Replace("from ..", "from ").Replace("from .", "from ")
+                                                let hash = code |> GetMd5Hash
+                                            
+                                                if hash |> CompiledPythonModules.ContainsKey && name |> CompiledPythonModulesNameHash.ContainsKey && CompiledPythonModulesNameHash.[name] = hash then
+                                                    name, CompiledPythonModules.[hash]
+                                                else
+
+                                                    try
+                                                        if name |> CompiledPythonModulesNameHash.ContainsKey then
+                                                            let lastHash = CompiledPythonModulesNameHash.[name]
+                                                            if lastHash |> CompiledPythonModules.ContainsKey then
+                                                                let lastMod = CompiledPythonModules.[lastHash]
+                                                                let name = "A" + lastHash + name
+                                                                
+                                                                let delCommand =
+                                                                    "import sys \n" +
+                                                                    "import " + name.Replace(".py","") + "  \n" +
+                                                                    "del sys.modules['" + name + "'] \n" +
+                                                                    "del " + name.Replace(".py","")
+
+                                                                delCommand |> PythonEngine.Exec
+                                                                CompiledPythonModules.TryRemove(lastHash) |> ignore
+                                                    with 
+                                                    | e -> e |> Console.WriteLine
+
+                                                    let modFlag = "Base/" |> name.StartsWith |> not
+                                                    CompiledPythonModulesNameHash.[name] <- hash
+
+                                                    let name = (if modFlag then ("A" + hash) else "") + name
+
+                                                    let pyFile = pathTemp + name.Replace("/", Path.DirectorySeparatorChar.ToString())
+
+                                                    pyFile |> Path.GetDirectoryName |> Directory.CreateDirectory
+
+                                                    File.WriteAllText(pyFile, code)
+
+
+                                                    let modName = "<module '" + name + "' from '" + pyFile + "'>"
+
+                                                    // Bug fix
+                                                    // PythonEngine.ImportModule(name) should work.
+                                                    // It works in Docker Mac and Windows (Alpine Linux Kernel).
+                                                    // But randomly in Azure Ubuntu (older kernel version).
+                                                    // This happens because Docker Engine on Linux leverages off
+                                                    // the native kernel which is different to the VM used in Mac and Win.
+                                                    
+                                                    let namesplit = name.Split('/')
+                                                    
+                                                    if name.Contains("Base") && namesplit.Length > 2 then
+                                                        
+                                                        let pkgName = namesplit.[1]
+                                                        pkgName |> InstallPip
+                                                        _name, null
+                                                    else
+                                                    
+                                                        let pyMod = PythonEngine.CompileToModule(name, code, pyFile)
+                                                        if pyMod |> isNull then 
+                                                            "Error loading: " + name |> Console.WriteLine
+                                                            _name, null 
+                                                        else
+                                                            (hash, pyMod) |> CompiledPythonModules.TryAdd
+                                                            if modFlag |> not then (modName, modName) |> CompiledPythonModulesName.TryAdd |> ignore 
+                                                            _name, pyMod
+                                            with
+                                            | ex -> 
+                                                ex |> Console.WriteLine
+                                                if "required positional argument" |> ex.Message.Contains |> not then
+                                                    ex.Message |> sbuilder.AppendLine |> ignore
+                                                "", null
+                                        )
+
+                                    modules |> List.last
+
+                                if pyModule |> isNull |> not then
+                                    let moduleName = pyModule.ToString()
+                                    if execute then
+                                        let rec obje_func (func : PyObject, name : string) cls = 
+                                            if cls = "type" || cls = "CLR.CLR Metatype" || cls = "CLR.ModuleObject" || cls = "module" then
+                                                null
+                                            else
+                                                let func_str = func.ToString()
+                                                let inner_call =
+                                                    if 
+                                                        func.IsCallable() |> not
+                                                        || (cls |> M._systemAssemblies.ContainsKey)
+                                                        || (cls |> M._compiledAssemblyNames.ContainsKey)
+                                                        || (moduleName |> CompiledPythonModulesName.ContainsKey)
+                                                    then
+                                                        null
+                                                    else
+                                                        try
+                                                            let par = if parameters |> isNull then [||] else parameters |> Array.map(fun x -> PyString(x.ToString()) :> PyObject )
+                                                            let result = pyModule.InvokeMethod(name, par)
+
+                                                            let cls = result.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
+                                                            if cls |> M._systemAssemblies.ContainsKey then
+                                                                let ttype = M._systemAssemblies.[cls].GetType(cls)
+
+                                                                result.AsManagedObject(ttype)
+
+                                                            elif cls |> M._compiledAssemblyNames.ContainsKey then
+                                                                let ttype = M._compiledAssemblies.[M._compiledAssemblyNames.[cls]].GetType(cls)
+
+                                                                result.AsManagedObject(ttype)
+                                                            else
+                                                                (cls |> obje_func(result, name)) :> obj
+                                                            
+                                                        with
+                                                        | e when 
+                                                            e :? Python.Runtime.PythonException && 
+                                                            (e.ToString().Contains("RuntimeError") |> not) &&
+                                                            (e.ToString().Contains("NameError") |> not) -> 
+
+                                                                if "required positional argument" |> e.Message.Contains |> not then
+                                                                    e.Message |> sbuilder.AppendLine |> ignore
+
+                                                                e.StackTrace :> obj
+                                                        | e -> 
+                                                            "Error: " + e.ToString() |> Console.WriteLine
+                                                            
                                                             if "required positional argument" |> e.Message.Contains |> not then
                                                                 e.Message |> sbuilder.AppendLine |> ignore
-
                                                             e.StackTrace :> obj
-                                                    | e -> 
-                                                        "Error: " + e.ToString() |> Console.WriteLine
-                                                        
-                                                        if "required positional argument" |> e.Message.Contains |> not then
-                                                            e.Message |> sbuilder.AppendLine |> ignore
-                                                        e.StackTrace :> obj
 
-                                            if 
-                                                func |> PyList.IsListType 
-                                                && (cls |> M._systemAssemblies.ContainsKey |> not)
-                                                && (cls |> M._compiledAssemblyNames.ContainsKey |> not)
-
-                                            then
-                                                let resList = 
-                                                    [
-                                                        for r in func do 
-                                                            let cls = r.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
-                                                            let obje = cls |> obje_func(r, name)
-                                                            if obje |> isNull then
-                                                                yield r.ToString() :> obj
-                                                            else
-                                                                yield obje
-                                                    ]
-                                                resList :> obj
-
-                                            elif cls |> M._systemAssemblies.ContainsKey then
-                                                let ttype = M._systemAssemblies.[cls].GetType(cls)
-                                                func.AsManagedObject(ttype)
-
-                                            elif cls |> M._compiledAssemblyNames.ContainsKey then
-                                                let ttype = M._compiledAssemblies.[M._compiledAssemblyNames.[cls]].GetType(cls)
-
-                                                func.AsManagedObject(ttype)
-
-                                            elif (func_str.StartsWith("<") && func_str.EndsWith(">") && cls <> "str") then
-                                                if func_str.Contains(" object at ") then
-                                                    
-                                                    try
-                                                        // Need to transform PyObject to dict incase the object leaves the Gil
-                                                        func 
-                                                        |> Newtonsoft.Json.JsonConvert.SerializeObject
-                                                        |> Newtonsoft.Json.JsonConvert.DeserializeObject
-                                                        
-                                                    with
-                                                    | ex -> 
-                                                        ex |> Console.WriteLine
-                                                        if "required positional argument" |> ex.Message.Contains |> not then
-                                                            ex.Message |> sbuilder.AppendLine |> ignore
-                                                        inner_call
-                                                    
-                                                else
-                                                    inner_call
-                                            
-                                            elif inner_call |> isNull |> not then
-                                                inner_call
-                                            else
-                                                // Need to transform PyObject to dict incase the object leaves the Gil
-                                                func 
-                                                |> Newtonsoft.Json.JsonConvert.SerializeObject
-                                                |> Newtonsoft.Json.JsonConvert.DeserializeObject
-
-                                    if functionName |> isNull || functionName = "?" then
-                                        let names = pyModule.Dir()
-                                        for n in names do
-                                            let n_str = n.ToString()
-                                            let func = pyModule.GetAttr(n)
-                                            if func |> isNull |> not then
-                                                let func_str = func.ToString()
                                                 if 
-                                                    n_str |> isNull |> not &&
-                                                    func_str |> isNull |> not &&
-                                                    n_str.StartsWith("__") |> not && 
-                                                    func_str.Contains("built-in") |> not && 
-                                                    func_str.Contains("<module '") |> not &&
-                                                    func_str.Contains("<class '") |> not 
+                                                    func |> PyList.IsListType 
+                                                    && (cls |> M._systemAssemblies.ContainsKey |> not)
+                                                    && (cls |> M._compiledAssemblyNames.ContainsKey |> not)
+
                                                 then
-                                                    let cls = func.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
-
-                                                    let funcModuleName =
-                                                        try
-                                                            func?__module__.ToString()
-                                                        with
-                                                        | _ -> ""
-                                                    
-                                                    if funcModuleName |> String.IsNullOrWhiteSpace || moduleName.Contains(funcModuleName) then
-                                                        // List all function names "?"
-                                                        let obje = 
-                                                            if functionName = "?" then 
-                                                                let fname = pyName.ToLower()
-                                                                let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".cs") then documentation.[fname + ".cs"] elif documentation.ContainsKey(fname + ".fs") then documentation.[fname + ".fs"] elif documentation.ContainsKey(fname + ".vb") then documentation.[fname + ".vb"] else (Seq.empty |> Map.ofSeq)
-                                                                let name = n.ToString()
-                                                                // (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj
-                                                                (if doc.ContainsKey(name) then doc.[name] else null) :> obj
-                                                            else 
-                                                                cls |> obje_func(func, n.ToString())
-                                                        if obje |> isNull |> not then
-                                                            let pair = (n.ToString(), obje)
-                                                            pair |> resdb.Add
-
-                                    else
-                                        try
-                                            let par = if parameters |> isNull then [||] else parameters |> Array.map(fun x -> PyString(x.ToString()) :> PyObject )
-                                            let result = pyModule.InvokeMethod(functionName, par)
-                                            
-                                            let cls = result.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
-                                            
-                                            let obje = cls |> obje_func(result, functionName)
-
-                                            if obje |> isNull |> not then
-                                                let pair = (functionName, obje)
-                                                pair |> resdb.Add
-                                        with
-                                        | e when 
-                                            e :? Python.Runtime.PythonException && 
-                                            (e.ToString().Contains("RuntimeError") |> not) &&
-                                            (e.ToString().Contains("NameError") |> not) -> 
-
-                                            e.Message |> sbuilder.AppendLine |> ignore
-                                        | ex ->
-                                            let func = pyModule.GetAttr(functionName) 
-                                            // let func_str = func.ToString()
-                                            let cls = func.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
-                                            let obje = cls |> obje_func(func, functionName)
-
-                                            if "required positional argument" |> ex.Message.Contains |> not then
-                                                ex.Message |> sbuilder.AppendLine |> ignore
-                                            if obje |> isNull |> not then
-                                                let pair = (functionName, obje)
-                                                pair |> resdb.Add
-                            
-                        )
-                    with
-                    | :? NullReferenceException -> ()
-                    | ex -> if "required positional argument" |> ex.Message.Contains |> not then ex.Message |> sbuilder.AppendLine |> ignore
-
-                let runJS (codes : (string * string) list) =
-                    
-                    try
-                        let engine = Jint.Engine(fun cfg -> 
-                            let assemblyList = 
-                                M._compiledAssemblies.Values |> Seq.toList
-                                |> List.append(
-                                    [
-                                        typeof<Newtonsoft.Json.JsonConverter>
-                                        typeof<System.Data.SqlClient.SqlDataReader>
-
-                                        typeof<QuantApp.Kernel.M>
-                                        typeof<QuantApp.Engine.F>
-
-                                        typeof<JVM.Runtime>
-
-                                        typeof<Jint.Engine>
-                                    ]
-                                    |> List.map(fun f -> 
-                                        Assembly.GetAssembly(f)
-                                        ))
-
-                            
-                            cfg.AllowClr()
-                            assemblyList
-                            |> List.distinct
-                            |> List.iter(fun ass -> cfg.AllowClr(ass) |> ignore)
-                            )
-                        engine.SetValue("jsWrapper", JsWrapper(engine))
-                        codes 
-                        |> List.iter(fun (name, code) ->
-                            try
-                                code |> engine.Execute |> ignore
-                            with
-                            | :? Jint.Runtime.JavaScriptException as ex ->
-                                sbuilder.AppendLine("Error in: " + name)
-                                sbuilder.AppendLine(ex.Message) |> ignore
-                                sbuilder.AppendLine("       Starting at Line = " + ex.Location.Start.Line.ToString() + ", Column = " + ex.Location.Start.Column.ToString() + " ending at Line = " + ex.Location.End.Line.ToString() + ", Column = " + ex.Location.End.Column.ToString()) |> ignore
-                            | :? Esprima.ParserException as ex ->
-                                sbuilder.AppendLine("Error in: " + name)
-                                sbuilder.AppendLine(ex.Message) |> ignore
-                            )
-                         
-                        let alls_variables = engine.Global.GetOwnProperties()
-                        if execute then
-                            alls_variables 
-                            |> Seq.iter(fun x -> 
-                                let name = x.Key
-                                try
-                                    let prop = x.Value
-
-                                    if prop |> isNull |> not then
-
-                                        let isEnum = prop.Enumerable
-                                        let valu = prop.Value
-                                        
-                                        if isEnum && name <> "jsWrapper" && valu |> isNull |> not && not(valu.ToString().StartsWith("[Namespace:")) then 
-
-                                            if functionName |> String.IsNullOrWhiteSpace |> not && functionName = "?" |> not then
-                                                if functionName = name then
-                                                    let t0 = DateTime.Now
-                                                    // "Executing: " + name + " " + t0.ToString() |> Console.WriteLine
-                                                    let valu_s = valu.ToString()
-                                                    if valu_s.StartsWith("function()") then
-                                                        let func = valu.ToObject() :?> Func<Jint.Native.JsValue,Jint.Native.JsValue[],Jint.Native.JsValue>
-                                                        let res =
-                                                            func.Invoke(
-                                                                Jint.Native.JsValue.Undefined,
-                                                                if parameters |> isNull then
-                                                                    null
+                                                    let resList = 
+                                                        [
+                                                            for r in func do 
+                                                                let cls = r.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
+                                                                let obje = cls |> obje_func(r, name)
+                                                                if obje |> isNull then
+                                                                    yield r.ToString() :> obj
                                                                 else
-                                                                    parameters 
-                                                                    |> Array.map(fun x -> 
-                                                                        if x.ToString().StartsWith("{\"") then
-                                                                            let objr = x :> obj
-                                                                            let res = Jint.Native.Json.JsonParser(engine).Parse(objr.ToString()) :> JsValue
-                                                                        
-                                                                            res
-                                                                        
-                                                                        elif x.ToString().StartsWith("{") then
-                                                                            let str = Newtonsoft.Json.JsonConvert.SerializeObject(x) 
-                                                                            let res = Jint.Native.Json.JsonParser(engine).Parse(str) :> JsValue
-                                                                            
-                                                                            res
-                                                                        else
-                                                                            Jint.Native.JsValue.FromObject(engine, x)
-                                                                        )
-                                                                    )
+                                                                    yield obje
+                                                        ]
+                                                    resList :> obj
 
-                                                        let res = 
-                                                            if res = Jint.Native.JsValue.Undefined then
-                                                                null
-                                                            else
-                                                                res.ToObject() :> obj
-                                                        let pair = (name, res)
+                                                elif cls |> M._systemAssemblies.ContainsKey then
+                                                    let ttype = M._systemAssemblies.[cls].GetType(cls)
+                                                    func.AsManagedObject(ttype)
 
-                                                        // "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
-                                                        pair |> resdb.Add
+                                                elif cls |> M._compiledAssemblyNames.ContainsKey then
+                                                    let ttype = M._compiledAssemblies.[M._compiledAssemblyNames.[cls]].GetType(cls)
+
+                                                    func.AsManagedObject(ttype)
+
+                                                elif (func_str.StartsWith("<") && func_str.EndsWith(">") && cls <> "str") then
+                                                    if func_str.Contains(" object at ") then
+                                                        
+                                                        try
+                                                            // Need to transform PyObject to dict incase the object leaves the Gil
+                                                            func 
+                                                            |> Newtonsoft.Json.JsonConvert.SerializeObject
+                                                            |> Newtonsoft.Json.JsonConvert.DeserializeObject
+                                                            
+                                                        with
+                                                        | ex -> 
+                                                            ex |> Console.WriteLine
+                                                            if "required positional argument" |> ex.Message.Contains |> not then
+                                                                ex.Message |> sbuilder.AppendLine |> ignore
+                                                            inner_call
+                                                        
                                                     else
-                                                        let pair = (name, valu.ToObject() :> obj)
-                                                        // "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
-                                                        pair |> resdb.Add
-                                            elif name.StartsWith("__") |> not then
-                                                let valu_s = valu.ToString()
+                                                        inner_call
                                                 
-                                                if valu_s.StartsWith("function()") then
-                                                    let func = valu.ToObject() :?> Func<Jint.Native.JsValue,Jint.Native.JsValue[],Jint.Native.JsValue>
-                                                    let func_obj = valu :?> Jint.Native.Function.ScriptFunctionInstance
-                                                    let pars = func_obj.FormalParameters
-                                                    
-                                                    if functionName = "?" || pars.Length = 0 then
-                                                        if functionName = "?" |> not then
+                                                elif inner_call |> isNull |> not then
+                                                    inner_call
+                                                else
+                                                    // Need to transform PyObject to dict incase the object leaves the Gil
+                                                    func 
+                                                    |> Newtonsoft.Json.JsonConvert.SerializeObject
+                                                    |> Newtonsoft.Json.JsonConvert.DeserializeObject
+
+                                        if functionName |> isNull || functionName = "?" then
+                                            let names = pyModule.Dir()
+                                            for n in names do
+                                                let n_str = n.ToString()
+                                                let func = pyModule.GetAttr(n)
+                                                if func |> isNull |> not then
+                                                    let func_str = func.ToString()
+                                                    if 
+                                                        n_str |> isNull |> not &&
+                                                        func_str |> isNull |> not &&
+                                                        n_str.StartsWith("__") |> not && 
+                                                        func_str.Contains("built-in") |> not && 
+                                                        func_str.Contains("<module '") |> not &&
+                                                        func_str.Contains("<class '") |> not 
+                                                    then
+                                                        let cls = func.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
+
+                                                        let funcModuleName =
+                                                            try
+                                                                func?__module__.ToString()
+                                                            with
+                                                            | _ -> ""
+                                                        
+                                                        if funcModuleName |> String.IsNullOrWhiteSpace || moduleName.Contains(funcModuleName) then
+                                                            // List all function names "?"
+                                                            let obje = 
+                                                                if functionName = "?" then 
+                                                                    let fname = pyName.ToLower()
+                                                                    let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".cs") then documentation.[fname + ".cs"] elif documentation.ContainsKey(fname + ".fs") then documentation.[fname + ".fs"] elif documentation.ContainsKey(fname + ".vb") then documentation.[fname + ".vb"] else (Seq.empty |> Map.ofSeq)
+                                                                    let name = n.ToString()
+                                                                    // (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj
+                                                                    (if doc.ContainsKey(name) then doc.[name] else null) :> obj
+                                                                else 
+                                                                    cls |> obje_func(func, n.ToString())
+                                                            if obje |> isNull |> not then
+                                                                let pair = (n.ToString(), obje)
+                                                                pair |> resdb.Add
+
+                                        else
+                                            try
+                                                let par = if parameters |> isNull then [||] else parameters |> Array.map(fun x -> PyString(x.ToString()) :> PyObject )
+                                                let result = pyModule.InvokeMethod(functionName, par)
+                                                
+                                                let cls = result.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
+                                                
+                                                let obje = cls |> obje_func(result, functionName)
+
+                                                if obje |> isNull |> not then
+                                                    let pair = (functionName, obje)
+                                                    pair |> resdb.Add
+                                            with
+                                            | e when 
+                                                e :? Python.Runtime.PythonException && 
+                                                (e.ToString().Contains("RuntimeError") |> not) &&
+                                                (e.ToString().Contains("NameError") |> not) -> 
+
+                                                e.Message |> sbuilder.AppendLine |> ignore
+                                            | ex ->
+                                                let func = pyModule.GetAttr(functionName) 
+                                                // let func_str = func.ToString()
+                                                let cls = func.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
+                                                let obje = cls |> obje_func(func, functionName)
+
+                                                if "required positional argument" |> ex.Message.Contains |> not then
+                                                    ex.Message |> sbuilder.AppendLine |> ignore
+                                                if obje |> isNull |> not then
+                                                    let pair = (functionName, obje)
+                                                    pair |> resdb.Add
+                                
+                            )
+                        with
+                        | :? NullReferenceException -> ()
+                        | ex -> if "required positional argument" |> ex.Message.Contains |> not then ex.Message |> sbuilder.AppendLine |> ignore
+
+                    let runJS (codes : (string * string) list) =
+                        
+                        try
+                            let engine = Jint.Engine(fun cfg -> 
+                                let assemblyList = 
+                                    M._compiledAssemblies.Values |> Seq.toList
+                                    |> List.append(
+                                        [
+                                            typeof<Newtonsoft.Json.JsonConverter>
+                                            typeof<System.Data.SqlClient.SqlDataReader>
+
+                                            typeof<QuantApp.Kernel.M>
+                                            typeof<QuantApp.Engine.F>
+
+                                            typeof<JVM.Runtime>
+
+                                            typeof<Jint.Engine>
+                                        ]
+                                        |> List.map(fun f -> 
+                                            Assembly.GetAssembly(f)
+                                            ))
+
+                                
+                                cfg.AllowClr()
+                                assemblyList
+                                |> List.distinct
+                                |> List.iter(fun ass -> cfg.AllowClr(ass) |> ignore)
+                                )
+                            engine.SetValue("jsWrapper", JsWrapper(engine))
+                            codes 
+                            |> List.iter(fun (name, code) ->
+                                try
+                                    code |> engine.Execute |> ignore
+                                with
+                                | :? Jint.Runtime.JavaScriptException as ex ->
+                                    sbuilder.AppendLine("Error in: " + name)
+                                    sbuilder.AppendLine(ex.Message) |> ignore
+                                    sbuilder.AppendLine("       Starting at Line = " + ex.Location.Start.Line.ToString() + ", Column = " + ex.Location.Start.Column.ToString() + " ending at Line = " + ex.Location.End.Line.ToString() + ", Column = " + ex.Location.End.Column.ToString()) |> ignore
+                                | :? Esprima.ParserException as ex ->
+                                    sbuilder.AppendLine("Error in: " + name)
+                                    sbuilder.AppendLine(ex.Message) |> ignore
+                                )
+                            
+                            let alls_variables = engine.Global.GetOwnProperties()
+                            if execute then
+                                alls_variables 
+                                |> Seq.iter(fun x -> 
+                                    let name = x.Key
+                                    try
+                                        let prop = x.Value
+
+                                        if prop |> isNull |> not then
+
+                                            let isEnum = prop.Enumerable
+                                            let valu = prop.Value
+                                            
+                                            if isEnum && name <> "jsWrapper" && valu |> isNull |> not && not(valu.ToString().StartsWith("[Namespace:")) then 
+
+                                                if functionName |> String.IsNullOrWhiteSpace |> not && functionName = "?" |> not then
+                                                    if functionName = name then
+                                                        let t0 = DateTime.Now
+                                                        // "Executing: " + name + " " + t0.ToString() |> Console.WriteLine
+                                                        let valu_s = valu.ToString()
+                                                        if valu_s.StartsWith("function()") then
+                                                            let func = valu.ToObject() :?> Func<Jint.Native.JsValue,Jint.Native.JsValue[],Jint.Native.JsValue>
                                                             let res =
                                                                 func.Invoke(
                                                                     Jint.Native.JsValue.Undefined,
@@ -1275,355 +1233,201 @@ module Code =
                                                                                 Jint.Native.JsValue.FromObject(engine, x)
                                                                             )
                                                                         )
+
                                                             let res = 
                                                                 if res = Jint.Native.JsValue.Undefined then
                                                                     null
                                                                 else
                                                                     res.ToObject() :> obj
                                                             let pair = (name, res)
+
+                                                            // "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                             pair |> resdb.Add
                                                         else
-                                                            let fname, _ = codes |> List.last
-                                                            let fname = fname.ToLower()
-                                                            let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".js") then documentation.[fname + ".js"] else (Seq.empty |> Map.ofSeq)
-                                                            // let docVal = (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj
-                                                            let docVal = (if doc.ContainsKey(name) then doc.[name] else null) :> obj
-
-                                                            let pair = (name, docVal)
+                                                            let pair = (name, valu.ToObject() :> obj)
+                                                            // "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                             pair |> resdb.Add
-                                                else
-                                                    let pair = (name, valu.ToObject() :> obj)
-                                                    pair |> resdb.Add
-                                
-                                with
-                                | ex ->
-                                    let pair = (name, ex.StackTrace :> obj)
-                                    pair |> resdb.Add
-                            
-                        )
-                    with
-                    | :? Jint.Runtime.JavaScriptException as ex ->
-                        ex.Message |> sbuilder.AppendLine |> ignore
-                        "       Starting at Line = " + ex.Location.Start.Line.ToString() + ", Column = " + ex.Location.Start.Column.ToString() + " ending at Line = " + ex.Location.End.Line.ToString() + ", Column = " + ex.Location.End.Column.ToString() |> sbuilder.AppendLine |> ignore
-                    | :? Esprima.ParserException as ex ->
-                        ex.Message |> sbuilder.AppendLine |> ignore
-
-                let initJVM() =
-                    if JVM.Runtime.Loaded |> not then
-
-                        let jarsMntPath = DirectoryInfo("mnt/jars")
-                        let jarsMnt =  jarsMntPath.GetFiles()
-                        
-                        jarsMnt |> Seq.map(fun jar -> jar.ToString()) |> Seq.iter(fun jar -> CompiledJVMBaseClasses.TryAdd(jar, jar) |> ignore)
-
-                        let jarsPath = DirectoryInfo("jars")
-                        let jars =  jarsPath.GetFiles()
-                        
-                        jars |> Seq.map(fun jar -> jar.ToString()) |> Seq.iter(fun jar -> CompiledJVMBaseClasses.TryAdd(jar, jar) |> ignore)
-
-                        let jars = jars |> Seq.append(jarsMnt)
-
-                        let path = jars |> Seq.map(fun jar -> jar.ToString()) |> Seq.fold(fun acc x -> acc + ":" + x) ""
-
-                        if Runtime.InitJVM(classpath=path) <> 0 then
-
-                            CompiledJVMBaseClasses.Values |> Seq.toArray |> Runtime.SetClassPath
-                            
-                            "JVM Engine not started: " + JVM.Runtime.Loaded.ToString() |> Console.WriteLine
-                        else
-                            "JVM Engine started" |> Console.WriteLine
-
-                let compileJava (codes : (string * string) list) =                    
-                    initJVM()
-
-                    let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
-                    
-                    let hash = str |> GetMd5Hash
-
-                    if hash |> CompiledJVMClasses.ContainsKey |> not then
- 
-                        let compileJava (codes : (string * string) list) =
-                            let path = Path.GetFileNameWithoutExtension(Path.GetTempFileName())
-                            let path = Path.Combine(Path.GetDirectoryName(Path.GetTempFileName()), path)
-
-                            let javaFiles =
-                                codes
-                                |> List.map(fun (name, code) ->
-                                    let fn = Path.Combine(path, name)
-
-                                    (FileInfo(fn)).Directory.Create()
-                                    let javaFile = Path.ChangeExtension(fn, ".java")
-                                    File.WriteAllText(javaFile, code)
-                                    
-                                    javaFile)
-
-                            if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("package") then
-
-                                let errors, exitCode = 
-                                    using (Py.GIL()) (fun _ -> 
-                                        let file = javaFiles |> List.fold(fun acc file -> acc + ",'" + file.ToString() + "'" ) ""
-                                        let cp = CompiledJVMBaseClasses.Values |> Seq.fold(fun acc path -> acc + ":" + path.ToString() ) ""
-                                        let path = javaFiles |> List.head |> Path.GetDirectoryName
-
-                                        let errorFile = Path.Combine(path, "errors.txt")
-                                        let code = "import subprocess; subprocess.check_call(['javac', '-Xstdout', '" + errorFile + "', '-cp', '" + path + cp + "'" + file + "])"
-                                        try
-                                            code |> PythonEngine.Exec
-                                            [|""|], 0
-                                        with
-                                        | _ -> [|File.ReadAllText(errorFile)|], -1
-                                        )
-
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
-                                #if MONO_LINUX || MONO_OSX
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
-                                #endif
-                                if exitCode = 0 then
-                                    (hash, path) |> CompiledJVMClasses.TryAdd |> ignore
-                                    (hash, path) |> CompiledJVMBaseClasses.TryAdd |> ignore
-                                    [|path|] |> Runtime.SetClassPath
-                            else
-                                let errors, exitCode = 
-                                    using (Py.GIL()) (fun _ -> 
-                                        let file = javaFiles |> List.fold(fun acc file -> acc + ",'" + file.ToString() + "'" ) ""
-                                        let cp = CompiledJVMBaseClasses.Values |> Seq.fold(fun acc path -> acc + ":" + path.ToString() ) ""
-                                        let path = Path.GetDirectoryName(javaFiles |> List.head)
-
-                                        let errorFile = Path.Combine(path, "errors.txt")
-                                        let code = "import subprocess; subprocess.check_call(['javac', '-Xstdout', '" + errorFile + "', '-cp', '" + path + cp + "'" + file + "])"
-                                        try
-                                            code |> PythonEngine.Exec
-                                            (hash, path) |> CompiledJVMClasses.TryAdd |> ignore
-                                            [|""|], 0
-                                        with
-                                        | _ -> [|File.ReadAllText(errorFile)|], -1
-                                        )
-
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
-                                #if MONO_LINUX || MONO_OSX
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
-                                #endif
-
-                                if exitCode = 0 then
-                                    CompiledJVMClasses.TryAdd(hash, path) |> ignore
-
-                        codes |> compileJava
-
-                    
-                    if execute && hash |> CompiledJVMClasses.ContainsKey then
-                        try
-                            let path = CompiledJVMClasses.[hash]
-                            path 
-                            |> Directory.GetFiles 
-                            |> Array.filter(fun x -> x.EndsWith(".class") && x.Contains("$") |> not) 
-                            |> Array.iter(fun x -> 
-                                try
-
-                                    let className = x |> Path.GetFileNameWithoutExtension
-
-                                    let jobj = Runtime.CreateInstancePath(className, path)
-
-                                    jobj.Members.Keys
-                                    |> Seq.iter(fun key -> 
-                                        try
-                                            let func = jobj.Members.[key]
-                                            let funcName = key.Substring(0, key.IndexOf("-"))
-                                            let argSignature = key.Substring(key.IndexOf("-") + 1)
-                                            
-                                            if (if functionName |> isNull || (functionName = "?" && (funcName.Contains("$") |> not) && (key = "equals-Ljava/lang/Object;" |> not)) then ("-" |> key.EndsWith || functionName = "?") else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
-
-                                                let parameters =
-                                                    if parameters |> isNull then 
-                                                        [||] 
-                                                    else
-                                                        let mutable idx = 0
-                                                        parameters 
-                                                        |> Array.mapi(fun i p -> 
-                                                            if argSignature.Length = 0 || (argSignature.Length <= idx && argSignature.Length <> 0) then
-                                                                p :> obj
+                                                elif name.StartsWith("__") |> not then
+                                                    let valu_s = valu.ToString()
+                                                    
+                                                    if valu_s.StartsWith("function()") then
+                                                        let func = valu.ToObject() :?> Func<Jint.Native.JsValue,Jint.Native.JsValue[],Jint.Native.JsValue>
+                                                        let func_obj = valu :?> Jint.Native.Function.ScriptFunctionInstance
+                                                        let pars = func_obj.FormalParameters
+                                                        
+                                                        if functionName = "?" || pars.Length = 0 then
+                                                            if functionName = "?" |> not then
+                                                                let res =
+                                                                    func.Invoke(
+                                                                        Jint.Native.JsValue.Undefined,
+                                                                        if parameters |> isNull then
+                                                                            null
+                                                                        else
+                                                                            parameters 
+                                                                            |> Array.map(fun x -> 
+                                                                                if x.ToString().StartsWith("{\"") then
+                                                                                    let objr = x :> obj
+                                                                                    let res = Jint.Native.Json.JsonParser(engine).Parse(objr.ToString()) :> JsValue
+                                                                                
+                                                                                    res
+                                                                                
+                                                                                elif x.ToString().StartsWith("{") then
+                                                                                    let str = Newtonsoft.Json.JsonConvert.SerializeObject(x) 
+                                                                                    let res = Jint.Native.Json.JsonParser(engine).Parse(str) :> JsValue
+                                                                                    
+                                                                                    res
+                                                                                else
+                                                                                    Jint.Native.JsValue.FromObject(engine, x)
+                                                                                )
+                                                                            )
+                                                                let res = 
+                                                                    if res = Jint.Native.JsValue.Undefined then
+                                                                        null
+                                                                    else
+                                                                        res.ToObject() :> obj
+                                                                let pair = (name, res)
+                                                                pair |> resdb.Add
                                                             else
-                                                                let p = p.ToString()
-                                                                if argSignature.[idx] = 'L' then
-                                                                    idx <- idx + argSignature.IndexOf(";") + 1
-                                                                    p :> obj
-                                                                elif argSignature.[idx] = 'Z' then
-                                                                    idx <- idx + 1
-                                                                    System.Boolean.Parse(p) :> obj
+                                                                let fname, _ = codes |> List.last
+                                                                let fname = fname.ToLower()
+                                                                let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".js") then documentation.[fname + ".js"] else (Seq.empty |> Map.ofSeq)
+                                                                // let docVal = (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj
+                                                                let docVal = (if doc.ContainsKey(name) then doc.[name] else null) :> obj
 
-                                                                elif argSignature.[idx] = 'B' then
-                                                                    idx <- idx + 1
-                                                                    System.Byte.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'C' then
-                                                                    idx <- idx + 1
-                                                                    System.Char.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'S' then
-                                                                    idx <- idx + 1
-                                                                    System.Int16.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'I' then
-                                                                    idx <- idx + 1
-                                                                    System.Int32.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'J' then
-                                                                    idx <- idx + 1
-                                                                    System.Int64.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'F' then
-                                                                    idx <- idx + 1
-                                                                    System.Decimal.Parse(p) :> obj
-
-                                                                elif argSignature.[idx] = 'D' then
-                                                                    idx <- idx + 1
-                                                                    System.Double.Parse(p) :> obj
-
-                                                                else
-                                                                    idx <- idx + 1
-                                                                    p :> obj)
-                                                
-                                                try
-                                                    if functionName = "?" |> not then
-                                                        let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
-
-                                                        if value |> isNull |> not then
-                                                            let pair = (funcName, value)
-                                                            pair |> resdb.Add
+                                                                let pair = (name, docVal)
+                                                                pair |> resdb.Add
                                                     else
-
-                                                        // "------ JAVA: " + className |> Console.WriteLine
-                                                        let fname = className.ToLower()
-                                                        let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".java") then documentation.[fname + ".java"] else (Seq.empty |> Map.ofSeq)
-                                                        let name = funcName
-                                                        // let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
-                                                        let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
+                                                        let pair = (name, valu.ToObject() :> obj)
                                                         pair |> resdb.Add
-                                                with
-                                                | ex -> 
-                                                    let message = ex.ToString()
-                                            
-                                                    if "Runtime Method not found" |> message.Contains |> not then
-                                                        let pair = (funcName, message :> obj)
-                                                        pair |> resdb.Add
-                                        with
-                                        | ex -> 
-                                            let message = ex.ToString()
-                                            
-                                            if "Runtime Method not found" |> message.Contains |> not then
-                                                message |> sbuilder.AppendLine |> ignore
-                                                "--------------------------" |> sbuilder.AppendLine |> ignore
-                                        )
-
-
-                                    jobj.Properties.Keys
-                                    |> Seq.iter(fun key -> 
-                                        if (if functionName |> isNull then true else functionName = key) then
-                                            try
-                                                let prop = jobj.TryGetMember(key)
-
-                                                let pair = (key, prop)
-                                                pair |> resdb.Add
-                                            with
-                                            | ex -> 
-                                                let message = ex.ToString()
-                                                if "Runtime Method not found" |> message.Contains |> not then 
-                                                    let pair = (key, message :> obj)
-                                                    pair |> resdb.Add
-                                        )
-                                with
-                                | _ -> ()
+                                    
+                                    with
+                                    | ex ->
+                                        let pair = (name, ex.StackTrace :> obj)
+                                        pair |> resdb.Add
+                                
                             )
                         with
-                        | ex -> 
-                            ex.ToString() |> sbuilder.AppendLine |> ignore
+                        | :? Jint.Runtime.JavaScriptException as ex ->
+                            ex.Message |> sbuilder.AppendLine |> ignore
+                            "       Starting at Line = " + ex.Location.Start.Line.ToString() + ", Column = " + ex.Location.Start.Column.ToString() + " ending at Line = " + ex.Location.End.Line.ToString() + ", Column = " + ex.Location.End.Column.ToString() |> sbuilder.AppendLine |> ignore
+                        | :? Esprima.ParserException as ex ->
+                            ex.Message |> sbuilder.AppendLine |> ignore
 
-                let compileScala (codes : (string * string) list) =
-                    initJVM()
+                    let initJVM() =
+                        if JVM.Runtime.Loaded |> not then
 
-                    let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
-                    
-                    let hash = str |> GetMd5Hash
+                            let jarsMntPath = DirectoryInfo("mnt/jars")
+                            let jarsMnt =  jarsMntPath.GetFiles()
+                            
+                            jarsMnt |> Seq.map(fun jar -> jar.ToString()) |> Seq.iter(fun jar -> CompiledJVMBaseClasses.TryAdd(jar, jar) |> ignore)
 
-                    if hash |> CompiledJVMClasses.ContainsKey |> not then
- 
-                        let compileScala (codes : (string * string) list) =
-                            let path = Path.GetFileNameWithoutExtension(Path.GetTempFileName())
-                            let path = Path.Combine(Path.GetDirectoryName(Path.GetTempFileName()), path)
+                            let jarsPath = DirectoryInfo("jars")
+                            let jars =  jarsPath.GetFiles()
+                            
+                            jars |> Seq.map(fun jar -> jar.ToString()) |> Seq.iter(fun jar -> CompiledJVMBaseClasses.TryAdd(jar, jar) |> ignore)
 
-                            let scalaFiles =
-                                codes
-                                |> List.map(fun (name, code) ->
-                                    let fn = Path.Combine(path, name)
+                            let jars = jars |> Seq.append(jarsMnt)
 
-                                    (FileInfo(fn)).Directory.Create()
-                                    let scalaFile = Path.ChangeExtension(fn, ".scala")
-                                    File.WriteAllText(scalaFile, code)
-                                    scalaFile)
+                            let path = jars |> Seq.map(fun jar -> jar.ToString()) |> Seq.fold(fun acc x -> acc + ":" + x) ""
 
-                            if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("package") then
+                            if Runtime.InitJVM(classpath=path) <> 0 then
+
+                                CompiledJVMBaseClasses.Values |> Seq.toArray |> Runtime.SetClassPath
                                 
-                                let errors, exitCode, path = 
-                                    using (Py.GIL()) (fun _ -> 
-                                        let file = scalaFiles |> List.fold(fun acc file -> acc + ",'" + file.ToString() + "'" ) ""
-                                        let cp = CompiledJVMBaseClasses.Values |> Seq.fold(fun acc path -> acc + ":" + path.ToString() ) ""
-                                        let path = Path.GetDirectoryName(scalaFiles |> List.head)
-
-                                        let errorFile = Path.Combine(path, "errors.txt")
-                                        let code = "import subprocess; f = open('" + errorFile + "', 'w'); subprocess.check_call(['scalac', '-d', '" + path + "', '-cp', '" + path + cp + "'" + file + "], stdout=f, stderr=f)"
-        
-                                        try
-                                            PythonEngine.Exec(code)
-                                            [|""|], 0, path
-                                        with
-                                        | _ -> [|File.ReadAllText(errorFile)|], -1, ""
-                                        )
-
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
-                                #if MONO_LINUX || MONO_OSX
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
-                                #endif
-                                if exitCode = 0 then
-                                    CompiledJVMClasses.TryAdd(hash, path) |> ignore
-                                    CompiledJVMBaseClasses.TryAdd(hash, path) |> ignore
-                                    [|path|] |> Runtime.SetClassPath
+                                "JVM Engine not started: " + JVM.Runtime.Loaded.ToString() |> Console.WriteLine
                             else
-                                let errors, exitCode = 
-                                    using (Py.GIL()) (fun _ -> 
-                                        let file = scalaFiles |> List.fold(fun acc file -> acc + ",'" + file.ToString() + "'" ) ""
-                                        let cp = CompiledJVMBaseClasses.Values |> Seq.fold(fun acc path -> acc + ":" + path.ToString() ) ""
-                                        let path = Path.GetDirectoryName(scalaFiles |> List.head)
+                                "JVM Engine started" |> Console.WriteLine
 
-                                        let errorFile = Path.Combine(path, "errors.txt")
-                                        let code = "import subprocess; f = open('" + errorFile + "', 'w'); subprocess.check_call(['scalac', '-d', '" + path + "', '-cp', '" + path + cp + "'" + file + "], stdout=f, stderr=f)"
-                                        try
-                                            PythonEngine.Exec(code)
-                                            CompiledJVMClasses.TryAdd(hash, path) |> ignore
-                                            [|""|], 0
-                                        with
-                                        | _ -> [|File.ReadAllText(errorFile)|], -1
-                                        )
+                    let compileJava (codes : (string * string) list) =                    
+                        initJVM()
 
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
-                                #if MONO_LINUX || MONO_OSX
-                                errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
-                                #endif
+                        let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
+                        
+                        let hash = str |> GetMd5Hash
 
-                                if exitCode = 0 then
-                                    CompiledJVMClasses.TryAdd(hash, path) |> ignore
+                        if hash |> CompiledJVMClasses.ContainsKey |> not then
+    
+                            let compileJava (codes : (string * string) list) =
+                                let path = Path.GetFileNameWithoutExtension(Path.GetTempFileName())
+                                let path = Path.Combine(Path.GetDirectoryName(Path.GetTempFileName()), path)
 
-                        codes |> compileScala
+                                let javaFiles =
+                                    codes
+                                    |> List.map(fun (name, code) ->
+                                        let fn = Path.Combine(path, name)
 
-                    if execute && hash |> CompiledJVMClasses.ContainsKey then
-                        try
-                            let path = CompiledJVMClasses.[hash]
-                            path 
-                            |> Directory.GetFiles 
-                            |> Array.filter(fun x -> x.EndsWith(".class") && x.Contains("$") |> not) 
-                            |> Array.iter(fun x -> 
-                                try
-                                    let className = x |> Path.GetFileNameWithoutExtension
-                                    let jobj = Runtime.CreateInstancePath(className, path)
-                                    if jobj |> isNull |> not then
+                                        (FileInfo(fn)).Directory.Create()
+                                        let javaFile = Path.ChangeExtension(fn, ".java")
+                                        File.WriteAllText(javaFile, code)
+                                        
+                                        javaFile)
+
+                                if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("package") then
+
+                                    let errors, exitCode = 
+                                        using (Py.GIL()) (fun _ -> 
+                                            let file = javaFiles |> List.fold(fun acc file -> acc + ",'" + file.ToString() + "'" ) ""
+                                            let cp = CompiledJVMBaseClasses.Values |> Seq.fold(fun acc path -> acc + ":" + path.ToString() ) ""
+                                            let path = javaFiles |> List.head |> Path.GetDirectoryName
+
+                                            let errorFile = Path.Combine(path, "errors.txt")
+                                            let code = "import subprocess; subprocess.check_call(['javac', '-Xstdout', '" + errorFile + "', '-cp', '" + path + cp + "'" + file + "])"
+                                            try
+                                                code |> PythonEngine.Exec
+                                                [|""|], 0
+                                            with
+                                            | _ -> [|File.ReadAllText(errorFile)|], -1
+                                            )
+
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
+                                    #if MONO_LINUX || MONO_OSX
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
+                                    #endif
+                                    if exitCode = 0 then
+                                        (hash, path) |> CompiledJVMClasses.TryAdd |> ignore
+                                        (hash, path) |> CompiledJVMBaseClasses.TryAdd |> ignore
+                                        [|path|] |> Runtime.SetClassPath
+                                else
+                                    let errors, exitCode = 
+                                        using (Py.GIL()) (fun _ -> 
+                                            let file = javaFiles |> List.fold(fun acc file -> acc + ",'" + file.ToString() + "'" ) ""
+                                            let cp = CompiledJVMBaseClasses.Values |> Seq.fold(fun acc path -> acc + ":" + path.ToString() ) ""
+                                            let path = Path.GetDirectoryName(javaFiles |> List.head)
+
+                                            let errorFile = Path.Combine(path, "errors.txt")
+                                            let code = "import subprocess; subprocess.check_call(['javac', '-Xstdout', '" + errorFile + "', '-cp', '" + path + cp + "'" + file + "])"
+                                            try
+                                                code |> PythonEngine.Exec
+                                                (hash, path) |> CompiledJVMClasses.TryAdd |> ignore
+                                                [|""|], 0
+                                            with
+                                            | _ -> [|File.ReadAllText(errorFile)|], -1
+                                            )
+
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
+                                    #if MONO_LINUX || MONO_OSX
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
+                                    #endif
+
+                                    if exitCode = 0 then
+                                        CompiledJVMClasses.TryAdd(hash, path) |> ignore
+
+                            codes |> compileJava
+
+                        
+                        if execute && hash |> CompiledJVMClasses.ContainsKey then
+                            try
+                                let path = CompiledJVMClasses.[hash]
+                                path 
+                                |> Directory.GetFiles 
+                                |> Array.filter(fun x -> x.EndsWith(".class") && x.Contains("$") |> not) 
+                                |> Array.iter(fun x -> 
+                                    try
+
+                                        let className = x |> Path.GetFileNameWithoutExtension
+
+                                        let jobj = Runtime.CreateInstancePath(className, path)
+
                                         jobj.Members.Keys
                                         |> Seq.iter(fun key -> 
                                             try
@@ -1632,6 +1436,7 @@ module Code =
                                                 let argSignature = key.Substring(key.IndexOf("-") + 1)
                                                 
                                                 if (if functionName |> isNull || (functionName = "?" && (funcName.Contains("$") |> not) && (key = "equals-Ljava/lang/Object;" |> not)) then ("-" |> key.EndsWith || functionName = "?") else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
+
                                                     let parameters =
                                                         if parameters |> isNull then 
                                                             [||] 
@@ -1690,13 +1495,13 @@ module Code =
                                                                 let pair = (funcName, value)
                                                                 pair |> resdb.Add
                                                         else
-                                                            
+
+                                                            // "------ JAVA: " + className |> Console.WriteLine
                                                             let fname = className.ToLower()
-                                                            let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".scala") then documentation.[fname + ".scala"] else (Seq.empty |> Map.ofSeq)
+                                                            let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".java") then documentation.[fname + ".java"] else (Seq.empty |> Map.ofSeq)
                                                             let name = funcName
                                                             // let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
                                                             let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
-                                                            
                                                             pair |> resdb.Add
                                                     with
                                                     | ex -> 
@@ -1705,7 +1510,6 @@ module Code =
                                                         if "Runtime Method not found" |> message.Contains |> not then
                                                             let pair = (funcName, message :> obj)
                                                             pair |> resdb.Add
-                                                            
                                             with
                                             | ex -> 
                                                 let message = ex.ToString()
@@ -1721,7 +1525,7 @@ module Code =
                                             if (if functionName |> isNull then true else functionName = key) then
                                                 try
                                                     let prop = jobj.TryGetMember(key)
-                                                    
+
                                                     let pair = (key, prop)
                                                     pair |> resdb.Add
                                                 with
@@ -1730,112 +1534,313 @@ module Code =
                                                     if "Runtime Method not found" |> message.Contains |> not then 
                                                         let pair = (key, message :> obj)
                                                         pair |> resdb.Add
-                                                    
                                             )
-                                with
-                                | _ -> ()
-                            )
-                        with
-                        | ex -> 
-                            ex.ToString() |> sbuilder.AppendLine |> ignore
+                                    with
+                                    | _ -> ()
+                                )
+                            with
+                            | ex -> 
+                                ex.ToString() |> sbuilder.AppendLine |> ignore
 
-                let compiled_net_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".cs") || name.EndsWith(".fs") || name.EndsWith(".vb")) && x.ToLower().Contains("namespace")) //Compiled
-                let scripted_net_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".cs") || name.EndsWith(".fs") || name.EndsWith(".vb")) && (x.ToLower().Contains("namespace") |> not)) //Script
+                    let compileScala (codes : (string * string) list) =
+                        initJVM()
 
-                let compiled_jvm_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".java") || name.EndsWith(".scala")) && x.ToLower().Contains("package")) //Compiled
-                let scripted_jvm_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".java") || name.EndsWith(".scala")) && (x.ToLower().Contains("package") |> not)) //Script
-
-                let python_code = codes |> List.filter(fun (name, x) -> name.EndsWith(".py")) //is Python
-                let js_code = codes |> List.filter(fun (name, x) -> name.EndsWith(".js")) //is Javascript
-
-                if compiled_net_code |> List.isEmpty |> not then 
-                    let orderedProject = 
-                        let mutable counter = 0
-                        let mutable lastFlag = ""
-                        compiled_net_code
-                        |> List.mapi(fun i (name, code) -> 
-                            let flag =
-                                match code with
-                                | x when x.StartsWith(csFlag) || name.EndsWith(".cs") -> csFlag
-                                | x when x.StartsWith(vbFlag) || name.EndsWith(".vb") -> vbFlag
-                                | _ -> fsFlag
-                            if flag <> lastFlag then counter <- counter + 1
-                            lastFlag <- flag
-                            (name, code, counter)
-                            )
-                        |> List.groupBy(fun (name, code, counter) -> counter)
-                        |> List.map(fun (g, files) -> (g, files |> List.map(fun (name, code, _) -> (name, code))))
+                        let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
                         
+                        let hash = str |> GetMd5Hash
 
-                    orderedProject
-                    |> List.iter(fun (g, compiled_net_code) ->
+                        if hash |> CompiledJVMClasses.ContainsKey |> not then
+    
+                            let compileScala (codes : (string * string) list) =
+                                let path = Path.GetFileNameWithoutExtension(Path.GetTempFileName())
+                                let path = Path.Combine(Path.GetDirectoryName(Path.GetTempFileName()), path)
 
-                        let csFiles = compiled_net_code |> List.filter(fun (name, x) -> x.StartsWith(csFlag) || name.EndsWith(".cs"))
-                        if csFiles |> List.isEmpty |> not then 
-                            try csFiles |> compileCS with | _ -> 0 |> ignore
+                                let scalaFiles =
+                                    codes
+                                    |> List.map(fun (name, code) ->
+                                        let fn = Path.Combine(path, name)
 
-                        let vbFiles = compiled_net_code |> List.filter(fun (name, x) -> x.StartsWith(vbFlag) || name.EndsWith(".vb"))
-                        if vbFiles |> List.isEmpty |> not then 
-                            try vbFiles |> compileVB with | _ -> 0 |> ignore
+                                        (FileInfo(fn)).Directory.Create()
+                                        let scalaFile = Path.ChangeExtension(fn, ".scala")
+                                        File.WriteAllText(scalaFile, code)
+                                        scalaFile)
 
-                        let fsFiles = compiled_net_code |> List.filter(fun (name, x) -> x.StartsWith(fsFlag) || name.EndsWith(".fs"))
-                        if fsFiles |> List.isEmpty |> not then 
-                            try fsFiles |> compileFS with | _ -> 0 |> ignore
+                                if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("package") then
+                                    
+                                    let errors, exitCode, path = 
+                                        using (Py.GIL()) (fun _ -> 
+                                            let file = scalaFiles |> List.fold(fun acc file -> acc + ",'" + file.ToString() + "'" ) ""
+                                            let cp = CompiledJVMBaseClasses.Values |> Seq.fold(fun acc path -> acc + ":" + path.ToString() ) ""
+                                            let path = Path.GetDirectoryName(scalaFiles |> List.head)
+
+                                            let errorFile = Path.Combine(path, "errors.txt")
+                                            let code = "import subprocess; f = open('" + errorFile + "', 'w'); subprocess.check_call(['scalac', '-d', '" + path + "', '-cp', '" + path + cp + "'" + file + "], stdout=f, stderr=f)"
+            
+                                            try
+                                                PythonEngine.Exec(code)
+                                                [|""|], 0, path
+                                            with
+                                            | _ -> [|File.ReadAllText(errorFile)|], -1, ""
+                                            )
+
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
+                                    #if MONO_LINUX || MONO_OSX
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
+                                    #endif
+                                    if exitCode = 0 then
+                                        CompiledJVMClasses.TryAdd(hash, path) |> ignore
+                                        CompiledJVMBaseClasses.TryAdd(hash, path) |> ignore
+                                        [|path|] |> Runtime.SetClassPath
+                                else
+                                    let errors, exitCode = 
+                                        using (Py.GIL()) (fun _ -> 
+                                            let file = scalaFiles |> List.fold(fun acc file -> acc + ",'" + file.ToString() + "'" ) ""
+                                            let cp = CompiledJVMBaseClasses.Values |> Seq.fold(fun acc path -> acc + ":" + path.ToString() ) ""
+                                            let path = Path.GetDirectoryName(scalaFiles |> List.head)
+
+                                            let errorFile = Path.Combine(path, "errors.txt")
+                                            let code = "import subprocess; f = open('" + errorFile + "', 'w'); subprocess.check_call(['scalac', '-d', '" + path + "', '-cp', '" + path + cp + "'" + file + "], stdout=f, stderr=f)"
+                                            try
+                                                PythonEngine.Exec(code)
+                                                CompiledJVMClasses.TryAdd(hash, path) |> ignore
+                                                [|""|], 0
+                                            with
+                                            | _ -> [|File.ReadAllText(errorFile)|], -1
+                                            )
+
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
+                                    #if MONO_LINUX || MONO_OSX
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
+                                    #endif
+
+                                    if exitCode = 0 then
+                                        CompiledJVMClasses.TryAdd(hash, path) |> ignore
+
+                            codes |> compileScala
+
+                        if execute && hash |> CompiledJVMClasses.ContainsKey then
+                            try
+                                let path = CompiledJVMClasses.[hash]
+                                path 
+                                |> Directory.GetFiles 
+                                |> Array.filter(fun x -> x.EndsWith(".class") && x.Contains("$") |> not) 
+                                |> Array.iter(fun x -> 
+                                    try
+                                        let className = x |> Path.GetFileNameWithoutExtension
+                                        let jobj = Runtime.CreateInstancePath(className, path)
+                                        if jobj |> isNull |> not then
+                                            jobj.Members.Keys
+                                            |> Seq.iter(fun key -> 
+                                                try
+                                                    let func = jobj.Members.[key]
+                                                    let funcName = key.Substring(0, key.IndexOf("-"))
+                                                    let argSignature = key.Substring(key.IndexOf("-") + 1)
+                                                    
+                                                    if (if functionName |> isNull || (functionName = "?" && (funcName.Contains("$") |> not) && (key = "equals-Ljava/lang/Object;" |> not)) then ("-" |> key.EndsWith || functionName = "?") else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
+                                                        let parameters =
+                                                            if parameters |> isNull then 
+                                                                [||] 
+                                                            else
+                                                                let mutable idx = 0
+                                                                parameters 
+                                                                |> Array.mapi(fun i p -> 
+                                                                    if argSignature.Length = 0 || (argSignature.Length <= idx && argSignature.Length <> 0) then
+                                                                        p :> obj
+                                                                    else
+                                                                        let p = p.ToString()
+                                                                        if argSignature.[idx] = 'L' then
+                                                                            idx <- idx + argSignature.IndexOf(";") + 1
+                                                                            p :> obj
+                                                                        elif argSignature.[idx] = 'Z' then
+                                                                            idx <- idx + 1
+                                                                            System.Boolean.Parse(p) :> obj
+
+                                                                        elif argSignature.[idx] = 'B' then
+                                                                            idx <- idx + 1
+                                                                            System.Byte.Parse(p) :> obj
+
+                                                                        elif argSignature.[idx] = 'C' then
+                                                                            idx <- idx + 1
+                                                                            System.Char.Parse(p) :> obj
+
+                                                                        elif argSignature.[idx] = 'S' then
+                                                                            idx <- idx + 1
+                                                                            System.Int16.Parse(p) :> obj
+
+                                                                        elif argSignature.[idx] = 'I' then
+                                                                            idx <- idx + 1
+                                                                            System.Int32.Parse(p) :> obj
+
+                                                                        elif argSignature.[idx] = 'J' then
+                                                                            idx <- idx + 1
+                                                                            System.Int64.Parse(p) :> obj
+
+                                                                        elif argSignature.[idx] = 'F' then
+                                                                            idx <- idx + 1
+                                                                            System.Decimal.Parse(p) :> obj
+
+                                                                        elif argSignature.[idx] = 'D' then
+                                                                            idx <- idx + 1
+                                                                            System.Double.Parse(p) :> obj
+
+                                                                        else
+                                                                            idx <- idx + 1
+                                                                            p :> obj)
+                                                        
+                                                        try
+                                                            if functionName = "?" |> not then
+                                                                let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
+
+                                                                if value |> isNull |> not then
+                                                                    let pair = (funcName, value)
+                                                                    pair |> resdb.Add
+                                                            else
+                                                                
+                                                                let fname = className.ToLower()
+                                                                let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".scala") then documentation.[fname + ".scala"] else (Seq.empty |> Map.ofSeq)
+                                                                let name = funcName
+                                                                // let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
+                                                                let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
+                                                                
+                                                                pair |> resdb.Add
+                                                        with
+                                                        | ex -> 
+                                                            let message = ex.ToString()
+                                                    
+                                                            if "Runtime Method not found" |> message.Contains |> not then
+                                                                let pair = (funcName, message :> obj)
+                                                                pair |> resdb.Add
+                                                                
+                                                with
+                                                | ex -> 
+                                                    let message = ex.ToString()
+                                                    
+                                                    if "Runtime Method not found" |> message.Contains |> not then
+                                                        message |> sbuilder.AppendLine |> ignore
+                                                        "--------------------------" |> sbuilder.AppendLine |> ignore
+                                                )
+
+
+                                            jobj.Properties.Keys
+                                            |> Seq.iter(fun key -> 
+                                                if (if functionName |> isNull then true else functionName = key) then
+                                                    try
+                                                        let prop = jobj.TryGetMember(key)
+                                                        
+                                                        let pair = (key, prop)
+                                                        pair |> resdb.Add
+                                                    with
+                                                    | ex -> 
+                                                        let message = ex.ToString()
+                                                        if "Runtime Method not found" |> message.Contains |> not then 
+                                                            let pair = (key, message :> obj)
+                                                            pair |> resdb.Add
+                                                        
+                                                )
+                                    with
+                                    | _ -> ()
+                                )
+                            with
+                            | ex -> 
+                                ex.ToString() |> sbuilder.AppendLine |> ignore
+
+                    let compiled_net_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".cs") || name.EndsWith(".fs") || name.EndsWith(".vb")) && x.ToLower().Contains("namespace")) //Compiled
+                    let scripted_net_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".cs") || name.EndsWith(".fs") || name.EndsWith(".vb")) && (x.ToLower().Contains("namespace") |> not)) //Script
+
+                    let compiled_jvm_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".java") || name.EndsWith(".scala")) && x.ToLower().Contains("package")) //Compiled
+                    let scripted_jvm_code = codes |> List.filter(fun (name, x) -> (name.EndsWith(".java") || name.EndsWith(".scala")) && (x.ToLower().Contains("package") |> not)) //Script
+
+                    let python_code = codes |> List.filter(fun (name, x) -> name.EndsWith(".py")) //is Python
+                    let js_code = codes |> List.filter(fun (name, x) -> name.EndsWith(".js")) //is Javascript
+
+                    if compiled_net_code |> List.isEmpty |> not then 
+                        let orderedProject = 
+                            let mutable counter = 0
+                            let mutable lastFlag = ""
+                            compiled_net_code
+                            |> List.mapi(fun i (name, code) -> 
+                                let flag =
+                                    match code with
+                                    | x when x.StartsWith(csFlag) || name.EndsWith(".cs") -> csFlag
+                                    | x when x.StartsWith(vbFlag) || name.EndsWith(".vb") -> vbFlag
+                                    | _ -> fsFlag
+                                if flag <> lastFlag then counter <- counter + 1
+                                lastFlag <- flag
+                                (name, code, counter)
+                                )
+                            |> List.groupBy(fun (name, code, counter) -> counter)
+                            |> List.map(fun (g, files) -> (g, files |> List.map(fun (name, code, _) -> (name, code))))
+                            
+
+                        orderedProject
+                        |> List.iter(fun (g, compiled_net_code) ->
+
+                            let csFiles = compiled_net_code |> List.filter(fun (name, x) -> x.StartsWith(csFlag) || name.EndsWith(".cs"))
+                            if csFiles |> List.isEmpty |> not then 
+                                try csFiles |> compileCS with | _ -> 0 |> ignore
+
+                            let vbFiles = compiled_net_code |> List.filter(fun (name, x) -> x.StartsWith(vbFlag) || name.EndsWith(".vb"))
+                            if vbFiles |> List.isEmpty |> not then 
+                                try vbFiles |> compileVB with | _ -> 0 |> ignore
+
+                            let fsFiles = compiled_net_code |> List.filter(fun (name, x) -> x.StartsWith(fsFlag) || name.EndsWith(".fs"))
+                            if fsFiles |> List.isEmpty |> not then 
+                                try fsFiles |> compileFS with | _ -> 0 |> ignore
+                            
+                        )
+
+                    if compiled_jvm_code |> List.isEmpty |> not then 
+                        let orderedProject = 
+                            let mutable counter = 0
+                            let mutable lastFlag = ""
+                            compiled_jvm_code
+                            |> List.mapi(fun i (name, code) -> 
+                                let flag =
+                                    match code with
+                                    | x when x.StartsWith(jvFlag) || name.EndsWith(".java") -> jvFlag
+                                    | x when x.StartsWith(scFlag) || name.EndsWith(".scala") -> scFlag
+                                    | _ -> jvFlag
+
+                                if flag <> lastFlag then counter <- counter + 1
+                                lastFlag <- flag
+                                (name, code, counter)
+                                )
+                            |> List.groupBy(fun (name, code, counter) -> counter)
+                            |> List.map(fun (g, files) -> (g, files |> List.map(fun (name, code, counter) -> (name, code))))
+                            
+
+                        orderedProject
+                        |> List.iter(fun (g, compiled_jvm_code) ->
+
+                            let jvFiles = compiled_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(jvFlag) || name.EndsWith(".java"))
+                            if jvFiles |> List.isEmpty |> not then 
+                                try jvFiles |> compileJava with | _ -> 0 |> ignore
+
+                            let scFiles = compiled_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(scFlag) || name.EndsWith(".scala"))
+                            if scFiles |> List.isEmpty |> not then 
+                                try scFiles |> compileScala with | _ -> 0 |> ignore
+                        )
+
+                    if scripted_net_code |> List.isEmpty |> not then 
+                        let csFiles = scripted_net_code |> List.filter(fun (name, x) -> x.StartsWith(csFlag) || name.EndsWith(".cs"))
+                        if csFiles |> List.isEmpty |> not then csFiles |> compileCS
+
+                        let vbFiles = scripted_net_code |> List.filter(fun (name, x) -> x.StartsWith(vbFlag) || name.EndsWith(".vb"))
+                        if vbFiles |> List.isEmpty |> not then vbFiles |> compileVB
                         
-                    )
+                        let fsFiles = scripted_net_code |> List.filter(fun (name, x) -> x.StartsWith(fsFlag) || name.EndsWith(".fs"))
+                        if fsFiles |> List.isEmpty |> not then fsFiles |> compileFS
 
-                if compiled_jvm_code |> List.isEmpty |> not then 
-                    let orderedProject = 
-                        let mutable counter = 0
-                        let mutable lastFlag = ""
-                        compiled_jvm_code
-                        |> List.mapi(fun i (name, code) -> 
-                            let flag =
-                                match code with
-                                | x when x.StartsWith(jvFlag) || name.EndsWith(".java") -> jvFlag
-                                | x when x.StartsWith(scFlag) || name.EndsWith(".scala") -> scFlag
-                                | _ -> jvFlag
+                    if scripted_jvm_code |> List.isEmpty |> not then 
+                        let jvFiles = scripted_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(jvFlag) || name.EndsWith(".java"))
+                        if jvFiles |> List.isEmpty |> not then jvFiles |> compileJava
 
-                            if flag <> lastFlag then counter <- counter + 1
-                            lastFlag <- flag
-                            (name, code, counter)
-                            )
-                        |> List.groupBy(fun (name, code, counter) -> counter)
-                        |> List.map(fun (g, files) -> (g, files |> List.map(fun (name, code, counter) -> (name, code))))
-                        
+                        let scFiles = scripted_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(scFlag) || name.EndsWith(".scala"))
+                        if scFiles |> List.isEmpty |> not then scFiles |> compileScala
 
-                    orderedProject
-                    |> List.iter(fun (g, compiled_jvm_code) ->
+                    if python_code |> List.isEmpty |> not then python_code |> runPython 
 
-                        let jvFiles = compiled_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(jvFlag) || name.EndsWith(".java"))
-                        if jvFiles |> List.isEmpty |> not then 
-                            try jvFiles |> compileJava with | _ -> 0 |> ignore
-
-                        let scFiles = compiled_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(scFlag) || name.EndsWith(".scala"))
-                        if scFiles |> List.isEmpty |> not then 
-                            try scFiles |> compileScala with | _ -> 0 |> ignore
-                    )
-
-                if scripted_net_code |> List.isEmpty |> not then 
-                    let csFiles = scripted_net_code |> List.filter(fun (name, x) -> x.StartsWith(csFlag) || name.EndsWith(".cs"))
-                    if csFiles |> List.isEmpty |> not then csFiles |> compileCS
-
-                    let vbFiles = scripted_net_code |> List.filter(fun (name, x) -> x.StartsWith(vbFlag) || name.EndsWith(".vb"))
-                    if vbFiles |> List.isEmpty |> not then vbFiles |> compileVB
-                    
-                    let fsFiles = scripted_net_code |> List.filter(fun (name, x) -> x.StartsWith(fsFlag) || name.EndsWith(".fs"))
-                    if fsFiles |> List.isEmpty |> not then fsFiles |> compileFS
-
-                if scripted_jvm_code |> List.isEmpty |> not then 
-                    let jvFiles = scripted_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(jvFlag) || name.EndsWith(".java"))
-                    if jvFiles |> List.isEmpty |> not then jvFiles |> compileJava
-
-                    let scFiles = scripted_jvm_code |> List.filter(fun (name, x) -> x.StartsWith(scFlag) || name.EndsWith(".scala"))
-                    if scFiles |> List.isEmpty |> not then scFiles |> compileScala
-
-                if python_code |> List.isEmpty |> not then python_code |> runPython 
-
-                if js_code |> List.isEmpty |> not then js_code |> runJS 
+                    if js_code |> List.isEmpty |> not then js_code |> runJS 
 
             with
             | ex -> "QuantApp Compile ERROR: ---------------------------------------------------------------------" + Environment.NewLine + ex.ToString() |> Console.WriteLine

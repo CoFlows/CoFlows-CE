@@ -789,7 +789,10 @@ namespace CoFlows.Server.Controllers
                 if(quser == null)
                     QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                 else
+                {
                     QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+                    userId = quser.ID;
+                }
             }
             else if (userId != null)
             {
@@ -797,7 +800,10 @@ namespace CoFlows.Server.Controllers
                 if(quser == null)
                     QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                 else
+                {
                     QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+                    userId = quser.ID;
+                }
             }
             else
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
@@ -818,7 +824,7 @@ namespace CoFlows.Server.Controllers
                     codes.Add(new Tuple<string, string>(wb.Name, wb.Code));
 
                     // Check permissions from meta data
-                    var meta_data = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, "?", null);
+                    var meta_data = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, "??", null);
 
                     var hasPermission = false;
                     var setPermission = false;
@@ -906,7 +912,10 @@ namespace CoFlows.Server.Controllers
                 if(quser == null)
                     QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                 else
+                {
                     QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+                    userId = quser.ID;
+                }
             }
             else if (userId != null)
             {
@@ -914,7 +923,10 @@ namespace CoFlows.Server.Controllers
                 if(quser == null)
                     QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                 else
+                {
                     QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+                    userId = quser.ID;
+                }
             }
             else
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
@@ -935,7 +947,7 @@ namespace CoFlows.Server.Controllers
                     codes.Add(new Tuple<string, string>(wb.Name, wb.Code));
 
                     // Check permissions from meta data
-                    var meta_data = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, "?", null);
+                    var meta_data = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, "??", null);
 
                     var hasPermission = false;
                     var setPermission = false;
