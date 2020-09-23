@@ -405,6 +405,41 @@ namespace CoFlows.Server.Controllers
         }
 
         /// <summary>
+        /// Get the current user's Permissions (accessType) for all groups where the user has access
+        /// </summary>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// Result:
+        ///
+        ///     {
+        ///         'Data': [ { ID: '', Name: '', Permission: -1 } ]
+        ///     }
+        ///
+        /// Where accessType is:
+        ///
+        ///         Invited = -2
+        ///         Denied = -1
+        ///         View = 0
+        ///         Read = 1
+        ///         Write = 2
+        ///
+        /// </response>
+        [HttpGet]
+        public ActionResult GetPermissions()
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            var quser = QuantApp.Kernel.User.FindUser(userId);
+            QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+            var groups = QuantApp.Kernel.Group.MasterGroups();
+           
+            
+            return Ok(new { Data =  groups.Where(x => (int)x.Access > (int)AccessType.Denied).Select(x => new { ID = x.ID, Name = x.Name, Permission = x.PermissionContext() }) });
+        }
+
+        /// <summary>
         /// Get user data. This is a json object with any type of information linked to a group (groupid)
         /// </summary>
         /// <param name="groupid">Group ID</param>
