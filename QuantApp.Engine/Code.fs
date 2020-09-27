@@ -571,8 +571,7 @@ module Code =
                                 [
                                     typeof<Newtonsoft.Json.JsonConverter>
                                     typeof<System.Data.SqlClient.SqlDataReader>
-                                    typeof<System.Data.DataRowExtensions>
-
+                                    
                                     typeof<QuantApp.Kernel.M>
                                     typeof<QuantApp.Engine.F>
 
@@ -725,7 +724,10 @@ module Code =
 
                                 let errors, exitCode, assembly = 
                                     let errors, exitCode = args |> FSharpChecker.Create().Compile |> Async.RunSynchronously
-                                    
+
+                                    let errors = errors |> Array.filter(fun x -> x.ToString().Contains("You must add a reference to assembly 'System.Private.CoreLib, Version=4.0.0.0") |> not)
+
+                                                                        
                                     errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
                                     #if MONO_LINUX || MONO_OSX
                                     errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
@@ -763,7 +765,7 @@ module Code =
                         let hash = str |> GetMd5Hash
                         if hash |> CompiledAssemblies.ContainsKey |> not then
 
-                            let compileCS (codes : (string * string) list) =
+                            let _compileCS (codes : (string * string) list) =
                                 let fn = Path.GetTempFileName()
                                 let dllFile = Path.ChangeExtension(fn, ".dll")
                                                         
@@ -784,7 +786,7 @@ module Code =
                                 let emitResult = compilation.Emit(dllFile)
                                 
                                 let errors, exitCode, assembly = 
-                                    let errors = emitResult.Diagnostics |> Seq.map(fun d -> d.ToString())
+                                    let errors = emitResult.Diagnostics |> Seq.map(fun d -> d.ToString()) |> Seq.filter(fun x -> x.Contains("You must add a reference to assembly 'System.Private.CoreLib, Version=4.0.0.0") |> not)
                                     let exitCode = if emitResult.Success then 0 else 1
                                     let assembly = if emitResult.Success then System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile) else null
 
@@ -810,7 +812,7 @@ module Code =
                                     errors |> Seq.map(fun err -> err.ToString()) |> Seq.iter(sbuilder.AppendLine >> ignore)
                                     null
 
-                            let assembly = codes |> compileCS
+                            let assembly = codes |> _compileCS
 
                             if assembly |> isNull |> not then
                                 (hash, assembly) |> CompiledAssemblies.TryAdd |> ignore
@@ -823,7 +825,7 @@ module Code =
                         let hash = str |> GetMd5Hash
                         if hash |> CompiledAssemblies.ContainsKey |> not then
 
-                            let compileVB (codes : (string * string) list) =
+                            let _compileVB (codes : (string * string) list) =
                                 let fn = Path.GetTempFileName()
                                 let dllFile = Path.ChangeExtension(fn, ".dll")
 
@@ -866,7 +868,7 @@ module Code =
                                     errors |> Seq.iter(fun err -> sbuilder.AppendLine(err.ToString()) |> ignore)
                                     null
 
-                            let assembly = codes |> compileVB
+                            let assembly = codes |> _compileVB
 
                             if assembly |> isNull |> not then
                                 (hash, assembly) |> CompiledAssemblies.TryAdd |> ignore
