@@ -67,6 +67,7 @@ export class WorkflowComponent {
 
     
     private newPermission = 0
+    private newDate = { year: 9999, month: 12, day: 31 }
     private newEmail = ''
 
     private newGroup = { Name: '', Description: '' }
@@ -452,12 +453,11 @@ export class WorkflowComponent {
         });
     }
     
-    setPermission(id, permission_old, permission_new){
-        console.log(id, permission_old, permission_new)
-        if(permission_old != permission_new){
-            this.coflows.Get('administration/setpermission?pid=' + id + '&groupid=' + this.activeGroupID + '&accessType=' + permission_new,
+    setPermission(id, permission_old, permission_new, date){
+        
+        if(permission_old != permission_new || permission_new == null){
+            this.coflows.Get('administration/setpermission?pid=' + id + '&groupid=' + this.activeGroupID + '&accessType=' + permission_new + '&year=' + date.year + '&month=' + date.month + '&day=' + date.day,
                 data => {
-                    // console.log(data)
                     this.coflows.showMessage('Permission updated')
                 });
         }
@@ -465,8 +465,7 @@ export class WorkflowComponent {
 
     addPermissionMessage = ''
     addPermission(){
-        // console.log(this.newEmail, this.newPermission)
-        this.coflows.Get('administration/addpermission?email=' + this.newEmail + '&groupid=' + this.wid + '&accessType=' + this.newPermission,
+        this.coflows.Get('administration/addpermission?email=' + this.newEmail + '&groupid=' + this.wid + '&accessType=' + this.newPermission + '&year=' + this.newDate.year + '&month=' + this.newDate.month + '&day=' + this.newDate.day,
             data => {
                 if(data.Data == "ok"){
 
@@ -478,19 +477,12 @@ export class WorkflowComponent {
                     this.coflows.Get("administration/Users?groupid=" + this.wid, data => {
                         this.users = data
                         this.users_filtered = this.users
-                        // console.log(data, (Date.now() - t0) / 1000)
-                        this.search = ''
-                        
-                    });
-                    
-                    
+                        this.search = ''                        
+                    });                    
                 }
                 else
                     this.addPermissionMessage = data.Data
-
-                // console.log(data)
             });
-        // AddPermission(string email, int accessType)
     }
 
     addGroupMessage = ''

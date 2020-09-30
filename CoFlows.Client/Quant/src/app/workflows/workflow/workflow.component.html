@@ -473,13 +473,26 @@
 
                             <ngx-datatable-column prop="Value.Permission" name="Permission" [width]="100">
                                 <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
-                                    <select  class="form-control form-control-sm" #selectG (change)="setPermission(row.ID, row.Permission, selectG.value)">
+                                    <select  class="form-control form-control-sm" #selectG (change)="setPermission(row.ID, row.Permission, selectG.value, row.Expiry)">
                                         <option [value]="-2" [selected]="row.Permission == 'Invited'">Invited</option>
                                         <option [value]="-1" [selected]="row.Permission == 'Denied'">Denied</option>
                                         <option [value]="0" [selected]="row.Permission == 'View'">View</option>
                                         <option [value]="1" [selected]="row.Permission == 'Read'">Read</option>
                                         <option [value]="2" [selected]="row.Permission == 'Write'">Write</option>
                                     </select>
+                                </ng-template>
+                            </ngx-datatable-column>
+
+                            <ngx-datatable-column prop="Value.Expiry" name="Expiry" [width]="100">
+                                <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                                    <form class="form-inline">
+                                        <div class="form-group">
+                                            <input class="form-control form-control-sm" placeholder="yyyy-mm-dd" name="dp" [(ngModel)]="row.Expiry" ngbDatepicker #d2="ngbDatepicker" (change)="setPermission(row.ID, null, null, row.Expiry)" (dateSelect)="setPermission(row.ID, null, null, row.Expiry)" /> 
+                                            <div class="input-group-prepend" (click)="d2.toggle()" >
+                                                <span class="input-group-text" style="height:30px;" id=""><i class="icon icon-basic-calendar" style="cursor: pointer;"></i></span>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </ng-template>
                             </ngx-datatable-column>
 
@@ -526,6 +539,21 @@
                 <option [value]="1">Read</option>
                 <option [value]="2">Write</option>
             </select>
+        </fieldset>
+
+        <fieldset class="form-group">
+            <label>
+                Expiry
+            </label>
+            
+            <form class="form-inline">
+                <div class="form-group">
+                    <input class="form-control form-control-sm" placeholder="yyyy-mm-dd" name="dp" [(ngModel)]="newDate" ngbDatepicker #d3="ngbDatepicker" /> 
+                    <div class="input-group-prepend" (click)="d3.toggle()" >
+                        <span class="input-group-text" style="height:30px;" id=""><i class="icon icon-basic-calendar" style="cursor: pointer;"></i></span>
+                    </div>
+                </div>
+            </form>
         </fieldset>
         
     </div>
