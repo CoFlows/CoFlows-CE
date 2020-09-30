@@ -247,12 +247,28 @@ namespace QuantApp.Kernel
             return Factory.Permission(User.CurrentUser, this, permissible);
         }
 
+        public DateTime Expiry(IPermissible permissible)
+        {
+            if (Factory == null)
+                return DateTime.MaxValue;
+
+            return Factory.Expiry(User.CurrentUser, this, permissible);
+        }
+
         public AccessType Permission(UserData userData)
         {
             if (Factory == null)
                 return AccessType.Write;
 
             return Factory.Permission(User.FindUser(userData.ID), this, User.FindUser(userData.ID));
+        }
+
+        public DateTime Expiry(UserData userData)
+        {
+            if (Factory == null)
+                return DateTime.MaxValue;
+
+            return Factory.Expiry(User.FindUser(userData.ID), this, User.FindUser(userData.ID));
         }
 
         public AccessType PermissionContext()
@@ -264,6 +280,17 @@ namespace QuantApp.Kernel
                 return AccessType.Denied;
                 
             return Factory.Permission(quser, this, quser);
+        }
+
+        public DateTime ExpiryContext()
+        {
+            if (Factory == null)
+                return DateTime.MaxValue;
+            var quser = User.FindUser(User.ContextUser.ID);
+            if(quser == null)
+                return DateTime.MaxValue;
+                
+            return Factory.Expiry(quser, this, quser);
         }
 
         public List<IPermissible> ListContext(Type type, bool aggregated)
@@ -320,6 +347,11 @@ namespace QuantApp.Kernel
             return type;
         }
 
+        public DateTime Expiry(User user, IPermissible permissible)
+        {
+            return Factory.Expiry(user, this, permissible);
+        }
+
         public bool Exists(IPermissible permissible)
         {
             if (Factory == null)
@@ -343,14 +375,14 @@ namespace QuantApp.Kernel
                 Factory.SetProperty(this, name, value);
         }
 
-        public void Add(IPermissible permissible, Type type, AccessType accessType)
+        public void Add(IPermissible permissible, Type type, AccessType accessType, DateTime? expiry = null)
         {
             if (Factory == null)
                 return;
 
             _db = new ConcurrentDictionary<string, ConcurrentDictionary<string, AccessType>>();
 
-            Factory.Add(this, permissible, type, accessType);
+            Factory.Add(this, permissible, type, accessType, expiry);
         }
 
         public void Remove(IPermissible permissible)

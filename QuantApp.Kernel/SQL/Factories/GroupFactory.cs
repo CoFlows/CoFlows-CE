@@ -537,12 +537,23 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                                 foreach (DataRow row in rows)
                                 {
                                     string gid = (string)row["GroupID"];
+
+                                    DateTime expiry = DateTime.MaxValue;
+                                    if(table.Columns.Contains("Expiry"))
+                                        if(!(row["Expiry"] is DBNull))
+                                            expiry = (DateTime)row["Expiry"];
+                                    
+                                    AccessType access = (AccessType)row["AccessType"];
+
+                                    if(expiry < DateTime.Now)
+                                        access = AccessType.Denied;
+
                                     if (!_rawPermissibleDB.ContainsKey(gid))
                                         _rawPermissibleDB.TryAdd(gid, new ConcurrentDictionary<string, AccessType>());
                                     if (!_rawPermissibleTypeDB.ContainsKey(gid))
                                         _rawPermissibleTypeDB.TryAdd(gid, new ConcurrentDictionary<string, string>());
 
-                                    _rawPermissibleDB[gid].TryAdd((string)row["PermissibleID"], (AccessType)row["AccessType"]);
+                                    _rawPermissibleDB[gid].TryAdd((string)row["PermissibleID"], access);
                                     _rawPermissibleTypeDB[gid].TryAdd((string)row["PermissibleID"], (string)row["Type"]);
                                 }
                         }
@@ -591,6 +602,37 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
             }
         }
 
+        public readonly static object expiryLock = new object();
+        
+        public DateTime Expiry(User user, Group group, IPermissible permissible)
+        {
+            lock (expiryLock)
+            {
+                string tableName = permissionTableName;
+                string searchString = "PermissibleID = '" + permissible.PermissibleID + "' AND GroupID = '" + group.ID + "'";
+                string targetString = null;
+                DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
+                DataRowCollection rows = table.Rows;
+
+                System.Diagnostics.Debug.WriteLine("Expiry: " + user + " " + group + " " + permissible);
+
+                if (rows.Count != 0)
+                    foreach (DataRow row in rows)
+                    {
+                        string gid = (string)row["GroupID"];
+
+                        DateTime expiry = DateTime.MaxValue;
+                        if(table.Columns.Contains("Expiry"))
+                            if(!(row["Expiry"] is DBNull))
+                                expiry = (DateTime)row["Expiry"];
+
+                        return expiry;            
+                    }
+                
+                return DateTime.MaxValue;
+            }
+        }
+
         public bool Exists(Group group, IPermissible permissible)
         {
             string tableName = permissionTableName;
@@ -623,7 +665,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
             _rawPermissibleTypeDB = new ConcurrentDictionary<string, ConcurrentDictionary<string, string>>();
         }
 
-        public void Add(Group group, IPermissible permissible, Type type, AccessType accessType)
+        public void Add(Group group, IPermissible permissible, Type type, AccessType accessType, DateTime? expiry)
         {
             CleanMemory();
             string tableName = permissionTableName;
@@ -640,12 +682,22 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                 r["Type"] = type.ToString();
                 r["AccessType"] = (int)accessType;
 
+                if (table.Columns.Contains("Expiry") && expiry.HasValue)
+                {
+                    Console.WriteLine("SET EXPIRY: " + expiry.Value);
+                    r["Expiry"] = expiry.Value;
+                }
+                else
+                    Console.WriteLine("NO SET EXPIRY");
+
                 rows.Add(r);
                 Database.DB["CloudApp"].UpdateDataTable(table);
             }
             else
             {
                 rows[0]["AccessType"] = (int)accessType;
+                if (table.Columns.Contains("Expiry") && expiry.HasValue)
+                    rows[0]["Expiry"] = expiry.Value;
                 Database.DB["CloudApp"].UpdateDataTable(table);
             }
         }

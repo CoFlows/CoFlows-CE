@@ -36,11 +36,14 @@ namespace CoFlows.Server.Controllers
         /// <param name="pid">Permissible ID</param>
         /// <param name="groupid">Group ID</param>
         /// <param name="accessType">Access Type</param>
+        /// <param name="year">Expiry Year</param>
+        /// <param name="month">Expiry Month</param>
+        /// <param name="day">Expiry Day</param>
         /// <returns>Success</returns>
         /// <response code="200">Success</response>
         /// <response code="400">Permissible ID was not found or accessType has an incorrect value</response>
         [HttpGet]
-        public ActionResult SetPermission(string pid, string groupid, int accessType)
+        public ActionResult SetPermission(string pid, string groupid, int accessType, int year = 9999, int month = 12, int day = 31)
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -69,7 +72,7 @@ namespace CoFlows.Server.Controllers
             if(group == null)
                 group = QuantApp.Kernel.Group.CreateGroup(groupid, groupid);
 
-            group.Add(permissible, typeof(QuantApp.Kernel.User), (AccessType)accessType);
+            group.Add(permissible, typeof(QuantApp.Kernel.User), (AccessType)accessType, new DateTime(year, month, day));
 
             return Ok(new { Data = "ok" });
         }
@@ -174,11 +177,14 @@ namespace CoFlows.Server.Controllers
         /// <param name="groupid">Group ID</param>
         /// <param name="email">Email of the user</param>
         /// <param name="accessType">Access Type</param>
+        /// <param name="year">Expiry Year</param>
+        /// <param name="month">Expiry Month</param>
+        /// <param name="day">Expiry Day</param>
         /// <returns>Success</returns>
         /// <response code="200">Success</response>
         /// <response code="400">Email was not found or accessType has an incorrect value</response>
         [HttpGet]
-        public ActionResult AddPermission(string groupid, string email, int accessType)
+        public ActionResult AddPermission(string groupid, string email, int accessType, int year = 9999, int month = 12, int day = 31)
         {
             if(email == null)
                 return BadRequest(new { Data = "User not found..." });
@@ -206,7 +212,7 @@ namespace CoFlows.Server.Controllers
                     group = QuantApp.Kernel.Group.CreateGroup(groupid, groupid);
 
 
-                group.Add(user, typeof(QuantApp.Kernel.User), (AccessType)accessType);
+                group.Add(user, typeof(QuantApp.Kernel.User), (AccessType)accessType, new DateTime(year, month, day));
 
                 return Ok(new { Data = "ok" });
             }
@@ -379,6 +385,7 @@ namespace CoFlows.Server.Controllers
         ///         "LastName": "User's last name",
         ///         "Email": "User's email",
         ///         "Permission": "User's permission to the Group (groupid)",
+        ///         "Expiry": "User's expiry to the Group (groupid)",
         ///         "MetaData": "User's data stored in JSON format linked to this group",
         ///     }, 
         ///     ...]
@@ -413,6 +420,7 @@ namespace CoFlows.Server.Controllers
                     List<object> jres_tracks = new List<object>();
 
                     var ac = role.Permission(null, user_mem);
+                    var exp = role.Expiry(null, user_mem);
 
                     jres.Add(new
                     {
@@ -421,6 +429,7 @@ namespace CoFlows.Server.Controllers
                         LastName = quser.LastName,
                         Email = quser.Email,
                         Permission = ac.ToString(),
+                        Expiry = new { year = exp.Year, month = exp.Month, day = exp.Day},
                         MetaData = quser.MetaData,
                     });
                 }

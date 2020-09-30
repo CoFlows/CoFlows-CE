@@ -25,6 +25,7 @@ CREATE TABLE PermissionsRepository (
     PermissibleID Varchar(250) Not Null,
     GroupID Varchar(50) Not Null,
     AccessType Int Not Null,
+    Expiry DateTime,
     Type Text Not Null,
     PRIMARY KEY (PermissibleID, GroupID)
     );

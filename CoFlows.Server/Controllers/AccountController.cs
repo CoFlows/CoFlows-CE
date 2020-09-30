@@ -405,6 +405,38 @@ namespace CoFlows.Server.Controllers
         }
 
         /// <summary>
+        /// Get the current user's Expiry of access to a group (groupid)
+        /// </summary>
+        /// <param name="groupid">Group ID</param>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// Result:
+        ///
+        ///     {
+        ///         'Data': expiry
+        ///     }
+        ///
+        /// </response>
+        /// <response code="400">Permissible ID was not found or Group ID was not found</response>
+        [HttpGet]
+        public ActionResult GetExpiry(string groupid)
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            QuantApp.Kernel.IPermissible permissible = QuantApp.Kernel.User.FindUser(userId);
+            QuantApp.Kernel.Group group = QuantApp.Kernel.Group.FindGroup(groupid);
+            if(group == null)
+                group = QuantApp.Kernel.Group.FindGroup(groupid.Replace("_Workflow",""));
+
+            if(permissible != null && group != null)
+                return Ok(new { Data = group.Expiry(null, permissible) });
+
+            return Ok(new { Data = DateTime.MaxValue });
+        }
+
+        /// <summary>
         /// Get the current user's Permissions (accessType) for all groups where the user has access
         /// </summary>
         /// <returns>Success</returns>
@@ -426,6 +458,33 @@ namespace CoFlows.Server.Controllers
         /// </response>
         [HttpGet]
         public ActionResult GetPermissions()
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return null;
+
+            var quser = QuantApp.Kernel.User.FindUser(userId);
+            QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+            var groups = QuantApp.Kernel.Group.MasterGroups();
+           
+            
+            return Ok(new { Data =  groups.Where(x => (int)x.Access > (int)AccessType.Denied).Select(x => new { ID = x.ID, Name = x.Name, Permission = x.PermissionContext() }) });
+        }
+
+        /// <summary>
+        /// Get the current user's Expiry for all groups where the user has access
+        /// </summary>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// Result:
+        ///
+        ///     {
+        ///         'Data': [ { ID: '', Name: '', Expiry: '' } ]
+        ///     }
+        ///
+        /// </response>
+        [HttpGet]
+        public ActionResult GetExpiries()
         {
             string userId = this.User.QID();
             if (userId == null)
