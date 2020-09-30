@@ -8,10 +8,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using System.Data;
 
 namespace QuantApp.Kernel.Factories
 {
@@ -32,9 +28,10 @@ namespace QuantApp.Kernel.Factories
         List<IPermissible> List(User user, Group group, Type type, AccessType accessType, bool aggregated);
 
         AccessType Permission(User user, Group group, IPermissible permissible);
+        DateTime Expiry(User user, Group group, IPermissible permissible);
         bool Exists(Group group, IPermissible permissible);
 
-        void Add(Group group, IPermissible permissible, Type type, AccessType accessType);
+        void Add(Group group, IPermissible permissible, Type type, AccessType accessType, DateTime? expiry);
         void Remove(Group group, IPermissible permissible);
 
         List<Group> SubGroups(User user, Group group, bool aggregated);
