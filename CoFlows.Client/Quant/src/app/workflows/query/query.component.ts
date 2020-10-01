@@ -233,43 +233,99 @@ export class QueryComponent {
 
             this.workflowID = wid
 
-            this.coflows.LinkAction(wid,
-                data => { //Load
+            this.coflows.Get("account/getpermission?groupid=" + wid, perm => {
+                this.permission = perm.Data
 
-                    this.workflow = data[0].Value
-                    // console.log(this.workflow)
+                this.coflows.LinkAction(wid,
+                    data => { //Load
 
-                    this.workflow.Permissions.forEach(x => {
-                        if(x.ID == this.coflows.quser.User.Email) this.permission = x.Permission
-                    })
+                        this.workflow = data[0].Value
+                        // console.log(this.workflow)
 
-                    if(this.permission == 2){
-                        this.editorOptionsFs.readOnly = false
-                        this.editorOptionsCs.readOnly = false
-                        this.editorOptionsVb.readOnly = false
-                        this.editorOptionsPy.readOnly = false
-                        this.editorOptionsJs.readOnly = false
-                        this.editorOptionsJava.readOnly = false
-                        this.editorOptionsScala.readOnly = false
+                        this.workflow.Permissions.forEach(x => {
+                            if(x.ID == this.coflows.quser.User.Email) this.permission = x.Permission
+                        })
+
+                        if(this.permission == 2){
+                            this.editorOptionsFs.readOnly = false
+                            this.editorOptionsCs.readOnly = false
+                            this.editorOptionsVb.readOnly = false
+                            this.editorOptionsPy.readOnly = false
+                            this.editorOptionsJs.readOnly = false
+                            this.editorOptionsJava.readOnly = false
+                            this.editorOptionsScala.readOnly = false
+                        }
+
+                        this.permissionSet = true
+                    },
+                    data => { //Add
+                    },
+                    data => { //Exchange
+                    },
+                    data => { //Remove
                     }
-
-                    this.permissionSet = true
-                },
-                data => { //Add
-                },
-                data => { //Exchange
-                },
-                data => { //Remove
-                }
-            )
-            
-            this.coflows.LinkAction(wid + '--Queries', 
-                data => { //Load
-                    this.workbooks = data
-                    if(this.workbooks.length > 0){
-                        let tid = this.workbooks.findIndex(x => x.Value.ID == id)
+                )
+                
+                this.coflows.LinkAction(wid + '--Queries', 
+                    data => { //Load
+                        this.workbooks = data
+                        if(this.workbooks.length > 0){
+                            let tid = this.workbooks.findIndex(x => x.Value.ID == id)
+                            
+                            this.selectedWB = this.workbooks[Math.max(0, tid)].Value
+                            this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
+                            this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
+                            this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
+                            this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
+                            this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
+                            this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
+                        }
+                        else{
+                            this.selectedWB = JSON.parse(JSON.stringify(this.cfquery.templaceWB))
+                            this.selectedWB.WorkflowID = wid
+                            this.workbooks.push({Value : this.selectedWB })
+                            
+                            this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
+                            this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
+                            this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
+                            this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
+                            this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
+                            this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
+                        }
+                        //this.selectedWB = data[0]
+                        // console.log(data)
+                    },
+                    data => { //Add
+                        // console.log(data)
+                    },
+                    data => { //Exchange
+                        // console.log('EXCHANGE: ', data)
+                        let tid = this.workbooks.findIndex(x => x.Value.ID == data.Value.ID)
                         
-                        this.selectedWB = this.workbooks[Math.max(0, tid)].Value
+                        this.workbooks[tid] = data//.Value
+
+                        if(this.selectedWB.ID == data.Value.ID)
+                            this.selectedWB = data.Value
+
+                        this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
+                        this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
+                        this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
+                        this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
+                        this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
+                        this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
+
+                    },
+                    data => { //Remove
+                        let tid = this.workbooks.findIndex(x => x.Value.ID == data.Value.ID)
+                            
+                        if(tid > -1)
+                            this.workbooks.splice(tid,1)
+
+                        if(this.workbooks.length > 0)
+                            this.selectedWB = this.workbooks[0].Value
+                        else
+                            this.selectedWB = JSON.parse(JSON.stringify(this.cfquery.templaceWB))//this.cfquery.templaceWB
+
                         this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
                         this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
                         this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
@@ -277,61 +333,9 @@ export class QueryComponent {
                         this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
                         this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
                     }
-                    else{
-                        this.selectedWB = JSON.parse(JSON.stringify(this.cfquery.templaceWB))
-                        this.selectedWB.WorkflowID = wid
-                        this.workbooks.push({Value : this.selectedWB })
-                        
-                        this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
-                        this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
-                        this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
-                        this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
-                        this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
-                        this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
-                    }
-                    //this.selectedWB = data[0]
-                    // console.log(data)
-                },
-                data => { //Add
-                    // console.log(data)
-                },
-                data => { //Exchange
-                    // console.log('EXCHANGE: ', data)
-                    let tid = this.workbooks.findIndex(x => x.Value.ID == data.Value.ID)
-                    
-                    this.workbooks[tid] = data//.Value
-
-                    if(this.selectedWB.ID == data.Value.ID)
-                        this.selectedWB = data.Value
-
-                    this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
-                    this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
-                    this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
-                    this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
-                    this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
-                    this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
-
-                },
-                data => { //Remove
-                    let tid = this.workbooks.findIndex(x => x.Value.ID == data.Value.ID)
-                        
-                    if(tid > -1)
-                        this.workbooks.splice(tid,1)
-
-                    if(this.workbooks.length > 0)
-                        this.selectedWB = this.workbooks[0].Value
-                    else
-                        this.selectedWB = JSON.parse(JSON.stringify(this.cfquery.templaceWB))//this.cfquery.templaceWB
-
-                    this.pyCode = this.selectedWB.Code.startsWith('import clr') || this.selectedWB.Code.startsWith('#py') || this.selectedWB.Name.endsWith('.py')
-                    this.csCode = this.selectedWB.Code.startsWith('//cs') || this.selectedWB.Name.endsWith('.cs')
-                    this.jsCode = this.selectedWB.Code.startsWith('//js') || this.selectedWB.Name.endsWith('.js')
-                    this.javaCode = this.selectedWB.Code.startsWith('//java') || this.selectedWB.Name.endsWith('.java')
-                    this.scalaCode = this.selectedWB.Code.startsWith('//scala') || this.selectedWB.Name.endsWith('.scala')
-                    this.vbCode = this.selectedWB.Code.startsWith('\'vb') || this.selectedWB.Name.endsWith('.vb')
-                }
-            );
-        });
+                )
+            })
+        })
 
     }
 
