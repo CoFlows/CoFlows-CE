@@ -683,12 +683,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                 r["AccessType"] = (int)accessType;
 
                 if (table.Columns.Contains("Expiry") && expiry.HasValue)
-                {
-                    Console.WriteLine("SET EXPIRY: " + expiry.Value);
                     r["Expiry"] = expiry.Value;
-                }
-                else
-                    Console.WriteLine("NO SET EXPIRY");
 
                 rows.Add(r);
                 Database.DB["CloudApp"].UpdateDataTable(table);
