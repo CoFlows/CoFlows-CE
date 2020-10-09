@@ -729,28 +729,31 @@ export class CoFlowsComponent implements  CanActivate  {
         })
     }
     
-    Post(url : string, data : any, func : any): void {     
+    Post(url : string, data : any, func : any, err?: any): void {     
         this.CheckUser(() => {
             this.http.post(this.coflows_server + url, data, { headers: this.header })
             .toPromise().then(response => {  
                 func(response);
             })
+            .catch(error =>  {if(err != undefined) err(error) } )
         })
     }
 
-    PostAnonymous(url : string, data : any, func : any): void {     
+    PostAnonymous(url : string, data : any, func : any, err?: any): void {     
         this.http.post(this.coflows_server + url, data, { headers: this.header })
         .toPromise().then(response => {  
             func(response);
         })
+        .catch(error =>  {if(err != undefined) err(error) } )
     }
 
-    Get(url : string, func : any): void {        
+    Get(url : string, func : any, err?: any): void {        
         this.CheckUser(() => {
             this.http.get(this.coflows_server + url, { headers: this.header })
             .toPromise().then(response => {  
                 func(response);
             })
+            .catch(error =>  {if(err != undefined) err(error) } )
         })
     }
 

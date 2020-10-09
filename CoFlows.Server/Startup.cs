@@ -10,6 +10,7 @@ using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -97,6 +98,12 @@ namespace CoFlows.Server
                 .AddNewtonsoftJson(options =>
                     options.SerializerSettings.ContractResolver =
                         new Newtonsoft.Json.Serialization.DefaultContractResolver());
+
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = 
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
 
             if(Program.config["Server"]["OAuth"] != null && Program.config["Server"]["OAuth"]["AzureAdB2C"] != null)
             {
@@ -244,6 +251,8 @@ namespace CoFlows.Server
                     app.UseHsts();
                 app.UseHttpsRedirection();
             }
+
+            app.UseForwardedHeaders();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();

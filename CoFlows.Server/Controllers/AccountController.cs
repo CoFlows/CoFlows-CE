@@ -142,6 +142,9 @@ namespace CoFlows.Server.Controllers
             {
                 var remoteIpAddress = Request.HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress;
                 string ip = remoteIpAddress.ToString();
+                if(ip.Contains(":"))
+                    ip = ip.Substring(ip.LastIndexOf(":") + 1);
+                
                 //string ip = (Request.ServerVariables["HTTP_X_FORWARDED_FOR"] ?? Request.ServerVariables["REMOTE_ADDR"]).Split(',')[0].Trim();
                 UserRepository.AddLoginStamp(id, DateTime.UtcNow, ip);
 
