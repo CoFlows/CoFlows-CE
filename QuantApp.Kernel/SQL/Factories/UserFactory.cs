@@ -109,6 +109,9 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                 if (user == null)
                     return null;
 
+                if(user == "System")
+                    return new QuantApp.Kernel.User("System");
+
                 if (_userDB.ContainsKey(user))
                     return _userDB[user];
 
