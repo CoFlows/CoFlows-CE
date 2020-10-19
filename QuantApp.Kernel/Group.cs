@@ -210,11 +210,11 @@ namespace QuantApp.Kernel
             if (Factory == null)
                 return null;
 
-            AccessType ac = Permission(null, user);
+            AccessType ac = Permission(User.CurrentUser, user);
             List<IPermissible> res = Factory.List(user, this, type, aggregated);
 
             if (res != null)
-                return res.Where(p => ac >= Permission(null, p)).ToList();
+                return res.Where(p => ac >= Permission(user, p)).ToList();
 
             return res;
         }

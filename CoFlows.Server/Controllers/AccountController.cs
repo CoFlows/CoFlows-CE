@@ -471,7 +471,7 @@ namespace CoFlows.Server.Controllers
             var groups = QuantApp.Kernel.Group.MasterGroups();
            
             
-            return Ok(new { Data =  groups.Where(x => (int)x.Access > (int)AccessType.Denied).Select(x => new { ID = x.ID, Name = x.Name, Permission = x.PermissionContext() }) });
+            return Ok(new { Data =  groups.Where(x => (int)x.PermissionContext() > (int)AccessType.Denied).Select(x => new { ID = x.ID, Name = x.Name, Permission = x.PermissionContext(), Expiry = x.ExpiryContext() }) });
         }
 
         /// <summary>

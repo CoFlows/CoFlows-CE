@@ -321,8 +321,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
         {
             lock (list1Lock)
             {
-
-                string key = user.ID + group.ID + type + aggregated;
+                string key = (user == null ? "" : user.ID) + group.ID + type + aggregated;
 
                 if (_listPermissibleTypeAccessType.ContainsKey(key))
                     return _listPermissibleTypeAccessType[key];
@@ -354,7 +353,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                     DataRowCollection rows = table.Rows;
 
                     System.Diagnostics.Debug.WriteLine("List: " + user + " " + group + " " + type);
-
+                    
                     if (rows.Count != 0)
                         foreach (DataRow row in rows)
                         {
@@ -370,7 +369,6 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                 }
                 else
                 {
-
                     if (_rawPermissibleTypeDB.ContainsKey(group.ID))
                     {
                         foreach (string pid in _rawPermissibleTypeDB[group.ID].Keys.ToList())
@@ -386,7 +384,10 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                 if (result.Count > 0)
                     try
                     {
-                        _listPermissibleTypeAccessType.TryAdd(key, result);
+                        if(!_listPermissibleTypeAccessType.ContainsKey(key))
+                            _listPermissibleTypeAccessType.TryAdd(key, result);
+                        else
+                            _listPermissibleTypeAccessType[key] = result;
                     }
                     catch { }
 
@@ -400,8 +401,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
         {
             lock (list2Lock)
             {
-
-                string key = user.ID + group.ID + type + accessType + aggregated;
+                string key = (user == null ? "" : user.ID) + group.ID + type + aggregated;
 
                 if (_listPermissibleTypeAccessType.ContainsKey(key))
                     return _listPermissibleTypeAccessType[key];
@@ -532,7 +532,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                             DataRowCollection rows = table.Rows;
 
                             System.Diagnostics.Debug.WriteLine("Permission: " + user + " " + group + " " + permissible + " " + type);
-
+                            
                             if (rows.Count != 0)
                                 foreach (DataRow row in rows)
                                 {

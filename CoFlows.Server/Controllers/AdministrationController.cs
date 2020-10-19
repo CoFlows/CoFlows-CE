@@ -417,21 +417,20 @@ namespace CoFlows.Server.Controllers
 
                 if (quser != null)
                 {
-                    List<object> jres_tracks = new List<object>();
-
                     var ac = role.Permission(null, user_mem);
                     var exp = role.Expiry(null, user_mem);
 
-                    jres.Add(new
-                    {
-                        ID = quser.ID,
-                        FirstName = quser.FirstName,
-                        LastName = quser.LastName,
-                        Email = quser.Email,
-                        Permission = ac.ToString(),
-                        Expiry = new { year = exp.Year, month = exp.Month, day = exp.Day},
-                        MetaData = quser.MetaData,
-                    });
+                    if(quser.ID != "System")
+                        jres.Add(new
+                        {
+                            ID = quser.ID,
+                            FirstName = quser.FirstName,
+                            LastName = quser.LastName,
+                            Email = quser.Email,
+                            Permission = ac.ToString(),
+                            Expiry = new { year = exp.Year, month = exp.Month, day = exp.Day},
+                            MetaData = quser.MetaData,
+                        });
                 }
                 else
                     role.Remove(user_mem);
