@@ -828,8 +828,7 @@ namespace CoFlows.Server.Controllers
 
                     var hasPermission = false;
                     var setPermission = false;
-                    var costPermission = -1.0;
-
+                    
                     if(meta_data != null)
                     {
                         foreach(dynamic func in meta_data.Result)
@@ -843,13 +842,6 @@ namespace CoFlows.Server.Controllers
                                         hasPermission = true;
                                         var permAccess = QuantApp.Kernel.User.PermissionContext(perm.GroupID);
                                         setPermission = !setPermission ? (int)permAccess >= (int)perm.Access : setPermission;
-                                        if((int)permAccess >= (int)perm.Access)
-                                        {
-                                            if(costPermission == -1.0)
-                                                costPermission = perm.Cost;
-                                            else
-                                                costPermission = Math.Min(costPermission, perm.Cost);
-                                        }
                                     }
                             }
                         }
@@ -951,8 +943,7 @@ namespace CoFlows.Server.Controllers
 
                     var hasPermission = false;
                     var setPermission = false;
-                    var costPermission = -1.0;
-
+                    
                     if(meta_data != null)
                     {
                         foreach(dynamic func in meta_data.Result)
@@ -966,13 +957,6 @@ namespace CoFlows.Server.Controllers
                                         hasPermission = true;
                                         var permAccess = QuantApp.Kernel.User.PermissionContext(perm.GroupID);
                                         setPermission = !setPermission ? (int)permAccess >= (int)perm.Access : setPermission;
-                                        if((int)permAccess >= (int)perm.Access)
-                                        {
-                                            if(costPermission == -1.0)
-                                                costPermission = perm.Cost;
-                                            else
-                                                costPermission = Math.Min(costPermission, perm.Cost);
-                                        }
                                     }
                             }
                         }
@@ -1065,8 +1049,59 @@ namespace CoFlows.Server.Controllers
 
                     codes.Add(new Tuple<string, string>(wb.Name, wb.Code));
 
+                    var permissions = new Dictionary<string, bool>();
+                    var _execution = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, "?", null);
 
-                    var execution = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, "?", null);
+                    if(_execution != null)
+                    {
+                        try
+                        {
+                            foreach(dynamic func in _execution.Result)
+                            {
+                                if(func != null)
+                                {
+                                    var hasPermission = false;
+                                    var setPermission = false;
+                                    var pp = func.Item2;
+
+                                    if(func.Item1 != "#info" && pp != null && pp.Permissions != null)
+                                        foreach(var perm in pp.Permissions)
+                                        {
+                                            hasPermission = true;
+                                            var permAccess = QuantApp.Kernel.User.PermissionContext(perm.GroupID);
+                                            setPermission = !setPermission ? (int)permAccess >= (int)perm.Access : setPermission;
+                                        }
+
+                                    permissions[func.Item1] = func.Item1 == "#info" ? true : hasPermission ? setPermission : true;
+                                }
+                            }
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                        
+                    }
+
+                    var execution = 
+                            new { 
+                                Compilation = _execution.Compilation,
+                                Result = _execution.Result.Where(x => permissions.ContainsKey(x.Item1) && permissions[x.Item1]).Select(x => {
+                                    dynamic item2 = x.Item2;
+                                    return new {
+                                        Item1 = x.Item1,
+                                        Item2 = x.Item1 == "#info" ? x.Item2 : new {
+                                            Name = item2.Name,
+                                            Description = item2.Description,
+                                            Parameters = item2.Parameters,
+                                            //Permissions = item2.Permissions,
+                                            Returns = item2.Returns
+                                        }
+                                    };
+                                }).ToList()
+                            };
+
+                    
 
                     string yaml = Program.OpenAPI(execution, "/flow/query/" + wid + "/" + qid);
 

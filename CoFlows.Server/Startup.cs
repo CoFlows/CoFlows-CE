@@ -95,10 +95,10 @@ namespace CoFlows.Server
 
             services
                 .AddMvc(option => option.EnableEndpointRouting = false)
-                .AddNewtonsoftJson(options =>
-                    options.SerializerSettings.ContractResolver =
-                        new Newtonsoft.Json.Serialization.DefaultContractResolver());
-
+                .AddNewtonsoftJson(options => {
+                    options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                    options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+                });
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = 

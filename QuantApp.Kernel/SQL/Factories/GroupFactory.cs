@@ -367,18 +367,16 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                             _rawPermissibleTypeDB[gid].TryAdd((string)row["PermissibleID"], (string)row["Type"]);
                         }
                 }
-                else
+                
+                if (_rawPermissibleTypeDB.ContainsKey(group.ID))
                 {
-                    if (_rawPermissibleTypeDB.ContainsKey(group.ID))
-                    {
-                        foreach (string pid in _rawPermissibleTypeDB[group.ID].Keys.ToList())
-                            if (_rawPermissibleTypeDB[group.ID][pid] == type.ToString())
-                            {
-                                IPermissible permissible = Group.FindPermissible(user, type, pid);
-                                if (permissible != null && !result.Contains(permissible))
-                                    result.Add(permissible);
-                            }
-                    }
+                    foreach (string pid in _rawPermissibleTypeDB[group.ID].Keys.ToList())
+                        if (_rawPermissibleTypeDB[group.ID][pid] == type.ToString())
+                        {
+                            IPermissible permissible = Group.FindPermissible(user, type, pid);
+                            if (permissible != null && !result.Contains(permissible))
+                                result.Add(permissible);
+                        }
                 }
 
                 if (result.Count > 0)
@@ -433,7 +431,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                     DataRowCollection rows = table.Rows;
 
                     System.Diagnostics.Debug.WriteLine("List: " + user + " " + group + " " + type);
-
+                    
                     if (rows.Count != 0)
                         foreach (DataRow row in rows)
                         {
@@ -447,21 +445,20 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                             _rawPermissibleTypeDB[gid].TryAdd((string)row["PermissibleID"], (string)row["Type"]);
                         }
                 }
-                else
+                
+                if (_rawPermissibleTypeDB.ContainsKey(group.ID))
                 {
 
-                    if (_rawPermissibleTypeDB.ContainsKey(group.ID))
-                    {
-                        foreach (string pid in _rawPermissibleTypeDB[group.ID].Keys.ToList())
-                            if (_rawPermissibleTypeDB[group.ID][pid] == type.ToString() && (int)_rawPermissibleDB[group.ID][pid] >= (int)accessType)
-                            {
-                                IPermissible permissible = Group.FindPermissible(user, type, pid);
-                                if (permissible != null && !result.Contains(permissible))
-                                    result.Add(permissible);
-                            }
-                    }
+                    foreach (string pid in _rawPermissibleTypeDB[group.ID].Keys.ToList())
+                        if (_rawPermissibleTypeDB[group.ID][pid] == type.ToString() && (int)_rawPermissibleDB[group.ID][pid] >= (int)accessType)
+                        {
+                            IPermissible permissible = Group.FindPermissible(user, type, pid);
+                            
+                            if (permissible != null && !result.Contains(permissible))
+                                result.Add(permissible);
+                        }
                 }
-
+            
                 try
                 {
                     if (result.Count > 0)
