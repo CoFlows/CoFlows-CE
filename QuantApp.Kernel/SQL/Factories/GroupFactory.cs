@@ -471,7 +471,16 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
         }
 
         public readonly static object permLock = new object();
+
         public AccessType Permission(User user, Group group, IPermissible permissible)
+        {
+            var exp = Expiry(user, group, permissible);
+            if(exp.Date < DateTime.Today)
+                return AccessType.Denied;
+            return _Permission(user, group, permissible);
+
+        }
+        private AccessType _Permission(User user, Group group, IPermissible permissible)
         {
             lock (permLock)
             {
