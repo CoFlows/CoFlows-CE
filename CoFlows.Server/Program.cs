@@ -888,7 +888,7 @@ namespace CoFlows.Server
 
             var apis = new Dictionary<string, object>();
 
-            for(int i = 1; i < result.Result.Length; i++)
+            for(int i = 1; i < result.Result.Count; i++)
             {
                 var name = result.Result[i].Item1;
                 dynamic api = result.Result[i].Item2;
