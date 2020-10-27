@@ -409,7 +409,8 @@ module Code =
                 )
 
             let sbuilder = StringBuilder()
-            let resdb = Collections.Generic.List<string * obj>()
+            let resdb = Collections.Generic.List<string * obj * obj>()
+            // let expdb = Collections.Generic.List<string * obj>()
             
             try
                 let csFlag = "//cs"
@@ -455,7 +456,8 @@ module Code =
                                         TermsOfService = info_termsOfService; 
                                         Contact = {| Name = info_contact_name; URL = info_contact_url; Email = info_contact_email |};
                                         License = {| Name = info_license_name; URL = info_license_url |};
-                                    |} :> obj)
+                                    |} :> obj,
+                                    null)
                                 info_pair |> resdb.Add
 
                                 let apis = doc.Elements(xn "root").Elements(xn "api")
@@ -520,7 +522,8 @@ module Code =
                                             Permissions = permissions
                                         |} :> obj
                                     if functionName = "??" then
-                                        api_pair |> resdb.Add
+                                        let _n, _v = api_pair
+                                        (_n, _v, null) |> resdb.Add
                                     api_pair
                                     )
                                 
@@ -657,7 +660,7 @@ module Code =
                                                                         | _ -> x
                                                                         )
                                                                 )
-                                                            let pair = (name, res)
+                                                            let pair = (name, res, null)
                                                             // "Executed: " + m.Name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                             pair |> resdb.Add
                                                     elif functionName = "?" then
@@ -666,17 +669,18 @@ module Code =
                                                         let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".cs") then documentation.[fname + ".cs"] elif documentation.ContainsKey(fname + ".fs") then documentation.[fname + ".fs"] elif documentation.ContainsKey(fname + ".vb") then documentation.[fname + ".vb"] else (Seq.empty |> Map.ofSeq)
                                                         
                                                         // let pair = (name, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
-                                                        let pair = (name, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
+                                                        let pair = (name, (if doc.ContainsKey(name) then doc.[name] else null) :> obj, null)
                                                         pair |> resdb.Add
 
                                                     elif parameterInfo |> Array.isEmpty && t.Namespace |> isNull then
                                                         let res = m.Invoke(null, null)
-                                                        let pair = (name, res)
+                                                        let pair = (name, res, null)
                                                         pair |> resdb.Add
                                                 with
                                                 | ex ->
-                                                    (name, ex.InnerException.ToString() :> obj)
+                                                    (name, null, if ex.InnerException |> isNull then (ex.Message.ToString() :> obj) else (ex.InnerException.ToString() :> obj))
                                                     |> resdb.Add
+                                                    // |> expdb.Add
                                         with
                                         | ex -> 
                                             ex.ToString() |> sbuilder.AppendLine |> ignore
@@ -1108,7 +1112,7 @@ module Code =
                                                                 else 
                                                                     cls |> obje_func(func, n.ToString())
                                                             if obje |> isNull |> not then
-                                                                let pair = (n.ToString(), obje)
+                                                                let pair = (n.ToString(), obje, null)
                                                                 pair |> resdb.Add
 
                                         else
@@ -1119,9 +1123,10 @@ module Code =
                                                 let cls = result.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
                                                 
                                                 let obje = cls |> obje_func(result, functionName)
+                                                obje |> Console.WriteLine
 
                                                 if obje |> isNull |> not then
-                                                    let pair = (functionName, obje)
+                                                    let pair = (functionName, obje, null)
                                                     pair |> resdb.Add
                                             with
                                             | e when 
@@ -1129,7 +1134,12 @@ module Code =
                                                 (e.ToString().Contains("RuntimeError") |> not) &&
                                                 (e.ToString().Contains("NameError") |> not) -> 
 
-                                                e.Message |> sbuilder.AppendLine |> ignore
+                                                // "--- ERR 2" |> Console.WriteLine
+                                                // e |> Console.WriteLine
+
+                                                // e.Message |> sbuilder.AppendLine |> ignore
+                                                let pair = (functionName, null, e.Message :> obj)
+                                                pair |> resdb.Add
                                             | ex ->
                                                 let func = pyModule.GetAttr(functionName) 
                                                 // let func_str = func.ToString()
@@ -1137,9 +1147,11 @@ module Code =
                                                 let obje = cls |> obje_func(func, functionName)
 
                                                 if "required positional argument" |> ex.Message.Contains |> not then
-                                                    ex.Message |> sbuilder.AppendLine |> ignore
+                                                    // ex.Message |> sbuilder.AppendLine |> ignore
+                                                    let pair = (functionName, null, ex.Message :> obj)
+                                                    pair |> resdb.Add
                                                 if obje |> isNull |> not then
-                                                    let pair = (functionName, obje)
+                                                    let pair = (functionName, obje, null)
                                                     pair |> resdb.Add
                                 
                             )
@@ -1241,12 +1253,12 @@ module Code =
                                                                     null
                                                                 else
                                                                     res.ToObject() :> obj
-                                                            let pair = (name, res)
+                                                            let pair = (name, res, null)
 
                                                             // "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                             pair |> resdb.Add
                                                         else
-                                                            let pair = (name, valu.ToObject() :> obj)
+                                                            let pair = (name, valu.ToObject() :> obj, null)
                                                             // "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                             pair |> resdb.Add
                                                 elif name.StartsWith("__") |> not then
@@ -1287,7 +1299,7 @@ module Code =
                                                                         null
                                                                     else
                                                                         res.ToObject() :> obj
-                                                                let pair = (name, res)
+                                                                let pair = (name, res, null)
                                                                 pair |> resdb.Add
                                                             else
                                                                 let fname, _ = codes |> List.last
@@ -1296,15 +1308,15 @@ module Code =
                                                                 // let docVal = (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj
                                                                 let docVal = (if doc.ContainsKey(name) then doc.[name] else null) :> obj
 
-                                                                let pair = (name, docVal)
+                                                                let pair = (name, docVal, null)
                                                                 pair |> resdb.Add
                                                     else
-                                                        let pair = (name, valu.ToObject() :> obj)
+                                                        let pair = (name, valu.ToObject() :> obj, null)
                                                         pair |> resdb.Add
                                     
                                     with
                                     | ex ->
-                                        let pair = (name, ex.StackTrace :> obj)
+                                        let pair = (name, null, ex.StackTrace :> obj)
                                         pair |> resdb.Add
                                 
                             )
@@ -1432,10 +1444,11 @@ module Code =
 
                                         jobj.Members.Keys
                                         |> Seq.iter(fun key -> 
+                                            let func = jobj.Members.[key]
+                                            let funcName = key.Substring(0, key.IndexOf("-"))
+                                            let argSignature = key.Substring(key.IndexOf("-") + 1)
+                                                
                                             try
-                                                let func = jobj.Members.[key]
-                                                let funcName = key.Substring(0, key.IndexOf("-"))
-                                                let argSignature = key.Substring(key.IndexOf("-") + 1)
                                                 
                                                 if (if functionName |> isNull || (functionName = "?" && (funcName.Contains("$") |> not) && (key = "equals-Ljava/lang/Object;" |> not)) then ("-" |> key.EndsWith || functionName = "?") else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
 
@@ -1494,7 +1507,7 @@ module Code =
                                                             let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
 
                                                             if value |> isNull |> not then
-                                                                let pair = (funcName, value)
+                                                                let pair = (funcName, value, null)
                                                                 pair |> resdb.Add
                                                         else
 
@@ -1503,22 +1516,24 @@ module Code =
                                                             let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".java") then documentation.[fname + ".java"] else (Seq.empty |> Map.ofSeq)
                                                             let name = funcName
                                                             // let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
-                                                            let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
+                                                            let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else null) :> obj, null)
                                                             pair |> resdb.Add
                                                     with
                                                     | ex -> 
-                                                        let message = ex.ToString()
+                                                        let message = ex.Message.ToString()
                                                 
                                                         if "Runtime Method not found" |> message.Contains |> not then
-                                                            let pair = (funcName, message :> obj)
+                                                            let pair = (funcName, null, message :> obj)
                                                             pair |> resdb.Add
                                             with
                                             | ex -> 
-                                                let message = ex.ToString()
+                                                let message = ex.Message.ToString()
                                                 
                                                 if "Runtime Method not found" |> message.Contains |> not then
-                                                    message |> sbuilder.AppendLine |> ignore
-                                                    "--------------------------" |> sbuilder.AppendLine |> ignore
+                                                    let pair = (funcName, null, message :> obj)
+                                                    pair |> resdb.Add
+                                                    // message |> sbuilder.AppendLine |> ignore
+                                                    // "--------------------------" |> sbuilder.AppendLine |> ignore
                                             )
 
 
@@ -1528,13 +1543,13 @@ module Code =
                                                 try
                                                     let prop = jobj.TryGetMember(key)
 
-                                                    let pair = (key, prop)
+                                                    let pair = (key, prop, null)
                                                     pair |> resdb.Add
                                                 with
                                                 | ex -> 
-                                                    let message = ex.ToString()
+                                                    let message = ex.Message.ToString()
                                                     if "Runtime Method not found" |> message.Contains |> not then 
-                                                        let pair = (key, message :> obj)
+                                                        let pair = (key, null, message :> obj)
                                                         pair |> resdb.Add
                                             )
                                     with
@@ -1632,12 +1647,13 @@ module Code =
                                         let jobj = Runtime.CreateInstancePath(className, path)
                                         if jobj |> isNull |> not then
                                             jobj.Members.Keys
-                                            |> Seq.iter(fun key -> 
+                                            |> Seq.iter(fun key ->
+                                                let func = jobj.Members.[key]
+                                                let funcName = key.Substring(0, key.IndexOf("-"))
+                                                let argSignature = key.Substring(key.IndexOf("-") + 1)
+                                                
                                                 try
-                                                    let func = jobj.Members.[key]
-                                                    let funcName = key.Substring(0, key.IndexOf("-"))
-                                                    let argSignature = key.Substring(key.IndexOf("-") + 1)
-                                                    
+                                                     
                                                     if (if functionName |> isNull || (functionName = "?" && (funcName.Contains("$") |> not) && (key = "equals-Ljava/lang/Object;" |> not)) then ("-" |> key.EndsWith || functionName = "?") else (functionName = funcName && (if parameters |> isNull || parameters |> Array.isEmpty then ("-" |> key.EndsWith) else ("-" |> key.EndsWith |> not)))) && key <> "toString-" && key <> "hashCode-" && key <> "getClass-" && key <> "clone-" && (func :? Runtime.wrapAction) |> not then
                                                         let parameters =
                                                             if parameters |> isNull then 
@@ -1694,7 +1710,7 @@ module Code =
                                                                 let value = jobj.InvokeMember(funcName, if parameters |> isNull then [||] else parameters)
 
                                                                 if value |> isNull |> not then
-                                                                    let pair = (funcName, value)
+                                                                    let pair = (funcName, value, null)
                                                                     pair |> resdb.Add
                                                             else
                                                                 
@@ -1702,24 +1718,26 @@ module Code =
                                                                 let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".scala") then documentation.[fname + ".scala"] else (Seq.empty |> Map.ofSeq)
                                                                 let name = funcName
                                                                 // let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
-                                                                let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else null) :> obj)
+                                                                let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else null) :> obj, null)
                                                                 
                                                                 pair |> resdb.Add
                                                         with
                                                         | ex -> 
-                                                            let message = ex.ToString()
+                                                            let message = ex.Message.ToString()
                                                     
                                                             if "Runtime Method not found" |> message.Contains |> not then
-                                                                let pair = (funcName, message :> obj)
+                                                                let pair = (funcName, null, message :> obj)
                                                                 pair |> resdb.Add
                                                                 
                                                 with
                                                 | ex -> 
-                                                    let message = ex.ToString()
+                                                    let message = ex.Message.ToString()
                                                     
                                                     if "Runtime Method not found" |> message.Contains |> not then
-                                                        message |> sbuilder.AppendLine |> ignore
-                                                        "--------------------------" |> sbuilder.AppendLine |> ignore
+                                                        let pair = (funcName, null, message :> obj)
+                                                        pair |> resdb.Add
+                                                        // message |> sbuilder.AppendLine |> ignore
+                                                        // "--------------------------" |> sbuilder.AppendLine |> ignore
                                                 )
 
 
@@ -1729,13 +1747,13 @@ module Code =
                                                     try
                                                         let prop = jobj.TryGetMember(key)
                                                         
-                                                        let pair = (key, prop)
+                                                        let pair = (key, prop, null)
                                                         pair |> resdb.Add
                                                     with
                                                     | ex -> 
-                                                        let message = ex.ToString()
+                                                        let message = ex.Message.ToString()
                                                         if "Runtime Method not found" |> message.Contains |> not then 
-                                                            let pair = (key, message :> obj)
+                                                            let pair = (key, null, message :> obj)
                                                             pair |> resdb.Add
                                                         
                                                 )
@@ -1855,6 +1873,7 @@ module Code =
                     
                     CompiledBase.TryAdd(md5, name) |> ignore)
 
+            // { Result = (resdb |> Seq.toList); Exceptions = (expdb |> Seq.toList); Compilation = (sbuilder.ToString()) }
             { Result = (resdb |> Seq.toList); Compilation = (sbuilder.ToString()) }
 
         Utils.SetBuildCode(BuildCode(fun codes_all -> 

@@ -213,6 +213,8 @@ namespace QuantApp.Kernel.Adapters.SQL
                         adapter.SelectCommand = new SQLiteCommand(command, _connectionInternal);
                         adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
 
+                        adapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
+
                         adapter.Fill(dataset, table);
                     }
                     catch

@@ -132,7 +132,7 @@ type FPKG =
 
 type ExecuteCodeResult =
     {
-        Result : (string * obj) list
+        Result : (string * obj * obj) list
         Compilation : string
     }
 
@@ -229,16 +229,16 @@ module Utils =
         if _executeCode |> isNull |> not then
             _executeCode.Invoke(code |> Seq.toList)
         else
-            { Result = [("",null)]; Compilation = null }
+            { Result = [("", null, null)]; Compilation = null }
 
     let ExecuteCodeFunction(saveDisk : bool, code : (string * string) seq, name : string, parameters : obj[]) =
         if _executeCodeFunction |> isNull |> not then
             _executeCodeFunction.Invoke(saveDisk, code |> Seq.toList, name, parameters)
         else
-            { Result = [("",null)]; Compilation = null }
+            { Result = [("", null, null)]; Compilation = null }
 
     let CreatePKG(code : (string * string) seq, name: string, parameters : obj[]) : FPKG * ((string * string) seq) = 
-        let text, res = ExecuteCodeFunction(false, code, name, parameters).Result.[0]
+        let text, res, exp = ExecuteCodeFunction(false, code, name, parameters).Result.[0]
         if res :? string then
             res |> Console.WriteLine
             raise(Exception(res.ToString()))

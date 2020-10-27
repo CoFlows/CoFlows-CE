@@ -450,6 +450,10 @@ namespace QuantApp.Kernel
 
         public static User FindUserBySecret(string key)
         {
+            var user = FindBySecretCustom(key);
+            if(user != null)
+                return user;
+
             if (Factory == null)
                 return null;
 
@@ -491,6 +495,16 @@ namespace QuantApp.Kernel
         public static bool operator !=(User x, User y)
         {
             return !(x == y);
+        }
+
+        public delegate User FindBySecretEvent(string key);
+        public static FindBySecretEvent FindBySecretFunction = null;
+
+        public static User FindBySecretCustom(string key)
+        {
+            if (FindBySecretFunction != null)
+                return FindBySecretFunction(key);
+            return null;
         }
     }
 }
