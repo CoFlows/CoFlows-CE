@@ -1123,7 +1123,7 @@ module Code =
                                                 let cls = result.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
                                                 
                                                 let obje = cls |> obje_func(result, functionName)
-                                                obje |> Console.WriteLine
+                                                // obje |> Console.WriteLine
 
                                                 if obje |> isNull |> not then
                                                     let pair = (functionName, obje, null)
@@ -1187,6 +1187,9 @@ module Code =
                                 |> List.distinct
                                 |> List.iter(fun ass -> cfg.AllowClr(ass) |> ignore)
                                 )
+
+                            engine.SetValue("log", new Action<obj>(Console.WriteLine))
+
                             engine.SetValue("jsWrapper", JsWrapper(engine))
                             codes 
                             |> List.iter(fun (name, code) ->
@@ -2882,6 +2885,7 @@ module Code =
 
             { 
                 pkg with 
+                    ID = pkgId
                     Base = baseContent |> Seq.append(pkg.Base)
                     Queries = queriesContent |> Seq.append(pkg.Queries)
                     Agents = agentContent |> Seq.append(pkg.Agents)

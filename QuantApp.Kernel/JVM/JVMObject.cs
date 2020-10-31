@@ -622,12 +622,12 @@ namespace QuantApp.Kernel.JVM
                 //     return result;
                 // else
                 //     return null;
-                Console.WriteLine("--------------JVMObject TRY GET MEMBER: " + key);
+                // Console.WriteLine("--------------JVMObject TRY GET MEMBER: " + key);
                 return TryGetMember(key);
             }
             set
             {
-                Console.WriteLine("--------------JVMObject TRY SET MEMBER: " + key);
+                // Console.WriteLine("--------------JVMObject TRY SET MEMBER: " + key);
                 TrySetMember(key, value);
                 // if (Properties.ContainsKey(key))
                 // {
