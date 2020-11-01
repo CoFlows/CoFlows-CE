@@ -99,6 +99,7 @@ namespace CoFlows.Server
             var cloudKey = config["Cloud"]["SecretKey"].ToString();
             var cloudSSL = config["Cloud"]["SSL"].ToString();
 
+            //Jypiter Lab
             if(args != null && args.Length > 0 && args[0] == "lab")
             {
                 Connection.Client.Init(hostName, sslFlag);
@@ -135,7 +136,7 @@ namespace CoFlows.Server
 
                 Console.Write("Starting cloud deployment... ");
 
-                Code.UpdatePackageFile(workflow_name);
+                Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));
                 var t0 = DateTime.Now;
                 Console.WriteLine("Started: " + t0);
                 var res = Connection.Client.PublishPackage(workflow_name);
@@ -159,7 +160,7 @@ namespace CoFlows.Server
 
                 Console.Write("CoFlows Cloud build... ");
 
-                Code.UpdatePackageFile(workflow_name);
+                Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));
                 var t0 = DateTime.Now;
                 Console.WriteLine("Started: " + t0);
                 var res = Connection.Client.BuildPackage(workflow_name);
@@ -269,6 +270,7 @@ namespace CoFlows.Server
                 Console.WriteLine("Result: ");
                 Console.WriteLine(res);
             }
+            //Server
             else if(args != null && args.Length > 0 && args[0] == "server")
             {
                 PythonEngine.BeginAllowThreads();
@@ -363,7 +365,7 @@ namespace CoFlows.Server
 
                 Console.WriteLine("Local build");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name), true);
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                 var res = Code.BuildRegisterPackage(pkg);
                 if(string.IsNullOrEmpty(res))
                     Console.WriteLine("Success!!!");
@@ -396,7 +398,7 @@ namespace CoFlows.Server
                 Console.WriteLine("Parameters: " + parameters);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name), true);
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                 Code.ProcessPackageJSON(pkg);
 
                 var _g = Group.FindGroup(pkg.ID);
@@ -449,7 +451,7 @@ namespace CoFlows.Server
                 Console.WriteLine("Started: " + t0);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name), true);
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(string.IsNullOrEmpty(res))
@@ -620,7 +622,7 @@ namespace CoFlows.Server
 
                 Console.Write("Starting azure deployment... ");
 
-                Code.UpdatePackageFile(workflow_name);
+                Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));
                 var resDeploy = Connection.Client.PublishPackage(workflow_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
@@ -632,7 +634,7 @@ namespace CoFlows.Server
 
                 Console.WriteLine("Azure Container Instance remove start");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name), true);
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(!string.IsNullOrEmpty(res))
@@ -670,6 +672,186 @@ namespace CoFlows.Server
                 catch (Exception)
                 {
                     Console.WriteLine("Did not create any resources in Azure. No clean up is necessary");
+                }
+            }
+            //Add
+            else if(args != null && args.Length > 1 && args[0] == "add")
+            {
+                PythonEngine.BeginAllowThreads();
+
+                // Databases(connectionString);
+                var connectionString = config["Database"]["Connection"].ToString();
+                var type = config["Database"]["Type"].ToString();
+                if(type.ToLower() == "mssql" || type.ToLower() == "postgres")
+                    DatabasesDB(connectionString);
+                else
+                    DatabasesSqlite(connectionString);
+
+                Console.WriteLine("Add " + DateTime.Now);
+                Console.WriteLine("DB Connected");
+
+                Console.WriteLine("CoFlows add to workflow... ");
+
+                //sh add.sh query (cs, fs, py, java, scala, js, vb)
+                //sh add.sh agent (cs, fs, py, java, scala, js, vb)
+                //sh add.sh pip name
+                //sh add.sh jar url
+                //sh add.sh nuget name version
+
+                var cmd = args[1];
+                Console.WriteLine("Command: " + cmd);
+
+                if(cmd == "query")
+                {
+                    
+                    var lang = args[2].ToLower();
+                    var name = args[3];
+                    Console.WriteLine("     Creating new query: " + name);
+
+                    if(lang == "cs")
+                    {
+                        Console.WriteLine("     generating C# query...");
+                        string query = File.ReadAllText("scripts/Queries/csQuery.cs").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Queries/");
+                        File.WriteAllText("/app/mnt/Queries/" + name + ".cs", query);
+                    }
+                    else if(lang == "fs")
+                    {
+                        Console.WriteLine("     generating F# query...");
+                        string query = File.ReadAllText("scripts/Queries/fsQuery.fs").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Queries/");
+                        File.WriteAllText("/app/mnt/Queries/" + name + ".fs", query);
+                    }
+                    else if(lang == "py")
+                    {
+                        Console.WriteLine("     generating Python query...");
+                        string query = File.ReadAllText("scripts/Queries/pythonQuery.py").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Queries/");
+                        File.WriteAllText("/app/mnt/Queries/" + name + ".py", query);
+                    }
+                    else if(lang == "java")
+                    {
+                        Console.WriteLine("     generating Java query...");
+                        string query = File.ReadAllText("scripts/Queries/javaQuery.java").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Queries/");
+                        File.WriteAllText("/app/mnt/Queries/" + name + ".java", query);
+                    }
+                    else if(lang == "scala")
+                    {
+                        Console.WriteLine("     generating Scala query...");
+                        string query = File.ReadAllText("scripts/Queries/scalaQuery.scala").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Queries/");
+                        File.WriteAllText("/app/mnt/Queries/" + name + ".scala", query);
+                    }
+                    else if(lang == "js")
+                    {
+                        Console.WriteLine("     generating Javascript query...");
+                        string query = File.ReadAllText("scripts/Queries/javascriptQuery.js").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Queries/");
+                        File.WriteAllText("/app/mnt/Queries/" + name + ".js", query);
+                    }
+                    else if(lang == "vb")
+                    {
+                        Console.WriteLine("     generating VB query...");
+                        string query = File.ReadAllText("scripts/Queries/vbQuery.vb").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Queries/");
+                        File.WriteAllText("/app/mnt/Queries/" + name + ".vb", query);
+                    }
+
+                    var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
+                    var res = Code.BuildRegisterPackage(pkg);
+                    if(string.IsNullOrEmpty(res))
+                        Console.WriteLine("Success!!!");
+                    else
+                        Console.WriteLine(res);
+
+                    // Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(name, version), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));                
+                }
+                else if(cmd == "agent")
+                {
+                    
+                    var lang = args[2].ToLower();
+                    var name = args[3];
+                    Console.WriteLine("     Creating new agent: " + name);
+
+                    if(lang == "cs")
+                    {
+                        Console.WriteLine("     generating C# agent...");
+                        string agent = File.ReadAllText("scripts/Agents/csAgent.cs").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Agents/");
+                        File.WriteAllText("/app/mnt/Agents/" + name + ".cs", agent);
+                    }
+                    else if(lang == "fs")
+                    {
+                        Console.WriteLine("     generating F# agent...");
+                        string agent = File.ReadAllText("scripts/Agents/fsAgent.fs").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Agents/");
+                        File.WriteAllText("/app/mnt/Agents/" + name + ".fs", agent);
+                    }
+                    else if(lang == "py")
+                    {
+                        Console.WriteLine("     generating Python agent...");
+                        string agent = File.ReadAllText("scripts/Agents/pythonAgent.py").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Agents/");
+                        File.WriteAllText("/app/mnt/Agents/" + name + ".py", agent);
+                    }
+                    else if(lang == "java")
+                    {
+                        Console.WriteLine("     generating Java agent...");
+                        string agent = File.ReadAllText("scripts/Agents/javaAgent.java").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Agents/");
+                        File.WriteAllText("/app/mnt/Agents/" + name + ".java", agent);
+                    }
+                    else if(lang == "scala")
+                    {
+                        Console.WriteLine("     generating Scala agent...");
+                        string agent = File.ReadAllText("scripts/Agents/scalaAgent.scala").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Agents/");
+                        File.WriteAllText("/app/mnt/Agents/" + name + ".scala", agent);
+                    }
+                    else if(lang == "js")
+                    {
+                        Console.WriteLine("     generating Javascript agent...");
+                        string agent = File.ReadAllText("scripts/Agents/javascriptAgent.js").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Agents/");
+                        File.WriteAllText("/app/mnt/Agents/" + name + ".js", agent);
+                    }
+                    else if(lang == "vb")
+                    {
+                        Console.WriteLine("     generating VB agent...");
+                        string agent = File.ReadAllText("scripts/Agents/vbAgent.vb").Replace("XXX", name);
+                        Directory.CreateDirectory("/app/mnt/Agents/");
+                        File.WriteAllText("/app/mnt/Agents/" + name + ".vb", agent);
+                    }
+
+                    var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
+                    var res = Code.BuildRegisterPackage(pkg);
+                    if(string.IsNullOrEmpty(res))
+                        Console.WriteLine("Success!!!");
+                    else
+                        Console.WriteLine(res);
+                }
+                else if(cmd == "nuget")
+                {
+                    var name = args[2];
+                    var version = args[3];
+                    Console.WriteLine("     Installing nuget package: " + name + " @ " + version);
+                    Code.InstallNuGetAssembly(name, version);
+                    Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(name, version), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));                
+                }
+                else if(cmd == "pip")
+                {
+                    var pip = args[2];
+                    Console.WriteLine("     Installing pip package: " + pip);
+                    Code.InstallPip(pip);
+                    Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(pip), new QuantApp.Engine.JarPackage(null));
+                }
+                else if(cmd == "jar")
+                {
+                    var jar = args[2];
+                    Console.WriteLine("     Installing jar package: " + jar);
+                    Code.InstallJar(jar);
+                    Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(jar));
                 }
             }
             else

@@ -2778,7 +2778,7 @@ module Code =
 
         files |> ProcessPackageDictionary
 
-    let UpdatePackageFile (pkg_file : string) : string =
+    let UpdatePackageFile (pkg_file : string, nuget: NuGetPackage, pip: PipPackage, jar: JarPackage) : string =
         let pkgJson = File.ReadAllText(pkg_file)
         let pkgPath = Path.GetDirectoryName(pkg_file)
         let pkgType = Newtonsoft.Json.JsonConvert.DeserializeObject<QuantApp.Engine.PKG>(pkgJson)
@@ -2891,6 +2891,9 @@ module Code =
                     Agents = agentContent |> Seq.append(pkg.Agents)
                     Bins = binsContent
                     Files = filesContent
+                    Pips = if pip.ID |> isNull then pkg.Pips else (pkg.Pips |> Seq.append([pip]))
+                    NuGets = if nuget.ID |> isNull then pkg.NuGets else (pkg.NuGets |> Seq.append([nuget]))
+                    Jars = if jar.Url |> isNull then pkg.Jars else (pkg.Jars |> Seq.append([jar]))
             }
 
         let pkgContent = pkgType |> parse_content        
