@@ -123,7 +123,7 @@ namespace CoFlows.Server.Quant
 
                 Console.Write("Starting cloud deployment... ");
 
-                Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name);
+                Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));
                 var t0 = DateTime.Now;
                 Console.WriteLine("Started: " + t0);
                 var res = Connection.Client.PublishPackage(CoFlows.Server.Program.workflow_name);
@@ -147,7 +147,7 @@ namespace CoFlows.Server.Quant
 
                 Console.Write("CoFlows Cloud build... ");
 
-                Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name);
+                Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));
                 var t0 = DateTime.Now;
                 Console.WriteLine("Started: " + t0);
                 var res = Connection.Client.BuildPackage(CoFlows.Server.Program.workflow_name);
@@ -407,7 +407,7 @@ namespace CoFlows.Server.Quant
 
                 Console.WriteLine("Local build");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name), true);
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(string.IsNullOrEmpty(res))
@@ -457,7 +457,7 @@ namespace CoFlows.Server.Quant
                 Console.WriteLine("Parameters: " + parameters);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name), true);
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                 Code.ProcessPackageJSON(pkg);
 
                 var _g = Group.FindGroup(pkg.ID);
@@ -506,7 +506,7 @@ namespace CoFlows.Server.Quant
                 Console.WriteLine("Started: " + t0);
 
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name), true);
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(string.IsNullOrEmpty(res))
@@ -676,7 +676,7 @@ namespace CoFlows.Server.Quant
 
                 Console.Write("Starting azure deployment... ");
 
-                Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name);
+                Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));
                 var resDeploy = Connection.Client.PublishPackage(CoFlows.Server.Program.workflow_name);
                 var t1 = DateTime.Now;
                 Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
@@ -688,7 +688,7 @@ namespace CoFlows.Server.Quant
                 Console.WriteLine();
                 Console.WriteLine("Azure Container Instance remove start");
 
-                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name), true);
+                var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                 var res = Code.BuildRegisterPackage(pkg);
 
                 if(!string.IsNullOrEmpty(res))
@@ -735,12 +735,29 @@ namespace CoFlows.Server.Quant
                 PythonEngine.BeginAllowThreads();
 
                 // Databases(connectionString);
-                var connectionString = config["Database"]["Connection"].ToString();
                 var type = config["Database"]["Type"].ToString();
                 if(type.ToLower() == "mssql" || type.ToLower() == "postgres")
-                    DatabasesDB(connectionString);
+                {
+                    if(config["Database"]["Connection"] == null)
+                    {
+                        var kernelString = config["Database"]["Kernel"].ToString();
+                        var strategyString = config["Database"]["Strategies"].ToString();
+                        var quantappString = config["Database"]["QuantApp"].ToString();
+                        Databases(kernelString, strategyString, quantappString);
+                    }
+                    else
+                    {
+                        var kernelString = config["Database"]["Connection"].ToString();
+                        var strategyString = kernelString;
+                        var quantappString = kernelString;
+                        Databases(kernelString, strategyString, quantappString);
+                    }
+                }
                 else
-                    DatabasesSqlite(connectionString);
+                {
+                    var connectionString = config["Database"]["Connection"].ToString();
+                    Databases(connectionString);
+                }
 
                 Console.WriteLine("Add " + DateTime.Now);
                 Console.WriteLine("DB Connected");
@@ -813,7 +830,7 @@ namespace CoFlows.Server.Quant
                         File.WriteAllText("/app/mnt/Queries/" + name + ".vb", query);
                     }
 
-                    var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
+                    var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                     var res = Code.BuildRegisterPackage(pkg);
                     if(string.IsNullOrEmpty(res))
                         Console.WriteLine("Success!!!");
@@ -879,7 +896,7 @@ namespace CoFlows.Server.Quant
                         File.WriteAllText("/app/mnt/Agents/" + name + ".vb", agent);
                     }
 
-                    var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
+                    var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                     var res = Code.BuildRegisterPackage(pkg);
                     if(string.IsNullOrEmpty(res))
                         Console.WriteLine("Success!!!");
@@ -892,21 +909,21 @@ namespace CoFlows.Server.Quant
                     var version = args[3];
                     Console.WriteLine("     Installing nuget package: " + name + " @ " + version);
                     Code.InstallNuGetAssembly(name, version);
-                    Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(name, version), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));                
+                    Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(name, version), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));                
                 }
                 else if(cmd == "pip")
                 {
                     var pip = args[2];
                     Console.WriteLine("     Installing pip package: " + pip);
                     Code.InstallPip(pip);
-                    Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(pip), new QuantApp.Engine.JarPackage(null));
+                    Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(pip), new QuantApp.Engine.JarPackage(null));
                 }
                 else if(cmd == "jar")
                 {
                     var jar = args[2];
                     Console.WriteLine("     Installing jar package: " + jar);
                     Code.InstallJar(jar);
-                    Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(jar));
+                    Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(jar));
                 }
             }
             else
