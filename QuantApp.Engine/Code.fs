@@ -1123,7 +1123,7 @@ module Code =
                                                 let cls = result.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
                                                 
                                                 let obje = cls |> obje_func(result, functionName)
-                                                obje |> Console.WriteLine
+                                                // obje |> Console.WriteLine
 
                                                 if obje |> isNull |> not then
                                                     let pair = (functionName, obje, null)
@@ -1187,6 +1187,9 @@ module Code =
                                 |> List.distinct
                                 |> List.iter(fun ass -> cfg.AllowClr(ass) |> ignore)
                                 )
+
+                            engine.SetValue("log", new Action<obj>(Console.WriteLine))
+
                             engine.SetValue("jsWrapper", JsWrapper(engine))
                             codes 
                             |> List.iter(fun (name, code) ->
@@ -2775,7 +2778,7 @@ module Code =
 
         files |> ProcessPackageDictionary
 
-    let UpdatePackageFile (pkg_file : string) : string =
+    let UpdatePackageFile (pkg_file : string, nuget: NuGetPackage, pip: PipPackage, jar: JarPackage) : string =
         let pkgJson = File.ReadAllText(pkg_file)
         let pkgPath = Path.GetDirectoryName(pkg_file)
         let pkgType = Newtonsoft.Json.JsonConvert.DeserializeObject<QuantApp.Engine.PKG>(pkgJson)
@@ -2882,11 +2885,15 @@ module Code =
 
             { 
                 pkg with 
+                    ID = pkgId
                     Base = baseContent |> Seq.append(pkg.Base)
                     Queries = queriesContent |> Seq.append(pkg.Queries)
                     Agents = agentContent |> Seq.append(pkg.Agents)
                     Bins = binsContent
                     Files = filesContent
+                    Pips = if pip.ID |> isNull then pkg.Pips else (pkg.Pips |> Seq.append([pip]))
+                    NuGets = if nuget.ID |> isNull then pkg.NuGets else (pkg.NuGets |> Seq.append([nuget]))
+                    Jars = if jar.Url |> isNull then pkg.Jars else (pkg.Jars |> Seq.append([jar]))
             }
 
         let pkgContent = pkgType |> parse_content        
