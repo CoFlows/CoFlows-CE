@@ -111,6 +111,12 @@ export class HeaderComponent implements OnInit {
         }
         
       }
-    );
-}
+    )
+  }
+
+  generateSecret(){
+    this.coflows.Get('administration/resetsecret', secret => {
+      this.coflows.quser.User.Secret = secret
+    }, err => console.log(err))
+  }
 }
