@@ -708,22 +708,36 @@ namespace CoFlows.Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Reset the user secret
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="400">An error occured </response>
+        [HttpGet]
+        public ActionResult ResetSecret()
+        {
+            string userId = this.User.QID();
+            if (userId == null)
+                return Unauthorized();
 
+            try
+            {
+                var users = UserRepository.RetrieveUsersFromTenant(userId);
+                var ienum = users.GetEnumerator();
+                ienum.MoveNext();
+                var user = ienum.Current;
+                
+                var quser = QuantApp.Kernel.User.FindUser(userId);
 
-        // [HttpPost, AllowAnonymous]
-        // public string SendMessage(string id, string name, string email, string subject, string message)
-        // {
-        //     try
-        //     {
-        //         RTDEngine.Send(new List<string>(){"arturo@quant.app;Arturo Rodriguez"}, email + ";" + name, subject, message);
-        //         return "ok";
-        //     }
-        //     catch(Exception e)
-        //     {
-        //         Console.WriteLine(e);
-        //         return "error";
-        //     }
-        // }
+                quser.Secret = System.Guid.NewGuid().ToString();
+
+                return Ok(quser.Secret);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
 
         public class MessageClass
         {
