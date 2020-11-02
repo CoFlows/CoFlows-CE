@@ -1074,11 +1074,20 @@ namespace CoFlows.Server
             {
                 var name = result.Result[i].Item1;
                 dynamic api = result.Result[i].Item2;
+                
                 if(api != null)
                 {
-                    var pars = new List<object>();
+                    
+                    int varCounter = 0;
                     foreach(var par in api.Parameters)                            
-                        pars.Add(new Dictionary<string, object>(){
+                        if(par.Name != "_cokey")
+                            varCounter++;
+
+                    bool isPost = varCounter == 1;
+
+                    var parsGet = new List<object>();
+                    foreach(var par in api.Parameters)                            
+                        parsGet.Add(new Dictionary<string, object>(){
                             {"name", par.Name},
                             {"in", "query"},
                             {"required", true},
@@ -1086,7 +1095,26 @@ namespace CoFlows.Server
                             {"schema", new { type = par.Type }},
                         });
 
-                    pars.Add(new Dictionary<string, object>(){
+                    parsGet.Add(new Dictionary<string, object>(){
+                            {"name", "_cokey"},
+                            {"in", "query"},
+                            {"required", false},
+                            {"description", "CoFlows User Key. This value can also be set in the Header"},
+                            {"schema", new { type = "string" }},
+                        });
+
+                    
+                    var parsPost = new List<object>();
+                    foreach(var par in api.Parameters)                            
+                        parsPost.Add(new Dictionary<string, object>(){
+                            {"name", par.Name},
+                            {"in", "body"},
+                            {"required", true},
+                            {"description", par.Description},
+                            {"schema", new { type = par.Type }},
+                        });
+
+                    parsPost.Add(new Dictionary<string, object>(){
                             {"name", "_cokey"},
                             {"in", "query"},
                             {"required", false},
@@ -1094,17 +1122,38 @@ namespace CoFlows.Server
                             {"schema", new { type = "string" }},
                         });
                     
-
-                    apis.Add(
-                        "/" + name, 
-                        new { 
-                            get = new {
-                                description = api.Description,
-                                parameters = pars,
-                                responses = new Dictionary<string, object>() { 
-                                    {"200", new { description = api.Returns } }
-                                    }
-                            }}
+                    if(!isPost)
+                        apis.Add(
+                            "/" + name, 
+                            new { 
+                                get = new {
+                                    description = api.Description,
+                                    parameters = parsGet,
+                                    responses = new Dictionary<string, object>() { 
+                                        {"200", new { description = api.Returns } }
+                                        }
+                                }
+                            }
+                        );
+                    else
+                        apis.Add(
+                            "/" + name, 
+                            new { 
+                                get = new {
+                                    description = api.Description,
+                                    parameters = parsGet,
+                                    responses = new Dictionary<string, object>() { 
+                                        {"200", new { description = api.Returns } }
+                                        }
+                                },
+                                post = new {
+                                    description = api.Description,
+                                    parameters = parsPost,
+                                    responses = new Dictionary<string, object>() { 
+                                        {"200", new { description = api.Returns } }
+                                        }
+                                }
+                            }
                         );
                 }
                 else
@@ -1112,6 +1161,12 @@ namespace CoFlows.Server
                         "/" + name, 
                         new { 
                             get = new {
+                                description = "not found",
+                                responses = new Dictionary<string, object>() { 
+                                    {"200", new { description = "not found" } }
+                                    }
+                            },
+                            post = new {
                                 description = "not found",
                                 responses = new Dictionary<string, object>() { 
                                     {"200", new { description = "not found" } }
