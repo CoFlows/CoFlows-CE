@@ -41,14 +41,14 @@
       </div>
 
 
-      <div class="row" *ngIf="oauth.GitHub">
+      <div class="row" *ngIf="oauth != null && oauth.GitHub">
         <a href="{{oauth.GitHub}}" class="text-color">
           <i class="widget-icon rounded-circle icon icon-social-github"></i>
           <label class="form-control-label">&nbsp;&nbsp;GitHub Signin</label>
         </a>
       </div>
 
-      <div class="row" *ngIf="oauth.AzureAD">
+      <div class="row" *ngIf="oauth != null && oauth.AzureAD">
         <a href="{{oauth.AzureAD}}" class="text-color">
           <i class="widget-icon rounded-circle icon icon-grid"></i>
           <label class="form-control-label">&nbsp;&nbsp;Azure AD Signin</label>
