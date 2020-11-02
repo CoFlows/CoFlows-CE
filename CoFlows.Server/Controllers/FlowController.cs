@@ -867,7 +867,10 @@ namespace CoFlows.Server.Controllers
                             if(pair.Item1 == name)
                             {
                                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-                                return Ok(pair.Item2);
+                                if(pair.Item3 != null)
+                                    return BadRequest(pair.Item3);
+                                else
+                                    return Ok(pair.Item2);
                             }
                         }
                     else
@@ -983,7 +986,130 @@ namespace CoFlows.Server.Controllers
                             if(pair.Item1 == name)
                             {
                                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-                                return Ok(pair.Item2);
+                                if(pair.Item3 != null)
+                                    return BadRequest(pair.Item3);
+                                else
+                                    return Ok(pair.Item2);
+                            }
+                        }
+                    else
+                        return Ok(execution_result);
+                }
+            }
+
+            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+            return Ok(new { Result = "Empty" });
+        }
+
+
+        /// <summary>
+        /// Execute a Query
+        /// </summary>
+        /// <returns>Success</returns>
+        /// <param name="wid">Workflow ID</param>
+        /// <param name="qid">Query ID</param>
+        /// <param name="name">Query name</param>
+        /// <param name="_cokey">User secrect</param>
+        /// <param name="_p">parameters in JSON format</param>
+        /// <response code="200">Result of query in JSON format</response>
+        [HttpPost("{wid}/{qid}/{name}/{**parameters}"), AllowAnonymous]
+        public async Task<IActionResult> Query(string wid, string qid, string name, string _cokey,[FromBody] Newtonsoft.Json.Linq.JObject _p)
+        {
+            string[] p = new string[] { Newtonsoft.Json.JsonConvert.SerializeObject(_p) };
+
+            if(this.Request.Headers.ContainsKey("_cokey"))
+                _cokey = this.Request.Headers["_cokey"];
+            
+            string userId = this.User.QID();
+            if(!string.IsNullOrEmpty(_cokey))
+            {
+                QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUserBySecret(_cokey);
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                {
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+                    userId = quser.ID;
+                }
+            }
+            else if (userId != null)
+            {
+                QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                {
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+                    userId = quser.ID;
+                }
+            }
+            else
+                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+
+            var m = M.Base(wid);
+            var res = m[x => true];
+            if(res.Count > 0)
+            {
+                var workflow = res.FirstOrDefault() as Workflow;
+
+                var wb_m = M.Base(wid + "--Queries");
+                var wb_res = wb_m[x => M.V<string>(x, "ID") == qid];
+                if(wb_res.Count > 0)
+                {
+                    var wb = wb_res.FirstOrDefault() as CodeData;
+                    var codes = new List<Tuple<string,string>>();
+
+                    codes.Add(new Tuple<string, string>(wb.Name, wb.Code));
+
+                    // Check permissions from meta data
+                    var meta_data = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, "??", null);
+
+                    var hasPermission = false;
+                    var setPermission = false;
+                    
+                    if(meta_data != null)
+                    {
+                        foreach(dynamic func in meta_data.Result)
+                        {
+                            if(func != null && func.Item1 == name)
+                            {
+                                var pp = func.Item2;
+                                if(pp != null && pp.Permissions != null)
+                                    foreach(var perm in pp.Permissions)
+                                    {
+                                        hasPermission = true;
+                                        var permAccess = QuantApp.Kernel.User.PermissionContext(perm.GroupID);
+                                        setPermission = !setPermission ? (int)permAccess >= (int)perm.Access : setPermission;
+                                    }
+                            }
+                        }
+                        
+                    }
+
+                    if(hasPermission && !setPermission)
+                        return Unauthorized();
+                    // execute code
+
+
+                    var execution = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, name, p.Length == 0 ? null : p);
+                    
+                    var execution_result = execution.Result;
+                    if(execution_result.Length == 0)
+                    {
+                        QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                        return Ok(execution.Compilation);
+                    }
+                        
+                    if(name != null)
+                        foreach(var pair in execution_result)
+                        {
+                            if(pair.Item1 == name)
+                            {
+                                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                                if(pair.Item3 != null)
+                                    return BadRequest(pair.Item3);
+                                else
+                                    return Ok(pair.Item2);
                             }
                         }
                     else
