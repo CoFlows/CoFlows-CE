@@ -121,6 +121,8 @@
                 </label>
                 <input type="text" [disabled]="true" class="form-control" value="{{coflows.quser.User.Secret}}" />
               </fieldset>
+
+              <button (click)="generateSecret()" class="btn btn-warning" style="width: 100%;">Generate New Secret</button>
           </div>
       </div>
       <div class="modal-footer">

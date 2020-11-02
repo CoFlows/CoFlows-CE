@@ -18,7 +18,7 @@ import QuantApp.Kernel as qak
 ###     </permissions>
 ### </api>
 def Add(x, y):
-    return x + y
+    return int(x) + int(y)
 
 
 ### <api name="Permission">
