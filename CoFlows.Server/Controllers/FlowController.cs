@@ -500,22 +500,47 @@ namespace CoFlows.Server.Controllers
         }
 
         /// <summary>
-        /// Call Agent Body function through GET
+        /// Call Agent Body function through POST
         /// </summary>
         /// <returns>Success</returns>
         /// <param name="id">Agent ID</param>
-        /// <param name="parameters">parameters in string format</param>
+        /// <param name="_cokey">User secrect</param>
+        /// <param name="data">JSON object</param>
         /// <response code="200"></response>
         /// <response code="400">Agent not found</response>
-        [HttpGet]
-        public async Task<IActionResult> CallAgent(string id, string parameters)
+        [HttpPost("{id}/{**parameters}"), AllowAnonymous]
+        public async Task<IActionResult> Agent(string id, string _cokey, [FromBody] Newtonsoft.Json.Linq.JObject data)
         {
             string userId = this.User.QID();
-            if (userId == null)
-                return Unauthorized();
-
-            QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
-
+            
+            if(this.Request.Headers.ContainsKey("_cokey"))
+                _cokey = this.Request.Headers["_cokey"];
+            
+            if(!string.IsNullOrEmpty(_cokey))
+            {
+                QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUserBySecret(_cokey);
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                {
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+                    userId = quser.ID;
+                }
+            }
+            else if (userId != null)
+            {
+                QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
+                if(quser == null)
+                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                else
+                {
+                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+                    userId = quser.ID;
+                }
+            }
+            else
+                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+            
             var _agent = F.Find(id);
 
             if(_agent == null)
@@ -523,45 +548,15 @@ namespace CoFlows.Server.Controllers
 
             F f = _agent.Value;
 
-            return Ok(f.Body(parameters));
+            var result = f.Body(Newtonsoft.Json.JsonConvert.SerializeObject(data));
+
+            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+
+            return Ok(result);
         }
 
         /// <summary>
-        /// Call Agent Body function through POST
-        /// </summary>
-        /// <returns>Success</returns>
-        /// <param name="data">
-        /// Data:
-        ///
-        ///     {
-        ///         "ID": "Workflow ID",
-        ///         "Parameters": "serialized JSON parameters"
-        ///     }
-        ///
-        /// </param>
-        /// <response code="200"></response>
-        /// <response code="400">Agent not found</response>
-        [HttpPost]
-        public async Task<IActionResult> CallAgent([FromBody] FData data)
-        {
-            string userId = this.User.QID();
-            if (userId == null)
-                return Unauthorized();
-
-            QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
-
-            var _agent = F.Find(data.ID);
-
-            if(_agent == null)
-                return BadRequest(new { Data = "Agent not found" } );
-
-            F f = _agent.Value;
-
-            return Ok(f.Body(data.Parameters));
-        }
-
-        /// <summary>
-        /// Call Agent Body function through POST
+        /// Create an Agent
         /// </summary>
         /// <returns>Success</returns>
         /// <param name="data">
