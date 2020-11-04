@@ -308,8 +308,8 @@ module Code =
                 let code = 
                     "import subprocess \n" +
                     "try:\n" +
-                    "   import " + packageName + "\n" +
-                    "   print('Pip package: " + packageName + " exists.')\n" +
+                    "   import " + (if packageName.IndexOf("=") > -1 then packageName.Substring(0, packageName.IndexOf("=")) else packageName) + "\n" +
+                    "   print('Pip package: " + (if packageName.IndexOf("=") > -1 then packageName.Substring(0, packageName.IndexOf("=")) else packageName) + " exists.')\n" +
                     "except: \n" +
                     "   print('Installing Pip package: " + packageName + "...')\n" +
                     "   subprocess.check_call(['pip', 'install', '--target=/app/mnt/pip/', '" + packageName + "'])"
