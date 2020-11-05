@@ -99,7 +99,11 @@ namespace QuantApp.Kernel
 
         public static UserData ContextUserBySecret(string secret)
         {
-            return FindUserBySecret(secret).ToUserData();
+            var user = FindUserBySecret(secret);
+            if(user != null)
+                return user.ToUserData();
+            else
+                return new QuantApp.Kernel.UserData();
         }
 
         public void SetContextUser()
@@ -109,7 +113,10 @@ namespace QuantApp.Kernel
 
         public static void SetContextUserSecret(string secret)
         {
-            ContextUser = FindUserBySecret(secret).ToUserData();
+            var user = FindUserBySecret(secret);
+            
+            if(user != null)
+                ContextUser = user.ToUserData();
         }
 
         public override string ToString()
