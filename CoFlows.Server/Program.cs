@@ -83,21 +83,23 @@ namespace CoFlows.Server
             if(string.IsNullOrEmpty(config_file))
                 config_file = "coflows_config.json";
 
-            config = string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
-            workflow_name = config["Workflow"].ToString();
-            hostName = config["Server"]["Host"].ToString();
-            var secretKey = config["Server"]["SecretKey"].ToString();
+            bool addWorkflow = args[0] == "add" && args[1] == "workflow";
             
-            letsEncryptEmail = config["Server"]["LetsEncrypt"]["Email"].ToString();
-            letsEncryptStaging = config["Server"]["LetsEncrypt"]["Staging"].ToString().ToLower() == "true";
+            config = addWorkflow ? null : string.IsNullOrEmpty(config_env) ? (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(@"mnt/" + config_file))) : (JObject)JToken.Parse(config_env);
+            workflow_name = addWorkflow ? "" : config["Workflow"].ToString();
+            hostName = addWorkflow ? "" : config["Server"]["Host"].ToString();
+            var secretKey = addWorkflow ? "" : config["Server"]["SecretKey"].ToString();
+            
+            letsEncryptEmail = addWorkflow ? "" : config["Server"]["LetsEncrypt"]["Email"].ToString();
+            letsEncryptStaging = addWorkflow ? false : config["Server"]["LetsEncrypt"]["Staging"].ToString().ToLower() == "true";
 
-            var sslFlag = hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(letsEncryptEmail);
+            var sslFlag = addWorkflow ? false : hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(letsEncryptEmail);
 
-            useJupyter = config["Jupyter"].ToString().ToLower() == "true";
+            useJupyter = addWorkflow ? false : config["Jupyter"].ToString().ToLower() == "true";
 
-            var cloudHost = config["Cloud"]["Host"].ToString();
-            var cloudKey = config["Cloud"]["SecretKey"].ToString();
-            var cloudSSL = config["Cloud"]["SSL"].ToString();
+            var cloudHost = addWorkflow ? "" : config["Cloud"]["Host"].ToString();
+            var cloudKey = addWorkflow ? "" : config["Cloud"]["SecretKey"].ToString();
+            var cloudSSL = addWorkflow ? "" : config["Cloud"]["SSL"].ToString();
 
             //Jypiter Lab
             if(args != null && args.Length > 0 && args[0] == "lab")
@@ -680,23 +682,25 @@ namespace CoFlows.Server
                 PythonEngine.BeginAllowThreads();
 
                 // Databases(connectionString);
-                var connectionString = config["Database"]["Connection"].ToString();
-                var type = config["Database"]["Type"].ToString();
-                if(type.ToLower() == "mssql" || type.ToLower() == "postgres")
-                    DatabasesDB(connectionString);
-                else
-                    DatabasesSqlite(connectionString);
+                var connectionString = config == null ? "" : config["Database"]["Connection"].ToString();
+                var type = config == null ? "" : config["Database"]["Type"].ToString();
+                if(config != null)
+                    if(type.ToLower() == "mssql" || type.ToLower() == "postgres")
+                        DatabasesDB(connectionString);
+                    else
+                        DatabasesSqlite(connectionString);
 
                 Console.WriteLine("Add " + DateTime.Now);
                 Console.WriteLine("DB Connected");
 
                 Console.WriteLine("CoFlows add to workflow... ");
 
-                //sh add.sh query (cs, fs, py, java, scala, js, vb)
-                //sh add.sh agent (cs, fs, py, java, scala, js, vb)
-                //sh add.sh pip name
-                //sh add.sh jar url
-                //sh add.sh nuget name version
+                //sh add.sh query (cs, fs, py, java, scala, js, vb) {name}
+                //sh add.sh dash {name}
+                //sh add.sh agent (cs, fs, py, java, scala, js, vb) {name}
+                //sh add.sh pip {name}
+                //sh add.sh jar {url}
+                //sh add.sh nuget {name} {version}
 
                 var cmd = args[1];
                 Console.WriteLine("Command: " + cmd);
@@ -764,8 +768,37 @@ namespace CoFlows.Server
                         Console.WriteLine("Success!!!");
                     else
                         Console.WriteLine(res);
+                }
+                else if(cmd == "dash")
+                {
+                    
+                    var name = args[2];
+                    Console.WriteLine("     Creating new dash app: " + name);
 
-                    // Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(name, version), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));                
+                    Console.WriteLine("     generating dash app...");
+                    string query = File.ReadAllText("scripts/Queries/dash.py").Replace("XXX", name);
+                    Directory.CreateDirectory("/app/mnt/Queries/");
+                    File.WriteAllText("/app/mnt/Queries/" + name + ".py", query);
+
+                    var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
+                    var res = Code.BuildRegisterPackage(pkg);
+                    if(string.IsNullOrEmpty(res))
+                        Console.WriteLine("Success!!!");
+                    else
+                        Console.WriteLine(res);
+                }
+                else if(cmd == "workflow")
+                {
+                    var name = args[2];
+                    Console.WriteLine("     Creating new Workflow: " + name);
+
+                    Console.WriteLine("     generating the Workflow...");
+
+
+                    string sourceDirectory = @"scripts/Workflow";
+                    string targetDirectory = @"/app/mnt/" + name;
+
+                    Copy(sourceDirectory, targetDirectory, name);
                 }
                 else if(cmd == "agent")
                 {
@@ -1275,5 +1308,38 @@ namespace CoFlows.Server
                     .Run();
             }
         }
+
+        public static void Copy(string sourceDirectory, string targetDirectory, string name)
+        {
+            DirectoryInfo diSource = new DirectoryInfo(sourceDirectory);
+            DirectoryInfo diTarget = new DirectoryInfo(targetDirectory);
+
+            CopyAll(diSource, diTarget, name);
+        }
+
+        public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string name)
+        {
+            Directory.CreateDirectory(target.FullName);
+
+            // Copy each file into the new directory.
+            foreach (FileInfo fi in source.GetFiles())
+            {
+                Console.WriteLine(@"Creating {0}/{1}", target.FullName, fi.Name);
+                // fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+
+                string query = File.ReadAllText(fi.FullName).Replace("$NAME$", name);
+                Directory.CreateDirectory(Path.Combine(target.FullName));
+                File.WriteAllText(Path.Combine(target.FullName, fi.Name), query);
+            }
+
+            // Copy each subdirectory using recursion.
+            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+            {
+                DirectoryInfo nextTargetSubDir =
+                    target.CreateSubdirectory(diSourceSubDir.Name);
+                CopyAll(diSourceSubDir, nextTargetSubDir, name);
+            }
+        }
+
     }
 }

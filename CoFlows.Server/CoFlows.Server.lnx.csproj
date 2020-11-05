@@ -13,6 +13,8 @@
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DefineConstants>NETSTANDARD;MONO_LINUX;TRACE;DEBUG;PYTHON3;PYTHON37;UCS4;PYTHON_WITH_PYMALLOC</DefineConstants>
+
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,22 +26,8 @@
     <Content Include="jupyter/kernel.jupyter" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="sql/create.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
 
-    <Content Include="scripts/Queries/csQuery.cs" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Queries/fsQuery.fs" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Queries/pythonQuery.py" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Queries/javaQuery.java" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Queries/scalaQuery.scala" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Queries/javascriptQuery.js" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Queries/vbQuery.vb" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-
-    <Content Include="scripts/Agents/csAgent.cs" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Agents/fsAgent.fs" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Agents/pythonAgent.py" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Agents/javaAgent.java" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Agents/scalaAgent.scala" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Agents/javascriptAgent.js" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="scripts/Agents/vbAgent.vb" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-
+    <Content Include="scripts\**\*.*" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
+    
     <Compile Remove="scripts/Queries/csQuery.cs" />
     <Compile Remove="scripts/Queries/fsQuery.cs" />
     <Compile Remove="scripts/Agents/csAgent.cs" />
