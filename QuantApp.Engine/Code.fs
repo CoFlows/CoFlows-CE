@@ -2798,6 +2798,8 @@ module Code =
                         fun entry -> entry.Replace(Path.DirectorySeparatorChar.ToString(), "/")
                         >>
                         fun entry -> entry.Substring(entry.IndexOf("/Base") + 1))
+                    |> Seq.filter(fun entry -> entry.EndsWith(".pyc") |> not)    
+                    |> Seq.filter(fun entry -> entry.EndsWith(".DS_Store") |> not)    
                     |> Seq.filter(fun entry -> baseNames |> Seq.contains(entry) |> not)
                     |> Seq.map(fun entry -> 
                         let id = if ".py" |> entry.EndsWith then entry else entry.Substring(entry.IndexOf("/Base") + "/Base".Length + 1)
@@ -2820,6 +2822,8 @@ module Code =
                         fun entry -> entry.Replace(Path.DirectorySeparatorChar.ToString(), "/")
                         >>
                         fun entry -> entry.Substring(entry.IndexOf("/Queries") + 1))
+                    |> Seq.filter(fun entry -> entry.EndsWith(".DS_Store") |> not)  
+                    |> Seq.filter(fun entry -> entry.EndsWith(".pyc") |> not)      
                     |> Seq.filter(fun entry -> queryNames |> Seq.contains(entry) |> not)
                     |> Seq.map(fun entry ->
                         let id = entry.Substring(entry.IndexOf("/Queries") + "/Queries".Length + 1)
@@ -2844,6 +2848,8 @@ module Code =
                         >>
                         fun entry -> entry.Substring(entry.IndexOf("/Agents") + 1))
                     |> Seq.filter(fun entry -> agentNames |> Seq.contains(entry) |> not)
+                    |> Seq.filter(fun entry -> entry.EndsWith(".pyc") |> not)    
+                    |> Seq.filter(fun entry -> entry.EndsWith(".DS_Store") |> not)    
                     |> Seq.map(fun entry ->
                         let id = entry.Substring(entry.IndexOf("/Agents") + "/Agents".Length + 1)
                         {
@@ -2866,6 +2872,7 @@ module Code =
                         fun entry -> 
                             { Name = entry.Substring(entry.IndexOf("/Bins") + "/Bins".Length + 1); Content = entry.Substring(entry.IndexOf("/Bins") + 1)}
                     )
+                    |> Seq.filter(fun entry -> entry.EndsWith(".DS_Store") |> not)    
                 else
                     Seq.empty
 
@@ -2880,6 +2887,7 @@ module Code =
                         fun entry -> 
                             { Name = entry.Substring(entry.IndexOf("/Files") + "/Files".Length + 1); Content = entry.Substring(entry.IndexOf("/Files") + 1)}
                     )
+                    |> Seq.filter(fun entry -> entry.EndsWith(".DS_Store") |> not)    
                 else
                     Seq.empty
 
