@@ -10,35 +10,40 @@ Note: The python <-> CoreCLR interop is achieved through **PythonNet**.
     import QuantApp.Kernel as qak
     import QuantApp.Engine as qae
 
-    defaultID = "xxx"
-    mid = "xxx-MID" #Listener
+    import json
+    import datetime
+
+    workspaceID = "$WID$"
 
     def Add(id, data):
-        System.Console.WriteLine("Python Add: " + str(id) + " --> " + str(data))
-        
+        pass
+
     def Exchange(id, data):
-        System.Console.WriteLine("Python Exchange: " + str(id) + " --> " + str(data))
-        
-        
+        pass
+
     def Remove(id, data):
-        System.Console.WriteLine("Python Remove: " + str(id) + " --> " + str(data))
+        pass
         
     def Load(data):
-        System.Console.WriteLine("Python Loading: " + str(data))
+        pass
         
     def Body(data):
-        System.Console.WriteLine("Python Body: " + str(data))
+        cmd = json.loads(data)
+        if 'Data' in cmd and cmd['Data'] == 'Initial Execution':    
+            print('     Agent Initial Execute @ : ' + str(datetime.datetime.now()))
+
+        return data
 
     def Job(timestamp, data):
-        System.Console.WriteLine("Python Job: " + str(timestamp) + " --> " + str(data))
+        pass
 
     def pkg():
         return qae.FPKG(
-        defaultID, #ID
-        "Hello_World_Workflow", #Workflow ID
-        "Hello Python Agent", #Name
-        "Hello Python Analytics Agent Sample", #Description
-        mid, #M ID Listener
+        workspaceID + "-Agent", #ID
+        workspaceID, #Workflow ID
+        "Python XXX Agent", #Name
+        "Python XXX Agent", #Description
+        None, #M ID Listener
         qae.Utils.SetFunction("Load", qae.Load(Load)), 
         qae.Utils.SetFunction("Add", qak.MCallback(Add)), 
         qae.Utils.SetFunction("Exchange", qak.MCallback(Exchange)), 

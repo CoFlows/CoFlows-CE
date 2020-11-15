@@ -1,7 +1,7 @@
 M Set
 ===
 
-The **M** set is a persistent and distributed list in the **QuantApp.Kernel** environment. **M** can handle any object serialisable into JSON and ensures the objects in the set are replicated across all it's subscribers.
+The **M** set is a persistent and distributed list. Subscribers can link to this list to receive updates on changes to its state.  **M** can handle any object serialisable into JSON and ensures the objects in the set are replicated across all it's subscribers.
 
 Data can be queried through LINQ like predicates. A few examples follow:
 

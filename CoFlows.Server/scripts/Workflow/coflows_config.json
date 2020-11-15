@@ -1,0 +1,53 @@
+{
+    "Database": { 
+        "Connection": "mnt/database.db" ,
+        "Type": "sqlite"
+    },
+    "Workflow": "mnt/package.json",
+    "Jupyter": true,
+    "Server":{
+        "Host": "localhost",
+        "SecretKey": "26499e5e555e9957725f51cc4d400384",
+        "LetsEncrypt":{
+            "Email": "",
+            "Staging": false
+        },
+        "_OAuth": {
+            "AzureAdB2C": {
+                "Instance": "https://{{...}}.b2clogin.com/tfp/",
+                "Domain": "{{...}}.onmicrosoft.com",
+                "SignUpSignInPolicyId": "...",
+                "ClientId": "...",
+                "ClientSecret": "...",
+                "SignInLink": "https://{{...}}.b2clogin.com/{{...}}.onmicrosoft.com/oauth2/v2.0/authorize?p={{...}}&client_id={{...}}&nonce=defaultNonce&redirect_uri={{...}}&response_type=token&prompt=login&response_mode=query",
+                "DefaultGroupId": "06e1da00-4c81-4a35-914b-81c548b07345"
+            },
+            "GitHub":{
+                "ClientId": "...",
+                "ClientSecret": "...",
+                "SignInLink": "https://github.com/login/oauth/authorize?client_id=...&scope=user"
+            },
+            "LinkedIn":{
+                "ClientId": "...",
+                "ClientSecret": "..."
+            }
+        }
+    },
+    "Cloud":{
+        "Host": "example.coflows.com",
+        "SecretKey": "xxx",
+        "SSL": true
+    },
+
+    "AzureContainerInstance": {
+        "AuthFile":"mnt/Files/my.azureauth",
+        "Dns": "coflows-example-0",
+        "Region": "AustraliaEast",
+        "Cores": 2,
+        "Mem": 4,
+        "Gpu": {
+            "SKU": "",
+            "Cores": 1
+        }
+    }
+}

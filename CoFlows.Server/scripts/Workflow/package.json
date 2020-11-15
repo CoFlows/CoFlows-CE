@@ -1,0 +1,44 @@
+{
+  "ID": "",
+  "Name": "$NAME$",
+  "Base": [],
+  "Agents": [],
+  "Queries": [],
+  "Permissions": [
+    {
+      "ID": "root",
+      "Permission": 2
+    },
+    {
+      "ID": "Public",
+      "Permission": 0
+    }
+  ],
+  "NuGets": [],
+  "Pips": [],
+  "Jars": [],
+  "Bins": [],
+  "Files": [
+    {
+      "Name": "my.azureauth",
+      "Content": "Files/my.azureauth"
+    }
+  ],
+  "ReadMe": "README.md",
+  "Publisher": null,
+  "PublishTimestamp": "0001-01-01T00:00:00",
+  "AutoDeploy": true,
+  "Container": {
+    "Type": "",
+    "Request": {
+      "Cpu": "",
+      "Mem": ""
+    },
+    "Limit": {
+      "Cpu": "",
+      "Mem": ""
+    },
+    "VolumeMounts": null,
+    "Storage": null
+  }
+}
