@@ -14,7 +14,7 @@ Agents, can react to either a
 ### Properties
 
     ID                  "The ID of the Agent, we recommend using a GUID"
-    WorkflowID         "ID of the Workflow the Agent belongs to"
+    WorkflowID          "ID of the Workflow the Agent belongs to"
     Name                "Name of Agent"
     Description         "Description of Agent's reason to exist"
     MID                 "ID of the M set which the Agent should react to"

@@ -6,11 +6,17 @@ Note: The Java <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](htt
 
     import app.quant.clr.*;
 
-    class JavaAgent
-    {
-        public JavaAgent(){}
+    import java.time.*;
+    import java.time.format.*;
 
-        private static String defaultID = "xxx";
+    import java.util.*;
+    import com.google.gson.Gson;
+
+    class Agent
+    {
+        public Agent(){}
+
+        private static String workspaceID = "$WID$";
         public static Object pkg()
         {
             CLRObject Utils = CLRRuntime.GetClass("QuantApp.Engine.Utils");
@@ -18,11 +24,11 @@ Note: The Java <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](htt
             CLRObject M = CLRRuntime.GetClass("QuantApp.Kernel.M");
 
             return CLRRuntime.CreateInstance("QuantApp.Engine.FPKG",
-                defaultID, //ID
-                "Hello_World_Workflow", //Workflow ID  
-                "Hello Java Agent", //Name
-                "Hello Java Analytics Agent Sample", //Description
-                "xxx-MID", //JS Listener
+                workspaceID + "-Agent", //ID
+                workspaceID, //Workflow ID  
+                "Java Agent", //Name
+                "Java Agent", //Description
+                null, //MID
 
                 Utils.Invoke("SetFunction", "Load", CLRRuntime.CreateDelegate("QuantApp.Engine.Load", (x) -> { 
                     System.out.println("Java Agent Load");
@@ -30,7 +36,6 @@ Note: The Java <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](htt
                 })),
 
                 Utils.Invoke("SetFunction", "Add", CLRRuntime.CreateDelegate("QuantApp.Kernel.MCallback", (x) -> { 
-                    System.out.println("Java Agent Add: " + entry);
                     return 0;
                 })),
 
@@ -46,14 +51,16 @@ Note: The Java <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](htt
                     String id = (String)x[0];
                     Object data = x[1];
 
-                    System.out.println("Java Agent Remove");
                     return 0;
                 })),
 
                 Utils.Invoke("SetFunction", "Body", CLRRuntime.CreateDelegate("QuantApp.Engine.Body", (x) -> { 
                     Object data = x[0];
+
+                    Map map = new Gson().fromJson(data.toString(), Map.class);
+                    if(map.containsKey("Data") && map.get("Data").equals("Initial Execution"))
+                        System.out.println("     Agent Initial Execute @ " + (new Date()));
                     
-                    System.out.println("Java Agent Body: " + data);
                     return data;
                 })),
 
@@ -62,7 +69,6 @@ Note: The Java <-> CoreCLR interop is achieved through [QuantApp.Kernel/JVM](htt
                     Object date = x[0];
                     String command = (String)x[1];
 
-                    // System.out.println("Java Agent Job: " + date +  " --> " + command);
                     return 0;
                 }))
             );

@@ -1,8 +1,27 @@
 # CoFlows - Containerized Polyglot Runtime (Interop)
 
-**CoFlows CE (Community Edition)** is a Containerized Polyglot Runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**. 
+**CoFlows CE (Community Edition)** helps developers create Web APIs and data-centric workflows in various languages including **Python, Java, Scala, C#, F#, VB and Javascript**. These workflows require the management of multiple facets that can be daunting for many coders. **CoFlows CE** aims manage many of these facets including:
+* OpenAPI - Automatic generation of [OpenAPI specifications](https://www.openapis.org)
+* Agents - Scheduled [Cron](https://www.freeformatter.com/cron-expression-generator-quartz.html) and Asynchronous workflows
+* Apps - Beautiful visual interfaces with [Plotly Dash](https://plotly.com/dash/) apps in python
+* User Management - Authentication / Logins
+* Permissions - Authorization through groups
+* Free SSL - [LetsEncrypt](https://letsencrypt.org) certificate management
+* Persistence - Connections to SQL databases including [SQLite](https://www.sqlite.org/index.html), [Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server) and [Postgres SQL](https://www.postgresql.org)
+* Cloud Hosting - Support to deploy into [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/)
 
-To get started please go to our [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow).
+You can now choose to go through a hands on tutorial or continue reading through a deep dive:
+
+* [Tutorial 1 - Create a simple API, manage permissions, secrets and generate OpenAPI specs](docs/tutorial/tutorial-1.md)
+* [Tutorial 2 - Add support for third-party dependencies like **pips**, **nugets** and **jars**](docs/tutorial/tutorial-2.md)
+* [Tutorial 3 - Create an agent to support scheduled and asynchronous workflows](docs/tutorial/tutorial-3.md)
+* [Tutorial 4 - Create a Plotly Dash App](docs/tutorial/tutorial-4.md)
+* [Tutorial 5 - Users, Groups, Permissions and Expiries](docs/tutorial/tutorial-5.md)
+* [Tutorial 6 - Configurations, Hosting and deployment](docs/tutorial/tutorial-6.md)
+
+
+## Deep Dive
+**CoFlows CE (Community Edition)** is a Containerized Polyglot Runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**. 
 
 For a bit context, one implementation of **CoFlows** is a system to track ships and the imports/exports between countries in order to predict supply and demand dynamics for various commodities. To this end, we worked with GPS data where it was essential for us to quickly plot transformed data on a map for correctly tuning the algorithms. Below is a visual of this example:
 
@@ -15,18 +34,11 @@ More on how to visualize this type of data in the docs of the [sample repo from 
 As a Containerized Polyglot Runtime, its functionality allows developers to build complex workflows leveraging off great open-source libraries written in various languages. The wealth of distributed computing libraries of Java / Scala together with Python's data science tools are all available in order to use the right tool for the right purpose within the same process!
 
 Furthermore, our aim with **CoFlows** is to offer simplicity for **Data Scientists** in order to quickly build self-contained projects while leveraging off popular tools. To this end, once a developer pulls the **CoFlows** image, a range of tools are at their disposal as first class citizens of the **CoFlows** ecosystem:
-* DotNet Core 3.1
-* Python 3.7.4
-* Java 1.8
-* Scala 2.11.8
-* JupyterLab
-
-Additionally, **CoFlows** offers great features including:
-* Free and automatically generated SSL certificates through an integrated _LetsEncrypt_ functionality
-* Integrated deployment to **Azure Container Instances**
-* Integrated deployment from **GitHub** repositories
-* Users and Permissions management
-* Storage through either SQLite for local persistence or Microsoft SQL Server for cloud persistence. We will add more connectors in the near future.
+* [DotNet Core 3.1](https://github.com/dotnet/core)
+* [Python 3.7.4](https://www.python.org)
+* [Java 1.8](https://www.java.com/)
+* [Scala 2.11.8](https://www.scala-lang.org)
+* [JupyterLab](https://github.com/jupyterlab/jupyterlab)
 
 ... and yes, it is a big image taking 900Mb to download and 1.9Gb of space during runtime.
 
@@ -37,7 +49,7 @@ Our **Community Edition** is a version of our commercial codebase that we have u
 * Global equity selection strategy simulations
 * Healthcare cost and clinical segmentation analysis on national data
 
-For more information visit https://www.coflows.com.
+For more information visit https://www.coflo.ws.
 
 This edition will be tightly coupled with the **CoFlows Cloud** making it much easier for developers to deploy and host their applications. More information on this coming soon.
 
@@ -109,7 +121,7 @@ alternatively you could create a new user by clicking on "Create an account!"
 
 5) By click on the top right corner "root" you are able to logout, change password and see the user profile. In the user profile, you are able to change first and last names and most importantly see the User Secret. This Secret is used to authenticate user permissions when connecting through a WebAPI. 
 
-![dashboard](docs/images/profile.png)
+![dashboard](docs/images/CoFlows_profile_2.png)
 
 6) Closing the profile window and going back to the dashboard you can click on the Workflow to enter it. This first view will let you see the Agents and Queries available in the workflow. This view also has multiple tabs which are discussed below.
 

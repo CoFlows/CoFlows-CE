@@ -2,68 +2,40 @@ F# Agent
 ===
 This is a generic example of F# agent following the generic structure within **CoFlows**.
 
-    module Hello_World_FSharp
 
+    module Agent
+    
     open System
-    open System.Net
-    open System.IO
+    open System.Collections.Generic
+    open Newtonsoft.Json.Linq
 
     open QuantApp.Kernel
     open QuantApp.Engine
 
-    let defaultID = "xxx"
+    let workspaceID = "$WID$"
     let pkg(): FPKG =
         {
-            ID = Some(defaultID)
-            WorkflowID = Some("Hello_World_Workflow")
+            ID = workspaceID + "-Agent" |> Some
+            WorkflowID = workspaceID |> Some
             Code = None
-            Name = "Hello F# Agent"
-            Description = Some("Hello F# Analytics Agent Sample")
+            Name = "F# Agent"
+            Description = "F# Agent" |> Some
 
-            MID = Some(defaultID + "-MID") //ID of MultiVerse entry which this functions is linked to
-            Load = Some(Utils.SetFunction(
-                    "Load", 
-                    Load(fun data ->
-                            "Loading data" |> Console.WriteLine
-                        )
-                    ))
-            Add = Some(Utils.SetFunction(
-                    "Add", 
-                    MCallback(fun id data ->
-                            "Adding: " + id + " | " + data.ToString()) |> Console.WriteLine
-                            ()
-                        )
-                    ))
-            Exchange = Some(Utils.SetFunction(
-                    "Exchange", 
-                    MCallback(fun id data ->
-                            "Exchanging: " + id + " | " + data.ToString() |> Console.WriteLine
-                            ()
-                        )
-                    ))
-            Remove = Some(Utils.SetFunction(
-                    "Remove", 
-                    MCallback(fun id data ->
-                            "Removing: " + id + " | " + data.ToString() |> Console.WriteLine
-                            ()
-                        )
-                    ))
+            MID = None //MID
+            Load = (fun data -> ()) |> Utils.Load("$ID$-Load") |> Some
+            Add = (fun id data -> ()) |> Utils.Callback("$ID$-Add") |> Some
+            Exchange = (fun id data -> ()) |> Utils.Callback("$ID$-Exchange") |> Some
+            Remove = (fun id data -> ()) |> Utils.Callback("$ID$-Remove") |> Some
 
-            Body = Some(Utils.SetFunction(
-                    "Body", 
-                    Body(fun data ->
-                        let command = JsonConvert.DeserializeObject<FunctionType>(data.ToString())
+            Body = (fun data -> 
+                let cmd = JObject.Parse(data.ToString())
+                if cmd.ContainsKey("Data") && cmd.["Data"].ToString() = "Initial Execution" then
+                    Console.WriteLine("     Agent Initial Execute @ " + DateTime.Now.ToString())
 
-                        match command.Function with
-                        
-                        | _ -> "No Function: " + command.ToString()  :> obj
-                    )))
+                data
+                ) |> Utils.Body("$ID$-Body") |> Some
 
-            ScheduleCommand = Some("0 * * ? * *")
-            Job = Some(Utils.SetFunction(
-                    "Job", 
-                    Job(fun date execType ->
-                        "F# Agent Job: " + date.ToString() + " --> " + execType.ToString() |> Console.WriteLine
-                        )
-                    )) 
+            ScheduleCommand = "0 * * ? * *" |> Some
+            Job = (fun date execType -> ()) |> Utils.Job("$ID$-Job") |> Some
+        }
         |> F.ToFPKG

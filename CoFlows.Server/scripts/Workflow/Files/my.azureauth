@@ -1,0 +1,8 @@
+Dummy File
+-----------
+
+To get this you must login to the https://portal.azure.com, open the terminal in bash and type
+
+az ad sp create-for-rbac --sdk-auth > my.azureauth
+
+then copy the contents of that file into here...

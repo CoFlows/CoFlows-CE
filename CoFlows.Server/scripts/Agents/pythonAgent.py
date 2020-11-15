@@ -34,7 +34,7 @@ def Body(data):
     if 'Data' in cmd and cmd['Data'] == 'Initial Execution':    
         print('     XXX Initial Execute @ : ' + str(datetime.datetime.now()))
 
-    return data
+    return json.dumps(cmd)
 
 def Job(timestamp, data):
     pass
