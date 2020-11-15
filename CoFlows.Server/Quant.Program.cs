@@ -443,6 +443,27 @@ namespace CoFlows.Server.Quant
                     Databases(connectionString);
                 }
 
+                // QuantSpecific START
+                if(config["Quant"] != null)
+                {
+                    Instrument.TimeSeriesLoadFromDatabaseIntraday = config["Quant"]["Intraday"].ToString().ToLower() == "true";
+                    if(Instrument.TimeSeriesLoadFromDatabaseIntraday)
+                        Console.WriteLine("Intraday Timeseries");
+                    else
+                        Console.WriteLine("Close Timeseries");
+                    Strategy.Executer = true;
+                    // Market.Initialize();
+
+                    var saveAll = config["Quant"]["AutoSave"].ToString().ToLower() == "true";
+                    if (saveAll) {
+                        var ths = new System.Threading.Thread(x => (AQI.AQILabs.Kernel.Instrument.Factory as AQI.AQILabs.Kernel.Adapters.SQL.Factories.SQLInstrumentFactory).SaveAllLoop(5));
+                        ths.Start();
+                    }
+                    else
+                        Console.WriteLine("Not saving timeseries");
+                }
+                // QuantSpecific END
+
                 Console.WriteLine("Local Query " + DateTime.Now);
                 Console.WriteLine("DB Connected");
 
@@ -836,8 +857,37 @@ namespace CoFlows.Server.Quant
                         Console.WriteLine("Success!!!");
                     else
                         Console.WriteLine(res);
+                }
+                else if(cmd == "dash")
+                {
+                    
+                    var name = args[2];
+                    Console.WriteLine("     Creating new dash app: " + name);
 
-                    // Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(name, version), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null));                
+                    Console.WriteLine("     generating dash app...");
+                    string query = File.ReadAllText("scripts/Queries/dash.py").Replace("XXX", name);
+                    Directory.CreateDirectory("/app/mnt/Queries/");
+                    File.WriteAllText("/app/mnt/Queries/" + name + ".py", query);
+
+                    var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(CoFlows.Server.Program.workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
+                    var res = Code.BuildRegisterPackage(pkg);
+                    if(string.IsNullOrEmpty(res))
+                        Console.WriteLine("Success!!!");
+                    else
+                        Console.WriteLine(res);
+                }
+                else if(cmd == "workflow")
+                {
+                    var name = args[2];
+                    Console.WriteLine("     Creating new Workflow: " + name);
+
+                    Console.WriteLine("     generating the Workflow...");
+
+
+                    string sourceDirectory = @"scripts/Workflow";
+                    string targetDirectory = @"/app/mnt/" + name;
+
+                    CoFlows.Server.Program.Copy(sourceDirectory, targetDirectory, name);
                 }
                 else if(cmd == "agent")
                 {

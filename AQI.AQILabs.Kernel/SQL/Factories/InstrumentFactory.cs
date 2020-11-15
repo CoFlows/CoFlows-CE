@@ -342,6 +342,12 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             {
                 if (obj is Int64)
                     return (T)(object)Convert.ToInt32(obj);
+
+                if(typeof(T) == typeof(bool) && obj is Int32)
+                {
+                    res = ((int)obj) == 1;
+                    return (T)res;
+                }
             }
 
             return (T)obj;
@@ -945,6 +951,11 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
                         lastDate = t;
                     }
                 }
+                if(timeSeriesTable.Rows.Count == 0 && instrument.Name.EndsWith("- Cash"))
+                {
+                    dtlist.Add(Calendar.Close(new DateTime(1950,1,1)));
+                    vallist.Add(1.0);
+                }
 
                 res = new TimeSeries(vallist.Count, new DateTimeList(dtlist));
 
@@ -1118,7 +1129,7 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
         public void AddTimeSeriesPoint(Instrument instrument, DateTime date, double value, TimeSeriesType type, DataProvider provider, Boolean onlyMemory)
         {
             string key = instrument.ID + "_" + type + "_" + provider.ID;
-
+            
             GetTimeSeries(instrument, type, provider, Instrument.TimeSeriesLoadFromDatabase);
 
             try
@@ -1156,6 +1167,9 @@ namespace AQI.AQILabs.Kernel.Adapters.SQL.Factories
             {
                 SystemLog.Write(e);
             }
+
+            if(date == AQI.AQILabs.Kernel.Calendar.Close(date) && type == TimeSeriesType.Last)
+                this.AddTimeSeriesPoint(instrument, date, value, TimeSeriesType.Close, provider, onlyMemory);
 
             if (!onlyMemory && !instrument.SimulationObject && Instrument.TimeSeriesLoadFromDatabase)
                 Save(instrument);

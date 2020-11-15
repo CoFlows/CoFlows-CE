@@ -1190,7 +1190,7 @@ module Utils =
                 let ret = (ts.[last] * fx_t) / (ts.[first] * fx_0) - 1.0                                    
                 ret)
         
-            let rets = returnsList |> Array.sort
+            let rets = returnsList |> Array.filter(Double.IsNaN >> not) |> Array.sort
             let pctl = level * (double (rets.Length - 1)) + 1.0;
             let pctl_n = (int)pctl
             let pctl_d = pctl - (double)pctl_n

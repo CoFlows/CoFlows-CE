@@ -436,7 +436,7 @@ namespace AQI.AQILabs.Kernel
             if (pair_inv != null)
                 return pair_inv.ConvertInverse(value, date, type, provider, timeSeriesRoll);
 
-            //Console.WriteLine("WARNING: NO CURRENCY PAIR FOUND - " + buy.Name + "/" + sell.Name);
+            Console.WriteLine("WARNING: NO CURRENCY PAIR FOUND - " + buy.Name + "/" + sell.Name);
             return value;
         }
 
@@ -459,7 +459,15 @@ namespace AQI.AQILabs.Kernel
             double fxi = FXInstrument[date, type, provider, timeSeriesRoll];
 
             if (double.IsNaN(fxi))
+            {
+                CurrencyPair pair_inv = CurrencyPair.FindCurrencyPair(CurrencySell, CurrencyBuy);
+
+                if (pair_inv != null)
+                    return pair_inv.ConvertInverse(value, date, type, provider, timeSeriesRoll);
+
                 return value;
+
+            }
 
             return value * fxi;
         }
