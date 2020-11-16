@@ -181,9 +181,11 @@ Finally you will be able to run the query to see the values of all apis / functi
 ![](../images/CoFlows_query_run.png)
 
 The end-points to these APIs are now visible and are for the **Permission** API:
+
 http://localhost/flow/query/9a7adf48-183f-4d44-8ab2-c0afd1610c71/pyapi.py/Permission?_cokey=26499e5e555e9957725f51cc4d400384
 
 and for the **Add** API:
+
 http://localhost/flow/query/9a7adf48-183f-4d44-8ab2-c0afd1610c71/pyapi.py/Add?p[0]=X&p[[1]=Y&_cokey=26499e5e555e9957725f51cc4d400384
 where X and Y are any numbers.
 
