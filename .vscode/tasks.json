@@ -6,14 +6,14 @@
         
         {
             "label": "clean server osx",
-            "command": "dotnet clean ./CoFlows.Quant.osx.sln",
+            "command": "dotnet clean ./CoFlows.CE.osx.sln",
             "type": "shell",
             "group": "build",
             "problemMatcher": "$msCompile"
         },
         {
             "label": "build server osx",            
-            "command": "dotnet build ./CoFlows.Quant.osx.sln",
+            "command": "dotnet build ./CoFlows.CE.osx.sln",
             "type": "shell",
             "group": "build",
             //"dependsOn": "clean server",
