@@ -79,7 +79,7 @@ Projects in **CoFlows** are called Workflows. They contain the logic that define
 
 ## Security, Authentication and Permissions
 
-**CoFlows** has integrated LetsEncrypt functionality to simply the process to enable encrypted SSL connections. The standard process is to purchase an SSL certificate from CA, then transform the certificate into a PFX file which then should be stored securely while being accessible by the container. With LetsEncrypt, **CoFlows** now automatically generates a trusted SSL certificate if the domain name linked to the certificate is pointing to the container IP address. For more information please see the docs in the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow).
+**CoFlows** has integrated LetsEncrypt functionality to simply the process to enable encrypted SSL connections. The standard process is to purchase an SSL certificate from CA, then transform the certificate into a PFX file which then should be stored securely while being accessible by the container. With LetsEncrypt, **CoFlows** now automatically generates a trusted SSL certificate if the domain name linked to the certificate is pointing to the container IP address.
 
 ### Authentication through username/password and Secret Keys
 Authentication is done through **CoFlows** internal functionality. Users can either authenticate through the UI with a username and password. Alternatively, you can authenticate WebAPI calls using a secret key. This key can be accessed through the UI as explained below.
@@ -95,17 +95,15 @@ To manage user permissions you can create multiple groups and add users to these
 3) Read (1) - Mid level access, perhaps access to read information that is not accessible to (View only) users but no permission to change data.
 4) Write (2) - Administrators or users with permissions to change data.
 
-Please note that groups are arbitrary, you can create as many as you want. The meaning of the groups and their permissions are for you to define. To understand how to check if a user is a member of a group and see their permission please refer to the docs in the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow).
+Please note that groups are arbitrary, you can create as many as you want. The meaning of the groups and their permissions are for you to define.
 
 ## User Interface
 
 To simplify your interaction with your **CoFlows** project, we have created a user interface. Let's start with a few steps.
 
-1) Clone the CoFlows-Workflow repo from [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow).
+1) In the bin folder, execute the server.sh or bat/server.bat scripts. Read more in the README of this repo.
 
-2) In the bin folder, execute the server.sh or bat/server.bat scripts. Read more in the README of this repo.
-
-3) Open a browser and go to http://localhost and login with username "root" and password "123".
+2) Open a browser and go to http://localhost and login with username "root" and password "123".
 
 ![login](docs/images/login.png)
 
@@ -113,23 +111,23 @@ alternatively you could create a new user by clicking on "Create an account!"
 
 ![login](docs/images/create_user.png)
 
-4) Once logged in, you will see all the workflow hosted by this container. In this example, there is only one workflow called "Workflow". 
+3) Once logged in, you will see all the workflow hosted by this container. In this example, there is only one workflow called "Workflow". 
 
 ![dashboard](docs/images/dashboard.png)
 
-5) By click on the top right corner "root" you are able to logout, change password and see the user profile. In the user profile, you are able to change first and last names and most importantly see the User Secret. This Secret is used to authenticate user permissions when connecting through a WebAPI. 
+4) By click on the top right corner "root" you are able to logout, change password and see the user profile. In the user profile, you are able to change first and last names and most importantly see the User Secret. This Secret is used to authenticate user permissions when connecting through a WebAPI. 
 
 ![dashboard](docs/images/CoFlows_profile_2.png)
 
-6) Closing the profile window and going back to the dashboard you can click on the Workflow to enter it. This first view will let you see the Agents and Queries available in the workflow. This view also has multiple tabs which are discussed below.
+5) Closing the profile window and going back to the dashboard you can click on the Workflow to enter it. This first view will let you see the Agents and Queries available in the workflow. This view also has multiple tabs which are discussed below.
 
 ![workflow](docs/images/workflow.png)
 
-7) The Source tab lets you browse the Base code of workflow. The base code can be thought of as libraries used by both Agents and Queries. For more information please see the documentation of the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow). Please note that this code is read-only. To edit these libraries, you must do so outside of this UI.
+6) The Source tab lets you browse the Base code of workflow. The base code can be thought of as libraries used by both Agents and Queries. Please note that this code is read-only. To edit these libraries, you must do so outside of this UI.
 
 ![workflow](docs/images/workflow_source.png)
 
-8) View the permissions for this Workflow. As stated above, Fixed permissions are readonly and cannot be changed in the UI. The Group permissions are managed in the block below.
+7) View the permissions for this Workflow. As stated above, Fixed permissions are readonly and cannot be changed in the UI. The Group permissions are managed in the block below.
 
 ![permissions](docs/images/workflow_permissions.png)
 
