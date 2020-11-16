@@ -1,0 +1,165 @@
+/* $header
+ ------------------------------------------*/
+@mixin vertical-align($parent-height, $element-height) {
+  margin-top: (($parent-height - $element-height) / 2);
+  margin-bottom: (($parent-height - $element-height) / 2);
+}
+@mixin vertical-align-padding($parent-height, $element-height) {
+  padding-top: (($parent-height - $element-height) / 2);
+  padding-bottom: (($parent-height - $element-height) / 2);
+}
+
+.custom-navbar {
+  position: relative;
+  z-index: 1000;
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 0;
+  min-height: $header-height;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  box-shadow: 0 0 1px rgba($black, .1);
+  .navbar-nav {
+    flex-direction: row;
+    .nav-item {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      border-left: 1px solid rgba(0, 0, 0, 0);
+      border-right: 1px solid rgba(0, 0, 0, 0);
+    }
+    .nav-link {
+      line-height: $header-height;
+      position: relative;
+      padding-top: 0;
+      padding-bottom: 0;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      z-index: 1001;
+      margin-top: -1px;
+      .badge {
+        position: absolute;
+        bottom: 10px;
+        right: 5px;
+        border-radius: 50%;
+        min-height: 20px;
+        min-width: 20px;
+      }
+    }
+    .nav-link.dropdown > a {
+      line-height: $header-height;
+      display: inline-block;
+    }
+  }
+  .navbar-brand {
+    font-weight: bold;
+    color: white;
+    @include vertical-align-padding($header-height, 2rem);
+    margin: 0;
+    .navbar-brand-logo {
+      height: 24px;
+      margin-right: 6px;
+    }
+  }
+  .navbar-avatar {
+    width: 36px;
+  }
+  .navbar-heading {
+    font-size: 1rem;
+    font-weight: 500;
+    display: inline-block;
+    margin-right: $spacer;
+  }
+  .nav-divider {
+    height: 16px;
+    width: 1px;
+    display: inline;
+    position: relative;
+  }
+  .navbar-nav {
+    > li > a {
+      @include vertical-align-padding($header-height, 1.188rem);
+    }
+    .dropdown-menu {
+      position: absolute;
+      left: auto!important;
+      right: -1px!important;
+      line-height: initial;
+      min-width: auto;
+      margin-top: -1px;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: $border-radius;
+      border-bottom-left-radius: $border-radius;
+      box-shadow: 0 2px 4px rgba($black,.15);
+      .dropdown-item {
+        padding: .5rem 1rem;
+      }
+      &.notifications {
+        min-width: 360px;
+        padding-top: 0;
+        padding-bottom: 0;
+        @include media-breakpoint-down(xs) {
+          position: fixed;
+          left: 0;
+          right: 0;
+          top: $header-height;
+          min-width: auto;
+        }
+        .notifications-wrapper {
+          overflow-x: hidden;
+          overflow-y: auto;
+          max-height: 280px;
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          a {
+            position: relative;
+            padding: $spacer;
+            border-bottom: 1px solid rgba($black,.05);
+            width: auto;
+            &:last-child {
+              border-bottom: 0;
+            }
+          }
+          .time {
+            font-size: .72rem;
+            line-height: 1;
+            display: block;
+            color: $text-muted;
+          }
+        }
+        .notification-footer {
+          padding: .7rem $spacer;
+          background-color: rgba($black,.075);
+        }
+      }
+    }
+    .show::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background-color: #ffffff;
+      z-index: 1001;
+    }
+    .show {
+      outline: 0;
+      border-left: 1px solid rgba($black,.15);
+      border-right: 1px solid rgba($black,.15); 
+    }
+  }
+}
+
+.main-brand {
+  padding: 0 $spacer;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+.main-header .dropdown-toggle::after {
+  display: none;
+}

@@ -1,0 +1,48 @@
+@import "../mixins/material-palette";
+@import "../variables";
+@import "../../../../../node_modules/bootstrap/scss/functions";
+@import "../../../../../node_modules/bootstrap/scss/variables";
+
+:host ::ng-deep {
+  .node-wrapper {
+    display: flex;
+    align-items: center;
+  }
+  .toggle-children-wrapper {
+    padding: 0;
+  }
+  .toggle-children {
+    background-image: none;  
+    height: 24px;
+    width: 24px;
+    &::after{
+      content: "\E04B";
+      font-family: "linea-arrows-10";
+      font-style: normal !important;
+      font-weight: normal !important;
+      font-variant: normal !important;
+      text-transform: none !important;
+      speak: none;
+      line-height: 1;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  }
+  .tree-node-collapsed > .node-wrapper > .toggle-children-wrapper > .toggle-children {
+    transform: rotate(-90deg);
+  }
+  .tree-node-expanded > .node-wrapper > .toggle-children-wrapper > .toggle-children {
+    transform: rotate(0);
+  }
+  .node-content-wrapper:hover {
+    background: rgba(0, 0, 0, .05);
+    border-radius: $border-radius;
+  }
+  .tree-node-active.tree-node-focused > .node-wrapper > .node-content-wrapper {
+    background: rgba(0, 0, 0, .05);
+    border-radius: $border-radius;
+  }
+  .tree-node-focused > .node-wrapper > .node-content-wrapper {
+    background: rgba(0, 0, 0, .05);
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "HOME": "tableau de bord",
+
+  "EMAIL": "Email",
+
+  "COMPONENTS": "Composants",
+    "ACCORDION": "Accordéon",
+    "ALERT": "Alerte",
+    "BUTTONS": "Boutons",
+    "SBUTTONS": "Boutons sociaux",
+    "CAROUSEL": "Carrousel",
+    "COLLAPSE": "Effondrer",
+    "DATEPICKER": "Sélecteur de date",
+    "DROPDOWN": "Menu déroulant",
+    "MODAL": "Modal",
+    "PAGINATION": "Pagination",
+    "POPOVER": "Popover",
+    "PROGRESS": "Barres de progrès",
+    "RATING": "Évaluation",
+    "TABS": "Onglets",
+    "TIMEPICKER": "Timepicker",
+    "TOOLTIP": "Info-bulle",
+    "TYPEAHEAD": "typeahead",
+    "SPINNERS": "Spinners",
+
+  "ICONS": "Icônes",
+    "LINEA": "Linea",
+    "FONTAWESOME": "FontAwesome",
+    "SLI": "Simple Line Icons",
+
+  "TASKBOARD": "tâche",
+  
+  "CARDS": "Cartes",
+    "BASIC": "De base",
+    "PORTLETS": "Portlets",
+    "DRAGGABLE": "Draggable",
+
+  "FORMS": "Formes",
+    "MASKS": "Masques",
+    "EDITOR": "Éditeur",
+    "VALIDATION": "Validation",
+    "UPLOAD": "Télécharger",
+    "TREE": "Arbre",
+
+  "TABLES": "les tables",
+    "RESPONSIVE": "Sensible",
+
+  "DATATABLES": "Datatables",
+    "FULLSCREEN": "Plein écran",
+    "EDITING": "Édition",
+    "FILTER": "Filtre",
+    "PAGING": "Pagination",
+    "PINNING": "Pinning",
+    "SELECTION": "Sélection",
+    "SORTING": "Tri",
+
+  "CHARTS": "Graphiques",
+    "BAR": "Bar",
+    "PIE": "Tarte",
+    "LINE": "Ligne",
+    "MISC": "Divers",
+
+  "MAPS": "Cartes",
+    "GOOGLE": "Google",
+
+  "PAGES": "Pages",
+    "INVOICE": "Facture d'achat",
+    "FORUM": "Forum",
+    "TIMELINE": "Chronologie",
+    "ACTIVITY": "Activité",
+    "PRICING": "Prix",
+    "BLANK": "Blanc",
+
+  "LANDING": "Landing",
+
+  "AUTHENTICATION": "Authentification",
+    "SIGNIN": "Se connecter",
+    "SIGNUP": "S'inscrire",
+    "FORGOT": "Oublié",
+    "LOCKSCREEN": "Écran verrouillé",
+  
+  "ERROR": "Erreur",
+    "404": "404",
+    "500": "500",
+    "503": "503",
+
+  "CALENDAR": "Calendrier",
+
+  "MEDIA": "Médias",
+    "GRID": "la grille",
+    "TILE": "Tuile",
+    "LIST": "liste",
+
+  "WIDGETS": "Widgets",
+
+  "SOCIAL": "Social",
+
+  "DOCS": "Docs",
+
+  "MENU": "Menu"
+}

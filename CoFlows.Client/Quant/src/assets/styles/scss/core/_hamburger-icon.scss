@@ -1,0 +1,38 @@
+/* $hamburger-icon
+ ------------------------------------------*/
+.hamburger-icon {
+  tap-highlight-color: transparent;
+  display: inline-block;
+  &:before,
+  &:after,
+  span {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    pointer-events: none;
+  }
+  span {
+    margin: 4px 0;
+  }
+}
+
+.hamburger-icon.v2 {
+  &:before {
+    width: 14px;
+  }
+  span {
+    width: 10px;
+  }
+}
+
+.hamburger-icon.v3 {
+  &:before {
+    height: 1px;
+    transform: translateY(.09rem) translateX(0.38rem) rotate(45deg) scaleX(0.5);
+  }
+  &:after {
+    transform: translateY(-0.09rem) translateX(0.44em) rotate(-45deg) scaleX(0.5);
+  }
+}
+  

@@ -1,0 +1,62 @@
+<div class="d-flex align-items-stretch min-height-100 h-100">
+  <div class="bg-cover d-none d-md-inline-flex col-md-6 col-lg-8">
+    <video (ended)="videoFlip($event)" autoplay  id="video-background" muted plays-inline >
+      <source src="assets/videos/{{bgVideo[bgVideoIdx]}}" type="video/mp4"/>
+    </video>
+  </div>
+  <div class="card card-body mb-0 rounded-0 p-5 col-sm-12 col-md-6 col-lg-4">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <img src="assets/images/logo.png" style="border-radius: 50px;" class="avatar-xs mb-1" alt="">
+        <p class="ff-headers text-uppercase">Sign in to your <strong>CoFlows</strong> account</p>
+      </div>
+      <fieldset class="form-group" [ngClass]="{'has-danger': form.controls['uname'].hasError('required') && form.controls['uname'].touched}">
+        <label for="username" class="form-control-label">
+          Enter your username
+        </label>
+        <input type="text" class="form-control" placeholder="username" [formControl]="form.controls['uname']" [ngClass]="{'form-control-danger': form.controls['uname'].hasError('required') && form.controls['uname'].touched}"/>
+        <div class="form-control-feedback" *ngIf="form.controls['uname'].hasError('required') && form.controls['uname'].touched">Username is required.</div>
+      </fieldset>
+      <fieldset class="form-group" [ngClass]="{'has-danger': form.controls['password'].hasError('required') && form.controls['password'].touched}">
+        <label for="password" class="form-control-label">
+          Enter your password
+        </label>
+        <input type="password" class="form-control" placeholder="********" [formControl]="form.controls['password']" [ngClass]="{'form-control-danger': form.controls['password'].hasError('required') && form.controls['password'].touched}"/>
+        <div class="form-control-feedback" *ngIf="form.controls['password'].hasError('required') && form.controls['password'].touched">Password is required.</div>
+        <a [routerLink]="['/authentication/forgot']" class="form-text"><small>Recover password</small></a>
+
+        <div class="mb-3" *ngIf="errorMessage != ''">
+          <div class="block">&nbsp;</div>
+          <p class="ff-headers text-uppercase">Login error</p>
+        </div>
+        
+      </fieldset>
+      
+      <div class="block">&nbsp;</div>
+      <div class="row">
+      
+          <button class="text-color col-lg-6 col-md-6 col-sm-6 btn btn-warning btn-sm" type="submit" [disabled]="!form.valid">Login</button>
+          <a class="text-color col-lg-6 col-md-6 col-sm-6 btn btn-outline-warning btn-link btn-sm" [routerLink]="['/authentication/signup']">Create an account!</a>
+        
+      </div>
+
+
+      <div class="row" *ngIf="oauth != null && oauth.GitHub">
+        <a href="{{oauth.GitHub}}" class="text-color">
+          <i class="widget-icon rounded-circle icon icon-social-github"></i>
+          <label class="form-control-label">&nbsp;&nbsp;GitHub Signin</label>
+        </a>
+      </div>
+
+      <div class="row" *ngIf="oauth != null && oauth.AzureAD">
+        <a href="{{oauth.AzureAD}}" class="text-color">
+          <i class="widget-icon rounded-circle icon icon-grid"></i>
+          <label class="form-control-label">&nbsp;&nbsp;Azure AD Signin</label>
+        </a>
+      </div>  
+      
+      
+    </form>
+  </div>
+
+</div>

@@ -1,0 +1,296 @@
+<ngb-tabset (tabChange)="tabBeforeChange($event)">
+    <ngb-tab title="{{selectedNode.data == undefined ? '' : (coflows.FindInstrument(MainStrategyID).IsActive ? 'Active - ' : 'Inactive - ') + selectedNode.data.Name}}">
+        <ng-template ngbTabContent>
+            <div class="col-sm-12 col-md-12">
+                <div [chart]="chart"></div>
+            </div>
+            <br />
+            <div class="form-group">
+                <select #selectElem  (change)="onChangeTimeSeries(selectElem.value)" class="form-control">
+                    <option *ngFor="let item of timeSeriesType" [value]="stringify(item)" [selected]="item.Type == selectedTimeSeriesType.Type">{{item.Type}}</option>
+                </select>
+            </div>
+        </ng-template>
+    </ngb-tab>
+    <ngb-tab title="Monthly Performance">
+        <ng-template ngbTabContent>
+            <div class="col-sm-12 col-md-12">
+                    <ngx-datatable
+                    [columnMode]="'force'"
+                    [headerHeight]="40"
+                    [footerHeight]="0"
+                    [rowHeight]="40"
+                    [scrollbarV]="true"
+                    [scrollbarH]="true"
+                    [rows]="monthlyPerformance">
+                        <ngx-datatable-column name="Year" [width]="80" prop="Year"></ngx-datatable-column>
+                        <ngx-datatable-column name="Jan" [width]="80" prop="Jan"></ngx-datatable-column>
+                        <ngx-datatable-column name="Feb" [width]="80" prop="Feb"></ngx-datatable-column>
+                        <ngx-datatable-column name="Mar" [width]="80" prop="Mar"></ngx-datatable-column>
+                        <ngx-datatable-column name="Apr" [width]="80" prop="Apr"></ngx-datatable-column>
+                        <ngx-datatable-column name="May" [width]="80" prop="May"></ngx-datatable-column>                        
+                        <ngx-datatable-column name="Jun" [width]="80" prop="Jun"></ngx-datatable-column>
+                        <ngx-datatable-column name="Jul" [width]="80" prop="Jul"></ngx-datatable-column>
+                        <ngx-datatable-column name="Aug" [width]="80" prop="Aug"></ngx-datatable-column>
+                        <ngx-datatable-column name="Sep" [width]="80" prop="Sep"></ngx-datatable-column>
+                        <ngx-datatable-column name="Oct" [width]="80" prop="Oct"></ngx-datatable-column>
+                        <ngx-datatable-column name="Nov" [width]="80" prop="Nov"></ngx-datatable-column>
+                        <ngx-datatable-column name="Dec" [width]="80" prop="Dec"></ngx-datatable-column>
+                        <ngx-datatable-column name="Yearly" [width]="80" prop="Yearly"></ngx-datatable-column>
+                    </ngx-datatable>
+            </div>            
+        </ng-template>
+    </ngb-tab>
+    <ngb-tab title="Statisctics">
+        <ng-template ngbTabContent>
+            <div class="col-sm-12 col-md-12">
+                    <ngx-datatable
+                    [columnMode]="'force'"
+                    [headerHeight]="40"
+                    [footerHeight]="0"
+                    [rowHeight]="40"
+                    [scrollbarV]="true"
+                    [scrollbarH]="true"
+                    [rows]="statistics">
+                        <ngx-datatable-column name="Measure" [width]="80" prop="Measure"></ngx-datatable-column>
+                        <ngx-datatable-column name="Value" [width]="80" prop="Value"></ngx-datatable-column>                        
+                    </ngx-datatable>
+            </div>            
+        </ng-template>
+    </ngb-tab>
+    <ngb-tab title="Indicators" *ngIf="hasIndicator">
+        <ng-template ngbTabContent>
+            <div class="col-sm-12 col-md-12">
+                <div [chart]="chart_indicator"></div>
+                <br />
+                <div class="form-group">                    
+                    <select #selectElem (change)="onChangeIndicator(selectElem.value)" class="form-control">
+                        <option *ngFor="let item of indicators[selectedNode.data.Name]" [value]="stringify(item)">{{item.Name}}</option>
+                    </select>
+                </div>
+            </div>
+        </ng-template>
+    </ngb-tab>
+    <ngb-tab title="Historical Orders">
+        <ng-template ngbTabContent>
+            <div class="col-sm-12 col-md-12">
+                    <ngx-datatable
+                    [columnMode]="'force'"
+                    [headerHeight]="40"
+                    [footerHeight]="0"
+                    [rowHeight]="40"
+                    [scrollbarV]="true"
+                    [scrollbarH]="true"
+                    [rows]="historicalOrders">
+                        <ngx-datatable-column name="Date" [width]="50">
+                            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                                {{parseDate(row.Order.Status == 1 ? row.Order.OrderDate : row.Order.ExecutionDate)}}
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-column name="Time" [width]="50">
+                            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                                {{parseTime(row.Order.Status == 1 ? row.Order.OrderDate : row.Order.ExecutionDate)}}
+                            </ng-template>
+                        </ngx-datatable-column>                            
+                        <ngx-datatable-column name="Description" [width]="200" prop="Description"></ngx-datatable-column>
+                        
+                        <ngx-datatable-column name="Type" [width]="50">
+                            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                                {{row.Order.Unit > 0 ? 'Long':'Short'}}
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-column name="Size" [width]="40">
+                            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                                {{coflows.formatNumber(row.Order.Unit > 0 ? row.Order.Unit : -row.Order.Unit, false)}}
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-column name="Level" [width]="80">
+                            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                                {{row.Order.Status == 0 ? 'New' : (row.Order.Status == 1 ? 'Working' : (row.Order.Status == 4 ? 'Cancelled' : coflows.formatNumber(row.Order.ExecutionLevel / row.PointSize, false)))}}
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-column name="PnL" [width]="80">
+                            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                                {{row.Order.Status == 0 ? 'New' : (row.Order.Status == 1 ? 'Working' : (row.Order.Status == 4 ? 'Cancelled' : coflows.formatNumber(row.PnL, false)))}}
+                            </ng-template>
+                        </ngx-datatable-column>
+                    </ngx-datatable>
+            </div>            
+        </ng-template>
+    </ngb-tab>
+    
+</ngb-tabset>
+    
+    
+<br />
+<div class="row">
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-body card-widget">
+            <div class="widget-icon rounded-circle bg-green text-white icon icon-ecommerce-dollar">
+            </div>
+            <div class="block ml-3 mr-3">
+                <h5 class="mb-0 fw-400">                    
+                    {{coflows.formatNumber(notional(portfolioData[0], true),false)}}
+                </h5>                    
+                <small class="text-muted text-uppercase ">
+                <strong>Total Notional</strong>
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-body card-widget">            
+            <div class="widget-icon rounded-circle bg-red text-white icon icon-basic-pin2">
+            </div>
+            <div class="block ml-3 mr-3">
+                <h5 class="mb-0 fw-400">                    
+                    {{portfolioData[0].data != undefined ? portfolioData[0].data.VaR : ''}}                    
+                </h5>
+                <small class="text-muted text-uppercase ">
+                    <strong>Value At Risk</strong>
+                    
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-body card-widget">
+            <div class="widget-icon rounded-circle bg-teal text-white icon icon-basic-server2">
+            </div>
+            <div class="block ml-3 mr-3">
+                <h5 class="mb-0 fw-400">
+                    {{ coflows.formatNumber(lots(portfolioData[0], true),false) }}
+                </h5>
+                <small class="text-muted text-uppercase ">
+                    <strong>Total Contracts</strong>
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-body card-widget">
+            <div class="widget-icon rounded-circle bg-blue text-white icon icon-ecommerce-graph-increase">
+            </div>
+            <div class="block ml-3 mr-3">
+                <h5 class="mb-0 fw-400">
+                        {{ coflows.formatNumber(dailyPnl(portfolioData[0]),false) }}
+                </h5>
+                <small class="text-muted text-uppercase ">
+                    <strong>P&L</strong>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+    
+<ngb-tabset>
+    <ngb-tab title="Portfolio">
+        <ng-template ngbTabContent>
+            <p-treeTable [value]="portfolioData">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="border: 0 !important">Name</th>
+                        <th style="width: 125px; border: 0 !important; text-align: center">Last</th>
+                        <th style="width: 125px; border: 0 !important; text-align: center">Net Positions</th>
+                        <th style="width: 125px; border: 0 !important; text-align: center">Net Notional</th>
+                        <th style="width: 125px; border: 0 !important; text-align: center">VaR</th>
+                        <th style="width: 125px; border: 0 !important; text-align: center">Daily PnL</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+                    <tr>
+                        <td style="border: 0 !important">
+                            <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                            <a (click)="updateChart(rowNode.node)">{{ rowNode.node.data == undefined ? ' ' : rowNode.node.data.Name }}</a>
+                            
+                        </td>
+                        <td style="border: 0 !important; text-align: right;">{{ rowNode.node.children == undefined || rowNode.node.children.length > 0 ? ' ' : coflows.formatNumber(coflows.FindInstrument(rowData.ID).Last, false)}}</td>
+                        <td style="border: 0 !important; text-align: right;">{{ coflows.formatNumber(lots(rowNode.node, false), false) }}</td>
+                        <td style="border: 0 !important; text-align: right;">{{ coflows.formatNumber(notional(rowNode.node, false), false) }}</td>
+                        <td style="border: 0 !important; text-align: right;">{{ rowNode.node.data == undefined ? ' ' : rowNode.node.data.VaR }}</td>
+                        <td style="border: 0 !important; text-align: right;">{{ coflows.formatNumber(dailyPnl(rowNode.node), false) }}</td>
+                    </tr>            
+                </ng-template>
+            </p-treeTable>
+
+            <br/>
+            <p-treeTable [value]="orderData">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th style="border: 0 !important">Name</th>
+                            <th style="width: 325px; border: 0 !important; text-align: center">Date</th>
+                            <th style="width: 75px; border: 0 !important; text-align: center">Type</th>
+                            <th style="width: 125px; border: 0 !important; text-align: center">Order Size</th>
+                            <th style="width: 175px; border: 0 !important; text-align: center;">Status</th>
+                        </tr>
+                    </ng-template>
+    
+                    <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+                        <tr>
+                            <td style="border: 0 !important">
+                                <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                                {{rowNode.node.data == undefined ? ' ' : rowNode.node.data.Name }}
+                            </td>
+                            <td style="border: 0 !important">{{rowNode.node.data == undefined ? ' ' : rowNode.node.data.Date }}</td>
+                            <td style="border: 0 !important; text-align: right;">{{ rowNode.node.data == undefined ? '' : rowNode.node.data.Unit == '' ? 'Total': (rowNode.node.data.Unit > 0 ? 'Long' : 'Short') }}</td>
+                            <td style="border: 0 !important; text-align: right;">{{ rowNode.node.data == undefined ? '' : rowNode.node.data.Unit == '' ? coflows.formatNumber(traded(rowNode.node),false) : coflows.formatNumber((rowNode.node.data.Unit < 0 ? -rowNode.node.data.Unit : rowNode.node.data.Unit),false) }}</td>
+                            <td style="border: 0 !important; text-align: right;">{{rowNode.node.data == undefined ? ' ' : rowNode.node.data.Level }}</td>
+                        </tr>            
+                    </ng-template>
+                </p-treeTable>
+            <!-- <p-treeTable [value]="orderData" var="item">
+                <p-column field="Name" header="Name"></p-column>
+                <p-column>
+                    <ng-template let-col let-node="rowData" pTemplate="header">Type</ng-template>
+                    <ng-template let-col let-node="rowData" pTemplate="body">
+                        {{node.data == undefined ? '' : node.data.Unit == '' ? 'Total': (node.data.Unit > 0 ? 'Long' : 'Short') }}
+                    </ng-template>
+                </p-column>
+
+                <p-column>
+                    <ng-template let-col let-node="rowData" pTemplate="header">Order Size</ng-template>
+                    <ng-template let-col let-node="rowData" pTemplate="body">
+                        {{node.data == undefined ? '' : node.data.Unit == '' ? coflows.formatNumber(traded(node),false) : coflows.formatNumber((node.data.Unit < 0 ? -node.data.Unit : node.data.Unit),false) }}
+                    </ng-template>
+                </p-column>
+                
+                <p-column field="Date" header="Date"></p-column>
+                <p-column field="Level" header="Status"></p-column>                
+            </p-treeTable> -->
+        </ng-template>
+    </ngb-tab>
+    <ngb-tab title="Execution">        
+        <ng-template ngbTabContent>
+            <br/>
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <select #selectElem (change)="onChangeActive(selectElem.value)" class="form-control" id="exampleSelect1">
+                            <option [value]="0" [selected]="coflows.FindInstrument(MainStrategyID).IsActive">Active</option>
+                            <option [value]="1" [selected]="!coflows.FindInstrument(MainStrategyID).IsActive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6">
+                        <input (keyup.enter)="onChangeSchedule($event)" (blur)="onChangeSchedule($event)" type="text" class="form-control" id="scheudule" aria-describedby="emailHelp" placeholder="No schedule set..." [ngModel]="coflows.FindInstrument(MainStrategyID).ScheduleCommand">
+                </div>
+            </div>
+        </ng-template>
+    </ngb-tab>
+    <ngb-tab title="Code">        
+            <ng-template ngbTabContent>
+                <codemirror [(ngModel)]="code" [config]="editorOptions">
+                </codemirror>
+                <br>
+                <div>
+                    <button (click)="submitCode()" class="btn btn-primary">Submit</button>
+                </div>
+                <div *ngIf="compilationResult != ''">
+                    <br/>
+                    <textarea  class="form-control" [(ngModel)]="compilationResult" rows="10"></textarea>
+                </div>
+            </ng-template>
+        </ngb-tab>
+</ngb-tabset>
+

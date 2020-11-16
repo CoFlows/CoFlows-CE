@@ -2873,6 +2873,7 @@ module Code =
                         fun entry -> 
                             { Name = entry.Substring(entry.IndexOf("/Bins") + "/Bins".Length + 1); Content = entry.Substring(entry.IndexOf("/Bins") + 1)}
                     )
+                    
                 else
                     Seq.empty
 

@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>    
+    <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
+    <NoWarn>FS0020;FS0025;FS0049;FS0058;FS0064;FS0067;FS0104;MSB3243;MSB3245;NU1605</NoWarn>  
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Utils.fs" />
+    <Compile Include="RollingFutureStrategy.fs" />
+    <Compile Include="PortfolioStrategy.fs" />
+    <Compile Include="Extra.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Accord" Version="3.8.0" />
+    <PackageReference Include="Accord.Math" Version="3.8.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QuantApp.Kernel\QuantApp.Kernel.win.csproj" />
+    <ProjectReference Include="..\QuantApp.Engine\QuantApp.Engine.win.fsproj" />
+
+    <ProjectReference Include="..\AQI.AQILabs.Derivatives\AQI.AQILabs.Derivatives.win.csproj" />    
+    <ProjectReference Include="..\AQI.AQILabs.Kernel\AQI.AQILabs.Kernel.win.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,15 @@
+<div class="d-flex align-items-stretch min-height-100 h-100">
+  <div class="bg-cover d-none d-md-inline-flex col-md-6 col-lg-8">
+    <video (ended)="videoFlip($event)" autoplay  id="video-background" muted plays-inline >
+      <source src="assets/videos/{{bgVideo[bgVideoIdx]}}" type="video/mp4"/>
+    </video>
+  </div>
+  <div class="card card-body mb-0 rounded-0 p-5 col-sm-12 col-md-6 col-lg-4">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <img src="assets/images/logo.png" style="border-radius: 50px;" class="avatar-xs mb-1" alt="">
+        <p class="ff-headers text-uppercase">Signing into <strong>CoFlows</strong></p>
+      </div>
+    </form>
+  </div>
+</div>

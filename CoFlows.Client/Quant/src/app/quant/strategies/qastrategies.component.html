@@ -1,0 +1,50 @@
+<ngx-datatable style="max-height: 350px;" *ngIf="strategies.length > 0"
+    [columnMode]="'force'"
+    [headerHeight]="40"
+    [footerHeight]="0"
+    [rowHeight]="40"
+    [scrollbarV]="true"
+    [scrollbarH]="true"
+    [rows]="strategies">
+        <ngx-datatable-column name="Execution" [width]="80" prop="active">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                <label class="switch m-b">
+                    <div class="slide-toggle-bar">
+                        <input  #selectElem type="checkbox" [(ngModel)]="coflows.FindInstrument(row.id).IsActive" (change)="onChangeActiveStrategy(row.id, coflows.FindInstrument(row.id).IsActive)">
+                        <span></span>
+                    </div>
+                    <span class="slide-toggle-content">{{ coflows.FindInstrument(row.id).IsActive ? 'Active' : 'Inactive'}}</span>
+                </label>
+            </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Strategy" [width]="190">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                <a routerLink="/quant/trader/{{row.id}}" routerLinkActive="active">{{row.strategy}}</a>        
+            </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column name="Absolute Notional" prop="notional" [width]="100">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                {{coflows.formatNumber(notional(row.positions, true), false)}}
+            </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column name="Contracts" prop="notional" [width]="100">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                {{coflows.formatNumber(contracts(row.positions, true), false)}}
+            </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column name="VaR" prop="var" [width]="100">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                {{coflows.formatNumber(row.var, false)}}
+            </ng-template>
+        </ngx-datatable-column>
+            
+        <ngx-datatable-column name="Daily PnL" prop="pnl" [width]="100">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">        
+                {{coflows.formatNumber(coflows.FindInstrument(row.id).Last - row.dailyAdjustment, false)}}
+            </ng-template>
+        </ngx-datatable-column>
+
+    </ngx-datatable>

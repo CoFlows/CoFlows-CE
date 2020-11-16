@@ -1,0 +1,76 @@
+.btn {
+  font-size: 13px;
+  letter-spacing: 0.02rem;
+}
+
+.input-group-btn > .btn {
+  line-height: inherit;
+}
+
+// Icon buttons
+$bs-height-base: 2.188rem;
+$bs-height-lg: 3.188rem;
+$bs-height-sm: 1.688rem;
+@mixin btn-icon() {
+  position: relative;
+  overflow: hidden;
+  min-height: $bs-height-base;
+  padding-left: ($bs-height-base);
+  text-overflow: ellipsis;
+  i:first-child {
+    line-height: $bs-height-base;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: $bs-height-base;
+    text-align: center;
+    font-size: $font-size-base;
+  }
+  &.btn-lg {
+    min-height: $bs-height-lg;
+    padding-left: ($bs-height-lg);
+    :first-child {
+      line-height: $bs-height-lg;
+      width: $bs-height-lg;
+      font-size: 2rem;
+    }
+  }
+  &.btn-sm {
+    min-height: $bs-height-sm;
+    padding-left: ($bs-height-sm);
+    :first-child {
+      line-height: $bs-height-sm;
+      width: $bs-height-sm;
+    }
+  }
+}
+
+.btn-icon {
+  @include btn-icon;
+  text-align: left;
+}
+
+.btn-icon-icon {
+  width: $bs-height-base;
+  height: $bs-height-base;
+  padding: 0;
+  padding-left: 0!important;
+  @include btn-icon;
+  :first-child {
+    width: 100%!important;
+    text-align: center;
+  }
+  &.btn-lg {
+    width: $bs-height-lg;
+    height: $bs-height-lg;
+    padding-right: 0;
+    padding-left: 0;
+  }
+  &.btn-sm {
+    width: $bs-height-sm;
+    height: $bs-height-sm;
+    padding-right: 0;
+    padding-left: 0;
+  }
+}

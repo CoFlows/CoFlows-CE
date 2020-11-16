@@ -1,0 +1,11 @@
+.ng-touched .form-control:invalid ~ .invalid-feedback,
+.ng-invalid .form-control:invalid ~ .invalid-feedback,
+.ng-invalid + .invalid-feedback {
+  display: block;
+}
+
+.custom-control {
+  align-items: center;
+  align-content: center;
+}
+

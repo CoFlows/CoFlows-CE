@@ -1,0 +1,144 @@
+<!-- Workbook UI -->
+
+<ngb-alert [type]="'warning'" [dismissible]="false" *ngIf="status.indexOf('thinking...') > -1">{{status}}</ngb-alert>
+<ngb-alert [type]="'danger'" [dismissible]="false" *ngIf="status.indexOf('thinking...') == -1 && compilationResult != '' && compilationResult != undefined">{{selectedWB.Name}} {{status}}</ngb-alert>
+<div class="card" *ngIf="status.indexOf('thinking...') == -1 && results.length > 0 || compilationResult != '' && compilationResult != undefined">
+    <div *ngIf="compilationResult != '' && compilationResult != undefined">
+        
+        <textarea  class="form-control" [(ngModel)]="compilationResult" rows="10"></textarea>
+    </div>
+
+    <ngb-alert [type]="'success'" [dismissible]="true" (close)="removeResults()" *ngIf="status.indexOf('thinking...') == -1 && results.length > 0 && (compilationResult == '' || compilationResult == undefined || compilationResult == null)">{{selectedWB.Name}} {{status}}</ngb-alert>
+    <ngb-tabset #tabs>
+        <ngb-tab *ngFor="let result of results">
+            <ng-template ngbTabTitle>
+                <div class="f-headers text-color" (click)="onTabClick(result.Item1)">{{result.Item1}}</div>
+            </ng-template>
+            <ng-template ngbTabContent>
+                <div class="col-sm-12 col-md-12">
+                    <!-- <a class="f-headers text-color"  target="_blank" href="{{coflows.coflows_server}}flow/getquery?wid={{selectedWB.WorkflowID}}&qid={{selectedWB.ID}}&uid={{coflows.quser.User.Secret}}&name={{result.Item1}}">{{coflows.coflows_server}}flow/getquery?wid={{selectedWB.WorkflowID}}&qid={{selectedWB.ID}}&uid={{coflows.quser.User.Secret}}&name={{result.Item1}}</a> -->
+                    <a class="f-headers text-color"  target="_blank" href="{{coflows.coflows_server}}flow/query/{{selectedWB.WorkflowID}}/{{selectedWB.ID}}/{{result.Item1}}?_cokey={{coflows.quser.User.Secret}}">{{coflows.coflows_server}}flow/query/{{selectedWB.WorkflowID}}/{{selectedWB.ID}}/{{result.Item1}}?_cokey={{coflows.quser.User.Secret}}</a>
+                </div>
+                <div *ngIf="result.IsDash" class="col-sm-12 col-md-12">
+                    <a class="f-headers text-color" routerLink="{{result.URL2}}">App</a>
+                </div>
+
+                <div [chart]="charts[result.Item1]" *ngIf="result.IsChart"></div>
+
+                <iframe *ngIf="result.IsDash" frameborder="0" width="100%" height="100%" style="height:100vh" [src]="result.URL"></iframe>
+                
+                <img *ngIf="result.IsFigure" [src]="figures[result.Item1]" />
+                <!-- <div *ngIf="result.IsFigure" [innerHtml]="figures[result.Item1]" ></div> -->
+                
+                <ngx-datatable *ngIf="coflows.isArray(result.Item2) && !(result.IsChart || result.IsMap || result.IsFigure)"
+                    [columnMode]="'force'"
+                    [headerHeight]="40"
+                    [footerHeight]="0"
+                    [rowHeight]="40"
+                    [scrollbarV]="true"
+                    [scrollbarH]="true"
+                    
+                    [rows]="result.Item2">
+
+                    <ngx-datatable-column [sortable]="true" prop="{{col.name}}" name="{{col.name}}" *ngFor="let col of result.columns">
+                        <ng-template ngx-datatable-cell-template let-row="row">
+                            <a href="javascript:void(0);" (click)="addItem(result.SubItems, row[result.columns[0].name] + col.name, row[col.name])" *ngIf="(coflows.isArray(row[col.name]) || col.IsMap || col.IsChart) && (row[col.name] != null ? row[col.name].D_link == undefined : true)">
+                                Data
+                            </a>
+
+                            <div *ngIf="!coflows.isArray(row[col.name]) && !(col.IsChart || col.IsMap) && (col.name != 'D_link')  && (row[col.name] != null ? row[col.name].D_link == undefined : true)">
+                                {{row[col.name]}}
+                            </div>
+
+                            <a href="javascript:void(0);" (click)="addItem(result.SubItems, row[col.name].Name == undefined ? col.name : row[result.columns[0].name] + row[col.name].Name, row[col.name])" *ngIf="(col.name == 'D_link') || (row[col.name] != null ? row[col.name].D_link != undefined : false)">
+                                {{row[col.name].Name == undefined ? 'Link' : 'Link: ' + row[col.name].Name}}
+                            </a>
+                            
+
+                        </ng-template>
+                    </ngx-datatable-column>
+                
+                </ngx-datatable>
+
+                <ngui-map *ngIf="result.IsMap" id="map" [options]="mapOptions" (mapReady$)="onMapReady($event)" style="height: 500px;">
+                    <drawing-manager
+                    
+                    [drawingControl]="true"
+                    [drawingControlOptions]="{
+                    position: 2,
+                    drawingModes: ['polygon', 'rectangle']
+                    }"
+                    ></drawing-manager>
+                </ngui-map>
+
+                <textarea 
+                    
+                    *ngIf="(result.Item3 == null) && (!coflows.isArray(result.Item2) && !(result.IsChart || result.IsMap || result.IsFigure || result.IsDash))"  class="form-control" [(ngModel)]="result.Item2" rows="10"></textarea>
+                <div class="slide-toggle-bar alert alert-danger" *ngIf="result.Item3 != null">
+                    {{result.Item3}}
+                </div>
+
+                <div *ngFor="let item of result.SubItems">
+                    <ngb-alert [type]="'info'" (close)="removeItem(result.SubItems, item)">&nbsp;</ngb-alert>
+
+                    <div [chart]="charts[item.Item1]" *ngIf="item.IsChart"></div>
+
+                    <iframe *ngIf="item.IsDash" frameborder="0" width="100%" height="100%" style="height:100vh" [src]="item.URL"></iframe>
+                
+
+                    <!-- <img src="{{figures[item.Item1]}}" *ngIf="item.IsFigure" /> -->
+                    <img [src]="figures[item.Item1]" *ngIf="item.IsFigure" />
+
+                    <ngx-datatable *ngIf="coflows.isArray(item.Item2) && !(item.IsChart || item.IsMap || item.IsFigure)"
+                        [columnMode]="'force'"
+                        [headerHeight]="40"
+                        [footerHeight]="0"
+                        [rowHeight]="40"
+                        [scrollbarV]="true"
+                        [scrollbarH]="true"
+                        
+                        [rows]="item.Item2">
+
+                        <ngx-datatable-column [sortable]="true" prop="{{col.name}}" name="{{col.name}}" *ngFor="let col of item.columns">
+                            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+                                
+                                <div *ngIf="(coflows.isArray(row[col.name]) && row[col.name].length > 0) || col.IsMap || col.IsChart">
+                                    <a href="javascript:void(0);" (click)="addItem(result.SubItems, row[result.columns[0].name] + col.name, row[col.name])" *ngIf="coflows.isArray(row[col.name]) || col.IsMap || col.IsChart">
+                                        Data
+                                    </a>
+                                    <div *ngIf="row[col.name].length == 0 && !(col.IsMap || col.IsChart)">
+                                        Empty
+                                    </div>
+                                    
+                                </div>
+
+                                <div *ngIf="!coflows.isArray(row[col.name]) && !col.IsMap && !col.IsChart">
+                                    {{row[col.name]}}
+                                </div>
+                                
+
+                            </ng-template>
+                        </ngx-datatable-column>
+                    
+                    </ngx-datatable>
+
+                    <ngui-map *ngIf="item.IsMap" id="map" [options]="mapOptions" (mapReady$)="onMapReady($event)" style="height: 500px;">
+                        <drawing-manager
+                        
+                        [drawingControl]="true"
+                        [drawingControlOptions]="{
+                        position: 2,
+                        drawingModes: ['polygon', 'rectangle']
+                        }"
+                        ></drawing-manager>
+                    </ngui-map>
+
+                    <textarea *ngIf="!coflows.isArray(item.Item2) && !(item.IsChart || item.IsMap || item.IsFigure || item.IsDash)"  class="form-control" [(ngModel)]="item.Item2" rows="10"></textarea>
+
+
+                </div>
+
+            </ng-template>
+        </ngb-tab>
+    </ngb-tabset>
+</div>

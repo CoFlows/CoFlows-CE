@@ -1,0 +1,13 @@
+.ngb-dp-month-name {
+  font-family: $font-family-headers;
+  font-size: 13px!important;
+  text-transform: uppercase;
+  letter-spacing: 0.02rem;
+}
+.ngb-dp-day > div,
+.ngb-dp-day > span {
+  border-radius: 0;
+}
+.ngb-dp-months {
+  padding: 0!important;
+}
