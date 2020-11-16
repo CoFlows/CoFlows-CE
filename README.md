@@ -1,6 +1,6 @@
 # CoFlows - Containerized Polyglot Runtime (Interop)
 
-**CoFlows CE (Community Edition)** helps developers create Web APIs and data-centric workflows in various languages including **Python, Java, Scala, C#, F#, VB and Javascript**. These workflows require the management of multiple facets that can be daunting for many coders. **CoFlows CE** aims manage many of these facets including:
+**CoFlows CE (Community Edition)** helps developers create Web APIs and data-centric workflows in various languages including **Python, Java, Scala, C#, F#, VB and Javascript**. These workflows require the management of multiple facets that can be daunting for many coders. **CoFlows CE** aims to manage many of these facets including:
 * OpenAPI - Automatic generation of [OpenAPI specifications](https://www.openapis.org)
 * Agents - Scheduled [Cron](https://www.freeformatter.com/cron-expression-generator-quartz.html) and Asynchronous workflows
 * Apps - Beautiful visual interfaces with [Plotly Dash](https://plotly.com/dash/) apps in python
@@ -10,7 +10,7 @@
 * Persistence - Connections to SQL databases including [SQLite](https://www.sqlite.org/index.html), [Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server) and [Postgres SQL](https://www.postgresql.org)
 * Cloud Hosting - Support to deploy into [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/)
 
-You can now choose to go through a hands on tutorial or continue reading through a deep dive:
+You can now choose to go through a few hands on tutorials or continue reading this page for a deep dive:
 
 * [Tutorial 1 - Create a simple API, manage permissions, secrets and generate OpenAPI specs](docs/tutorial/tutorial-1.md)
 * [Tutorial 2 - Add support for third-party dependencies like **pips**, **nugets** and **jars**](docs/tutorial/tutorial-2.md)
@@ -28,8 +28,6 @@ For a bit context, one implementation of **CoFlows** is a system to track ships 
 | Code |  Visual |  Table |
 :-------------------------:|:-------------------------:|:-------------------------: 
 ![](docs/images/QA_python_agent.png)  | ![](docs/images/QA_vessels_map.png)  |  ![](docs/images/QA_table_query.png)
-
-More on how to visualize this type of data in the docs of the [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow). 
 
 As a Containerized Polyglot Runtime, its functionality allows developers to build complex workflows leveraging off great open-source libraries written in various languages. The wealth of distributed computing libraries of Java / Scala together with Python's data science tools are all available in order to use the right tool for the right purpose within the same process!
 
@@ -77,7 +75,7 @@ For further details please read [Polyglot](docs/Polyglot/General.md "Polyglot").
 
 ## Workflows
 
-Projects in **CoFlows** are called Workflows. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workflow depends on. For further information please read [sample repo from GitHub](https://github.com/CoFlows/CoFlows-Workflow).
+Projects in **CoFlows** are called Workflows. They contain the logic that defines the Web APIs and scheduled / reactive processes together with the definition of the entire environment including Nuget, Jar and Pip packages that the Workflow depends on.
 
 ## Security, Authentication and Permissions
 
