@@ -10,7 +10,7 @@
 * Persistence - Connections to SQL databases including [SQLite](https://www.sqlite.org/index.html), [Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server) and [Postgres SQL](https://www.postgresql.org)
 * Cloud Hosting - Support to deploy into [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/)
 
-You can now choose to go through a few hands on tutorials or continue reading this page for a deep dive:
+You can now choose to go through a few hands on tutorials or continue reading this page for a general overview:
 
 * [Tutorial 1 - Create a simple API, manage permissions, secrets and generate OpenAPI specs](docs/tutorial/tutorial-1.md)
 * [Tutorial 2 - Add support for third-party dependencies like **pips**, **nugets** and **jars**](docs/tutorial/tutorial-2.md)
@@ -20,7 +20,7 @@ You can now choose to go through a few hands on tutorials or continue reading th
 * [Tutorial 6 - Configurations, Hosting and deployment](docs/tutorial/tutorial-6.md)
 
 
-## Deep Dive
+## General Overview
 **CoFlows CE (Community Edition)** is a Containerized Polyglot Runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**. 
 
 For a bit context, one implementation of **CoFlows** is a system to track ships and the imports/exports between countries in order to predict supply and demand dynamics for various commodities. To this end, we worked with GPS data where it was essential for us to quickly plot transformed data on a map for correctly tuning the algorithms. Below is a visual of this example:
