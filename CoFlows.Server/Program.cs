@@ -948,6 +948,12 @@ namespace CoFlows.Server
             {         
                 if(KernelConnectString.StartsWith("Server="))
                 {
+                    MSSQLDataSetAdapter _KernelDataAdapter = new MSSQLDataSetAdapter();
+                    _KernelDataAdapter.ConnectString = KernelConnectString;
+                    _KernelDataAdapter.CreateDB(KernelConnectString, new List<string> {
+                        File.ReadAllText(@"sql/create.sql")
+                    });
+
                     MSSQLDataSetAdapter KernelDataAdapter = new MSSQLDataSetAdapter();
                     KernelDataAdapter.ConnectString = KernelConnectString;
                     QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);
@@ -959,6 +965,7 @@ namespace CoFlows.Server
                     _KernelDataAdapter.CreateDB(KernelConnectString, new List<string> {
                         File.ReadAllText(@"sql/create.sql").Replace("DateTime", "timestamp").Replace("Binary", "bytea")
                     });
+
                     var KernelDataAdapter = new PostgresDataSetAdapter();
                     KernelDataAdapter.ConnectString = KernelConnectString;
                     QuantApp.Kernel.Database.DB.Add("Kernel", KernelDataAdapter);

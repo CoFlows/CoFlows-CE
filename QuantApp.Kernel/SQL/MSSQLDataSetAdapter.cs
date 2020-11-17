@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 
 using System.Data;
@@ -555,6 +556,52 @@ namespace QuantApp.Kernel.Adapters.SQL
                 
                 }
             }
+        }
+
+        public void CreateDB(string connectionString, List<string> schemas)
+        {
+            // var connString = connectionString.Substring(0, connectionString.IndexOf("Database=") - 1);
+            // var dbName = connectionString.Substring(connectionString.IndexOf("Database="));
+            // dbName = dbName.Substring(dbName.IndexOf("=") + 1);
+            var dbName = "";
+
+            var cons = connectionString.Split(';');
+            foreach(var f in cons)
+                if(f.ToLower().StartsWith("server="))
+                    dbName = f.ToLower().Replace("server=", "");
+            
+            var connString = connectionString;
+
+            Console.WriteLine("MSSql database: " + dbName);
+
+            try
+            {
+                var conn = new SqlConnection(connString);
+                conn.Open();
+                
+                using (var cmd = new SqlCommand("SELECT 1 FROM sys.Tables WHERE NAME='" + dbName + "' AND Type = 'U'", conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if(reader.Read())
+                        return;
+                }
+                
+                bool addData = true;
+                Console.WriteLine("MSSql creating database" + dbName);
+                using (var cmd = new SqlCommand("CREATE DATABASE " + dbName, conn))
+                cmd.ExecuteNonQuery();
+            }
+            catch{}
+
+            Console.WriteLine("Checking Schema: " + dbName);
+            foreach(var schema in schemas)
+                try
+                {
+                    ExecuteCommand(schema);
+                }
+                catch{}
+
+            Console.WriteLine("Processed DB: " + dbName);
         }
 
         public DbDataReader ExecuteReader(string command)
