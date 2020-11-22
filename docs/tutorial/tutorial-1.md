@@ -46,7 +46,7 @@ These two functions are automatically assigned web end-points (URLs) transformin
 Lets run an example step by step to create a Python API:
 
     linux/macos:    sh add.sh query py pyapi
-    windows:    add.bat query py pyapi
+    windows:        add.bat query py pyapi
 
 your folder structure should now look as follows:
 
@@ -88,7 +88,7 @@ The pyapi.py looks like this:
         else:
             return quser.FirstName + " DENIED"
 
-Both of these function here are assigned API end-points. In this code there is a variable $WID$ which automatically is set to the ID of the Workflow. This might be as good a time as any to mention groups and permissions in **CoFlows**. 
+Both of these functions are assigned API end-points. In this code there is a variable $WID$ which automatically is set to the ID of the Workflow. This might be as good a time as any to mention groups and permissions in **CoFlows**. 
 
 We can easily add a new API to this Query. Lets assume we want to add the **Print** functionality. To do this, simply add the following function to the source file:
 

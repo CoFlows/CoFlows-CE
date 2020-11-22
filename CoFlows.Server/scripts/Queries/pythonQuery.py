@@ -1,6 +1,6 @@
 ### <info version="1.0.100">
-###     <title>C# Query Test API</title>
-###     <description>C# Query API with samples for permissions, documentation and function definitions</description>
+###     <title>Python Query Test API</title>
+###     <description>Python Query API with samples for permissions, documentation and function definitions</description>
 ###     <termsOfService url="https://www.coflo.ws"/>
 ###     <contact name="Arturo Rodriguez" url="https://www.coflo.ws" email="arturo@coflo.ws"/>
 ###     <license name="Apache 2.0" url="https://www.apache.org/licenses/LICENSE-2.0.html"/>

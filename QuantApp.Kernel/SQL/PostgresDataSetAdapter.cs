@@ -649,19 +649,22 @@ namespace QuantApp.Kernel.Adapters.SQL
                     var commands = command.Split(';');
                     foreach(var _com in commands)
                     {
-                        try
+                        if(!string.IsNullOrEmpty(_com))
                         {
-                            NpgsqlCommand com = new NpgsqlCommand(_com, _connectionInternal, transaction);
-                            // NpgsqlCommand com = new NpgsqlCommand(_com);
-                            // com.CommandTimeout = 0 * 60 * 15;
-                            // com.Connection = _connectionInternal;
-                            com.ExecuteNonQuery();
-                        }
-                        catch(Exception e)
-                        {
-                            Console.WriteLine("ERROR: " + _com);
-                            Console.WriteLine(e);
-                            throw e;
+                            try
+                            {
+                                NpgsqlCommand com = new NpgsqlCommand(_com, _connectionInternal, transaction);
+                                // NpgsqlCommand com = new NpgsqlCommand(_com);
+                                // com.CommandTimeout = 0 * 60 * 15;
+                                // com.Connection = _connectionInternal;
+                                com.ExecuteNonQuery();
+                            }
+                            catch(Exception e)
+                            {
+                                Console.WriteLine("ERROR: " + _com);
+                                Console.WriteLine(e);
+                                // throw e;
+                            }
                         }
                     }
                     transaction.Commit();
@@ -670,7 +673,7 @@ namespace QuantApp.Kernel.Adapters.SQL
             }
         }
 
-        public void CreateDB(string connectionString, List<string> schemas)
+        public void CreateDB(string connectionString, List<Tuple<string, string>> schemas)
         {
             // var connString = connectionString.Substring(0, connectionString.IndexOf("Database=") - 1);
             // var dbName = connectionString.Substring(connectionString.IndexOf("Database="));
@@ -709,7 +712,9 @@ namespace QuantApp.Kernel.Adapters.SQL
             foreach(var schema in schemas)
                 try
                 {
-                    ExecuteCommand(schema);
+                    Console.WriteLine("Start running: " + schema.Item1);
+                    ExecuteCommand(schema.Item2);
+                    Console.WriteLine("Done running: " + schema.Item1);
                 }
                 catch{}
 

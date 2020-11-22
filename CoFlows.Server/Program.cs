@@ -950,8 +950,8 @@ namespace CoFlows.Server
                 {
                     MSSQLDataSetAdapter _KernelDataAdapter = new MSSQLDataSetAdapter();
                     _KernelDataAdapter.ConnectString = KernelConnectString;
-                    _KernelDataAdapter.CreateDB(KernelConnectString, new List<string> {
-                        File.ReadAllText(@"sql/create.sql")
+                    _KernelDataAdapter.CreateDB(KernelConnectString, new List<Tuple<string, string>> {
+                        Tuple.Create("sql/create.sql", File.ReadAllText(@"sql/create.sql"))
                     });
 
                     MSSQLDataSetAdapter KernelDataAdapter = new MSSQLDataSetAdapter();
@@ -962,8 +962,8 @@ namespace CoFlows.Server
                 {
                     var _KernelDataAdapter = new PostgresDataSetAdapter();
                     _KernelDataAdapter.ConnectString = KernelConnectString;
-                    _KernelDataAdapter.CreateDB(KernelConnectString, new List<string> {
-                        File.ReadAllText(@"sql/create.sql").Replace("DateTime", "timestamp").Replace("Binary", "bytea")
+                    _KernelDataAdapter.CreateDB(KernelConnectString, new List<Tuple<string, string>> {
+                        Tuple.Create("sql/create.sql", File.ReadAllText(@"sql/create.sql"))
                     });
 
                     var KernelDataAdapter = new PostgresDataSetAdapter();
