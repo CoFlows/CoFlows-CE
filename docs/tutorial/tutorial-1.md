@@ -1,14 +1,18 @@
 # Tutorial 1 - Simple APIs
 
-This tutorial explains how to create a simple API with [**CoFlows CE (Community Edition)**](https://github.com/QuantApp/CoFlows-CE). To gain a general overview of the CoFlows environment, we will cover the topics of:
+This tutorial explains how to create a simple API with [**CoFlows CE (Community Edition)**](https://github.com/QuantApp/CoFlows-CE). To gain a general overview of the CoFlows environment, we will cover the following topics:
 * Queries / APIs
 * Groups and Permissions
 * Secret Keys
 * HTTP Requests
 * Open API Schema
 
-First you must install [docker](https://www.docker.com/get-started) with support for linux containers.
+If you don't feel comfortable with VSCode and working with the terminal you can read a simpler tutorial here
 
+https://www.coflo.ws/post/coflows-tutorial-1-simple-webapi-in-only-4-lines-c-f-java-scala-js-or-python
+
+First of all you must install [docker](https://www.docker.com/get-started) with support for linux containers. 
+Now you can create a new workflow (CoFlows Project) called pyflow by running the following command in the terminal:
 
     linux/macos:    docker run -v $(pwd):/app/mnt coflows/ce add workflow {name}
     windows:        docker run -v %cd%:/app/mnt coflows/ce add workflow {name}
@@ -186,7 +190,7 @@ http://localhost/flow/query/9a7adf48-183f-4d44-8ab2-c0afd1610c71/pyapi.py/Permis
 
 and for the **Add** API:
 
-http://localhost/flow/query/9a7adf48-183f-4d44-8ab2-c0afd1610c71/pyapi.py/Add?p[0]=X&p[[1]=Y&_cokey=26499e5e555e9957725f51cc4d400384
+http://localhost/flow/query/9a7adf48-183f-4d44-8ab2-c0afd1610c71/pyapi.py/Add?p[0]=X&p[1]=Y&_cokey=26499e5e555e9957725f51cc4d400384
 where X and Y are any numbers.
 
 Using curl you are able to test this API
