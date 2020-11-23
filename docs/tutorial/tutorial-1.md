@@ -11,6 +11,8 @@ If you don't feel comfortable with VSCode and working with the terminal you can 
 
 https://www.coflo.ws/post/coflows-tutorial-1-simple-webapi-in-only-4-lines-c-f-java-scala-js-or-python
 
+and then continue with this tutorial.
+
 First of all you must install [docker](https://www.docker.com/get-started) with support for linux containers. 
 Now you can create a new workflow (CoFlows Project) called pyflow by running the following command in the terminal:
 
