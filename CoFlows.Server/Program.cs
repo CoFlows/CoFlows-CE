@@ -294,6 +294,53 @@ namespace CoFlows.Server
                 {
                     var pkg = Code.ProcessPackageFile(workflow_name, true);
                     Code.ProcessPackageJSON(pkg);
+                    
+                    var files = M.Base(pkg.ID + "--Files")[x => true];
+                    foreach(var file in files)
+                    {
+                        // var memoryStream = System.IO.MemoryStream();
+                        // using (var archieve = System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true)) 
+                        // {
+                        //     var _file = archive.CreateEntry((if "Base/" |> entry.Name.StartsWith then "" else "Base/") + entry.Name, CompressionLevel.Optimal);
+
+                            var fileName = M.V<string>(file, "Name");
+
+                            // if(File.Exists("mnt/Files/" + fileName))
+                            //     File.WriteAllBytes("mnt/Files/_" + fileName + ".bak", File.ReadAllBytes("mnt/Files/" + fileName));
+
+                            var fileContent = M.V<string>(file, "Content");
+                            try
+                            {
+                                var fileData = System.Convert.FromBase64String(fileContent);
+                                File.WriteAllBytes("mnt/Files/" + fileName, fileData);
+                            }
+                            catch(Exception e)
+                            {
+                                Console.WriteLine("ERROR FILE: " + fileName);
+                                Console.WriteLine(e);
+                            }
+                        // }
+                    }
+
+                    var bins = M.Base(pkg.ID + "--Bins")[x => true];
+                    foreach(var bin in bins)
+                    {
+                        // var memoryStream = System.IO.MemoryStream();
+                        // using (System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true))
+                        // {
+                            var fileName = M.V<string>(bin, "Name");
+
+                            // if(File.Exists("mnt/Bins/" + fileName))
+                            //     File.WriteAllBytes("mnt/Bins/_" + fileName + ".bak", File.ReadAllBytes("mnt/Bins/" + fileName));
+
+                            var fileContent = M.V<string>(bin, "Content");
+
+                            // var archive = System.IO.Compression.ZipArchive(System.IO.MemoryStream(data));
+                            var fileData = System.Convert.FromBase64String(fileContent);
+                            File.WriteAllBytes("mnt/Bins/" + fileName, fileData);
+                        // }
+                    }
+
                     SetDefaultWorkflows(new string[]{ pkg.ID }, false, config["Jupyter"] != null && config["Jupyter"].ToString().ToLower() == "true");
                     Console.WriteLine(pkg.Name + " started");
 
@@ -779,6 +826,11 @@ namespace CoFlows.Server
                     string query = File.ReadAllText("scripts/Queries/dash.py").Replace("XXX", name);
                     Directory.CreateDirectory("/app/mnt/Queries/");
                     File.WriteAllText("/app/mnt/Queries/" + name + ".py", query);
+
+                    string sourceDirectory = @"scripts/Files";
+                    string targetDirectory = @"/app/mnt/Files" + name;
+
+                    Copy(sourceDirectory, targetDirectory, name);
 
                     var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                     var res = Code.BuildRegisterPackage(pkg);

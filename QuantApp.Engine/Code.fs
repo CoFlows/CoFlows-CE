@@ -2076,9 +2076,19 @@ module Code =
                             try
                                 (if entry.Name |> String.IsNullOrEmpty then Path.GetFileName(entry.Content) else entry.Name), System.Convert.ToBase64String(File.ReadAllBytes(entry.Content))
                             with
-                            | _ -> entry.Name, entry.Content
+                            | _ -> 
+                                let files_m = pkg.ID + "--Bins" |> M.Base
+                                let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = entry.Name]
+                                let cont = 
+                                    if files_m_res.Count > 0 then
+                                        M.V<string>(files_m_res.[0],"Content")
+                                    else
+                                        entry.Content
+
+                                entry.Name, cont
                     { entry with Name = name; Content = content }
                 )
+                |> Seq.toList |> List.toSeq
 
             let files_content = 
                 pkg.Files 
@@ -2087,16 +2097,28 @@ module Code =
                         try
                             let name = if entry.Name |> String.IsNullOrEmpty then Path.GetFileName(pkg_path + Path.DirectorySeparatorChar.ToString() + entry.Content) else entry.Name
                             let content = System.Convert.ToBase64String(File.ReadAllBytes(pkg_path + Path.DirectorySeparatorChar.ToString() + entry.Content))
+
                             name, content
                         with
                         | e ->
-                            e |> Console.WriteLine 
+                            // e |> Console.WriteLine 
                             try
                                 (if entry.Name |> String.IsNullOrEmpty then Path.GetFileName(entry.Content) else entry.Name), System.Convert.ToBase64String(File.ReadAllBytes(entry.Content))
                             with
-                            | _ -> entry.Name, entry.Content
+                            | _ ->
+                                let files_m = pkg.ID + "--Files" |> M.Base
+
+                                let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = entry.Name]
+                                let cont = 
+                                    if files_m_res.Count > 0 then
+                                        M.V<string>(files_m_res.[0],"Content")
+                                    else
+                                        entry.Content
+
+                                entry.Name, cont
                     { entry with Name = name; Content = content }
                 )
+                |> Seq.toList |> List.toSeq
 
             let readme_content = File.ReadAllText(pkg_path + Path.DirectorySeparatorChar.ToString() + pkg.ReadMe)
             
@@ -2112,8 +2134,7 @@ module Code =
                     Pips = if pkg.Pips |> isNull then [] |> List.toSeq else pkg.Pips 
             }
 
-        let pkg_content = pkg_type |> parse_content        
-        pkg_content
+        pkg_type |> parse_content        
 
     let ProcessPackageDictionary (pkg_dict : Collections.Generic.Dictionary<string, string>) : PKG =
         let pkg_json = pkg_dict.["package.json"]
