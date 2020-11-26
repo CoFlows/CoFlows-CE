@@ -298,47 +298,29 @@ namespace CoFlows.Server
                     var files = M.Base(pkg.ID + "--Files")[x => true];
                     foreach(var file in files)
                     {
-                        // var memoryStream = System.IO.MemoryStream();
-                        // using (var archieve = System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true)) 
-                        // {
-                        //     var _file = archive.CreateEntry((if "Base/" |> entry.Name.StartsWith then "" else "Base/") + entry.Name, CompressionLevel.Optimal);
+                        var fileName = M.V<string>(file, "Name");
 
-                            var fileName = M.V<string>(file, "Name");
-
-                            // if(File.Exists("mnt/Files/" + fileName))
-                            //     File.WriteAllBytes("mnt/Files/_" + fileName + ".bak", File.ReadAllBytes("mnt/Files/" + fileName));
-
-                            var fileContent = M.V<string>(file, "Content");
-                            try
-                            {
-                                var fileData = System.Convert.FromBase64String(fileContent);
-                                File.WriteAllBytes("mnt/Files/" + fileName, fileData);
-                            }
-                            catch(Exception e)
-                            {
-                                Console.WriteLine("ERROR FILE: " + fileName);
-                                Console.WriteLine(e);
-                            }
-                        // }
+                        var fileContent = M.V<string>(file, "Content");
+                        try
+                        {
+                            var fileData = System.Convert.FromBase64String(fileContent);
+                            File.WriteAllBytes("mnt/Files/" + fileName, fileData);
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine("ERROR FILE: " + fileName);
+                            Console.WriteLine(e);
+                        }
                     }
 
                     var bins = M.Base(pkg.ID + "--Bins")[x => true];
                     foreach(var bin in bins)
                     {
-                        // var memoryStream = System.IO.MemoryStream();
-                        // using (System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true))
-                        // {
-                            var fileName = M.V<string>(bin, "Name");
+                        var fileName = M.V<string>(bin, "Name");
+                        var fileContent = M.V<string>(bin, "Content");
 
-                            // if(File.Exists("mnt/Bins/" + fileName))
-                            //     File.WriteAllBytes("mnt/Bins/_" + fileName + ".bak", File.ReadAllBytes("mnt/Bins/" + fileName));
-
-                            var fileContent = M.V<string>(bin, "Content");
-
-                            // var archive = System.IO.Compression.ZipArchive(System.IO.MemoryStream(data));
-                            var fileData = System.Convert.FromBase64String(fileContent);
-                            File.WriteAllBytes("mnt/Bins/" + fileName, fileData);
-                        // }
+                        var fileData = System.Convert.FromBase64String(fileContent);
+                        File.WriteAllBytes("mnt/Bins/" + fileName, fileData);
                     }
 
                     SetDefaultWorkflows(new string[]{ pkg.ID }, false, config["Jupyter"] != null && config["Jupyter"].ToString().ToLower() == "true");
