@@ -2308,12 +2308,42 @@ module Code =
             let ws =
                 let pkg_id = pkg_content.ID
 
+                let filesCache = pkg_content.Files |> Seq.toList
+                let binsCache = pkg_content.Bins |> Seq.toList
+
                 let files_m = pkg_id + "--Files" |> M.Base
-                files_m.[fun _ -> true] |> Seq.iter(files_m.Remove)
+                files_m.[fun _ -> true] 
+                |> Seq.iter(
+                    fun fileEntry ->
+                        let name = M.V<string>(fileEntry, "Name") 
+                        
+                        filesCache
+                        |> List.iter(
+                            fun pkgFile ->
+                                if pkgFile.Name = name && pkgFile.Content <> "__content__in__m__" then
+                                    fileEntry |> files_m.Remove
+                        )
+                        
+                        // file |> files_m.Remove
+                    )
                 files_m.Save()
 
                 let bins_m = pkg_id + "--Bins" |> M.Base
-                bins_m.[fun _ -> true] |> Seq.iter(bins_m.Remove)
+                bins_m.[fun _ -> true] 
+                |> Seq.iter(
+                    fun fileEntry ->
+                        let name = M.V<string>(fileEntry, "Name") 
+                        
+                        binsCache 
+                        |> List.iter(
+                            fun pkgFile ->
+                                if pkgFile.Name = name && pkgFile.Content <> "__content__in__m__" then
+                                    fileEntry |> bins_m.Remove
+                        )
+                        
+                        // file |> files_m.Remove
+                    )
+                // |> Seq.iter(bins_m.Remove)
                 bins_m.Save()
 
                 let ws = 
@@ -2347,45 +2377,45 @@ module Code =
                         // Bins = pkg_content.Bins |> Seq.toList
                         // Files = pkg_content.Files |> Seq.toList
                         Bins = 
-                            pkg_content.Bins
-                            |> Seq.map(fun filePkg ->
-                                
-                                let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
-                                if bins_m_res.Count > 0 then
-                                    let item = bins_m_res.[0] :?> FilePackage
-                                    
-                                    bins_m.Exchange(
-                                        item, 
-                                        filePkg)
-                                else
-                                    bins_m.Add(
-                                        filePkg) |> ignore
+                            binsCache
+                            |> List.map(fun filePkg ->
+                                if filePkg.Content = "__content__in__m__" |> not then
+                                    let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                                    if bins_m_res.Count > 0 then
+                                        let item = bins_m_res.[0] :?> FilePackage
+                                        
+                                        bins_m.Exchange(
+                                            item, 
+                                            filePkg)
+                                    else
+                                        bins_m.Add(
+                                            filePkg) |> ignore
 
                                 {    
                                     Name = filePkg.Name
                                     Content = "__content__in__m__"
                                 } : FilePackage)
-                            |> Seq.toList
+                            
                         Files = 
-                            pkg_content.Files
-                            |> Seq.map(fun filePkg ->
-                                
-                                let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
-                                if files_m_res.Count > 0 then
-                                    let item = files_m_res.[0] :?> FilePackage
-                                    
-                                    files_m.Exchange(
-                                        item, 
-                                        filePkg)
-                                else
-                                    files_m.Add(
-                                        filePkg) |> ignore
+                            filesCache
+                            |> List.map(fun filePkg ->
+                                if filePkg.Content = "__content__in__m__" |> not then
+                                    let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                                    if files_m_res.Count > 0 then
+                                        let item = files_m_res.[0] :?> FilePackage
+                                        
+                                        files_m.Exchange(
+                                            item, 
+                                            filePkg)
+                                    else
+                                        files_m.Add(
+                                            filePkg) |> ignore
 
                                 {    
                                     Name = filePkg.Name
                                     Content = "__content__in__m__"
                                 } : FilePackage)
-                            |> Seq.toList
+                            
                         ReadMe = pkg_content.ReadMe
                         Publisher = if pkg_content.Publisher |> isNull then QuantApp.Kernel.User.ContextUser.Email else pkg_content.Publisher
                         PublishTimestamp = if pkg_content.PublishTimestamp.Year <= (DateTime.Now.Year - 10) then DateTime.Now else pkg_content.PublishTimestamp
@@ -2439,127 +2469,6 @@ module Code =
 
         build
 
-    let ProcessPackageJSONinMemory (startAgents : bool) (pkg_content : PKG) =
-        let build = pkg_content |> BuildRegisterPackage
-        if build |> String.IsNullOrEmpty then
-            let ws =
-                let pkg_id = pkg_content.ID
-
-                pkg_content.NuGets |> InstallNuGets
-                pkg_content.Pips |> InstallPips
-                pkg_content.Jars |> InstallJars
-
-                let files_m = pkg_id + "--Files" |> M.Base
-                files_m.[fun _ -> true] |> Seq.iter(files_m.Remove)
-
-                let bins_m = pkg_id + "--Bins" |> M.Base
-                bins_m.[fun _ -> true] |> Seq.iter(bins_m.Remove)
-
-                let ws = 
-                    {
-                        ID = pkg_id
-                        Name = pkg_content.Name
-                        Strategies = []
-                        Agents = 
-                            pkg_content.Agents
-                            |> Seq.toList
-                            |> List.map(fun entry -> 
-                                F.CreatePKG(Utils.CreatePKG(
-                                    [
-                                        (entry.Name, entry.Content)
-                                    ],// |> List.append(pkg_content.Base |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content)),
-                                    entry.Exe, 
-                                    [||]))
-                                    )
-                            |> List.map(fun (f, _)  -> f.ID)
-
-                        Permissions = pkg_content.Permissions |> Seq.toList
-
-                        Code = pkg_content.Base |> Seq.toList |> List.map(fun entry -> entry.Name, entry.Content)
-                        NuGets = pkg_content.NuGets |> Seq.toList
-                        Pips = pkg_content.Pips |> Seq.toList
-                        Jars = pkg_content.Jars |> Seq.toList
-                        // Bins = pkg_content.Bins |> Seq.toList
-                        // Files = pkg_content.Files |> Seq.toList
-                        Bins = 
-                            pkg_content.Bins
-                            |> Seq.map(fun filePkg ->
-                                
-                                let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
-                                if bins_m_res.Count > 0 then
-                                    let item = bins_m_res.[0] :?> FilePackage
-                                    
-                                    bins_m.Exchange(
-                                        item, 
-                                        filePkg)
-                                else
-                                    bins_m.Add(
-                                        filePkg) |> ignore
-
-                                {    
-                                    Name = filePkg.Name
-                                    Content = "__content__in__m__"
-                                } : FilePackage)
-                            |> Seq.toList
-                        Files = 
-                            pkg_content.Files
-                            |> Seq.map(fun filePkg ->
-                                
-                                let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
-                                if files_m_res.Count > 0 then
-                                    let item = files_m_res.[0] :?> FilePackage
-                                    
-                                    files_m.Exchange(
-                                        item, 
-                                        filePkg)
-                                else
-                                    files_m.Add(
-                                        filePkg) |> ignore
-
-                                {    
-                                    Name = filePkg.Name
-                                    Content = "__content__in__m__"
-                                } : FilePackage)
-                            |> Seq.toList
-                        ReadMe = pkg_content.ReadMe
-                        Publisher = if pkg_content.Publisher |> isNull then QuantApp.Kernel.User.ContextUser.Email else pkg_content.Publisher
-                        PublishTimestamp = if pkg_content.PublishTimestamp.Year <= (DateTime.Now.Year - 10) then DateTime.Now else pkg_content.PublishTimestamp
-                        AutoDeploy = pkg_content.AutoDeploy
-                        Container = pkg_content.Container
-                    }
-
-                let work_books = M.Base(pkg_id + "--Queries")
-                pkg_content.Queries
-                |> Seq.toList
-                |> List.iter(fun entry ->
-                    let wb_res = work_books.[fun x -> M.V<string>(x, "ID") = entry.ID]
-                    if wb_res.Count > 0 then
-                    
-                        let item = wb_res.[0] :?> CodeData
-                        work_books.Exchange(
-                            item, 
-                            {    
-                                Name = entry.Name
-                                ID = if entry.ID |> String.IsNullOrEmpty then System.Guid.NewGuid().ToString() else entry.ID
-                                Code = entry.Content
-                                WorkflowID = pkg_id
-                            })
-                    else
-                        work_books.Add(
-                            {    
-                                Name = entry.Name
-                                ID = if entry.ID |> String.IsNullOrWhiteSpace then System.Guid.NewGuid().ToString() else entry.ID
-                                Code = entry.Content
-                                WorkflowID = pkg_id
-                            }) |> ignore
-                )
-                ws
-
-            if startAgents then
-                ws.Agents |> List.iter(fun id -> F.Find(id).Value.Start())
-
-        build              
-    
     let ProcessPackageWorkflow (wsp : Workflow) : PKG =
         
         let pkg_id = wsp.ID
@@ -2683,9 +2592,11 @@ module Code =
                     
                     let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = entry.Name]
                     if bins_m_res.Count > 0 then
-                        let item = bins_m_res.[0] :?> FilePackage
+                        // let item = bins_m_res.[0] :?> FilePackage
+                        let item = bins_m_res.[0]
                         try
-                            streamWriter.Write(System.Convert.FromBase64String(entry.Content))
+                            // streamWriter.Write(System.Convert.FromBase64String(entry.Content))
+                            streamWriter.Write(System.Convert.FromBase64String(M.V<string>(item, "Content")))
                         with | _ -> 0 |> ignore
                         streamWriter.Close()
                     )
@@ -2700,9 +2611,11 @@ module Code =
 
                     let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = entry.Name]
                     if files_m_res.Count > 0 then
-                        let item = files_m_res.[0] :?> FilePackage
+                        // let item = files_m_res.[0] :?> FilePackage
+                        let item = files_m_res.[0]
                         try
-                            streamWriter.Write(System.Convert.FromBase64String(item.Content))
+                            // streamWriter.Write(System.Convert.FromBase64String(item.Content))
+                            streamWriter.Write(System.Convert.FromBase64String(M.V<string>(item, "Content")))
                         with | _ -> 0 |> ignore
                         streamWriter.Close()
                     )
@@ -2894,6 +2807,7 @@ module Code =
                         fun entry -> 
                             { Name = entry.Substring(entry.IndexOf("/Bins") + "/Bins".Length + 1); Content = entry.Substring(entry.IndexOf("/Bins") + 1)}
                     )
+                    
                 else
                     Seq.empty
 
@@ -2909,7 +2823,6 @@ module Code =
                         fun entry -> 
                             { Name = entry.Substring(entry.IndexOf("/Files") + "/Files".Length + 1); Content = entry.Substring(entry.IndexOf("/Files") + 1)}
                     )
-                    
                 else
                     Seq.empty
 

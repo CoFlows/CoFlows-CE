@@ -341,9 +341,46 @@ namespace CoFlows.Server
                 else
                 {
                     Console.WriteLine("Empty server...");
-                    var workflow_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows")[xe => true];
-                    foreach(var wsp in workflow_ids)
+                    // var workflow_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows")[xe => true];
+                    // foreach(var wsp in workflow_ids)
+                    // {
+                    //     SetDefaultWorkflows(new string[]{ wsp.ToString() }, true, config["Jupyter"] != null && config["Jupyter"].ToString().ToLower() == "true");
+                    //     Console.WriteLine(wsp + " started");
+                    // }
+                    var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows")[xe => true];
+                    foreach(var wsp in workspace_ids)
                     {
+                        var files = QuantApp.Kernel.M.Base(wsp + "--Files")[x => true];
+                        foreach(var file in files)
+                        {
+                            var fileName = QuantApp.Kernel.M.V<string>(file, "Name");
+
+                            var fileContent = QuantApp.Kernel.M.V<string>(file, "Content");
+                            try
+                            {
+                                var fileData = System.Convert.FromBase64String(fileContent);
+                                (new System.IO.FileInfo("mnt/Files/" + fileName)).Directory.Create();
+                                File.WriteAllBytes("mnt/Files/" + fileName, fileData);
+                            }
+                            catch(Exception e)
+                            {
+                                Console.WriteLine("ERROR FILE: " + fileName);
+                                Console.WriteLine(e);
+                                Console.WriteLine(fileContent.Substring(Math.Min(250, fileContent.Length)));
+                            }
+                        }
+
+                        var bins = QuantApp.Kernel.M.Base(wsp + "--Bins")[x => true];
+                        foreach(var bin in bins)
+                        {
+                            var fileName = QuantApp.Kernel.M.V<string>(bin, "Name");
+                            var fileContent = QuantApp.Kernel.M.V<string>(bin, "Content");
+
+                            var fileData = System.Convert.FromBase64String(fileContent);
+                            (new System.IO.FileInfo("mnt/Files/" + fileName)).Directory.Create();
+                            File.WriteAllBytes("mnt/Bins/" + fileName, fileData);
+                        }
+
                         SetDefaultWorkflows(new string[]{ wsp.ToString() }, true, config["Jupyter"] != null && config["Jupyter"].ToString().ToLower() == "true");
                         Console.WriteLine(wsp + " started");
                     }
@@ -1062,9 +1099,12 @@ namespace CoFlows.Server
                                 // var filePath = "/Workflow/" + entry.FullName;
                                 var filePath = "/app/mnt/" + entry.FullName;
 
-                                System.IO.FileInfo file = new System.IO.FileInfo(filePath);
-                                file.Directory.Create(); // If the directory already exists, this method does nothing.
-                                System.IO.File.WriteAllText(file.FullName, content);
+                                if(!string.IsNullOrWhiteSpace(content))
+                                {
+                                    System.IO.FileInfo file = new System.IO.FileInfo(filePath);
+                                    file.Directory.Create(); // If the directory already exists, this method does nothing.
+                                    System.IO.File.WriteAllText(file.FullName, content);
+                                }
                             }
                         }
                         

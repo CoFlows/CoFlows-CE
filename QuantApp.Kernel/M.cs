@@ -376,7 +376,7 @@ namespace QuantApp.Kernel
                             Console.WriteLine("ERROR");
                 }
                 else
-                    Console.WriteLine("M not added internal: " + key + " " + data);
+                    Console.WriteLine("M not added internal: " + key + " " + data.ToString().Substring(0, Math.Min(data.ToString().Length, 250)));
             }
         }
 
