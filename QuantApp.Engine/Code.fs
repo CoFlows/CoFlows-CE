@@ -2544,13 +2544,14 @@ module Code =
             Container = wsp.Container
         }
     
-    let ProcessPackageToZIP (pkg : PKG) : byte[] =
+    let __ProcessPackageToZIP (pkg : PKG) : byte[] =
         let memoryStream = MemoryStream()
         
         using (ZipArchive(memoryStream, ZipArchiveMode.Create, true))
             (fun archive -> 
                 pkg.Base
-                |> Seq.iter(fun entry -> 
+                |> Seq.toList
+                |> List.iter(fun entry -> 
                     let file = archive.CreateEntry((if "Base/" |> entry.Name.StartsWith then "" else "Base/") + entry.Name, CompressionLevel.Optimal)
 
                     let entryStream = file.Open()
@@ -2561,7 +2562,8 @@ module Code =
                     )
 
                 pkg.Agents
-                |> Seq.iter(fun entry -> 
+                |> Seq.toList
+                |> List.iter(fun entry -> 
                     let file = archive.CreateEntry("Agents/" + entry.Name, CompressionLevel.Optimal)
 
                     let entryStream = file.Open()
@@ -2572,7 +2574,8 @@ module Code =
                     )
 
                 pkg.Queries
-                |> Seq.iter(fun entry -> 
+                |> Seq.toList
+                |> List.iter(fun entry -> 
                     let file = archive.CreateEntry("Queries/" + entry.Name, CompressionLevel.Optimal)
 
                     let entryStream = file.Open()
@@ -2584,7 +2587,8 @@ module Code =
 
                 let bins_m = pkg.ID + "--Bins" |> M.Base
                 pkg.Bins
-                |> Seq.iter(fun entry -> 
+                |> Seq.toList
+                |> List.iter(fun entry -> 
                     let file = archive.CreateEntry("Bins/" + entry.Name, CompressionLevel.Optimal)
 
                     let entryStream = file.Open()
@@ -2603,7 +2607,8 @@ module Code =
 
                 let files_m = pkg.ID + "--Files" |> M.Base
                 pkg.Files
-                |> Seq.iter(fun entry -> 
+                |> Seq.toList
+                |> List.iter(fun entry -> 
                     let file = archive.CreateEntry("Files/" + entry.Name, CompressionLevel.Optimal)
 
                     let entryStream = file.Open()
@@ -2658,6 +2663,153 @@ module Code =
                             ReadMe = "README.md"
                     }
         
+                let pkg_paths = Newtonsoft.Json.JsonConvert.SerializeObject(pkg_paths, Newtonsoft.Json.Formatting.Indented)
+                streamWriter.Write(pkg_paths)
+                streamWriter.Close()
+            )
+
+        memoryStream.Seek(int64(0), SeekOrigin.Begin)
+        memoryStream.ToArray()
+    
+
+    let ProcessPackageToZIP (pkg : PKG) : byte[] =
+        let memoryStream = MemoryStream()
+        
+        // using (ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+        //     (fun archive -> 
+        pkg.Base
+        |> Seq.toList
+        |> List.iter(fun entry -> 
+            using (ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                (fun archive -> 
+                    let file = archive.CreateEntry((if "Base/" |> entry.Name.StartsWith then "" else "Base/") + entry.Name, CompressionLevel.Optimal)
+
+                    let entryStream = file.Open()
+                    let streamWriter = StreamWriter(entryStream)
+                    
+                    streamWriter.Write(entry.Content)
+                    streamWriter.Close()
+                )
+            )
+
+        pkg.Agents
+        |> Seq.toList
+        |> List.iter(fun entry -> 
+            using (ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                (fun archive -> 
+                    let file = archive.CreateEntry("Agents/" + entry.Name, CompressionLevel.Optimal)
+
+                    let entryStream = file.Open()
+                    let streamWriter = StreamWriter(entryStream)
+                    
+                    streamWriter.Write(entry.Content)
+                    streamWriter.Close()
+                )
+            )
+
+        pkg.Queries
+        |> Seq.toList
+        |> List.iter(fun entry -> 
+            using (ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                (fun archive -> 
+                    let file = archive.CreateEntry("Queries/" + entry.Name, CompressionLevel.Optimal)
+
+                    let entryStream = file.Open()
+                    let streamWriter = StreamWriter(entryStream)
+                    
+                    streamWriter.Write(entry.Content)
+                    streamWriter.Close()
+                )
+            )
+
+        let bins_m = pkg.ID + "--Bins" |> M.Base
+        pkg.Bins
+        |> Seq.toList
+        |> List.iter(fun entry -> 
+            using (ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                (fun archive -> 
+                    let file = archive.CreateEntry("Bins/" + entry.Name, CompressionLevel.Optimal)
+
+                    let entryStream = file.Open()
+                    let streamWriter = BinaryWriter(entryStream)
+                    
+                    let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = entry.Name]
+                    if bins_m_res.Count > 0 then
+                        // let item = bins_m_res.[0] :?> FilePackage
+                        let item = bins_m_res.[0]
+                        try
+                            // streamWriter.Write(System.Convert.FromBase64String(entry.Content))
+                            streamWriter.Write(System.Convert.FromBase64String(M.V<string>(item, "Content")))
+                        with | _ -> 0 |> ignore
+                        streamWriter.Close()
+                )
+            )
+
+        let files_m = pkg.ID + "--Files" |> M.Base
+        pkg.Files
+        |> Seq.toList
+        |> List.iter(fun entry -> 
+            using (ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                (fun archive -> 
+                    let file = archive.CreateEntry("Files/" + entry.Name, CompressionLevel.Optimal)
+
+                    let entryStream = file.Open()
+                    let streamWriter = BinaryWriter(entryStream)
+
+                    let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = entry.Name]
+                    if files_m_res.Count > 0 then
+                        // let item = files_m_res.[0] :?> FilePackage
+                        let item = files_m_res.[0]
+                        try
+                            // streamWriter.Write(System.Convert.FromBase64String(item.Content))
+                            streamWriter.Write(System.Convert.FromBase64String(M.V<string>(item, "Content")))
+                        with | _ -> 0 |> ignore
+                        streamWriter.Close()
+                )
+            )
+
+        using (ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+            (fun archive -> 
+                let file = archive.CreateEntry("README.md", CompressionLevel.Optimal)
+
+                let entryStream = file.Open()
+                let streamWriter = StreamWriter(entryStream)
+                streamWriter.Write(pkg.ReadMe)
+                streamWriter.Close()
+            )
+
+        using (ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+            (fun archive -> 
+                let file = archive.CreateEntry("package.json", CompressionLevel.Optimal)
+
+                let entryStream = file.Open()
+                let streamWriter = StreamWriter(entryStream)
+            
+        
+                let pkg_paths = 
+                    {
+                        pkg with
+                            Base =
+                                pkg.Base
+                                |> Seq.map(fun entry -> { entry with Content =(if "Base/" |> entry.Name.StartsWith then "" else "Base/") + entry.Name });
+                            Agents =
+                                pkg.Agents
+                                |> Seq.map(fun entry -> { entry with Content = "Agents/" + entry.Name });
+                            Queries =
+                                pkg.Queries
+                                |> Seq.map(fun entry -> { entry with Content = "Queries/" + entry.Name })
+
+                            Bins =
+                                pkg.Bins
+                                |> Seq.map(fun entry -> { entry with Content = "Bins/" + entry.Name })
+
+                            Files =
+                                pkg.Files
+                                |> Seq.map(fun entry -> { entry with Content = "Files/" + entry.Name })
+
+                            ReadMe = "README.md"
+                    }
+
                 let pkg_paths = Newtonsoft.Json.JsonConvert.SerializeObject(pkg_paths, Newtonsoft.Json.Formatting.Indented)
                 streamWriter.Write(pkg_paths)
                 streamWriter.Close()

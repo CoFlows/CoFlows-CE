@@ -132,11 +132,11 @@ When adding the template as done in the example above you can open the app scrip
 
 Alternatively, you can go to the following URL from your browser to see a clean view that can even be injected into an iframe:
 
-    http://localhost/dash/9a7adf48-183f-4d44-8ab2-c0afd1610c71/app.py?uid={User Secret}
+    http://localhost/dash/9a7adf48-183f-4d44-8ab2-c0afd1610c71/app.py?_cokey={User Secret}
 
 the general URL is
 
-    http://localhost/dash/{$WID$}/{app name}.py?uid={User Secret}
+    http://localhost/dash/{$WID$}/{app name}.py?_cokey={User Secret}
 
 and you should see:
 

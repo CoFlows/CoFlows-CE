@@ -1375,7 +1375,12 @@ namespace CoFlows.Server
                     {
                         webBuilder.UseUrls(new string[] { "http://*", "https://*" });
                         webBuilder
-                        .UseStartup(startup);
+                        .UseStartup(startup)
+                        .UseKestrel(options =>
+                        {
+                            options.Limits.MaxRequestBodySize = null;
+                        });
+                        
                     })
                     .Build()
                     .Run();
@@ -1384,7 +1389,7 @@ namespace CoFlows.Server
             {
                 Console.WriteLine("SSL encryption is not used....");
                 Host.CreateDefaultBuilder(args)
-                    .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(startup))
+                    .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(startup).UseKestrel(options => { options.Limits.MaxRequestBodySize = null; }))
                     .Build()
                     .Run();
             }

@@ -24,7 +24,7 @@ import json
 import QuantApp.Kernel as qak
 
 # This app can be access through
-# http://localhost/dash/$WID$/XXX.py?uid={User Secret}
+# http://localhost/dash/$WID$/XXX.py?_cokey={User Secret}
 
 # Plotly/Dash code as required by CoFlows
 dash_init = True

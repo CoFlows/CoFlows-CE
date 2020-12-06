@@ -206,8 +206,8 @@ export class CFQueryComponent {
                             let data = result.Item2
 
                             result.IsDash = true
-                            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.coflows.coflows_server + 'dash/' + workbook.WorkflowID + '/' + workbook.ID + '?uid=' + this.coflows.quser.User.Secret)
-                            result.URL2 = '/workflows/app/dash/' + workbook.WorkflowID + '/' + workbook.ID + '?uid=' + this.coflows.quser.User.Secret
+                            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.coflows.coflows_server + 'dash/' + workbook.WorkflowID + '/' + workbook.ID + '?_cokey=' + this.coflows.quser.User.Secret)
+                            result.URL2 = '/workflows/app/dash/' + workbook.WorkflowID + '/' + workbook.ID + '?_cokey=' + this.coflows.quser.User.Secret
                             
                         }
                         else if(result.Item1.indexOf('_map') >= 0){
@@ -488,8 +488,8 @@ export class CFQueryComponent {
             let data = result.Item2
 
             result.IsDash = true
-            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.coflows.coflows_server + 'dash/' + this.selectedWB.WorkflowID + '/' + this.selectedWB.ID + '?uid=' + this.coflows.quser.User.Secret)
-            result.URL2 = '/workflows/app/dash/' + this.selectedWB.WorkflowID + '/' + this.selectedWB.ID + '?uid=' + this.coflows.quser.User.Secret
+            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.coflows.coflows_server + 'dash/' + this.selectedWB.WorkflowID + '/' + this.selectedWB.ID + '?_cokey=' + this.coflows.quser.User.Secret)
+            result.URL2 = '/workflows/app/dash/' + this.selectedWB.WorkflowID + '/' + this.selectedWB.ID + '?_cokey=' + this.coflows.quser.User.Secret
             
         }
         else if(result.Item1.indexOf('_map') >= 0){
