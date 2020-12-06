@@ -50,6 +50,10 @@ namespace CoFlows.Server.Controllers
                 return null;
 
             QuantApp.Kernel.IPermissible permissible = QuantApp.Kernel.User.FindUser(pid);
+
+            if(permissible == null)
+                permissible = QuantApp.Kernel.User.FindUserBySecret(pid);
+                
             if(permissible == null)
                 permissible = FileRepository.File(pid);
 
@@ -94,6 +98,10 @@ namespace CoFlows.Server.Controllers
                 return null;
 
             QuantApp.Kernel.IPermissible permissible = QuantApp.Kernel.User.FindUser(pid);
+
+            if(permissible == null)
+                permissible = QuantApp.Kernel.User.FindUserBySecret(pid);
+
             if(permissible == null)
                 permissible = FileRepository.File(pid);
 
@@ -141,6 +149,9 @@ namespace CoFlows.Server.Controllers
                 return null;
 
             QuantApp.Kernel.IPermissible permissible = QuantApp.Kernel.User.FindUser(pid);
+            if(permissible == null)
+                permissible = QuantApp.Kernel.User.FindUserBySecret(pid);
+            
             if(permissible == null)
                 permissible = FileRepository.File(pid);
 

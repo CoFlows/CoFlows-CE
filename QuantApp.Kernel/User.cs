@@ -96,14 +96,29 @@ namespace QuantApp.Kernel
             return PermissionContextFunction(ContextUser.ID, groupID);
         }
 
+        public static AccessType PermissionContext(string secret, string groupID)
+        {
+            if(PermissionContextFunction == null)
+            {
+                var group = QuantApp.Kernel.Group.FindGroup(groupID);
+                if(group == null)
+                    return AccessType.Denied;
+
+                return group.PermissionSecret(secret);
+            }
+            
+            return PermissionContextFunction(secret, groupID);
+        }
+
 
         public static UserData ContextUserBySecret(string secret)
         {
+            
             var user = FindUserBySecret(secret);
             if(user != null)
                 return user.ToUserData();
             else
-                return new QuantApp.Kernel.UserData();
+                return FindUserDataBySecretCustom(secret);
         }
 
         public void SetContextUser()
@@ -512,6 +527,17 @@ namespace QuantApp.Kernel
             if (FindBySecretFunction != null)
                 return FindBySecretFunction(key);
             return null;
+        }
+
+
+        public delegate UserData FindUserDataBySecretEvent(string key);
+        public static FindUserDataBySecretEvent FindUserDataBySecretFunction = null;
+
+        public static UserData FindUserDataBySecretCustom(string key)
+        {
+            if (FindUserDataBySecretFunction != null)
+                return FindUserDataBySecretFunction(key);
+            return new QuantApp.Kernel.UserData();
         }
     }
 }

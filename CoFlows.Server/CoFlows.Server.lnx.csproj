@@ -27,6 +27,8 @@
     <Content Include="jupyter/coflows" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="jupyter/kernel.jupyter" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  /> -->
     <!-- <Content Include="sql/create.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  /> -->
+
+    <Content Include="appsettings.json" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="sql\**\*.*" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
 
     <Content Include="scripts\**\*.*" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />

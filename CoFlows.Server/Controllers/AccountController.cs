@@ -440,6 +440,21 @@ namespace CoFlows.Server.Controllers
         }
 
         /// <summary>
+        /// Get the current user data
+        /// </summary>
+        /// <param name="_cokey">Secret Key</param>
+        /// <returns>Success</returns>
+        /// <response code="200">
+        /// </response>
+        [HttpGet]
+        public ActionResult UserBySecret(string _cokey)
+        {
+            var quser = QuantApp.Kernel.User.FindUserBySecret(_cokey);
+            return Ok(quser.ToUserData());
+        }
+
+        
+        /// <summary>
         /// Get the current user's Permissions (accessType) for all groups where the user has access
         /// </summary>
         /// <returns>Success</returns>
