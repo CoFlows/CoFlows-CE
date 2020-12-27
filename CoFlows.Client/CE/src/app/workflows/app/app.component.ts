@@ -18,11 +18,12 @@ export class AppComponent {
 
         var n=0
         this.activatedRoute.url.subscribe(params => {
-            if(n == 0)
+            // if(n == 0)
             {
                 let cleanUrl = params.map(x => decodeURIComponent(x.path)).join('/')
                 let fullUrl = this.coflows.coflows_server + cleanUrl
-                this.url = this.sanitization.bypassSecurityTrustResourceUrl(fullUrl)
+                if(n == 0)
+                    this.url = this.sanitization.bypassSecurityTrustResourceUrl(fullUrl)
                 n++
                 this.location.go('/workflows/app/' + cleanUrl)
             }
