@@ -23,6 +23,12 @@ import json
 
 import QuantApp.Kernel as qak
 
+### <api name="DashApp">
+###     <description>Plotly Dash App in CoFlows</description>
+###     <returns>APP</returns>
+### </api>
+
+
 # This app can be access through
 # http://localhost/dash/$WID$/XXX.py?_cokey={User Secret}
 
@@ -174,11 +180,11 @@ def run(port, path):
             def set_start_values(args):
                 args = getArgs(args)
                 if args is not None:
-                    uid = args['uid']
+                    uid = args['_cokey']
 
                     cuser = qak.User.ContextUserBySecret(uid)
-                    qgroup = qak.Group.FindGroup('$WID$')
-                    perm = qgroup.PermissionSecret(uid)
+                    perm = qak.User.PermissionContext(uid, '$WID$')
+                    
                     
                     if perm > -1:
                         return [perm, uid, dict(), dict(display='none'), dict(display='none')]
