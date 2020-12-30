@@ -169,7 +169,8 @@ module Code =
                     let wc = new WebClient()
                     
                     let archive = 
-                                "https://www.nuget.org/api/v2/package/" + name + "/" + version
+                                "https://www.nuget.org/api/v2/package/" + name + "/" + System.Text.RegularExpressions.Regex.Replace(version, @"[^\d(\.\d)*$]", "")
+                                // "https://globalcdn.nuget.org/packages/" + name.ToLower() + "." + System.Text.RegularExpressions.Regex.Replace(version, @"[^\d(\.\d)*$]", "") + ".nupkg"
                                 |> wc.DownloadData
                                 |> MemoryStream
                                 |> ZipArchive
