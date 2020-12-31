@@ -53,6 +53,7 @@ namespace CoFlows.Server
         public static bool letsEncryptStaging = false;
         public static bool useJupyter = false;
         public static bool loadedJupyter = false;
+        public static string sendGridKey = null;
 
         public static string jwtKey = System.Guid.NewGuid().ToString();
 
@@ -92,6 +93,8 @@ namespace CoFlows.Server
             
             letsEncryptEmail = addWorkflow ? "" : config["Server"]["LetsEncrypt"]["Email"].ToString();
             letsEncryptStaging = addWorkflow ? false : config["Server"]["LetsEncrypt"]["Staging"].ToString().ToLower() == "true";
+
+            sendGridKey = addWorkflow || config["SendGrid"] == null ? "" : config["SendGrid"].ToString();
 
             var sslFlag = addWorkflow ? false : hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(letsEncryptEmail);
 

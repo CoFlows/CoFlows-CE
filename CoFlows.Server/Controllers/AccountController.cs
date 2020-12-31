@@ -462,7 +462,7 @@ namespace CoFlows.Server.Controllers
         /// Result:
         ///
         ///     {
-        ///         'Data': [ { ID: '', Name: '', Permission: -1 } ]
+        ///         'Data': [ { ID: '', Name: '', Permission: -1, Expiry = '' } ]
         ///     }
         ///
         /// Where accessType is:
