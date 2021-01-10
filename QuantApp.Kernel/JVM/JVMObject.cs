@@ -646,46 +646,16 @@ namespace QuantApp.Kernel.JVM
 
         ~JVMObject() 
         {
-            // Console.WriteLine("JVMOBJECT DISPOSE 2: " + this);
             int hsh = this.JavaHashCode;
-
-            // if(__DB.Count > 10 || Runtime.__DB.Count > 1000)//  || Runtime.DB.Count > 1000)
-            // {   
-            //     var en = Runtime.__DB.Values.GetEnumerator();
-            //     en.MoveNext();
-            //     var dd = en.Current;
-            //     Console.WriteLine("JVMOBJECT DISPOSE: " + dd + " --> "  + Runtime.__DB.Count + " "  + Runtime.DB.Count + " "  + Runtime.MethodDB.Count + " " + Runtime.__DB);
-            // }
 
             if(DB.ContainsKey(hsh))
             {
                 WeakReference ot;
                 DB.TryRemove(hsh, out ot);
-                // if(DB.TryRemove(hsh, out ot))
-                //     Console.WriteLine("REMOVED!: " + ot);
-                // else
-                //     Console.WriteLine("NOT REMOVED 1");
             }
-            // else
-            //     Console.WriteLine("NOT REMOVED 2");
 
             this.Dispose();
             
-
-                // Runtime.RegisterJVMObject(hsh, _pointer.ToPointer());
-
-                // if(!DB.ContainsKey(hsh))
-                {
-                    // DB.TryAdd(hsh, this);
-                    // __DB[hsh] = this;
-                    
-                    
-                }
-            // if (Ptr != IntPtr.Zero) 
-            // {
-            //     Marshal.FreeHGlobal(Ptr);
-            //     Ptr = IntPtr.Zero;
-            // }
         }
 
         public void Dispose() 

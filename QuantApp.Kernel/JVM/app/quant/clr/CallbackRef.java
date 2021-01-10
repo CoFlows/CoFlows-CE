@@ -50,11 +50,19 @@ public class CallbackRef implements AutoCloseable
     @Override
     protected void finalize() throws Throwable 
     // public void close()
-    {
-        // System.out.println("JAVA GC Finalize CALLBACK: " + _id);
+    {        
         CLRRuntime.nativeRemoveObject(_id);
-        // Action<object, int> handle = Collected;
-        // if (handle != null)
-        //     handle(_obj, _id);
+
+        if(CLRObject.__DB.containsKey(_id))
+        {
+            System.out.println("JAVA GC Finalize CALLBACK: " + _id);
+            CLRObject.__DB.remove(_id);
+        }
+
+        if(CLRRuntime._DBID.containsKey(_id))
+            CLRRuntime._DBID.remove(_id);
+
+        if(CLRRuntime._SDBID.containsKey(_id))
+            CLRRuntime._SDBID.remove(_id);
     }
 }

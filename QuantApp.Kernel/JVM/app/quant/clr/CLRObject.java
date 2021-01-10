@@ -77,10 +77,28 @@ public class CLRObject
     @Override
     protected void finalize() throws Throwable 
     {
-        // if(__cache)
-            // System.out.println("JAVA FINALISE(" + Pointer + "): " + this + " " + CLRRuntime.__DB.size());
         if(__DB.containsKey(Pointer))
             __DB.remove(Pointer);
+
+        // NEW TEST
+        if(DB.containsKey(Pointer))
+            DB.remove(Pointer);
+
+        if(CLRRuntime._DBID.containsKey(Pointer))
+        {
+            CLRRuntime._DBID.remove(Pointer);
+            // System.out.println("JAVA FINALISE 1(" + Pointer + "): " + this + " " + CLRRuntime._DBID.size());
+        }
+        if(CLRRuntime._SDBID.containsKey(Pointer))
+        {
+            // System.out.println("JAVA FINALISE 2(" + Pointer + "): " + this + " " + CLRRuntime._SDBID.size());
+            CLRRuntime._SDBID.remove(Pointer); 
+        }
+
+        System.out.println("JAVA FINALISE 2(" + Pointer + "): " + this + " " + CLRRuntime.__DB.size() + " <-> " + CLRRuntime.DB.size() + " " + CLRRuntime._DBID.size() + " " + CLRRuntime._SDBID.size());
+
+
+            
         CLRRuntime.nativeRemoveObject(Pointer);
         super.finalize();
     }

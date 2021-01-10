@@ -32,6 +32,125 @@ public class CLRRuntime
 
         */
         System.loadLibrary("JNIWrapper");
+
+        Thread thread = new Thread() {
+            public void run() {
+                while(true)
+                {
+
+                    try
+                    {
+                        // System.out.println("------------ JVM CLEAN THREAD");
+                        Thread.sleep(10000);
+                        for(Map.Entry<Integer, Integer> entry : CLRRuntime._DBID.entrySet()) {
+                            Integer key = entry.getKey();
+                            Integer value = entry.getValue();
+                            // System.out.println("------------ JAVA LEFT: " + CLRRuntime.DB.get(key));
+                
+                            if(CLRRuntime.DB.containsKey(key) && CLRRuntime.DB.get(key) == null)
+                            {
+                                CLRRuntime._DBID.remove(key);
+                                CLRRuntime.DB.remove(key);
+                            }
+                        }
+                
+                        for(Map.Entry<Integer, Integer> entry : CLRRuntime._SDBID.entrySet()) {
+                            Integer key = entry.getKey();
+                            Integer value = entry.getValue();
+                            // System.out.println("------------ JAVA LEFT: " + CLRRuntime.DB.get(key));
+                
+                            if(CLRRuntime.DB.containsKey(key) && CLRRuntime.DB.get(key) == null)
+                            {
+                                CLRRuntime._SDBID.remove(key);
+                                CLRRuntime.DB.remove(key);
+                            }
+                        }
+                
+                        for(Map.Entry<Integer, WeakReference> entry : CLRRuntime.DB.entrySet()) {
+                            Integer key = entry.getKey();
+                            WeakReference value = entry.getValue();
+                            // System.out.println("------------ JAVA LEFT: " + CLRRuntime.DB.get(key));
+                
+                            if(value == null)
+                                CLRRuntime.DB.remove(key);
+                        }
+                
+                        for(Map.Entry<Integer, Object> entry : CLRRuntime.__DB.entrySet()) {
+                            Integer key = entry.getKey();
+                            Object value = entry.getValue();
+                            // System.out.println("------------ JAVA LEFT: " + CLRRuntime.DB.get(key));
+                
+                            if(value == null)
+                                CLRRuntime.__DB.remove(key);
+                        }
+                    }
+                    catch(Exception e){}
+                }
+            }
+        };
+        
+        thread.start();
+    }
+
+     
+    public CLRRuntime() {
+        // Thread thread = new Thread() {
+        //     public void run() {
+        //         while(true)
+        //         {
+
+        //             try
+        //             {
+        //                 System.out.println("------------ JVM CLEAN THREAD");
+        //                 Thread.sleep(10000);
+        //                 for(Map.Entry<Integer, Integer> entry : CLRRuntime._DBID.entrySet()) {
+        //                     Integer key = entry.getKey();
+        //                     Integer value = entry.getValue();
+        //                     // System.out.println("------------ JAVA LEFT: " + CLRRuntime.DB.get(key));
+                
+        //                     if(CLRRuntime.DB.containsKey(key) && CLRRuntime.DB.get(key) == null)
+        //                     {
+        //                         CLRRuntime._DBID.remove(key);
+        //                         CLRRuntime.DB.remove(key);
+        //                     }
+        //                 }
+                
+        //                 for(Map.Entry<Integer, Integer> entry : CLRRuntime._SDBID.entrySet()) {
+        //                     Integer key = entry.getKey();
+        //                     Integer value = entry.getValue();
+        //                     // System.out.println("------------ JAVA LEFT: " + CLRRuntime.DB.get(key));
+                
+        //                     if(CLRRuntime.DB.containsKey(key) && CLRRuntime.DB.get(key) == null)
+        //                     {
+        //                         CLRRuntime._SDBID.remove(key);
+        //                         CLRRuntime.DB.remove(key);
+        //                     }
+        //                 }
+                
+        //                 for(Map.Entry<Integer, WeakReference> entry : CLRRuntime.DB.entrySet()) {
+        //                     Integer key = entry.getKey();
+        //                     WeakReference value = entry.getValue();
+        //                     // System.out.println("------------ JAVA LEFT: " + CLRRuntime.DB.get(key));
+                
+        //                     if(value == null)
+        //                         CLRRuntime.DB.remove(key);
+        //                 }
+                
+        //                 for(Map.Entry<Integer, Object> entry : CLRRuntime.__DB.entrySet()) {
+        //                     Integer key = entry.getKey();
+        //                     Object value = entry.getValue();
+        //                     // System.out.println("------------ JAVA LEFT: " + CLRRuntime.DB.get(key));
+                
+        //                     if(value == null)
+        //                         CLRRuntime.__DB.remove(key);
+        //                 }
+        //             }
+        //             catch(Exception e){}
+        //         }
+        //     }
+        // };
+        
+        // thread.start();
     }
 
     public static String GetError(Exception ex)
@@ -136,11 +255,9 @@ public class CLRRuntime
 
     
     public static WeakHashMap<Object, Integer> DBID = new WeakHashMap<Object, Integer>();
-    // public static Map<Object, Integer> DBID = new HashMap<Object, Integer>();
     public static Map<Integer, Integer> _DBID = new HashMap<Integer, Integer>();
 
     public static WeakHashMap<Object, Integer> SDBID = new WeakHashMap<Object, Integer>();
-    // public static Map<Object, Integer> SDBID = new HashMap<Object, Integer>();
     public static Map<Integer, Integer> _SDBID = new HashMap<Integer, Integer>();
     
 
@@ -226,8 +343,12 @@ public class CLRRuntime
 
         if(__DB.containsKey(id))
         {
-            // System.out.println("JAVA REMOVE ID " + id);
             __DB.remove(id);
+        }
+
+        if(CLRRuntime._DBID.containsKey(id))
+        {
+            CLRRuntime._DBID.remove(id);
         }
 
     }
@@ -437,7 +558,7 @@ public class CLRRuntime
     public static native void nativeRemoveObject(int ptr);
 
      
-    public CLRRuntime() {}
+    
 
     public static String TransformType(Type stype)
     {

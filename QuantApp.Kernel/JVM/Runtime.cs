@@ -290,12 +290,62 @@ namespace QuantApp.Kernel.JVM
             SetClassPath(classpathList);
 
 
+            // Background thread to clean null entries in the caches.
+
+            var th = new System.Threading.Thread(() => {
+                while(true)
+                {
+                    try
+                    {
+                        System.Threading.Thread.Sleep(10000);
+                        foreach(var _id in __DB.Keys.ToArray())
+                        {
+                            object ob;
+                            if(__DB.TryGetValue(_id, out ob))
+                            {
+                                if(ob == null)
+                                {
+                                    __DB.TryRemove(_id, out ob);
+
+                                    if(MethodDB.ContainsKey(_id)) //NO
+                                    {
+                                        ConcurrentDictionary<string,MethodInfo> _o;
+                                        MethodDB.TryRemove(_id, out _o);
+                                    }
+                                }
+                            }
+                        }
+
+                        foreach(var _id in DB.Keys.ToArray())
+                        {
+                            WeakReference ob;
+                            if(DB.TryGetValue(_id, out ob))
+                            {
+                                if(ob == null)
+                                {
+                                    DB.TryRemove(_id, out ob);
+
+                                    if(MethodDB.ContainsKey(_id)) //NO
+                                    {
+                                        ConcurrentDictionary<string,MethodInfo> _o;
+                                        MethodDB.TryRemove(_id, out _o);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch{}
+                }
+            });
+            th.Start();
+
+
             return nRes;        
         }
 
         // internal static ConcurrentDictionary<object, int> DBID = new ConcurrentDictionary<object, int>();
         internal static ConditionalWeakTable<object, object> DBID = new ConditionalWeakTable<object, object>();
-        internal static ConcurrentDictionary<int, int> _DBID = new ConcurrentDictionary<int, int>();
+        // internal static ConcurrentDictionary<int, int> _DBID = new ConcurrentDictionary<int, int>();
         private readonly static object objLock_GetID = new object();
         public static unsafe int GetID(object obj, bool cache)
         {
@@ -3222,6 +3272,9 @@ namespace QuantApp.Kernel.JVM
                     ConcurrentDictionary<string,MethodInfo> _o;
                     MethodDB.TryRemove(id, out _o);
                 }
+
+                
+
 
                 // if(_DBID.ContainsKey(id)) //TEST
                 // {
