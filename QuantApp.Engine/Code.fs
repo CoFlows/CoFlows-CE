@@ -1053,7 +1053,6 @@ module Code =
 
                                                 elif (func_str.StartsWith("<") && func_str.EndsWith(">") && cls <> "str") then
                                                     if func_str.Contains(" object at ") then
-                                                        
                                                         try
                                                             // Need to transform PyObject to dict incase the object leaves the Gil
                                                             func 
@@ -2364,9 +2363,13 @@ module Code =
                                     entry.Exe, [||])
                                 let fpkg = { fpkg with ID = fpkg.ID.Replace("$WID$", pkg_id); WorkflowID = fpkg.WorkflowID.Replace("$WID$", pkg_id) }
                                 let f, result = F.CreatePKG(fpkg, code)
-                                try
-                                    async { { Function = "Main"; Data = "Initial Execution" } |> Newtonsoft.Json.JsonConvert.SerializeObject |> f.Body |> ignore } |> Async.Start
-                                with | _ -> 0 |> ignore
+                                
+                                async {  
+                                    try
+                                        { Function = "Main"; Data = "Initial Execution" } |> Newtonsoft.Json.JsonConvert.SerializeObject |> f.Body |> ignore 
+                                    with | _ -> 0 |> ignore
+                                } |> Async.Start
+                                
                                 f, result
                                 )
                             |> List.map(fun (f, _)  -> f.ID)
