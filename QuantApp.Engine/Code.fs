@@ -2364,7 +2364,9 @@ module Code =
                                     entry.Exe, [||])
                                 let fpkg = { fpkg with ID = fpkg.ID.Replace("$WID$", pkg_id); WorkflowID = fpkg.WorkflowID.Replace("$WID$", pkg_id) }
                                 let f, result = F.CreatePKG(fpkg, code)
-                                async { { Function = "Main"; Data = "Initial Execution" } |> Newtonsoft.Json.JsonConvert.SerializeObject |> f.Body |> ignore } |> Async.Start
+                                try
+                                    async { { Function = "Main"; Data = "Initial Execution" } |> Newtonsoft.Json.JsonConvert.SerializeObject |> f.Body |> ignore } |> Async.Start
+                                with | _ -> 0 |> ignore
                                 f, result
                                 )
                             |> List.map(fun (f, _)  -> f.ID)
@@ -2886,7 +2888,9 @@ module Code =
                         >>
                         fun entry -> entry.Substring(entry.IndexOf("/Base") + 1))
                     |> Seq.filter(fun entry -> entry.EndsWith(".pyc") |> not)    
-                    |> Seq.filter(fun entry -> entry.EndsWith(".DS_Store") |> not)    
+                    |> Seq.filter(fun entry -> entry.EndsWith(".DS_Store") |> not)
+                    |> Seq.filter(fun entry -> entry.ToLower().Contains("/bin/") |> not)
+                    |> Seq.filter(fun entry -> entry.ToLower().Contains("/obj/") |> not)
                     |> Seq.filter(fun entry -> baseNames |> Seq.contains(entry) |> not)
                     |> Seq.map(fun entry -> 
                         let id = if ".py" |> entry.EndsWith then entry else entry.Substring(entry.IndexOf("/Base") + "/Base".Length + 1)
