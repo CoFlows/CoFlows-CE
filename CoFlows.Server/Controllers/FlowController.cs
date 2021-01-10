@@ -132,7 +132,6 @@ namespace CoFlows.Server.Controllers
         /// <response code="400">Workflow not found</response>
         [HttpPost]
         public async Task<IActionResult> CreateWorkflow([FromBody] PKG data)
-        // public async Task<IActionResult> CreatePKGFromJSON([FromBody] PKG data)
         {
             string userId = this.User.QID();
             if (userId == null)
@@ -243,7 +242,6 @@ namespace CoFlows.Server.Controllers
         /// <response code="400">Workflow not found</response>
         [HttpPost]
         public async Task<IActionResult> CompileWorkflow([FromBody] PKG data)
-        // public async Task<IActionResult> CompileFromJSON([FromBody] PKG data)
         {
             string userId = this.User.QID();
             if (userId == null)
