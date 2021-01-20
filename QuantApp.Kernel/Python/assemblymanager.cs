@@ -207,8 +207,8 @@ namespace Python.Runtime
             catch (Exception e)
             {
                 
-                if (!(e is System.IO.FileNotFoundException))
-                    Console.WriteLine(e);
+                // if (!(e is System.IO.FileNotFoundException))
+                //     Console.WriteLine(e);
                 //{
                 //    throw;
                 //}
@@ -301,9 +301,12 @@ namespace Python.Runtime
             var s = "";
             Assembly lastAssembly = null;
             HashSet<Assembly> assembliesSet = null;
+
             for (var i = 0; i < names.Length; i++)
             {
                 s = i == 0 ? names[0] : s + "." + names[i];
+
+
 
                 if (!probed.ContainsKey(s))
                 {
@@ -313,6 +316,7 @@ namespace Python.Runtime
                     }
                     Assembly a = FindLoadedAssembly(s);
 
+                    
                     if (a == null)
                     {
                         a = LoadAssemblyPath(s);
@@ -326,7 +330,7 @@ namespace Python.Runtime
                         loaded = true;
                         lastAssembly = a;
                     }
-                    
+
                     probed[s] = 1;
                 }
             }
@@ -358,6 +362,7 @@ namespace Python.Runtime
             foreach (Type t in GetTypes(assembly))
             {
                 string ns = t.Namespace ?? "";
+                
                 if (!namespaces.ContainsKey(ns))
                 {
                     string[] names = ns.Split('.');
