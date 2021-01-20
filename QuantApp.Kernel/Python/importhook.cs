@@ -186,6 +186,7 @@ namespace Python.Runtime
             }
 
             string mod_name = Runtime.GetManagedString(py_mod_name);
+
             // Check these BEFORE the built-in import runs; may as well
             // do the Incref()ed return here, since we've already found
             // the module.
@@ -217,6 +218,7 @@ namespace Python.Runtime
                 return clr_module;
             }
             string realname = mod_name;
+
             string clr_prefix = null;
             if (mod_name.StartsWith("CLR."))
             {
@@ -225,7 +227,7 @@ namespace Python.Runtime
                 string msg = $"Importing from the CLR.* namespace is deprecated. Please import '{realname}' directly.";
                 Exceptions.deprecation(msg);
             }
-            else
+            else if(false)
             {
                 // 2010-08-15: Always seemed smart to let python try first...
                 // This shaves off a few tenths of a second on test_module.py
@@ -234,26 +236,35 @@ namespace Python.Runtime
                 // Turns out that the AssemblyManager.ResolveHandler() checks to see if any
                 // Assembly's FullName.ToLower().StartsWith(name.ToLower()), which makes very
                 // little sense to me.
+                Console.WriteLine("------- IMPORT 2.1: " + realname);
                 IntPtr res = Runtime.PyObject_Call(py_import, args, kw);
+                Console.WriteLine("------- IMPORT 2.2: " + realname);
                 if (res != IntPtr.Zero)
                 {
+                    Console.WriteLine("------- IMPORT 2.2.1: " + realname);
                     // There was no error.
                     if (fromlist && IsLoadAll(fromList))
                     {
+                        
                         var mod = ManagedType.GetManagedObject(res) as ModuleObject;
+                        Console.WriteLine("------- IMPORT 2.2.2: " + realname + " --> " + mod);
                         mod?.LoadNames();
                     }
+
+                    Console.WriteLine("------- IMPORT 2.2.3: " + realname + " -> " + fromlist + " -> " + IsLoadAll(fromList));
                     return res;
                 }
                 // There was an error
                 if (!Exceptions.ExceptionMatches(Exceptions.ImportError))
                 {
+                    Console.WriteLine("------- IMPORT 2.3: " + realname);
                     // and it was NOT an ImportError; bail out here.
                     return IntPtr.Zero;
                 }
 
                 if (mod_name == string.Empty)
                 {
+                    Console.WriteLine("------- IMPORT 2.4: " + realname);
                     // Most likely a missing relative import.
                     // For example site-packages\bs4\builder\__init__.py uses it to check if a package exists:
                     //     from . import _html5lib
@@ -265,7 +276,7 @@ namespace Python.Runtime
             }
 
             string[] names = realname.Contains(".") ? realname.Split('.') : new string[]{ realname };
-    
+
             // Now we need to decide if the name refers to a CLR module,
             // and may have to do an implicit load (for b/w compatibility)
             // using the AssemblyManager. The assembly manager tries
