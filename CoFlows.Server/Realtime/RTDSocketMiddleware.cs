@@ -533,7 +533,7 @@ namespace CoFlows.Server.Realtime
 
             lock (locks[connection])
             {
-                ArraySegment<byte> buffer = buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(message));
+                ArraySegment<byte> buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(message));
                 connection.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
             }
         }

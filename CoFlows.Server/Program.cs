@@ -299,7 +299,7 @@ namespace CoFlows.Server
                     Console.WriteLine("config from file ");
 
                     var pkg = Code.ProcessPackageFile(workflow_name, true);
-                    Code.ProcessPackageJSON(pkg);
+                    Code.ProcessPackageJSON(pkg, false);
                     
                     var files = M.Base(pkg.ID + "--Files")[x => true];
                     foreach(var file in files)
@@ -469,7 +469,7 @@ namespace CoFlows.Server
 
 
                 var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
-                Code.ProcessPackageJSON(pkg);
+                Code.ProcessPackageJSON(pkg, false);
 
                 var _g = Group.FindGroup(pkg.ID);
                 if(_g == null)
@@ -1164,7 +1164,7 @@ namespace CoFlows.Server
                             Code.InstallJars(wsp.Jars);
 
                             var pkg = Code.ProcessPackageWorkflow(wsp);
-                            Code.ProcessPackageJSON(pkg);
+                            Code.ProcessPackageJSON(pkg, false);
                             
                             var bytes = QuantApp.Engine.Code.ProcessPackageToZIP(pkg);
                             var archive = new ZipArchive(new MemoryStream(bytes));

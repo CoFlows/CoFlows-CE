@@ -22,7 +22,7 @@ namespace CoFlows.Server
 {
     public class MFactory : IMFactory
     {
-        public M Find(string id, Type type)
+        public M Find(string id, Type type, M m)
         {
             return Connection.Client.GetM(id, type);
         }

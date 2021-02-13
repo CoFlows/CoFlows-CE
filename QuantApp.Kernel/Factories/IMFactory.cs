@@ -17,7 +17,7 @@ namespace QuantApp.Kernel.Factories
 {
     public interface IMFactory
     {
-        M Find(string id, Type type);
+        M Find(string id, Type type, M m = null);
 
         void Save(M m);
 

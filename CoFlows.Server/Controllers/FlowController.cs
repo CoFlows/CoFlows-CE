@@ -163,7 +163,7 @@ namespace CoFlows.Server.Controllers
 
             try
             {
-                var res = Code.ProcessPackageJSON(data);
+                var res = Code.ProcessPackageJSON(data, true);
 
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
 
@@ -513,6 +513,12 @@ namespace CoFlows.Server.Controllers
             
             if(this.Request.Headers.ContainsKey("_cokey"))
                 _cokey = this.Request.Headers["_cokey"];
+            
+            else if(this.Request.Headers.ContainsKey("x-api-key"))
+                _cokey = this.Request.Headers["x-api-key"];
+
+            else if(this.Request.Headers.ContainsKey("X-API-KEY"))
+                _cokey = this.Request.Headers["X-API-KEY"];
             
             if(!string.IsNullOrEmpty(_cokey))
             {
@@ -892,6 +898,12 @@ namespace CoFlows.Server.Controllers
 
             if(this.Request.Headers.ContainsKey("_cokey"))
                 _cokey = this.Request.Headers["_cokey"];
+
+            else if(this.Request.Headers.ContainsKey("x-api-key"))
+                _cokey = this.Request.Headers["x-api-key"];
+
+            else if(this.Request.Headers.ContainsKey("X-API-KEY"))
+                _cokey = this.Request.Headers["X-API-KEY"];
             
             string userId = this.User.QID();
             if(!string.IsNullOrEmpty(_cokey))
@@ -1012,6 +1024,12 @@ namespace CoFlows.Server.Controllers
 
             if(this.Request.Headers.ContainsKey("_cokey"))
                 _cokey = this.Request.Headers["_cokey"];
+
+            else if(this.Request.Headers.ContainsKey("x-api-key"))
+                _cokey = this.Request.Headers["x-api-key"];
+
+            else if(this.Request.Headers.ContainsKey("X-API-KEY"))
+                _cokey = this.Request.Headers["X-API-KEY"];
             
             string userId = this.User.QID();
             if(!string.IsNullOrEmpty(_cokey))
@@ -1129,6 +1147,13 @@ namespace CoFlows.Server.Controllers
 
             if(this.Request.Headers.ContainsKey("_cokey"))
                 _cokey = this.Request.Headers["_cokey"];
+
+            else if(this.Request.Headers.ContainsKey("x-api-key"))
+                _cokey = this.Request.Headers["x-api-key"];
+
+            else if(this.Request.Headers.ContainsKey("X-API-KEY"))
+                _cokey = this.Request.Headers["X-API-KEY"];
+                
 
             if(!string.IsNullOrEmpty(_cokey))
             {
@@ -1318,7 +1343,7 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User.ContextUser = quser.ToUserData();
 
-            var res = Code.ProcessPackageJSON(data);
+            var res = Code.ProcessPackageJSON(data, false);
 
             QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
             Console.WriteLine("GitHub push done local");

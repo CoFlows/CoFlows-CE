@@ -306,12 +306,21 @@ module Code =
             using (Py.GIL()) (fun _ -> 
 
                 setPythonOut |> PythonEngine.RunSimpleString
+                let _name = 
+                    if packageName.IndexOf("=") > -1 then 
+                        packageName.Substring(0, packageName.IndexOf("=")) 
+                    elif packageName.IndexOf("[") > -1 then 
+                        let _packageName = packageName.Replace("[",".") 
+                        _packageName.Substring(0, _packageName.IndexOf("]")) 
+                    else 
+                        packageName.Replace("-",".")
+
                 let code = 
                     "import subprocess \n" +
                     "try:\n" +
-                    "   import " + (if packageName.IndexOf("=") > -1 then packageName.Substring(0, packageName.IndexOf("=")) else packageName) + "\n" +
-                    "   print('Pip package: " + (if packageName.IndexOf("=") > -1 then packageName.Substring(0, packageName.IndexOf("=")) else packageName) + " exists.')\n" +
-                    "except: \n" +
+                    "   import " + _name + "\n" +
+                    "   print('Pip package: " + _name + " exists.')\n" +
+                    "except BaseException: \n" +
                     "   print('Installing Pip package: " + packageName + "...')\n" +
                     "   subprocess.check_call(['pip', 'install', '--target=/app/mnt/pip/', '" + packageName + "'])"
                 code |> PythonEngine.Exec
@@ -2301,8 +2310,7 @@ module Code =
         |> Seq.fold(fun (acc : StringBuilder) line -> acc.AppendLine(line)) (StringBuilder())
         |> (fun x -> x.ToString())
 
-    let ProcessPackageJSON (pkg_content : PKG) =
-        
+    let ProcessPackageJSON (pkg_content : PKG, manageFiles : bool) =
         let build = pkg_content |> BuildRegisterPackage
         if build |> String.IsNullOrEmpty then
             let ws =
@@ -2311,41 +2319,46 @@ module Code =
                 let filesCache = pkg_content.Files |> Seq.toList
                 let binsCache = pkg_content.Bins |> Seq.toList
 
-                let files_m = pkg_id + "--Files" |> M.Base
-                files_m.[fun _ -> true] 
-                |> Seq.iter(
-                    fun fileEntry ->
-                        let name = M.V<string>(fileEntry, "Name") 
-                        
-                        filesCache
-                        |> List.iter(
-                            fun pkgFile ->
-                                if pkgFile.Name = name && pkgFile.Content <> "__content__in__m__" then
-                                    fileEntry |> files_m.Remove
-                        )
-                        
-                        // file |> files_m.Remove
-                    )
-                files_m.Save()
 
-                let bins_m = pkg_id + "--Bins" |> M.Base
-                bins_m.[fun _ -> true] 
-                |> Seq.iter(
-                    fun fileEntry ->
-                        let name = M.V<string>(fileEntry, "Name") 
-                        
-                        binsCache 
-                        |> List.iter(
-                            fun pkgFile ->
-                                if pkgFile.Name = name && pkgFile.Content <> "__content__in__m__" then
-                                    fileEntry |> bins_m.Remove
-                        )
-                        
-                        // file |> files_m.Remove
-                    )
-                // |> Seq.iter(bins_m.Remove)
-                bins_m.Save()
+                if manageFiles then
 
+                    let files_m = pkg_id + "--Files" |> M.Base
+                    files_m.[fun _ -> true] 
+                    |> Seq.iter(
+                        fun fileEntry ->
+                            let name = M.V<string>(fileEntry, "Name") 
+                            
+                            filesCache
+                            |> List.iter(
+                                fun pkgFile ->
+                                    if pkgFile.Name = name && pkgFile.Content <> "__content__in__m__" then
+                                        fileEntry |> files_m.Remove
+                            )
+                            
+                            // file |> files_m.Remove
+                        )
+                    files_m.Save()
+
+                    
+                    let bins_m = pkg_id + "--Bins" |> M.Base
+                    bins_m.[fun _ -> true] 
+                    |> Seq.iter(
+                        fun fileEntry ->
+                            let name = M.V<string>(fileEntry, "Name") 
+                            
+                            binsCache 
+                            |> List.iter(
+                                fun pkgFile ->
+                                    if pkgFile.Name = name && pkgFile.Content <> "__content__in__m__" then
+                                        fileEntry |> bins_m.Remove
+                            )
+                            
+                            // file |> files_m.Remove
+                        )
+                    // |> Seq.iter(bins_m.Remove)
+                    bins_m.Save()
+
+            
                 let ws = 
                     {
                         ID = pkg_id
@@ -2385,17 +2398,20 @@ module Code =
                         Bins = 
                             binsCache
                             |> List.map(fun filePkg ->
-                                if filePkg.Content = "__content__in__m__" |> not then
-                                    let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
-                                    if bins_m_res.Count > 0 then
-                                        let item = bins_m_res.[0] :?> FilePackage
-                                        
-                                        bins_m.Exchange(
-                                            item, 
-                                            filePkg)
-                                    else
-                                        bins_m.Add(
-                                            filePkg) |> ignore
+
+                                if manageFiles then
+                                    let bins_m = pkg_id + "--Bins" |> M.Base
+                                    if filePkg.Content = "__content__in__m__" |> not then
+                                        let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                                        if bins_m_res.Count > 0 then
+                                            let item = bins_m_res.[0] :?> FilePackage
+                                            
+                                            bins_m.Exchange(
+                                                item, 
+                                                filePkg)
+                                        else
+                                            bins_m.Add(
+                                                filePkg) |> ignore
 
                                 {    
                                     Name = filePkg.Name
@@ -2405,17 +2421,19 @@ module Code =
                         Files = 
                             filesCache
                             |> List.map(fun filePkg ->
-                                if filePkg.Content = "__content__in__m__" |> not then
-                                    let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
-                                    if files_m_res.Count > 0 then
-                                        let item = files_m_res.[0] :?> FilePackage
-                                        
-                                        files_m.Exchange(
-                                            item, 
-                                            filePkg)
-                                    else
-                                        files_m.Add(
-                                            filePkg) |> ignore
+                                if manageFiles then
+                                    let files_m = pkg_id + "--Files" |> M.Base
+                                    if filePkg.Content = "__content__in__m__" |> not then
+                                        let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                                        if files_m_res.Count > 0 then
+                                            let item = files_m_res.[0] :?> FilePackage
+                                            
+                                            files_m.Exchange(
+                                                item, 
+                                                filePkg)
+                                        else
+                                            files_m.Add(
+                                                filePkg) |> ignore
 
                                 {    
                                     Name = filePkg.Name
@@ -2429,8 +2447,12 @@ module Code =
                         Container = pkg_content.Container
                     }
 
-                files_m.Save()
-                bins_m.Save()
+
+                if manageFiles then
+                    let files_m = pkg_id + "--Files" |> M.Base
+                    files_m.Save()
+                    let bins_m = pkg_id + "--Bins" |> M.Base
+                    bins_m.Save()
 
                 let work_books = pkg_id + "--Queries" |> M.Base
                 work_books.[fun _ -> true] |> Seq.iter(work_books.Remove)
@@ -2460,13 +2482,14 @@ module Code =
                                 WorkflowID = pkg_id
                             }) |> ignore
                 )
+
                 work_books.Save()
                 ws
 
             let wsp = ws.ID |> M.Base
             wsp.[fun _ -> true] |> Seq.iter(wsp.Remove)
             ws |> wsp.Add |> ignore
-
+            
             wsp.Save()
 
         else
@@ -2474,6 +2497,91 @@ module Code =
             build |> Console.WriteLine
 
         build
+
+    let ProcessFiles (pkg_content : PKG) =
+        
+        let pkg_id = pkg_content.ID
+
+        let filesCache = pkg_content.Files |> Seq.toList
+        let binsCache = pkg_content.Bins |> Seq.toList
+
+
+        let files_m = pkg_id + "--Files" |> M.Base
+        files_m.[fun _ -> true] 
+        |> Seq.iter(
+            fun fileEntry ->
+                let name = M.V<string>(fileEntry, "Name") 
+                
+                filesCache
+                |> List.iter(
+                    fun pkgFile ->
+                        if pkgFile.Name = name && pkgFile.Content <> "__content__in__m__" then
+                            fileEntry |> files_m.Remove
+                )
+                
+                // file |> files_m.Remove
+            )
+        files_m.Save()
+
+        
+        let bins_m = pkg_id + "--Bins" |> M.Base
+        bins_m.[fun _ -> true] 
+        |> Seq.iter(
+            fun fileEntry ->
+                let name = M.V<string>(fileEntry, "Name") 
+                
+                binsCache 
+                |> List.iter(
+                    fun pkgFile ->
+                        if pkgFile.Name = name && pkgFile.Content <> "__content__in__m__" then
+                            fileEntry |> bins_m.Remove
+                )
+                
+                // file |> files_m.Remove
+            )
+        // |> Seq.iter(bins_m.Remove)
+        bins_m.Save()
+
+        
+        binsCache
+        |> List.iter(fun filePkg ->
+            let bins_m = pkg_id + "--Bins" |> M.Base
+            if filePkg.Content = "__content__in__m__" |> not then
+                let bins_m_res = bins_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                if bins_m_res.Count > 0 then
+                    let item = bins_m_res.[0] :?> FilePackage
+                    
+                    bins_m.Exchange(
+                        item, 
+                        filePkg)
+                else
+                    bins_m.Add(filePkg) |> ignore
+            )
+        
+    
+        filesCache
+        |> List.iter(fun filePkg ->
+            
+            let files_m = pkg_id + "--Files" |> M.Base
+            if filePkg.Content = "__content__in__m__" |> not then
+                let files_m_res = files_m.[fun x -> M.V<string>(x, "Name") = filePkg.Name]
+                if files_m_res.Count > 0 then
+                    let item = files_m_res.[0] :?> FilePackage
+                    
+                    files_m.Exchange(
+                        item, 
+                        filePkg)
+                else
+                    files_m.Add(
+                        filePkg) |> ignore
+            )
+
+        
+        let files_m = pkg_id + "--Files" |> M.Base
+        files_m.Save()
+        let bins_m = pkg_id + "--Bins" |> M.Base
+        bins_m.Save()
+        
 
     let ProcessPackageWorkflow (wsp : Workflow) : PKG =
         

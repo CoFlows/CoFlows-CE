@@ -59,6 +59,7 @@ namespace QuantApp.Kernel
         public static ConcurrentDictionary<string, string> _compiledAssemblyNames = new ConcurrentDictionary<string, string>();
 
         public Type type = null;
+        public DateTime Timestamp = DateTime.MinValue;
         public static string CRUDClass = "Kernel.M";
 
         public static QuantApp.Kernel.Factories.IMFactory Factory = null;
@@ -76,7 +77,7 @@ namespace QuantApp.Kernel
             if(group == null)
                 group = Group.FindGroup(ID);
             
-            if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+            if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
             {
                 var permission = group.PermissionContext();
                 if(permission != AccessType.Write)
@@ -93,7 +94,7 @@ namespace QuantApp.Kernel
             if(group == null)
                 group = Group.FindGroup(ID);
             
-            if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+            if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
             {
                 var permission = group.PermissionContext();
                 if(permission != AccessType.Write)
@@ -111,7 +112,7 @@ namespace QuantApp.Kernel
             if(group == null)
                 group = Group.FindGroup(ID);
             
-            if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+            if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
             {
                 var permission = group.PermissionContext();
                 if(permission != AccessType.Write)
@@ -125,10 +126,47 @@ namespace QuantApp.Kernel
 
         public readonly static object objLock = new object();
 
+        private static bool started = false;
+        public bool loaded = false;
+
         public static M Base(string id, Type type = null)
         {
             lock (objLock)
             {
+                if(!started)
+                {
+                    var cleaner = new System.Threading.Thread(() => {
+                    while(true){
+
+                        try
+                        {
+                            
+                        
+                            var t = DateTime.Now;
+                            // Console.WriteLine("------ M Clearning: " + t);
+                            foreach(var key in instance.Keys.ToArray())
+                            {
+                                var m = instance[key];
+
+                                lock(m.editLock)
+                                {
+                                    if ((t - m.Timestamp).TotalSeconds >= 5 && m.changes.Count == 0 && m.loaded)
+                                        m.ClearMemory();                                    
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            Console.WriteLine(e.StackTrace);
+                        }
+
+                        System.Threading.Thread.Sleep(1000 * 10);
+                        
+                    }});
+                    cleaner.Start();
+                    started = true;
+                }
                 if (instance == null)
                     instance = new ConcurrentDictionary<string, M>();
 
@@ -144,6 +182,10 @@ namespace QuantApp.Kernel
                 instance[id].ID = id;
                 instance[id].type = type;
 
+                instance[id].Timestamp = DateTime.Now;
+
+                // Console.WriteLine("--- M GET: " + id + " " + instance[id].Timestamp + " " + instance[id].GetHashCode());
+
                 return instance[id];
             }
         }
@@ -158,6 +200,7 @@ namespace QuantApp.Kernel
         {
             lock (saveLock)
             {
+                this.Timestamp = DateTime.Now;
                 if (Factory != null)
                     Factory.Save(this);
 
@@ -165,19 +208,43 @@ namespace QuantApp.Kernel
             }
         }
 
-        public void Delete()
+        public void ClearMemory()
+        {
+            lock (editLock)
+            {
+                this.loaded = false;
+                this.singularity = new ConcurrentDictionary<string, object>();
+                this.singularity_type = new ConcurrentDictionary<string, string>();
+                this.singularity_assembly = new ConcurrentDictionary<string, string>();
+                this.singularity_inverse = new ConcurrentDictionary<object, string>();
+            }
+        }
+
+        public void Delete(bool onlyMemory = false)
         {
             M outM = null;
             instance.TryRemove(this.ID, out outM);
 
-            if (Factory != null)
+            if (!onlyMemory && Factory != null)
                 Factory.Remove(this);
+
+            outM = null;
         }
 
         private ConcurrentDictionary<string, object> singularity = new ConcurrentDictionary<string, object>();
         private ConcurrentDictionary<string, string> singularity_type = new ConcurrentDictionary<string, string>();
         private ConcurrentDictionary<string, string> singularity_assembly = new ConcurrentDictionary<string, string>();
         private ConcurrentDictionary<object, string> singularity_inverse = new ConcurrentDictionary<object, string>();
+
+        ~M() 
+        {
+            Console.WriteLine("==== KILL: " + this.ID + " " + DateTime.Now);
+            this.singularity = null;
+            this.singularity_type = null;
+            this.singularity_assembly = null;
+            this.singularity_inverse = null;
+            this.loaded = false;
+        }
 
 
         private List<EntryChange> changes = new List<EntryChange>();
@@ -196,6 +263,12 @@ namespace QuantApp.Kernel
         {
             lock (editLock)
             {
+                this.Timestamp = DateTime.Now;
+                if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                // Console.WriteLine("--- M ADD: " + this.ID + " " + this.Timestamp + " " + this.GetHashCode());
+
                 if (data == null)
                 {
                     Console.WriteLine("M not null");
@@ -205,7 +278,7 @@ namespace QuantApp.Kernel
                 if(group == null)
                     group = Group.FindGroup(ID);
                 
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                 {
                     var permission = group.PermissionContext();
                     if(permission != AccessType.Write)
@@ -284,6 +357,11 @@ namespace QuantApp.Kernel
         {
             lock (editLock)
             {
+                if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
+
                 if (key == null || data == null)
                 {
                     Console.WriteLine("M not added id: " + key + " " + data);
@@ -293,7 +371,7 @@ namespace QuantApp.Kernel
                 if(group == null)
                     group = Group.FindGroup(ID);
                 
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                 {
                     var permission = group.PermissionContext();
                     if(permission != AccessType.Write)
@@ -344,10 +422,15 @@ namespace QuantApp.Kernel
         }
 
 
-        public void AddInternal(string key, object data, string type, string assembly)
+        internal void AddInternal(string key, object data, string type, string assembly)
         {
             lock (editLock)
             {
+                // if(!this.loaded && Factory != null)
+                //     Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
+
                 if (key == null || data == null)
                 {
                     Console.WriteLine("M not added internal: " + key + " " + data);
@@ -357,10 +440,10 @@ namespace QuantApp.Kernel
                 if(group == null)
                     group = Group.FindGroup(ID);
                 
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                 {
                     var permission = group.PermissionContext();
-                    if(permission != AccessType.Write)
+                    if(permission == AccessType.Denied)
                         return;
                 }
 
@@ -388,13 +471,19 @@ namespace QuantApp.Kernel
         {
             lock (editLock)
             {
+                if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
+                // Console.WriteLine("--- M EXC: " + this.ID + " " + this.Timestamp);
+
                 var invKeyOld = dataOld;
                 if (singularity_inverse.ContainsKey(invKeyOld))
                 {
                     if(group == null)
                     group = Group.FindGroup(ID);
                 
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                     {
                         var permission = group.PermissionContext();
                         if(permission != AccessType.Write)
@@ -467,13 +556,17 @@ namespace QuantApp.Kernel
         {
             lock (editLock)
             {
+                if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
 
                 if (singularity.ContainsKey(key))
                 {
                     if(group == null)
                     group = Group.FindGroup(ID);
                 
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                     {
                         var permission = group.PermissionContext();
                         if(permission != AccessType.Write)
@@ -552,13 +645,18 @@ namespace QuantApp.Kernel
         {
             lock (editLock)
             {
+                if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
+
                 var invKey = data;
                 if (singularity_inverse.ContainsKey(invKey))
                 {
                     if(group == null)
                     group = Group.FindGroup(ID);
                 
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                     {
                         var permission = group.PermissionContext();
                         if(permission != AccessType.Write)
@@ -611,12 +709,17 @@ namespace QuantApp.Kernel
         {
             lock (editLock)
             {
+                if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
+
                 if (singularity.ContainsKey(key))
                 {
                     if(group == null)
                     group = Group.FindGroup(ID);
                 
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                     {
                         var permission = group.PermissionContext();
                         if(permission != AccessType.Write)
@@ -675,10 +778,15 @@ namespace QuantApp.Kernel
         {
             lock (processLock)
             {
+                if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
+
                 if(group == null)
                     group = Group.FindGroup(ID);
                 
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                 {
                     var permission = group.PermissionContext();
                     if(permission != AccessType.Write)
@@ -731,10 +839,15 @@ namespace QuantApp.Kernel
         {
             lock(editLock)
             {
+                if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
+
                 if(group == null)
                     group = Group.FindGroup(ID);
                 
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                 {
                     var permission = group.PermissionContext();
                     if(permission == AccessType.Denied)
@@ -749,12 +862,18 @@ namespace QuantApp.Kernel
         {
             lock(editLock)
             {
+                if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
+
                 if(group == null)
                     group = Group.FindGroup(ID);
 
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                 {
                     var permission = group.PermissionContext();
+
                     if(permission == AccessType.Denied)
                         return new List<RawEntry>();
                 }
@@ -792,13 +911,18 @@ namespace QuantApp.Kernel
         {
             lock(editLock)
             {
+                // if(!this.loaded && Factory != null)
+                //     Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
+
                 if(rawEntries == null)
                     return;
 
                 if(group == null)
                     group = Group.FindGroup(ID);
                 
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                 {
                     var permission = group.PermissionContext();
                     if(permission == AccessType.Denied)
@@ -838,6 +962,8 @@ namespace QuantApp.Kernel
                         this.AddInternal(entryID, rawEntry.Entry, typeName, assemblyName);
                     }
                 }
+
+                this.loaded = true;
             }
         }
 
@@ -852,16 +978,20 @@ namespace QuantApp.Kernel
             {
                 lock(editLock)
                 {
+                    if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                    this.Timestamp = DateTime.Now;
+
                     if(group == null)
                         group = Group.FindGroup(ID);
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                    
+                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                     {
                         var permission = group.PermissionContext();
                         if(permission == AccessType.Denied)
                             return new List<object>();
                     }
-
-
 
                     List<object> res = singularity.Values.Where(predicate).Select(x => x).ToList();
                     return res;
@@ -877,10 +1007,15 @@ namespace QuantApp.Kernel
         {
             lock(editLock)
             {
+                if(!this.loaded && Factory != null)
+                    Factory.Find(this.ID, this.type, this);
+
+                this.Timestamp = DateTime.Now;
+
                 if(group == null)
                     group = Group.FindGroup(ID);
                 
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                 {
                     var permission = group.PermissionContext();
                     if(permission == AccessType.Denied)
@@ -902,10 +1037,12 @@ namespace QuantApp.Kernel
             {
                 lock(editLock)
                 {
+                    this.Timestamp = DateTime.Now;
+
                     if(group == null)
                         group = Group.FindGroup(ID);
                     
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Count > 0)
+                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
                     {
                         var permission = group.PermissionContext();
                         if(permission == AccessType.Denied)

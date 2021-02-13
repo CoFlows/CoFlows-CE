@@ -612,7 +612,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                     catch (Exception e)
                     {
                         NpgsqlConnection.ClearAllPools();
-                        Console.WriteLine(e);
+                        // Console.WriteLine(e);
                     }
                 }
             }
@@ -661,8 +661,8 @@ namespace QuantApp.Kernel.Adapters.SQL
                             }
                             catch(Exception e)
                             {
-                                Console.WriteLine("ERROR: " + _com);
-                                Console.WriteLine(e);
+                                // Console.WriteLine("ERROR: " + _com);
+                                // Console.WriteLine(e);
                                 // throw e;
                             }
                         }

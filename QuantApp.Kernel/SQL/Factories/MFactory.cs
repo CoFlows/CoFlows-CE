@@ -51,7 +51,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
         public readonly static object objLock = new object();
         private Dictionary<int, DataTable> _mainTables = new Dictionary<int, DataTable>();
 
-        public M Find(string id, Type type)
+        public M Find(string id, Type type, M m = null)
         {
             lock (objLock)
             {
@@ -67,7 +67,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                 if (rows.Count == 0)
                     return null;
 
-                M m = new M();
+                m = m == null ? new M() : m;
 
                 var dict = new Dictionary<string, Type>();
                 foreach (DataRow r in rows)
@@ -121,6 +121,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                         m.AddInternal(entryID, entryString.Replace((char)27, '"').Replace((char)26, '\''), typeName, assemblyName);
                     }
                 }
+                m.loaded = true;
                 return m;
             }
         }
