@@ -170,8 +170,8 @@ namespace CoFlows.Server.Controllers
                 }
 
                 var sessionKey = System.Guid.NewGuid().ToString();
-                sessionKeys.TryAdd(sessionKey, user.Secret);
-                revSessionKeys.TryAdd(user.Secret, sessionKey);
+                sessionKeys[sessionKey] = user.Secret;
+                revSessionKeys[user.Secret] = sessionKey;
                 Response.Cookies.Append("coflows", sessionKey, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });
 
                 return Ok(new

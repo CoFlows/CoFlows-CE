@@ -686,7 +686,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                     dbName = f.ToLower().Replace("database=", "");
             
             var connString = string.Join(";", new List<string>(cons).Where(x => !x.ToLower().StartsWith("database="))) + ";Database=postgres";
-
+            
             Console.WriteLine("Postgres database: " + dbName);
 
             try
@@ -698,15 +698,49 @@ namespace QuantApp.Kernel.Adapters.SQL
                 using (var reader = cmd.ExecuteReader())
                 {
                     if(reader.Read())
+                    {
+                        Console.WriteLine("Database exists!");
                         return;
+                    }
                 }
                 
                 bool addData = true;
-                Console.WriteLine("Postgres creating database" + dbName);
+                Console.WriteLine("Postgres creating database: " + dbName);
                 using (var cmd = new NpgsqlCommand("CREATE DATABASE " + dbName, conn))
                 cmd.ExecuteNonQuery();
+            
             }
-            catch{}
+            catch(Exception e)
+            {
+                // Console.WriteLine("------ ERROR in CREATION");
+                // Console.WriteLine(e);
+            }
+
+            try
+            {
+                Console.WriteLine("Waiting for database to be created...");
+                var conn = new NpgsqlConnection(connString);
+                conn.Open();
+                
+                using (var cmd = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname='" + dbName + "'", conn))
+                while(true)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if(reader.Read())
+                        {
+                            Console.WriteLine("Database has been created!");
+                            break;
+                        }
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("------ ERROR in waiting for db");
+                Console.WriteLine(e);
+            }
 
             Console.WriteLine("Checking Schema: " + dbName);
             foreach(var schema in schemas)
@@ -716,7 +750,11 @@ namespace QuantApp.Kernel.Adapters.SQL
                     ExecuteCommand(schema.Item2);
                     Console.WriteLine("Done running: " + schema.Item1);
                 }
-                catch{}
+                catch(Exception e)
+                {
+                    Console.WriteLine("------ ERROR in " + schema.Item1);
+                    Console.WriteLine(e);
+                }
 
             Console.WriteLine("Processed DB: " + dbName);
         }

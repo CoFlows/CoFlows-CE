@@ -891,7 +891,7 @@ namespace CoFlows.Server.Controllers
         /// <param name="_cokey">User secrect</param>
         /// <param name="parameters">parameters in list format</param>
         /// <response code="200">Result of query in JSON format</response>
-        [HttpGet("{wid}/{qid}/{name}/{**parameters}"), AllowAnonymous]
+        [HttpGet("{wid}/{qid}/{name}/{**parameters}"), AllowAnonymous, Produces("application/json")]
         public async Task<IActionResult> Query(string wid, string qid, string name, string _cokey, string parameters = "")
         {
             string[] p = this.Request.Query.Where(x => x.Key != "_cokey").SelectMany(x => x.Value).ToArray();
@@ -1017,7 +1017,7 @@ namespace CoFlows.Server.Controllers
         /// <param name="_cokey">User secrect</param>
         /// <param name="_p">parameters in JSON format</param>
         /// <response code="200">Result of query in JSON format</response>
-        [HttpPost("{wid}/{qid}/{name}/{**parameters}"), AllowAnonymous]
+        [HttpPost("{wid}/{qid}/{name}/{**parameters}"), AllowAnonymous, Produces("application/json")]
         public async Task<IActionResult> Query(string wid, string qid, string name, string _cokey,[FromBody] Newtonsoft.Json.Linq.JObject _p)
         {
             string[] p = new string[] { Newtonsoft.Json.JsonConvert.SerializeObject(_p) };

@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 
@@ -96,7 +97,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
             return obj;
         }
 
-        private static Dictionary<string, User> _userDB = new Dictionary<string, User>();
+        private static ConcurrentDictionary<string, User> _userDB = new ConcurrentDictionary<string, User>();
 
         string userTableName = "Users";
         string permissionTableName = "PermissionsRepository";
@@ -132,7 +133,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                         var secret = GetValue(row, "Secret", typeof(string)) as string;
 
                         User u = new User(user, firstName, lastName, email, meta, secret);
-                        _userDB.Add(user, u);
+                        _userDB[user] = u;
                         return u;
                     }
                 }
@@ -170,8 +171,9 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
 
                         User u = new User(user, firstName, lastName, email, meta, secret);
                         // User u = new User(user);
-                        if(!_userDB.ContainsKey(user))
-                            _userDB.Add(user, u);
+                        // if(!_userDB.ContainsKey(user))
+                            // _userDB.Add(user, u);
+                        _userDB[user] = u;
                         return u;
                     }
                 }
