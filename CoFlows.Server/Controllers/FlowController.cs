@@ -378,7 +378,7 @@ namespace CoFlows.Server.Controllers
                 {
                     var w = l[0] as Workflow;
                     foreach(var p in w.Permissions)
-                        if(p.ID == quser.Email && (int)p.Permission > (int)AccessType.Denied || p.ID.ToLower() == "public")
+                        if(p.ID == quser.Email && (int)p.Permission > (int)AccessType.Denied)
                         {
                             added = true;
                             var newWorkflow = new Workflow(
