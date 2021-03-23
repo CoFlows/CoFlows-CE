@@ -219,144 +219,14 @@ export class TopicComponent {
 
         this.activatedRoute.params.subscribe(params => {
             this.wid = params['id'];
-
             if(this.wid == "-")
                 this.wid = ""
-
-            console.log(this.wid)
-
             this.subgroups = [ { Name: 'Master', ID: this.wid }]
             this.activeGroupID = this.wid
             
             this.users = []
             this.users_filtered = []
             this.search = 'Loading users...'
-
-            // let wiid = this.wid + "--Queries"
-
-            // console.log(coflows)
-
-            
-            // this.coflows.LinkAction(this.wid,
-            //     data => { //Load
-                    
-
-            //         this.result.Item2 = data
-
-            //         console.log(this.result.Item2)
-                    
-            //         for(let i = 0; i < this.result.Item2.length; i++){
-            //             try {
-            //                 if(this.result.Item2[i].Value != undefined){
-            //                     this.result.Item2[i].Value = JSON.parse(this.result.Item2[i].Value);
-            //                 }
-            //             } catch (e) {}
-            //         }
-
-            //         let columns = []
-
-            //         if(this.result.Item2 != undefined && this.result.Item2[0] != undefined){
-            //             for (let i in this.result.Item2[0].Value ) { 
-            //                 columns.push({ prop: i, name: i })
-            //             }  
-                    
-                    
-                    
-
-            //             let isObject = Array.isArray(Object.keys(this.result.Item2[0].Value)) && typeof(this.result.Item2[0].Value) !== 'string'
-
-            //             if(!isObject){
-            //                 this.result.columns = [{ prop: "Value", name: "Value"}]
-            //                 if(true || this.result.Item2.forEach != undefined){
-            //                     let res = []
-            //                     this.result.Item2.forEach( val => { 
-            //                         res.push({ __Key: val.Key, Value : val.Value })
-            //                     })
-
-            //                     this.result.Item2 = res
-            //                 }
-            //             }
-            //             else
-            //             this.result.columns = columns  
-
-            //             if(isObject){
-            //                 let res = []
-            //                 this.result.Item2.forEach( val => { 
-            //                     //console.log(val)
-            //                     let vv = val.Value
-            //                     try{
-            //                         vv.__Key = val.Key
-            //                     }
-            //                     catch{}
-                                
-            //                     res.push(vv)
-            //                 })
-
-            //                 this.result.Item2 = res
-            //             }
-            //         }
-
-            //         console.log(this.result)
-            //     },
-            //     data => { //Add
-            //         // console.log('ADD', data, result.Item2)
-
-            //         let isObject = Array.isArray(Object.keys(data.Value)) && typeof(data.Value) !== 'string'
-            //         if(!isObject){
-            //             data.__Key = data.Key
-            //             this.result.Item2.push(data)
-            //         }
-            //         else{
-            //             let vv = data.Value
-            //             try{
-            //                 vv.__Key = data.Key
-            //             }
-            //             catch{}
-            //             this.result.Item2.push(vv)
-            //         }
-
-            //         this.result.Item2 = [... this.result.Item2]
-
-            //         //console.log(result.Item2)
-
-            //     }, 
-            //     data => { //Exchange
-            //         console.log('Exchange', data, this.result.Item2)
-
-            //         let idx = this.result.Item2.findIndex(x => x.__Key == data.Key)
-            //         if(idx > -1){
-            //             let isObject = Array.isArray(Object.keys(data.Value)) && typeof(data.Value) !== 'string'
-
-            //             if(!isObject){
-            //                 data.__Key = data.Key
-            //                 this.result.Item2[idx] = data
-            //             }
-            //             else{
-            //                 let vv = data.Value
-            //                 try{
-            //                     vv.__Key = data.Key
-            //                 }
-            //                 catch{}
-            //                 this.result.Item2[idx] = vv
-            //             }
-            //         }
-            //         this.result.Item2 = [... this.result.Item2]
-            //     },
-            //     data => {//Remove
-            //         //console.log('Remove', data)
-
-            //         let idx = this.result.Item2.findIndex(x => x.__Key == data.Key)
-            //         if(idx > -1){
-            //             this.result.Item2.splice(idx,1)
-            //         }
-
-            //         this.result.Item2 = [... this.result.Item2]
-            //     }, 
-            // )
-
-            // let t0 = Date.now()
-            
-
         })
     }
 
@@ -374,7 +244,6 @@ export class TopicComponent {
         this.users_filtered = []
         this.search = 'loading users...'
         this.coflows.Get("administration/Users?groupid=" + sgid, data => {
-            // console.log(data)
             this.activeGroupID = sgid
             if(data == null){
                 this.users_filtered = []
@@ -390,11 +259,9 @@ export class TopicComponent {
     }
     
     setPermission(id, permission_old, permission_new){
-        console.log(id, permission_old, permission_new)
         if(permission_old != permission_new){
-            this.coflows.Get('administration/setpermission?userid=' + id + '&groupid=' + this.activeGroupID + '&accessType=' + permission_new,
+            this.coflows.Get('administration/setpermission?pid=' + id + '&groupid=' + this.activeGroupID + '&accessType=' + permission_new,
                 data => {
-                    // console.log(data)
                     this.coflows.showMessage('Permission updated')
                 });
         }
@@ -443,7 +310,7 @@ export class TopicComponent {
         
         this.search = 'Reloading permissions...'
                 
-        this.coflows.Get('administration/removepermission?userid=' + id + '&groupid=' + this.wid,
+        this.coflows.Get('administration/removepermission?pid=' + id + '&groupid=' + this.wid,
             data => {
                 let t0 = Date.now()
                 this.users_filtered = []
