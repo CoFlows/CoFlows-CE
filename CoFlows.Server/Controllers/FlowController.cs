@@ -896,6 +896,19 @@ namespace CoFlows.Server.Controllers
         {
             string[] p = this.Request.Query.Where(x => x.Key != "_cokey").SelectMany(x => x.Value).ToArray();
 
+            string contentType = "application/json";
+
+            if(name.EndsWith(".csv"))
+            {
+                name = name.Replace(".csv","");
+                contentType = "text/csv";
+            }
+            else if(name.EndsWith(".txt"))
+            {
+                name = name.Replace(".txt","");
+                contentType = "text/plain";
+            }
+
             if(this.Request.Headers.ContainsKey("_cokey"))
                 _cokey = this.Request.Headers["_cokey"];
 
@@ -982,7 +995,13 @@ namespace CoFlows.Server.Controllers
                     if(execution_result.Length == 0)
                     {
                         QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-                        return Ok(execution.Compilation);
+                        // return Ok(execution.Compilation);
+                        return new ContentResult
+                        {
+                            ContentType = contentType,
+                            Content = execution.Compilation == null ? null : contentType == "application/json" ? Newtonsoft.Json.JsonConvert.SerializeObject(execution.Compilation, Newtonsoft.Json.Formatting.Indented) : execution.Compilation.ToString(),
+                            StatusCode = 200
+                        };
                     }
                         
                     if(name != null)
@@ -992,18 +1011,42 @@ namespace CoFlows.Server.Controllers
                             {
                                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                                 if(pair.Item3 != null)
-                                    return BadRequest(pair.Item3);
+                                    // return BadRequest(pair.Item3);
+                                    return new ContentResult
+                                    {
+                                        ContentType = contentType,
+                                        Content = pair.Item3 == null ? null : contentType == "application/json" ? Newtonsoft.Json.JsonConvert.SerializeObject(pair.Item3, Newtonsoft.Json.Formatting.Indented) : pair.Item3.ToString(),
+                                        StatusCode = 500
+                                    };
                                 else
-                                    return Ok(pair.Item2);
+                                    // return Ok(pair.Item2);
+                                    return new ContentResult
+                                    {
+                                        ContentType = contentType,
+                                        Content = pair.Item2 == null ? null : contentType == "application/json" ? Newtonsoft.Json.JsonConvert.SerializeObject(pair.Item2, Newtonsoft.Json.Formatting.Indented) : pair.Item2.ToString(),
+                                        StatusCode = 200
+                                    };
                             }
                         }
                     else
-                        return Ok(execution_result);
+                        // return Ok(execution_result);
+                        return new ContentResult
+                        {
+                            ContentType = contentType,
+                            Content = execution_result == null ? null : contentType == "application/json" ? Newtonsoft.Json.JsonConvert.SerializeObject(execution_result, Newtonsoft.Json.Formatting.Indented) : execution_result.ToString(),
+                            StatusCode = 200
+                        };
                 }
             }
 
             QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-            return Ok(new { Result = "Empty" });
+            // return Ok(new { Result = "Empty" });
+            return new ContentResult
+            {
+                ContentType = contentType,
+                Content = "Empty",
+                StatusCode = 204
+            };
         }
 
 
@@ -1022,6 +1065,19 @@ namespace CoFlows.Server.Controllers
         {
             string[] p = new string[] { Newtonsoft.Json.JsonConvert.SerializeObject(_p) };
 
+            string contentType = "application/json";
+
+            if(name.EndsWith(".csv"))
+            {
+                name = name.Replace(".csv","");
+                contentType = "text/csv";
+            }
+            else if(name.EndsWith(".txt"))
+            {
+                name = name.Replace(".txt","");
+                contentType = "text/plain";
+            }
+
             if(this.Request.Headers.ContainsKey("_cokey"))
                 _cokey = this.Request.Headers["_cokey"];
 
@@ -1108,7 +1164,13 @@ namespace CoFlows.Server.Controllers
                     if(execution_result.Length == 0)
                     {
                         QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-                        return Ok(execution.Compilation);
+                        // return Ok(execution.Compilation);
+                        return new ContentResult
+                        {
+                            ContentType = contentType,
+                            Content = execution.Compilation == null ? null : contentType == "application/json" ? Newtonsoft.Json.JsonConvert.SerializeObject(execution.Compilation, Newtonsoft.Json.Formatting.Indented) : execution.Compilation.ToString(),
+                            StatusCode = 200
+                        };
                     }
                         
                     if(name != null)
@@ -1118,18 +1180,42 @@ namespace CoFlows.Server.Controllers
                             {
                                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                                 if(pair.Item3 != null)
-                                    return BadRequest(pair.Item3);
+                                    // return BadRequest(pair.Item3);
+                                    return new ContentResult
+                                    {
+                                        ContentType = contentType,
+                                        Content = pair.Item3 == null ? null : contentType == "application/json" ? Newtonsoft.Json.JsonConvert.SerializeObject(pair.Item3, Newtonsoft.Json.Formatting.Indented) : pair.Item3.ToString(),
+                                        StatusCode = 500
+                                    };
                                 else
-                                    return Ok(pair.Item2);
+                                    // return Ok(pair.Item2);
+                                    return new ContentResult
+                                    {
+                                        ContentType = contentType,
+                                        Content = pair.Item2 == null ? null : contentType == "application/json" ? Newtonsoft.Json.JsonConvert.SerializeObject(pair.Item2, Newtonsoft.Json.Formatting.Indented) : pair.Item2.ToString(),
+                                        StatusCode = 200
+                                    };
                             }
                         }
                     else
-                        return Ok(execution_result);
+                        // return Ok(execution_result);
+                        return new ContentResult
+                        {
+                            ContentType = contentType,
+                            Content = execution_result == null ? null : contentType == "application/json" ? Newtonsoft.Json.JsonConvert.SerializeObject(execution_result, Newtonsoft.Json.Formatting.Indented) : execution_result.ToString(),
+                            StatusCode = 200
+                        };
                 }
             }
 
             QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-            return Ok(new { Result = "Empty" });
+            // return Ok(new { Result = "Empty" });
+            return new ContentResult
+            {
+                ContentType = contentType,
+                Content = "Empty",
+                StatusCode = 204
+            };
         }
 
         /// <summary>
