@@ -64,10 +64,15 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
 
                 DataRowCollection rows = table.Rows;
 
-                if (rows.Count == 0)
-                    return null;
-
                 m = m == null ? new M() : m;
+
+                if (rows.Count == 0)
+                {
+                    m.loaded = true;
+                    return m;
+                }
+
+                
 
                 var dict = new Dictionary<string, Type>();
                 foreach (DataRow r in rows)

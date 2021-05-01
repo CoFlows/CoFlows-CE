@@ -657,7 +657,6 @@ namespace QuantApp.Kernel.Adapters.SQL
                         {
                             Console.WriteLine("ERROR: " + _com);
                             Console.WriteLine(e);
-                            throw e;
                         }
                     }
                     transaction.Commit();

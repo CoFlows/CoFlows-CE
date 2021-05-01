@@ -184,8 +184,6 @@ namespace QuantApp.Kernel
 
                 instance[id].Timestamp = DateTime.Now;
 
-                // Console.WriteLine("--- M GET: " + id + " " + instance[id].Timestamp + " " + instance[id].GetHashCode());
-
                 return instance[id];
             }
         }
@@ -265,9 +263,10 @@ namespace QuantApp.Kernel
             {
                 this.Timestamp = DateTime.Now;
                 if(!this.loaded && Factory != null)
+                {
+                    Console.WriteLine("--- ADD FIND: " + this.ID);
                     Factory.Find(this.ID, this.type, this);
-
-                // Console.WriteLine("--- M ADD: " + this.ID + " " + this.Timestamp + " " + this.GetHashCode());
+                }
 
                 if (data == null)
                 {
@@ -290,8 +289,7 @@ namespace QuantApp.Kernel
                 {
                     string key = System.Guid.NewGuid().ToString();
                     singularity.TryAdd(key, data);
-                    singularity_inverse.TryAdd(invKey, key);
-
+                    var addedFlag = singularity_inverse.TryAdd(invKey, key);
                     
                     if(singularity.Count != singularity_inverse.Count) 
                         Console.WriteLine("ERROR");
@@ -360,6 +358,7 @@ namespace QuantApp.Kernel
                 if(!this.loaded && Factory != null)
                     Factory.Find(this.ID, this.type, this);
 
+
                 this.Timestamp = DateTime.Now;
 
                 if (key == null || data == null)
@@ -418,6 +417,8 @@ namespace QuantApp.Kernel
                         RTDEngine.Send(new RTDMessage() { Type = RTDMessage.MessageType.CRUD, Content = crud });
                     }
                 }
+                else
+                    Console.WriteLine("---- Contains Inverse: " + invKey);
             }
         }
 
@@ -426,9 +427,6 @@ namespace QuantApp.Kernel
         {
             lock (editLock)
             {
-                // if(!this.loaded && Factory != null)
-                //     Factory.Find(this.ID, this.type, this);
-
                 this.Timestamp = DateTime.Now;
 
                 if (key == null || data == null)
@@ -459,7 +457,13 @@ namespace QuantApp.Kernel
                             Console.WriteLine("ERROR");
                 }
                 else
-                    Console.WriteLine("M not added internal: " + key + " " + data.ToString().Substring(0, Math.Min(data.ToString().Length, 250)));
+                {
+                    Console.WriteLine("--- ADD INTERNAL OBJECT EXISTS: " + key + " <-> " + this.loaded);
+                    // singularity[key] = data;
+                    // singularity_type[key] = type;
+                    // singularity_assembly[key] = assembly;
+                    // singularity_inverse[invKey] = key;
+                }
             }
         }
 
@@ -475,8 +479,7 @@ namespace QuantApp.Kernel
                     Factory.Find(this.ID, this.type, this);
 
                 this.Timestamp = DateTime.Now;
-                // Console.WriteLine("--- M EXC: " + this.ID + " " + this.Timestamp);
-
+                
                 var invKeyOld = dataOld;
                 if (singularity_inverse.ContainsKey(invKeyOld))
                 {
@@ -911,11 +914,8 @@ namespace QuantApp.Kernel
         {
             lock(editLock)
             {
-                // if(!this.loaded && Factory != null)
-                //     Factory.Find(this.ID, this.type, this);
-
                 this.Timestamp = DateTime.Now;
-
+                
                 if(rawEntries == null)
                     return;
 
@@ -928,6 +928,8 @@ namespace QuantApp.Kernel
                     if(permission == AccessType.Denied)
                         return;
                 }
+
+                Console.WriteLine("----- LOAD RAW");
 
                 foreach (var rawEntry in rawEntries)
                 {

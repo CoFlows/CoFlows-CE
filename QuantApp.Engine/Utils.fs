@@ -141,6 +141,7 @@ type RegisterCode = delegate of bool * bool * (string * string) list -> string
 type ExecuteCode = delegate of (string * string) list -> ExecuteCodeResult
 type ExecuteCodeFunction = delegate of bool * (string * string) list * string * obj[] -> ExecuteCodeResult
 
+[<CustomEquality; CustomComparison>]
 type Workflow =
     {
         ID : string
@@ -160,6 +161,29 @@ type Workflow =
         AutoDeploy : bool
         Container : Container
     }
+    override this.GetHashCode () = this.ID.GetHashCode()
+    override this.Equals other = 
+        match other with
+        | :? Workflow as p -> p.ID = this.ID
+        | _ -> false
+    
+    static member op_Equality(this, other) = this.Equals other
+    
+            
+    interface System.IEquatable<Workflow> with
+        member this.Equals other = this.ID = other.ID
+            
+
+    interface IComparable with
+        member this.CompareTo other =
+            match other with
+            | :? Workflow as p -> (this :> IComparable<_>).CompareTo p
+            | _ -> -1
+
+    interface IComparable<Workflow> with
+        member this.CompareTo other = other.ID.CompareTo this.ID
+    
+    
 
 
 type Load = delegate of obj[] -> unit

@@ -324,7 +324,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                                     var type = col.DataType;
 
                                     if (type == typeof(string) || type == typeof(char))
-                                        addstring += "\"" + value + "\" , ";
+                                        addstring += "\"" + ((string)value).Replace("'","''") + "\" , ";
 
                                     else if (type == typeof(bool))
                                         addstring += ((bool)value ? 1 : 0) + " , ";
@@ -333,7 +333,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                                         addstring += string.IsNullOrWhiteSpace(vstr) ? "null, " : "'" + ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' , ";
 
                                     else
-                                        addstring += (string.IsNullOrWhiteSpace(vstr) ? "null" : vstr) + " , ";
+                                        addstring += (string.IsNullOrWhiteSpace(vstr) ? "null" : vstr.Replace("'","''")) + " , ";
                                 }
 
                                 addstring = addstring.Remove(addstring.Length - 2) + ");";
@@ -472,7 +472,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                                         added++;
                                         string value = "";
                                         if (col.DataType == typeof(string) || col.DataType == typeof(char))
-                                            value = "'" + row[col] + "' , ";
+                                            value = "'" + row[col].ToString().Replace("'","''") + "' , ";
 
                                         else if (col.DataType == typeof(bool))
                                             value = ((bool)row[col] ? 1 : 0) + " , ";
@@ -481,7 +481,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                                             value = string.IsNullOrWhiteSpace(row[col].ToString()) ? "null, " : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' , ";
 
                                         else
-                                            value = (string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : row[col].ToString()) + " , ";
+                                            value = (string.IsNullOrWhiteSpace(row[col].ToString()) ? "null" : row[col].ToString().Replace("'","''")) + " , ";
 
                                         update += name + " = " + value;
                                     }
