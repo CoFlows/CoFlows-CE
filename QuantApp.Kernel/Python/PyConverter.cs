@@ -55,6 +55,11 @@ namespace Python.Runtime
                 }
                 writer.WriteEndObject();
             }
+            else if(PyLong.IsLongType(jobj))
+            {
+                var pobj = new PyLong(jobj);
+                writer.WriteValue(pobj.ToInt64());
+            }
             else if(PyInt.IsIntType(jobj))
             {
                 var pobj = new PyInt(jobj);
@@ -65,11 +70,7 @@ namespace Python.Runtime
                 var pobj = new PyFloat(jobj);
                 writer.WriteValue(pobj.ToDouble());
             }
-            else if(PyLong.IsLongType(jobj))
-            {
-                var pobj = new PyLong(jobj);
-                writer.WriteValue(pobj.ToInt64());
-            }
+            
             else if(PyString.IsStringType(jobj) || jojb_type == "<class 'datetime.date'>")
             {
                 // var pobj = new PyString(jobj);

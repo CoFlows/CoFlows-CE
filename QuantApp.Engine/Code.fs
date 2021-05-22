@@ -506,8 +506,6 @@ module Code =
                                                 
                                                 let groupID = if group.Attribute(xn "id") |> isNull then "" else group.Attribute(xn "id").Value
                                                 let cost = if group.Attribute(xn "cost") |> isNull then null else group.Attribute(xn "cost").Value
-                                                let currency = if group.Attribute(xn "currency") |> isNull then null else group.Attribute(xn "currency").Value
-                                                let perType = if group.Attribute(xn "type") |> isNull then null else group.Attribute(xn "type").Value
                                                 let accessTypeStr = if group.Attribute(xn "permission") |> isNull then "Denied" else group.Attribute(xn "permission").Value
 
                                                 let mutable accessType = AccessType.Denied
@@ -517,8 +515,6 @@ module Code =
                                                 {|
                                                     GroupID = groupID;
                                                     Cost = if cost |> isNull then 0.0 else Double.Parse(cost);
-                                                    Currency = currency;
-                                                    Type = perType;
                                                     Access = accessType
                                                 |})
 
@@ -1162,7 +1158,6 @@ module Code =
                                                 if obje |> isNull |> not then
                                                     let pair = (functionName, obje, null)
                                                     pair |> resdb.Add
-                                
                             )
                         with
                         | :? NullReferenceException -> ()
