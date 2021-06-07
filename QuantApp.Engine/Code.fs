@@ -284,11 +284,27 @@ module Code =
                     System.Reflection.Assembly.Load(packageName)
                 with
                 | _ -> 
-                    let filename = "mnt/nugets/" + masterName + "/" + masterName + ".dll"
-                    if filename |> File.Exists |> not then
-                        _downloadPackage masterName version
+                    let foldername = "mnt/nugets/" + masterName + "/"
+                    let filename = foldername + masterName + ".dll"
 
-                    System.Reflection.Emit.AssemblyBuilder.LoadFrom("mnt/nugets/" + masterName + "/" + masterName + ".dll")
+                    if foldername |> Directory.Exists then
+                        let files = foldername |> Directory.GetFiles
+                        if files |> Array.length = 1 then
+                            System.Reflection.Emit.AssemblyBuilder.LoadFrom(files.[0])
+                        else
+                            if filename |> File.Exists |> not then
+                                _downloadPackage masterName version
+            
+                            System.Reflection.Emit.AssemblyBuilder.LoadFrom(filename)
+                    else
+                        if filename |> File.Exists |> not || foldername |> Directory.Exists |> not then
+                            _downloadPackage masterName version
+            
+                        let files = foldername |> Directory.GetFiles
+                        if files |> Array.length = 1 then
+                            System.Reflection.Emit.AssemblyBuilder.LoadFrom(files.[0])
+                        else
+                            System.Reflection.Emit.AssemblyBuilder.LoadFrom(filename)
             assembly
         
         let assembly = downloadPackage packageName packageVersion
