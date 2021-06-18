@@ -346,6 +346,7 @@ module Code =
     let InitializeCodeTypes(types : Type[]) =
 
         using (Py.GIL()) (fun _ -> "/app/mnt/pip/" |> setPythonImportPath |> PythonEngine.RunSimpleString)
+        using (Py.GIL()) (fun _ -> "/app/mnt/Base/" |> setPythonImportPath |> PythonEngine.RunSimpleString)
         
         let sys_names = System.Collections.Generic.Dictionary<string, int>()        
         types

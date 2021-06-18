@@ -144,16 +144,17 @@ namespace QuantApp.Kernel
                         
                             var t = DateTime.Now;
                             // Console.WriteLine("------ M Clearning: " + t);
-                            foreach(var key in instance.Keys.ToArray())
-                            {
-                                var m = instance[key];
-
-                                lock(m.editLock)
+                            if(instance != null)
+                                foreach(var key in instance.Keys.ToArray())
                                 {
-                                    if ((t - m.Timestamp).TotalSeconds >= 5 && m.changes.Count == 0 && m.loaded)
-                                        m.ClearMemory();                                    
+                                    var m = instance[key];
+
+                                    lock(m.editLock)
+                                    {
+                                        if ((t - m.Timestamp).TotalSeconds >= 5 && m.changes.Count == 0 && m.loaded)
+                                            m.ClearMemory();                                    
+                                    }
                                 }
-                            }
                         }
                         catch (Exception e)
                         {
@@ -929,8 +930,6 @@ namespace QuantApp.Kernel
                         return;
                 }
 
-                Console.WriteLine("----- LOAD RAW");
-
                 foreach (var rawEntry in rawEntries)
                 {
 
@@ -1116,7 +1115,6 @@ namespace QuantApp.Kernel
         /// </summary>
         /// <param name="T">Type of return</param>
         /// <param name="x">object</param>
-        /// <param name="property">Property Name</param>
         public static T C<T>(object x)
         {
             object nul = null;

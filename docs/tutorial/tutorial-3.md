@@ -126,6 +126,7 @@ Agents can run jobs according to [cron](https://www.freeformatter.com/cron-expre
 
     "0 * * ? * *", #Cron Schedule - Every hour
     "0 0/1 0 ? * *", #Cron Schedule - Every minute
+    "0 0 2,8 ? * * @ Australia/Sydney", #Cron Schedule - Every day at 2am and 8am in Australia/Sydney Timezone
 
 Note that the tool formats cron jobs with years included, this yields cron schedules with 7 elements. **CoFlows** doesn't accept years in the cron job so we only take 6 elements like we have done in the samples above. The **Job** function takes two variables, **timestamp** which is when the function is called and **data** a label for the job that is being run:
 

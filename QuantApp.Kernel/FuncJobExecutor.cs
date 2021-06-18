@@ -46,7 +46,10 @@ namespace QuantApp.Kernel
         /// <param name="schedule">Quartz formatted schedule</param>
         public void StartJob(string schedule)
         {
+            // type | cron @ Timezone
             string jobID = "Job: " + _name + " " + schedule;
+
+            string tz = "UTC";
 
             Console.WriteLine("Starting " + jobID);
 
@@ -64,10 +67,18 @@ namespace QuantApp.Kernel
             else
                 job.JobDataMap["ExecutionType"] = "All";
 
+            if(schedule.Contains("@"))
+            {
+                var pair = schedule.Split('@');
+
+                schedule = pair[0].Trim();
+                tz = pair[1].Trim();   
+            }
+
             ICronTrigger trigger = (ICronTrigger)TriggerBuilder.Create()
                 .WithIdentity(jobID, "Func Group " + _name)
                 .StartNow()
-                .WithCronSchedule(schedule)
+                .WithCronSchedule(schedule, x => x.InTimeZone(TimeZoneInfo.FindSystemTimeZoneById(tz)))
                 .ForJob(job.Key)
                 .Build();
 
