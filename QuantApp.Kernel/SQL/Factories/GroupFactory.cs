@@ -22,6 +22,48 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
         string groupTableName = "Roles";
         string permissionTableName = "PermissionsRepository";
 
+        internal void loadData()
+        {
+            lock(permLock)
+            {
+                if (_rawPermissibleDB.Count == 0)
+                {
+                    string tableName = permissionTableName;
+                    string searchString = null;
+                    string targetString = null;
+                    DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
+                    DataRowCollection rows = table.Rows;
+                    
+                    if (rows.Count != 0)
+                        foreach (DataRow row in rows)
+                        {
+                            string gid = (string)row["GroupID"];
+
+                            DateTime expiry = DateTime.MaxValue;
+                            if(table.Columns.Contains("Expiry"))
+                                if(!(row["Expiry"] is DBNull))
+                                    expiry = (DateTime)row["Expiry"];
+                            
+                            AccessType access = (AccessType)row["AccessType"];
+
+                            if(expiry < DateTime.Now)
+                                access = AccessType.Denied;
+
+                            if (!_rawPermissibleDB.ContainsKey(gid))
+                                _rawPermissibleDB.TryAdd(gid, new ConcurrentDictionary<string, AccessType>());
+                            if (!_rawPermissibleExpiryDB.ContainsKey(gid))
+                                _rawPermissibleExpiryDB.TryAdd(gid, new ConcurrentDictionary<string, DateTime>());
+                            if (!_rawPermissibleTypeDB.ContainsKey(gid))
+                                _rawPermissibleTypeDB.TryAdd(gid, new ConcurrentDictionary<string, string>());
+
+                            _rawPermissibleDB[gid].TryAdd((string)row["PermissibleID"], access);
+                            _rawPermissibleExpiryDB[gid].TryAdd((string)row["PermissibleID"], expiry);
+                            _rawPermissibleTypeDB[gid].TryAdd((string)row["PermissibleID"], (string)row["Type"]);
+                        }
+                }
+            }
+        }
+
         protected object GetValue(DataRow row, string columnname, Type type)
         {
             object res = null;
@@ -319,8 +361,10 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
 
         public List<IPermissible> List(User user, Group group, Type type, bool aggregated)
         {
-            lock (list1Lock)
+            // lock (list1Lock)
+            // lock(permLock)
             {
+                loadData();
                 string key = (user == null ? "" : user.ID) + group.ID + type + aggregated;
 
                 if (_listPermissibleTypeAccessType.ContainsKey(key))
@@ -344,29 +388,30 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                     }
                 }
 
-                if (_rawPermissibleDB.Count == 0)
-                {
-                    string tableName = permissionTableName;
-                    string searchString = null;
-                    string targetString = null;
-                    DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
-                    DataRowCollection rows = table.Rows;
+                // if (_rawPermissibleDB.Count == 0)
+                // {
+                //     string tableName = permissionTableName;
+                //     string searchString = null;
+                //     string targetString = null;
+                //     DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
+                //     DataRowCollection rows = table.Rows;
 
-                    System.Diagnostics.Debug.WriteLine("List: " + user + " " + group + " " + type);
+                //     System.Diagnostics.Debug.WriteLine("List: " + user + " " + group + " " + type);
                     
-                    if (rows.Count != 0)
-                        foreach (DataRow row in rows)
-                        {
-                            string gid = (string)row["GroupID"];
-                            if (!_rawPermissibleDB.ContainsKey(gid))
-                                _rawPermissibleDB.TryAdd(gid, new ConcurrentDictionary<string, AccessType>());
-                            if (!_rawPermissibleTypeDB.ContainsKey(gid))
-                                _rawPermissibleTypeDB.TryAdd(gid, new ConcurrentDictionary<string, string>());
+                //     if (rows.Count != 0)
+                //         foreach (DataRow row in rows)
+                //         {
+                //             string gid = (string)row["GroupID"];
+                //             if (!_rawPermissibleDB.ContainsKey(gid))
+                //                 _rawPermissibleDB.TryAdd(gid, new ConcurrentDictionary<string, AccessType>());
+                //             if (!_rawPermissibleTypeDB.ContainsKey(gid))
+                //                 _rawPermissibleTypeDB.TryAdd(gid, new ConcurrentDictionary<string, string>());
 
-                            _rawPermissibleDB[gid].TryAdd((string)row["PermissibleID"], (AccessType)row["AccessType"]);
-                            _rawPermissibleTypeDB[gid].TryAdd((string)row["PermissibleID"], (string)row["Type"]);
-                        }
-                }
+                //             _rawPermissibleDB[gid].TryAdd((string)row["PermissibleID"], (AccessType)row["AccessType"]);
+                //             _rawPermissibleTypeDB[gid].TryAdd((string)row["PermissibleID"], (string)row["Type"]);
+                //         }
+                // }
+                // loadData();
                 
                 if (_rawPermissibleTypeDB.ContainsKey(group.ID))
                 {
@@ -397,8 +442,11 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
         public readonly static object list2Lock = new object();
         public List<IPermissible> List(User user, Group group, Type type, AccessType accessType, bool aggregated)
         {
-            lock (list2Lock)
+            // lock (list2Lock)
+            // lock(permLock)
             {
+                Console.WriteLine("     ---- LIST1: " + group.ID + " " + type);
+                loadData();
                 string key = (user == null ? "" : user.ID) + group.ID + type + aggregated;
 
                 if (_listPermissibleTypeAccessType.ContainsKey(key))
@@ -422,29 +470,30 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
                     }
                 }
 
-                if (_rawPermissibleDB.Count == 0)
-                {
-                    string tableName = permissionTableName;
-                    string searchString = null;
-                    string targetString = null;
-                    DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
-                    DataRowCollection rows = table.Rows;
+                // if (_rawPermissibleDB.Count == 0)
+                // {
+                //     string tableName = permissionTableName;
+                //     string searchString = null;
+                //     string targetString = null;
+                //     DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
+                //     DataRowCollection rows = table.Rows;
 
-                    System.Diagnostics.Debug.WriteLine("List: " + user + " " + group + " " + type);
+                //     System.Diagnostics.Debug.WriteLine("List: " + user + " " + group + " " + type);
                     
-                    if (rows.Count != 0)
-                        foreach (DataRow row in rows)
-                        {
-                            string gid = (string)row["GroupID"];
-                            if (!_rawPermissibleDB.ContainsKey(gid))
-                                _rawPermissibleDB.TryAdd(gid, new ConcurrentDictionary<string, AccessType>());
-                            if (!_rawPermissibleTypeDB.ContainsKey(gid))
-                                _rawPermissibleTypeDB.TryAdd(gid, new ConcurrentDictionary<string, string>());
+                //     if (rows.Count != 0)
+                //         foreach (DataRow row in rows)
+                //         {
+                //             string gid = (string)row["GroupID"];
+                //             if (!_rawPermissibleDB.ContainsKey(gid))
+                //                 _rawPermissibleDB.TryAdd(gid, new ConcurrentDictionary<string, AccessType>());
+                //             if (!_rawPermissibleTypeDB.ContainsKey(gid))
+                //                 _rawPermissibleTypeDB.TryAdd(gid, new ConcurrentDictionary<string, string>());
 
-                            _rawPermissibleDB[gid].TryAdd((string)row["PermissibleID"], (AccessType)row["AccessType"]);
-                            _rawPermissibleTypeDB[gid].TryAdd((string)row["PermissibleID"], (string)row["Type"]);
-                        }
-                }
+                //             _rawPermissibleDB[gid].TryAdd((string)row["PermissibleID"], (AccessType)row["AccessType"]);
+                //             _rawPermissibleTypeDB[gid].TryAdd((string)row["PermissibleID"], (string)row["Type"]);
+                //         }
+                // }
+                // loadData();
                 
                 if (_rawPermissibleTypeDB.ContainsKey(group.ID))
                 {
@@ -474,15 +523,22 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
 
         public AccessType Permission(User user, Group group, IPermissible permissible)
         {
-            var exp = Expiry(user, group, permissible);
-            if(exp.Date < DateTime.Today)
-                return AccessType.Denied;
-            return _Permission(user, group, permissible);
+            // lock (permLock)
+            {
+                var t0 = DateTime.Now;
+                loadData();
+                var exp = Expiry(user, group, permissible);
+                if(exp.Date < DateTime.Today)
+                    return AccessType.Denied;
 
+                if((DateTime.Now - t0).TotalSeconds > 1)
+                    Console.WriteLine("     ---- Permission: " + group.ID + " " + (DateTime.Now - t0));
+                return _Permission(user, group, permissible);
+            }
         }
         private AccessType _Permission(User user, Group group, IPermissible permissible)
         {
-            lock (permLock)
+            // lock (permLock)
             {
                 AccessType type = AccessType.Denied;
 
@@ -526,45 +582,6 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
 
                     if (type == AccessType.Denied)
                     {
-                        if (_rawPermissibleDB.Count == 0)
-                        {
-                            _rawPermissibleDB.TryAdd(group.ID, new ConcurrentDictionary<string, AccessType>());
-                            _rawPermissibleTypeDB.TryAdd(group.ID, new ConcurrentDictionary<string, string>());
-
-                            string tableName = permissionTableName;
-                            string searchString = null;
-                            string targetString = null;
-                            DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
-                            DataRowCollection rows = table.Rows;
-
-                            System.Diagnostics.Debug.WriteLine("Permission: " + user + " " + group + " " + permissible + " " + type);
-                            
-                            if (rows.Count != 0)
-                                foreach (DataRow row in rows)
-                                {
-                                    string gid = (string)row["GroupID"];
-
-                                    DateTime expiry = DateTime.MaxValue;
-                                    if(table.Columns.Contains("Expiry"))
-                                        if(!(row["Expiry"] is DBNull))
-                                            expiry = (DateTime)row["Expiry"];
-                                    
-                                    AccessType access = (AccessType)row["AccessType"];
-
-                                    if(expiry < DateTime.Now)
-                                        access = AccessType.Denied;
-
-                                    if (!_rawPermissibleDB.ContainsKey(gid))
-                                        _rawPermissibleDB.TryAdd(gid, new ConcurrentDictionary<string, AccessType>());
-                                    if (!_rawPermissibleTypeDB.ContainsKey(gid))
-                                        _rawPermissibleTypeDB.TryAdd(gid, new ConcurrentDictionary<string, string>());
-
-                                    _rawPermissibleDB[gid].TryAdd((string)row["PermissibleID"], access);
-                                    _rawPermissibleTypeDB[gid].TryAdd((string)row["PermissibleID"], (string)row["Type"]);
-                                }
-                        }
-
-
                         if (_rawPermissibleDB.ContainsKey(group.ID))
                         {
                             if (_rawPermissibleDB[group.ID].ContainsKey(permissible.PermissibleID))
@@ -608,37 +625,108 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
             }
         }
 
-        public readonly static object expiryLock = new object();
-        
-        public DateTime Expiry(User user, Group group, IPermissible permissible)
+        private DateTime _Expiry(User user, Group group, IPermissible permissible)
         {
-            lock (expiryLock)
+            // lock (permLock)
             {
-                string tableName = permissionTableName;
-                string searchString = "PermissibleID = '" + permissible.PermissibleID + "' AND GroupID = '" + group.ID + "'";
-                string targetString = null;
-                DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
-                DataRowCollection rows = table.Rows;
+                DateTime type = DateTime.MaxValue;
 
-                System.Diagnostics.Debug.WriteLine("Expiry: " + user + " " + group + " " + permissible);
+                if (group.Parent != null)
+                {
+                    DateTime pt = Expiry(user, group.Parent, permissible);
+                    if (pt == DateTime.MaxValue)
+                        type = DateTime.MaxValue;
+                }
 
-                if (rows.Count != 0)
-                    foreach (DataRow row in rows)
+                string uid = user == null ? "" : user.ID;
+
+
+                if (_permissibleExpiryDB.ContainsKey(uid) && _permissibleExpiryDB[uid].ContainsKey(group.ID) && _permissibleExpiryDB[uid][group.ID].ContainsKey(permissible.PermissibleID))
+                    return _permissibleExpiryDB[uid][group.ID][permissible.PermissibleID];
+
+                if (!_permissibleExpiryDB.ContainsKey(uid))
+                    _permissibleExpiryDB.TryAdd(uid, new ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>>());
+
+                if (!_permissibleExpiryDB[uid].ContainsKey(group.ID))
+                    _permissibleExpiryDB[uid].TryAdd(group.ID, new ConcurrentDictionary<string, DateTime>());
+
+
+
+                if (user != null && user.PermissibleID == "System")
+                    type = DateTime.MaxValue;
+
+                if (permissible == null)
+                    return DateTime.MinValue;
+
+                if (type != DateTime.MaxValue)
+                {
+                    type = group.ID == "Administrator" ? DateTime.MinValue : FindGroup(User.CurrentUser, "Administrator").Expiry(user, permissible);
+
+                    if (type == DateTime.MaxValue)
                     {
-                        string gid = (string)row["GroupID"];
-
-                        DateTime expiry = DateTime.MaxValue;
-                        if(table.Columns.Contains("Expiry"))
-                            if(!(row["Expiry"] is DBNull))
-                                expiry = (DateTime)row["Expiry"];
-
-                        return expiry;            
+                        if (!_permissibleExpiryDB[uid][group.ID].ContainsKey(permissible.PermissibleID))
+                            _permissibleExpiryDB[uid][group.ID].TryAdd(permissible.PermissibleID, type);
+                        return type;
                     }
-                
-                return DateTime.MaxValue;
+
+                    if (type == DateTime.MinValue)
+                    {
+                        if (_rawPermissibleExpiryDB.ContainsKey(group.ID))
+                        {
+                            if (_rawPermissibleExpiryDB[group.ID].ContainsKey(permissible.PermissibleID))
+                                type = _rawPermissibleExpiryDB[group.ID][permissible.PermissibleID];
+                            else
+                                return type;
+                        }
+                        else return type;
+
+
+                        if (group.Parent != null)
+                        {
+                            DateTime pt = Expiry(user, group.Parent, permissible);
+                            if (pt == DateTime.MaxValue)
+                                type = DateTime.MaxValue;
+                        }
+                    }
+
+                    if (!(permissible is User))
+                    {
+                        DateTime gtype = group.Expiry(user, user);
+
+                        if (user != null)
+                            type = type > gtype ? DateTime.MinValue : gtype;
+                    }
+
+                }
+
+                if (user == null)
+                    return type;
+
+                if (!_permissibleExpiryDB.ContainsKey(uid))
+                    _permissibleExpiryDB.TryAdd(uid, new ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>>());
+
+                if (!_permissibleExpiryDB[uid].ContainsKey(group.ID))
+                    _permissibleExpiryDB[uid].TryAdd(group.ID, new ConcurrentDictionary<string, DateTime>());
+
+                if (!_permissibleExpiryDB[uid][group.ID].ContainsKey(permissible.PermissibleID))
+                    _permissibleExpiryDB[uid][group.ID].TryAdd(permissible.PermissibleID, type);
+                return type;
             }
         }
 
+        public readonly static object expiryLock = new object();
+
+        public DateTime Expiry(User user, Group group, IPermissible permissible)
+        {
+            // lock (permLock)
+            {
+                var t0 = DateTime.Now;
+                loadData();
+                
+                return _Expiry(user, group, permissible);
+            }
+        }
+        
         public bool Exists(Group group, IPermissible permissible)
         {
             string tableName = permissionTableName;
@@ -651,7 +739,9 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
         }
 
         private ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, AccessType>>> _permissibleDB = new ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, AccessType>>>();
+        private ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>>> _permissibleExpiryDB = new ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>>>();
         private ConcurrentDictionary<string, ConcurrentDictionary<string, AccessType>> _rawPermissibleDB = new ConcurrentDictionary<string, ConcurrentDictionary<string, AccessType>>();
+        private ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>> _rawPermissibleExpiryDB = new ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>>();
         private ConcurrentDictionary<string, ConcurrentDictionary<string, string>> _rawPermissibleTypeDB = new ConcurrentDictionary<string, ConcurrentDictionary<string, string>>();
         private ConcurrentDictionary<string, Group> _groupDBID = new ConcurrentDictionary<string, Group>();
         private ConcurrentDictionary<string, Group> _groupDBName = new ConcurrentDictionary<string, Group>();
@@ -662,6 +752,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
         private void CleanMemory()
         {
             _permissibleDB = new ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, AccessType>>>();
+            _permissibleExpiryDB = new ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>>>();
             _groupDBID = new ConcurrentDictionary<string, Group>();
             _groupDBName = new ConcurrentDictionary<string, Group>();
             _subGroupListDB = new ConcurrentDictionary<string, List<Group>>();
@@ -673,88 +764,108 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
 
         public void Add(Group group, IPermissible permissible, Type type, AccessType accessType, DateTime? expiry)
         {
-            CleanMemory();
-            string tableName = permissionTableName;
-            string searchString = "GroupID = '" + group.ID + "' AND PermissibleID = '" + permissible.PermissibleID + "'";
-            string targetString = null;
-            DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
-            DataRowCollection rows = table.Rows;
-
-            if (rows.Count == 0)
+            lock(permLock)
             {
-                DataRow r = table.NewRow();
-                r["PermissibleID"] = permissible.PermissibleID;
-                r["GroupID"] = group.ID;
-                r["Type"] = type.ToString();
-                r["AccessType"] = (int)accessType;
+                CleanMemory();
+                string tableName = permissionTableName;
+                string searchString = "GroupID = '" + group.ID + "' AND PermissibleID = '" + permissible.PermissibleID + "'";
+                string targetString = null;
+                DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
+                DataRowCollection rows = table.Rows;
 
-                if (table.Columns.Contains("Expiry") && expiry.HasValue)
-                    r["Expiry"] = expiry.Value;
+                if (rows.Count == 0)
+                {
+                    DataRow r = table.NewRow();
+                    r["PermissibleID"] = permissible.PermissibleID;
+                    r["GroupID"] = group.ID;
+                    r["Type"] = type.ToString();
+                    r["AccessType"] = (int)accessType;
 
-                rows.Add(r);
-                Database.DB["CloudApp"].UpdateDataTable(table);
-            }
-            else
-            {
-                rows[0]["AccessType"] = (int)accessType;
-                if (table.Columns.Contains("Expiry") && expiry.HasValue)
-                    rows[0]["Expiry"] = expiry.Value;
-                Database.DB["CloudApp"].UpdateDataTable(table);
+                    if (table.Columns.Contains("Expiry") && expiry.HasValue)
+                        r["Expiry"] = expiry.Value;
+
+                    rows.Add(r);
+                    Database.DB["CloudApp"].UpdateDataTable(table);
+                }
+                else
+                {
+                    rows[0]["AccessType"] = (int)accessType;
+                    if (table.Columns.Contains("Expiry") && expiry.HasValue)
+                        rows[0]["Expiry"] = expiry.Value;
+                    Database.DB["CloudApp"].UpdateDataTable(table);
+                }
+                loadData();
             }
         }
 
         public void Remove(Group group, IPermissible permissible)
         {
-            CleanMemory();
-            string tableName = permissionTableName;
-            string searchString = "GroupID = '" + group.ID + "' AND PermissibleID = '" + permissible.PermissibleID + "'";
-            string targetString = null;
-            DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
-            DataRowCollection rows = table.Rows;
+            lock(permLock)
+            {
+                CleanMemory();
+                string tableName = permissionTableName;
+                string searchString = "GroupID = '" + group.ID + "' AND PermissibleID = '" + permissible.PermissibleID + "'";
+                string targetString = null;
+                DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
+                DataRowCollection rows = table.Rows;
 
-            foreach (DataRow row in rows)
-                row.Delete();
+                foreach (DataRow row in rows)
+                    row.Delete();
 
-            Database.DB["CloudApp"].UpdateDataTable(table);
+                Database.DB["CloudApp"].UpdateDataTable(table);
+                loadData();
+            }
         }
 
         public void Add(Group group, Group subgroup)
         {
-            CleanMemory();
-            subgroup.Parent = group;
+            lock(permLock)
+            {
+                CleanMemory();
+                subgroup.Parent = group;
+                loadData();
+            }
         }
 
         public void Remove(Group group, Group subgroup)
         {
-            CleanMemory();
-            subgroup.Parent = null;
+            lock(permLock)
+            {
+                CleanMemory();
+                subgroup.Parent = null;
+                loadData();
+            }
         }
 
         public void Remove(Group group)
         {
-            CleanMemory();
-            string tableName = permissionTableName;
-            string searchString = "GroupID = '" + group.ID + "'";
-            string targetString = null;
-            DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
-            DataRowCollection rows = table.Rows;
+            lock(permLock)
+            {
+                CleanMemory();
+                string tableName = permissionTableName;
+                string searchString = "GroupID = '" + group.ID + "'";
+                string targetString = null;
+                DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
+                DataRowCollection rows = table.Rows;
 
-            foreach (DataRow row in rows)
-                row.Delete();
+                foreach (DataRow row in rows)
+                    row.Delete();
 
-            Database.DB["CloudApp"].UpdateDataTable(table);
+                Database.DB["CloudApp"].UpdateDataTable(table);
 
 
-            tableName = groupTableName;
-            searchString = "ID = '" + group.ID + "'";
-            targetString = null;
-            table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
-            rows = table.Rows;
+                tableName = groupTableName;
+                searchString = "ID = '" + group.ID + "'";
+                targetString = null;
+                table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
+                rows = table.Rows;
 
-            foreach (DataRow row in rows)
-                row.Delete();
+                foreach (DataRow row in rows)
+                    row.Delete();
 
-            Database.DB["CloudApp"].UpdateDataTable(table);
+                Database.DB["CloudApp"].UpdateDataTable(table);
+                loadData();
+            }
         }
 
 
@@ -783,6 +894,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
 
                 Group g = FindGroup(User.CurrentUser, id);
                 g.Add(user, typeof(User), AccessType.Write);
+                loadData();
                 return g;
             }
 
@@ -813,6 +925,7 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
 
                 Group g = FindGroup(User.CurrentUser, id);
                 g.Add(user, typeof(User), AccessType.Write);
+                loadData();
                 return g;
             }
 

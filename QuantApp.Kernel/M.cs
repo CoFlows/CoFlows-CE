@@ -72,17 +72,44 @@ namespace QuantApp.Kernel
 
         public static ConcurrentDictionary<string, Object> _dic = new ConcurrentDictionary<string, Object>();
 
-        public void RegisterAdd(string fid, string func)
+        private ConcurrentDictionary<string, Tuple<DateTime, AccessType>> _permissionCache = new ConcurrentDictionary<string, Tuple<DateTime, AccessType>>();
+        private AccessType permission()
         {
             if(group == null)
-                group = Group.FindGroup(ID);
-            
-            if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
+                group = Group.FindGroup(this.ID);
+
+            var tmpPermission = AccessType.Write;
+
+            if(string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID))
+                return tmpPermission;
+
+            var _id = this.ID + QuantApp.Kernel.User.ContextUser.ID;
+
+            if(!_permissionCache.ContainsKey(_id) || (DateTime.Now - _permissionCache[_id].Item1).TotalSeconds > 1)
             {
-                var permission = group.PermissionContext();
-                if(permission != AccessType.Write)
-                    return;
+                if(group != null && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
+                    tmpPermission = group.PermissionContext();
+            
+                _permissionCache[_id] = new Tuple<DateTime, AccessType>(DateTime.Now, tmpPermission);
             }
+            
+            return _permissionCache[_id].Item2;
+        }
+
+        public void RegisterAdd(string fid, string func)
+        {
+            // if(group == null)
+            //     group = Group.FindGroup(ID);
+            
+            // if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
+            // {
+            //     var permission = group.PermissionContext();
+            //     if(permission != AccessType.Write)
+            //         return;
+            // }
+            if(permission() != AccessType.Write)
+                    return;
+
             if(add_fdb.ContainsKey(fid))
                 add_fdb[fid] = func;
             else
@@ -91,15 +118,17 @@ namespace QuantApp.Kernel
 
         public void RegisterExchange(string fid, string func)
         { 
-            if(group == null)
-                group = Group.FindGroup(ID);
+            // if(group == null)
+            //     group = Group.FindGroup(ID);
             
-            if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-            {
-                var permission = group.PermissionContext();
-                if(permission != AccessType.Write)
-                    return;
-            }
+            // if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
+            // {
+            //     var permission = group.PermissionContext();
+            //     if(permission != AccessType.Write)
+            //         return;
+            // }
+            if(permission() != AccessType.Write)
+                return;
             
             if(exchange_fdb.ContainsKey(fid))
                 exchange_fdb[fid] = func;
@@ -109,15 +138,17 @@ namespace QuantApp.Kernel
 
         public void RegisterRemove(string fid, string func)
         {
-            if(group == null)
-                group = Group.FindGroup(ID);
+            // if(group == null)
+            //     group = Group.FindGroup(ID);
             
-            if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-            {
-                var permission = group.PermissionContext();
-                if(permission != AccessType.Write)
+            // if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
+            // {
+            //     var permission = group.PermissionContext();
+            //     if(permission != AccessType.Write)
+            //         return;
+            // }
+            if(permission() != AccessType.Write)
                     return;
-            }
             if(remove_fdb.ContainsKey(fid))
                 remove_fdb[fid] = func;
             else
@@ -275,15 +306,8 @@ namespace QuantApp.Kernel
                     return null;
                 }
 
-                if(group == null)
-                    group = Group.FindGroup(ID);
-                
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                {
-                    var permission = group.PermissionContext();
-                    if(permission != AccessType.Write)
-                        return null;
-                }
+                if(permission() != AccessType.Write)
+                    return null;
 
                 var invKey = data;
                 if (!singularity_inverse.ContainsKey(invKey))
@@ -368,15 +392,8 @@ namespace QuantApp.Kernel
                     return;
                 }
 
-                if(group == null)
-                    group = Group.FindGroup(ID);
-                
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                {
-                    var permission = group.PermissionContext();
-                    if(permission != AccessType.Write)
-                        return;
-                }
+                if(permission() != AccessType.Write)
+                    return;
 
                 var invKey = data;
                 if (!singularity_inverse.ContainsKey(invKey))
@@ -436,16 +453,6 @@ namespace QuantApp.Kernel
                     return;
                 }
 
-                if(group == null)
-                    group = Group.FindGroup(ID);
-                
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                {
-                    var permission = group.PermissionContext();
-                    if(permission == AccessType.Denied)
-                        return;
-                }
-
                 var invKey = data;
                 if (!singularity_inverse.ContainsKey(invKey))
                 {
@@ -484,15 +491,8 @@ namespace QuantApp.Kernel
                 var invKeyOld = dataOld;
                 if (singularity_inverse.ContainsKey(invKeyOld))
                 {
-                    if(group == null)
-                    group = Group.FindGroup(ID);
-                
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                    {
-                        var permission = group.PermissionContext();
-                        if(permission != AccessType.Write)
-                            return;
-                    }
+                    if(permission() != AccessType.Write)
+                        return;
                     string key = singularity_inverse[invKeyOld];
                     object oo = null;
                     singularity.TryRemove(key, out oo);
@@ -567,15 +567,8 @@ namespace QuantApp.Kernel
 
                 if (singularity.ContainsKey(key))
                 {
-                    if(group == null)
-                    group = Group.FindGroup(ID);
-                
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                    {
-                        var permission = group.PermissionContext();
-                        if(permission != AccessType.Write)
-                            return;
-                    }
+                    if(permission() != AccessType.Write)
+                        return;
 
                     object dataOld = singularity[key];
                     var invKeyOld = dataOld;
@@ -657,15 +650,8 @@ namespace QuantApp.Kernel
                 var invKey = data;
                 if (singularity_inverse.ContainsKey(invKey))
                 {
-                    if(group == null)
-                    group = Group.FindGroup(ID);
-                
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                    {
-                        var permission = group.PermissionContext();
-                        if(permission != AccessType.Write)
-                            return;
-                    }
+                    if(permission() != AccessType.Write)
+                        return;
 
                     string key = singularity_inverse[invKey];
 
@@ -720,15 +706,8 @@ namespace QuantApp.Kernel
 
                 if (singularity.ContainsKey(key))
                 {
-                    if(group == null)
-                    group = Group.FindGroup(ID);
-                
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                    {
-                        var permission = group.PermissionContext();
-                        if(permission != AccessType.Write)
-                            return;
-                    }
+                    if(permission() != AccessType.Write)
+                        return;
                     object data = singularity[key];
 
                     object oo = null;
@@ -787,15 +766,8 @@ namespace QuantApp.Kernel
 
                 this.Timestamp = DateTime.Now;
 
-                if(group == null)
-                    group = Group.FindGroup(ID);
-                
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                {
-                    var permission = group.PermissionContext();
-                    if(permission != AccessType.Write)
-                        return;
-                }
+                if(permission() != AccessType.Write)
+                    return;
 
                 if (singularity.ContainsKey(message.ID))
                 {
@@ -848,15 +820,8 @@ namespace QuantApp.Kernel
 
                 this.Timestamp = DateTime.Now;
 
-                if(group == null)
-                    group = Group.FindGroup(ID);
-                
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                {
-                    var permission = group.PermissionContext();
-                    if(permission == AccessType.Denied)
-                        return new List<KeyValuePair<string, object>>();
-                }
+                if(permission() == AccessType.Denied)
+                    return new List<KeyValuePair<string, object>>();
 
                 return singularity.ToList();
             }
@@ -865,22 +830,15 @@ namespace QuantApp.Kernel
         public List<RawEntry> RawEntries()
         {
             lock(editLock)
-            {
+            {                
                 if(!this.loaded && Factory != null)
                     Factory.Find(this.ID, this.type, this);
 
                 this.Timestamp = DateTime.Now;
 
-                if(group == null)
-                    group = Group.FindGroup(ID);
 
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                {
-                    var permission = group.PermissionContext();
-
-                    if(permission == AccessType.Denied)
-                        return new List<RawEntry>();
-                }
+                if(permission() == AccessType.Denied)
+                    return new List<RawEntry>();
 
                 var entries = singularity.ToList();
                 var res = new List<RawEntry>();
@@ -901,8 +859,6 @@ namespace QuantApp.Kernel
                     }
                     else
                         rawentry.Entry = Newtonsoft.Json.JsonConvert.SerializeObject(entry.Value);
-
-
                     
                     res.Add(rawentry);
                 }
@@ -920,15 +876,10 @@ namespace QuantApp.Kernel
                 if(rawEntries == null)
                     return;
 
-                if(group == null)
-                    group = Group.FindGroup(ID);
+                if(permission() == AccessType.Denied)
+                    return;
+
                 
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                {
-                    var permission = group.PermissionContext();
-                    if(permission == AccessType.Denied)
-                        return;
-                }
 
                 foreach (var rawEntry in rawEntries)
                 {
@@ -941,9 +892,6 @@ namespace QuantApp.Kernel
                     {
                         if (type == null)
                         {
-                            
-                            
-
                             type = Type.GetType(typeName);
                             if(type == null)
                             {
@@ -980,19 +928,12 @@ namespace QuantApp.Kernel
                 lock(editLock)
                 {
                     if(!this.loaded && Factory != null)
-                    Factory.Find(this.ID, this.type, this);
+                        Factory.Find(this.ID, this.type, this);
 
                     this.Timestamp = DateTime.Now;
 
-                    if(group == null)
-                        group = Group.FindGroup(ID);
-                    
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                    {
-                        var permission = group.PermissionContext();
-                        if(permission == AccessType.Denied)
-                            return new List<object>();
-                    }
+                    if(permission() == AccessType.Denied)
+                        return new List<object>();
 
                     List<object> res = singularity.Values.Where(predicate).Select(x => x).ToList();
                     return res;
@@ -1013,15 +954,8 @@ namespace QuantApp.Kernel
 
                 this.Timestamp = DateTime.Now;
 
-                if(group == null)
-                    group = Group.FindGroup(ID);
-                
-                if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                {
-                    var permission = group.PermissionContext();
-                    if(permission == AccessType.Denied)
+                if(permission() == AccessType.Denied)
                         return new List<object>();
-                }
 
                 List<object> res = singularity.Values.Where(predicate).Select(x => x).ToList();
                 return res;
@@ -1040,15 +974,8 @@ namespace QuantApp.Kernel
                 {
                     this.Timestamp = DateTime.Now;
 
-                    if(group == null)
-                        group = Group.FindGroup(ID);
-                    
-                    if(group != null && !string.IsNullOrEmpty(QuantApp.Kernel.User.ContextUser.ID) && group.List(QuantApp.Kernel.User.CurrentUser, typeof(QuantApp.Kernel.User), false).Where(x => x.PermissibleID != "System").Count() > 0)
-                    {
-                        var permission = group.PermissionContext();
-                        if(permission == AccessType.Denied)
-                            return null;
-                    }
+                    if(permission() == AccessType.Denied)
+                        return null;
 
                     IEnumerable<IGrouping<object, object>> res = singularity.Values.Where(predicate).Select(x => x).GroupBy(groupby);
                     return res;
