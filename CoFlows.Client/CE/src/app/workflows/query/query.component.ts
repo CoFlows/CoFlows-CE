@@ -268,7 +268,7 @@ export class QueryComponent {
                 
                 this.coflows.LinkAction(wid + '--Queries', 
                     data => { //Load
-                        this.workbooks = data
+                        this.workbooks = data.sort((n1,n2)=> n1.Value.Name > n2.Value.Name)
                         if(this.workbooks.length > 0){
                             let tid = this.workbooks.findIndex(x => x.Value.ID == id)
                             

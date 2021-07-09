@@ -239,7 +239,7 @@ export class WorkflowComponent {
             
                 this.coflows.LinkAction(wiid,
                     data => { //Load
-                        this.workbooks = data
+                        this.workbooks = data.sort((n1,n2)=> n1.Value.Name > n2.Value.Name)
                         this.workbooks.push({Value: {Name: "All", ID: ""}})
                         // console.log(data)
                         this.tabBeforeChange(3)
@@ -396,7 +396,7 @@ export class WorkflowComponent {
                 }
                 else{
                     this.users = data
-                    this.users_filtered = this.users
+                    this.users_filtered = this.users.filter(n => n.Email != 'root').sort((n1,n2) => n1.FirstName > n2.FirstName ? 1: -1)
                     if(this.users_filtered.length == 0)
                         this.search = 'no users found'
                         // this.search = ''
