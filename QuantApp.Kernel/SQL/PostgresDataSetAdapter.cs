@@ -217,6 +217,10 @@ namespace QuantApp.Kernel.Adapters.SQL
                         adapter.SelectCommand = new NpgsqlCommand(command, _connectionInternal);
                         adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
 
+                        if(args != null)
+                            foreach(var arg in args)
+                                adapter.SelectCommand.Parameters.AddWithValue(arg.Item1, arg.Item2);
+
                         adapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
 
                         adapter.Fill(dataset, table);
@@ -231,6 +235,10 @@ namespace QuantApp.Kernel.Adapters.SQL
                         NpgsqlDataAdapter adapter = new NpgsqlDataAdapter();
                         adapter.SelectCommand = new NpgsqlCommand(command, _connectionInternal);
                         adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
+
+                        if(args != null)
+                            foreach(var arg in args)
+                                adapter.SelectCommand.Parameters.AddWithValue(arg.Item1, arg.Item2);
 
                         adapter.Fill(dataset, table);
 
@@ -637,6 +645,9 @@ namespace QuantApp.Kernel.Adapters.SQL
                             try
                             {
                                 NpgsqlCommand com = new NpgsqlCommand(_com, _connectionInternal, transaction);
+                                if(args != null)
+                                    foreach(var arg in args)
+                                        com.Parameters.AddWithValue(arg.Item1, arg.Item2);
                                 // NpgsqlCommand com = new NpgsqlCommand(_com);
                                 // com.CommandTimeout = 0 * 60 * 15;
                                 // com.Connection = _connectionInternal;

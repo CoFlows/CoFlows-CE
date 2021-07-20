@@ -207,6 +207,10 @@ namespace QuantApp.Kernel.Adapters.SQL
                     adapter.SelectCommand = new SqlCommand(command, _connectionInternal);
                     adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
 
+                    if(args != null)
+                        foreach(var arg in args)
+                            adapter.SelectCommand.Parameters.AddWithValue(arg.Item1, arg.Item2);
+
                     adapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
 
                     adapter.Fill(dataset, table);
@@ -221,6 +225,10 @@ namespace QuantApp.Kernel.Adapters.SQL
                     SqlDataAdapter adapter = new SqlDataAdapter();
                     adapter.SelectCommand = new SqlCommand(command, _connectionInternal);
                     adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
+
+                    if(args != null)
+                        foreach(var arg in args)
+                            adapter.SelectCommand.Parameters.AddWithValue(arg.Item1, arg.Item2);
 
                     adapter.Fill(dataset, table);
                 }
@@ -587,6 +595,9 @@ namespace QuantApp.Kernel.Adapters.SQL
                                 // _command.CommandText = _com;
 
                                 SqlCommand _command = new SqlCommand(_com, _connectionInternal, transaction);
+                                if(args != null)
+                                    foreach(var arg in args)
+                                        _command.Parameters.AddWithValue(arg.Item1, arg.Item2);
                                 _command.ExecuteNonQuery();
                             }
                             catch(Exception e)

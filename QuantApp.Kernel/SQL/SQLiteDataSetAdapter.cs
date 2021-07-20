@@ -213,6 +213,10 @@ namespace QuantApp.Kernel.Adapters.SQL
                         adapter.SelectCommand = new SQLiteCommand(command, _connectionInternal);
                         adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
 
+                        if(args != null)
+                            foreach(var arg in args)
+                                adapter.SelectCommand.Parameters.AddWithValue(arg.Item1, arg.Item2);
+
                         adapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
 
                         adapter.Fill(dataset, table);
@@ -227,6 +231,10 @@ namespace QuantApp.Kernel.Adapters.SQL
                         SQLiteDataAdapter adapter = new SQLiteDataAdapter();
                         adapter.SelectCommand = new SQLiteCommand(command, _connectionInternal);
                         adapter.SelectCommand.CommandTimeout = 0 * 60 * 15;
+
+                        if(args != null)
+                            foreach(var arg in args)
+                                adapter.SelectCommand.Parameters.AddWithValue(arg.Item1, arg.Item2);
 
                         adapter.Fill(dataset, table);
 
