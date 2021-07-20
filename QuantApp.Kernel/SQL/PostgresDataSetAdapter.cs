@@ -655,6 +655,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                             }
                             catch(Exception e)
                             {
+                                Console.WriteLine(e);
                             }
                         }
                     }

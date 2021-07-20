@@ -94,8 +94,8 @@ CREATE TABLE Logger (
         ClassName Text Not Null,
         MemberName Text Not Null,
         LineNumber int Not Null,
-        SequencyID int Not Null,
+        SequenceID int Not Null,
 
         Message Text Not Null,
-        PRIMARY KEY (RuntimeID, ID, Timestamp, Level)
+        PRIMARY KEY (RuntimeID, ID, SequenceID)
     );
