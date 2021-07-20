@@ -206,8 +206,8 @@ export class CFQueryComponent {
                             let data = result.Item2
 
                             result.IsDash = true
-                            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.coflows.coflows_server + 'dash/' + workbook.WorkflowID + '/' + workbook.ID + '?_cokey=' + this.coflows.quser.User.Secret)
-                            result.URL2 = '/workflows/app/dash/' + workbook.WorkflowID + '/' + workbook.ID + '?_cokey=' + this.coflows.quser.User.Secret
+                            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.coflows.coflows_server + 'dash/' + workbook.WorkflowID + '/' + workbook.ID + '?_cokey=' + this.coflows.quser.Secret)
+                            result.URL2 = '/workflows/app/dash/' + workbook.WorkflowID + '/' + workbook.ID + '?_cokey=' + this.coflows.quser.Secret
                             
                         }
                         else if(result.Item1.indexOf('_map') >= 0){
@@ -488,8 +488,8 @@ export class CFQueryComponent {
             let data = result.Item2
 
             result.IsDash = true
-            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.coflows.coflows_server + 'dash/' + this.selectedWB.WorkflowID + '/' + this.selectedWB.ID + '?_cokey=' + this.coflows.quser.User.Secret)
-            result.URL2 = '/workflows/app/dash/' + this.selectedWB.WorkflowID + '/' + this.selectedWB.ID + '?_cokey=' + this.coflows.quser.User.Secret
+            result.URL = this.sanitization.bypassSecurityTrustResourceUrl(this.coflows.coflows_server + 'dash/' + this.selectedWB.WorkflowID + '/' + this.selectedWB.ID + '?_cokey=' + this.coflows.quser.Secret)
+            result.URL2 = '/workflows/app/dash/' + this.selectedWB.WorkflowID + '/' + this.selectedWB.ID + '?_cokey=' + this.coflows.quser.Secret
             
         }
         else if(result.Item1.indexOf('_map') >= 0){
@@ -576,7 +576,7 @@ export class CFQueryComponent {
     addItem(items, name, item){
         if(item.D_link != undefined || name == 'D_link'){
             this.coflows.Get(
-                'flow/getquery?wid=' + this.selectedWB.WorkflowID + '&qid=' + this.selectedWB.ID + '&_cokey=' + this.coflows.quser.User.Secret + '&' + (item.D_link != undefined ? item.D_link : item), 
+                'flow/getquery?wid=' + this.selectedWB.WorkflowID + '&qid=' + this.selectedWB.ID + '&_cokey=' + this.coflows.quser.Secret + '&' + (item.D_link != undefined ? item.D_link : item), 
                 data => { 
                     this.addItem_internal(items, name, data)
                  });

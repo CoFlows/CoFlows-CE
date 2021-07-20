@@ -25,6 +25,7 @@ using System.Text;
 
 using System.Data;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 using QuantApp.Kernel;
 using QuantApp.Engine;
@@ -364,24 +365,55 @@ namespace CoFlows.Core
             _username = username;
             _password = password;
 
+            // NEED TO CHANGE
+            //// START
+            var dict = new Dictionary<string,string>();
+            dict.Add("grant_type", "password");
+            dict.Add("username", username);
+            dict.Add("password", password);
+            dict.Add("client_id", "jwt_token");
             
-            LogOnResult logonRes = GetObject<LogOnResult>("account/login", new { Username = username, Password = password });
+            var content = new FormUrlEncodedContent(dict);
+            content.Headers.Clear();
+            content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
 
-            if(logonRes == null || string.IsNullOrEmpty(logonRes.token))
-                return false;
+            var authUrl = QuantAppURL.AbsoluteUri + "/connect/token";
+            
+            var client = new System.Net.Http.HttpClient();
+            var result = client.PostAsync(new Uri(authUrl), content);
+
+            var tokenJson = JsonConvert.DeserializeObject<JObject>(result.Result.Content.ReadAsStringAsync().Result);
+            var token = tokenJson["access_token"].ToString();
+
+            //////////
+            var whoamiUrl = QuantAppURL.AbsoluteUri + "/account/whoami";
+            
+            client = new System.Net.Http.HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            result = client.GetAsync(new Uri(whoamiUrl));
+
+            var sessionData = JsonConvert.DeserializeObject<JObject>(result.Result.Content.ReadAsStringAsync().Result);
+            var quser = JsonConvert.DeserializeObject<QuantApp.Kernel.UserData>(sessionData["User"].ToString());
+            //// END
+
+            
+            // LogOnResult logonRes = GetObject<LogOnResult>("account/login", new { Username = username, Password = password });
+
+            //if(logonRes == null || string.IsNullOrEmpty(logonRes.token))
+            //    return false;
 
             DateTime date = DateTime.Now;
             string timeKey = date.Date + "/" + date.Hour;
             _lastUpdate = timeKey;
 
-            _token = logonRes.token;
-            _code = logonRes.Secret;
-            _session = logonRes.Session;
+            _token = token;//logonRes.token;
+            _code = sessionData["Secret"].ToString();//logonRes.Secret;
+            _session = sessionData["Session"].ToString();//logonRes.Session;
 
             if(file != null)
-                System.IO.File.WriteAllText(file, logonRes.Secret);
+                System.IO.File.WriteAllText(file, _code);//logonRes.Secret);
 
-            QuantApp.Kernel.User.ContextUser = logonRes.User;
+            QuantApp.Kernel.User.ContextUser = quser;//logonRes.User;
 
             return true;
         }
@@ -392,20 +424,51 @@ namespace CoFlows.Core
             _session = null; 
 
             _code = key;
-            
-            LogOnResult logonRes = GetObject<LogOnResult>("account/login", new { Code = key });
 
-            if(logonRes == null || string.IsNullOrEmpty(logonRes.token))
-                return false;
+            // LogOnResult logonRes = GetObject<LogOnResult>("account/login", new { Code = key });
+
+             // NEED TO CHANGE
+            //// START
+            var dict = new Dictionary<string,string>();
+            dict.Add("grant_type", "password");
+            dict.Add("username", key);
+            dict.Add("client_id", "jwt_token");
+
+            
+            var content = new FormUrlEncodedContent(dict);
+            content.Headers.Clear();
+            content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+
+            var authUrl = QuantAppURL.AbsoluteUri + "connect/token";
+
+            var client = new System.Net.Http.HttpClient();
+            var result = client.PostAsync(new Uri(authUrl), content);
+
+            var tokenJson = JsonConvert.DeserializeObject<JObject>(result.Result.Content.ReadAsStringAsync().Result);
+            var token = tokenJson["access_token"].ToString();
+            //////////
+            var whoamiUrl = QuantAppURL.AbsoluteUri + "account/whoami";
+            
+            client = new System.Net.Http.HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            result = client.GetAsync(new Uri(whoamiUrl));
+
+            var sessionData = JsonConvert.DeserializeObject<JObject>(result.Result.Content.ReadAsStringAsync().Result);
+
+            var quser = JsonConvert.DeserializeObject<QuantApp.Kernel.UserData>(sessionData["User"].ToString());
+            //// END
+
+            // if(logonRes == null || string.IsNullOrEmpty(logonRes.token))
+            //     return false;
 
             DateTime date = DateTime.Now;
             string timeKey = date.Date + "/" + date.Hour;
             _lastUpdate = timeKey;
 
-            _token = logonRes.token;
-            _session = logonRes.Session;
+            _token = token;//logonRes.token;
+            _session = sessionData["Session"].ToString();//logonRes.Session;
 
-            QuantApp.Kernel.User.ContextUser = logonRes.User;
+            QuantApp.Kernel.User.ContextUser = quser;//logonRes.User;
 
             return true;
         }

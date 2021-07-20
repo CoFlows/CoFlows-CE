@@ -10,12 +10,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Text;
+
+using System.IO;
+using System.IO.Compression;
+
 
 using Microsoft.FSharp.Collections;
 
 namespace CoFlows.Server.Utils
 {
-
     public static class FSharpInteropExtensions
     {
         public static FSharpList<TItemType> ToFSharplist<TItemType>(this IEnumerable<TItemType> myList)
@@ -46,6 +50,63 @@ namespace CoFlows.Server.Utils
         {
             DateTime unixRef = new DateTime(1970, 1, 1, 0, 0, 0);
             return (long)(dt - unixRef).TotalMilliseconds;
+        }
+    }
+    public class Compression
+    {
+
+        public static string Encode(string text)
+        {
+            if(string.IsNullOrEmpty(text))
+                return "";
+            return Encode(Encoding.UTF8.GetBytes(text));
+        }
+
+        public static string Encode(byte[] buffer)
+        {
+            var memoryStream = new MemoryStream();
+            using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
+            {
+                gZipStream.Write(buffer, 0, buffer.Length);
+            }
+
+            memoryStream.Position = 0;
+
+            var compressedData = new byte[memoryStream.Length];
+            memoryStream.Read(compressedData, 0, compressedData.Length);
+
+            var gZipBuffer = new byte[compressedData.Length + 4];
+            Buffer.BlockCopy(compressedData, 0, gZipBuffer, 4, compressedData.Length);
+            Buffer.BlockCopy(BitConverter.GetBytes(buffer.Length), 0, gZipBuffer, 0, 4);
+            return Convert.ToBase64String(gZipBuffer);
+        }
+        public static string Decode(string compressedText)
+        {
+            if(string.IsNullOrEmpty(compressedText))
+                return "";
+            return Encoding.UTF8.GetString(DecodeBytes(compressedText));
+        }
+
+        public static byte[] DecodeBytes(string compressedText)
+        {
+            if(string.IsNullOrEmpty(compressedText))
+                return Array.Empty<byte>();
+            byte[] gZipBuffer = Convert.FromBase64String(compressedText);
+            using (var memoryStream = new MemoryStream())
+            {
+                int dataLength = BitConverter.ToInt32(gZipBuffer, 0);
+                memoryStream.Write(gZipBuffer, 4, gZipBuffer.Length - 4);
+
+                var buffer = new byte[dataLength];
+
+                memoryStream.Position = 0;
+                using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+                {
+                    gZipStream.Read(buffer, 0, buffer.Length);
+                }
+
+                return buffer;
+            }
         }
     }
 }

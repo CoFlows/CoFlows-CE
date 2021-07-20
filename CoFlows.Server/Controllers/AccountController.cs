@@ -174,6 +174,19 @@ namespace CoFlows.Server.Controllers
                 revSessionKeys[user.Secret] = sessionKey;
                 Response.Cookies.Append("coflows", sessionKey, new CookieOptions() { Expires = DateTime.Now.AddHours(24) });
 
+                // var props = new AuthenticationProperties
+                // {
+                //     IsPersistent = true,
+                //     ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
+                // };
+
+                // var isuser = new IdentityServerUser(user.SubjectId)
+                // {
+                //     DisplayName = user.Username
+                // };
+
+                // await HttpContext.SignInAsync(user.ID, claims);
+
                 return Ok(new
                 {
                     User = user.ToUserData(),
@@ -320,7 +333,7 @@ namespace CoFlows.Server.Controllers
             string firstname = "";
             string lastname = "";
             string email = "";
-           string metadata = "";
+            string metadata = "";
 
             string secret = "";
 
@@ -345,25 +358,19 @@ namespace CoFlows.Server.Controllers
                     revSessionKeys.TryAdd(secret, session);
                 }
 
+                Response.Cookies.Append("coflows", revSessionKeys.ContainsKey(secret) ? revSessionKeys[secret] : "", new CookieOptions() { Expires = DateTime.Now.AddHours(24) });
+
                 return Ok(new
                 {
-                    User = new
-                    {
-                        Loggedin = loggedin,
-                        ID = uid,
-                        Name = username,
-                        FirstName = firstname,
-                        LastName = lastname,
-                        Email = email,
-                        MetaData = metadata,
-                        Secret = secret,
-                        Session = revSessionKeys.ContainsKey(secret) ? revSessionKeys[secret] : ""
-                    }
+                    Loggedin = loggedin,
+                    User = quser.ToUserData(),
+                    Secret = secret,
+                    Session = revSessionKeys.ContainsKey(secret) ? revSessionKeys[secret] : ""
                 });
             }
             else
             {
-                return BadRequest(new { Data = "User not logged in"});
+                return BadRequest("User not logged in");
             }
         }
 

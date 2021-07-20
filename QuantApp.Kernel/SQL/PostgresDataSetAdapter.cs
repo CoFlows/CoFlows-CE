@@ -13,8 +13,10 @@ using System.IO;
 
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
+// using System.Data.SqlClient;
 using Npgsql;
+
+using NLog;
 
 
 namespace QuantApp.Kernel.Adapters.SQL
@@ -191,14 +193,15 @@ namespace QuantApp.Kernel.Adapters.SQL
                 }
                 catch (Exception e)
                 {
+                    var logger = LogManager.GetCurrentClassLogger();
                     string SelectString = @"SELECT " + (target == null ? "*" : target) + " FROM " + table + (search == null ? "" : (search.Trim().ToLower().StartsWith("order") ? " " : " WHERE ") + search);
-                    Console.WriteLine(SelectString + e);
+                    logger.Error(SelectString + e);
                     return null;
                 }
             }
         }
 
-        public DataTable ExecuteDataTable(string table, string command)
+        public DataTable ExecuteDataTable(string table, string command, params Tuple<string, object>[] args)
         {
             lock (objLock)
             {
@@ -362,8 +365,8 @@ namespace QuantApp.Kernel.Adapters.SQL
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("EXCEPTION FROM MSSQL.");
-                        Console.WriteLine(e);
+                        var logger = LogManager.GetCurrentClassLogger();
+                        logger.Error(e);
                     }
                     finally
                     {
@@ -558,25 +561,6 @@ namespace QuantApp.Kernel.Adapters.SQL
 
                                     for (int i = 0; i < pl; i++)
                                     {
-                                        // var col = primary[i];
-                                        // string name = col.ColumnName;
-                                        // string value = "";
-                                        // // Console.WriteLine(" -----> REMOVE:  " + col + " " + name);
-
-                                        // if (col.DataType == typeof(string) || col.DataType == typeof(char))
-                                        //     value = "'" + row[col, DataRowVersion.Original] + "' , ";
-
-                                        // else if (col.DataType == typeof(bool))
-                                        //     value = ((bool)row[col, DataRowVersion.Original] ? 1 : 0).ToString();
-
-                                        // else if (col.DataType == typeof(DateTime))
-                                        //     value = string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null, " : "'" + ((DateTime)row[col]).ToString("yyyy-MM-dd HH:mm:ss.fff") + "' ";
-
-                                        // else
-                                        //     value = (string.IsNullOrWhiteSpace(row[col, DataRowVersion.Original].ToString()) ? "null" : row[col].ToString());
-
-                                        // update += name + " = " + value + (i == pl - 1 ? ";" : " AND ");
-
                                         var col = primary[i];
                                         string name = col.ColumnName;
                                         string value = "";
@@ -612,7 +596,6 @@ namespace QuantApp.Kernel.Adapters.SQL
                     catch (Exception e)
                     {
                         NpgsqlConnection.ClearAllPools();
-                        // Console.WriteLine(e);
                     }
                 }
             }
@@ -635,7 +618,7 @@ namespace QuantApp.Kernel.Adapters.SQL
             }
         }
 
-        public void ExecuteCommand(string command)
+        public void ExecuteCommand(string command, params Tuple<string, object>[] args)
         {
             lock (objLock)
             {
@@ -661,9 +644,6 @@ namespace QuantApp.Kernel.Adapters.SQL
                             }
                             catch(Exception e)
                             {
-                                // Console.WriteLine("ERROR: " + _com);
-                                // Console.WriteLine(e);
-                                // throw e;
                             }
                         }
                     }
@@ -675,6 +655,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public void CreateDB(string connectionString, List<Tuple<string, string>> schemas)
         {
+            var logger = LogManager.GetCurrentClassLogger();
             // var connString = connectionString.Substring(0, connectionString.IndexOf("Database=") - 1);
             // var dbName = connectionString.Substring(connectionString.IndexOf("Database="));
             // dbName = dbName.Substring(dbName.IndexOf("=") + 1);
@@ -687,7 +668,7 @@ namespace QuantApp.Kernel.Adapters.SQL
             
             var connString = string.Join(";", new List<string>(cons).Where(x => !x.ToLower().StartsWith("database="))) + ";Database=postgres";
             
-            Console.WriteLine("Postgres database: " + dbName);
+            logger.Info("Postgres database: " + dbName);
 
             try
             {
@@ -699,26 +680,24 @@ namespace QuantApp.Kernel.Adapters.SQL
                 {
                     if(reader.Read())
                     {
-                        Console.WriteLine("Database exists!");
+                        logger.Info("Database exists!");
                         return;
                     }
                 }
                 
                 bool addData = true;
-                Console.WriteLine("Postgres creating database: " + dbName);
+                logger.Info("Postgres creating database: " + dbName);
                 using (var cmd = new NpgsqlCommand("CREATE DATABASE " + dbName, conn))
                 cmd.ExecuteNonQuery();
             
             }
             catch(Exception e)
             {
-                // Console.WriteLine("------ ERROR in CREATION");
-                // Console.WriteLine(e);
             }
 
             try
             {
-                Console.WriteLine("Waiting for database to be created...");
+                logger.Info("Waiting for database to be created...");
                 var conn = new NpgsqlConnection(connString);
                 conn.Open();
                 
@@ -730,7 +709,7 @@ namespace QuantApp.Kernel.Adapters.SQL
                     {
                         if(reader.Read())
                         {
-                            Console.WriteLine("Database has been created!");
+                            logger.Info("Database has been created!");
                             break;
                         }
                     }
@@ -738,25 +717,23 @@ namespace QuantApp.Kernel.Adapters.SQL
             }
             catch(Exception e)
             {
-                Console.WriteLine("------ ERROR in waiting for db");
-                Console.WriteLine(e);
+                logger.Error(e);
             }
 
-            Console.WriteLine("Checking Schema: " + dbName);
+            logger.Warn("Checking Schema: " + dbName);
             foreach(var schema in schemas)
                 try
                 {
-                    Console.WriteLine("Start running: " + schema.Item1);
+                    logger.Debug("Start running: " + schema.Item1);
                     ExecuteCommand(schema.Item2);
-                    Console.WriteLine("Done running: " + schema.Item1);
+                    logger.Debug("Done running: " + schema.Item1);
                 }
                 catch(Exception e)
                 {
-                    Console.WriteLine("------ ERROR in " + schema.Item1);
-                    Console.WriteLine(e);
+                    logger.Error(e, "Error in: " + schema.Item1);
                 }
 
-            Console.WriteLine("Processed DB: " + dbName);
+            logger.Info("Processed DB: " + dbName);
         }
 
         public DbDataReader ExecuteReader(string command)

@@ -41,6 +41,12 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ContainerInstance.Fluent.Models;
 
+using NLog;
+using NLog.Web;
+using NLog.Targets;
+using NLog.Config;
+
+
 
 namespace CoFlows.Server
 {
@@ -62,15 +68,19 @@ namespace CoFlows.Server
         private static readonly System.Threading.AutoResetEvent _closing = new System.Threading.AutoResetEvent(false);
         public static void Main(string[] args)
         {
+            CoFlows.Server.Program.RegisterLogger();
+
+            var logger = LogManager.GetCurrentClassLogger();
+            QuantApp.Kernel.Logger.SetID("__root__");
+            
             #if NETCOREAPP3_1
-            Console.Write("CoFlows CE - NetCoreApp 3.1... ");
+            logger.Info("CoFlows CE - NetCoreApp 3.1");
             #endif
 
             #if NET461
-            Console.Write("CoFlows CE - Net Framework 461... ");
+            logger.Info("CoFlows CE - Net Framework 4.61");
             #endif
 
-            Console.Write("Python starting... ");
             PythonEngine.Initialize();
 
             Code.InitializeCodeTypes(new Type[]{ 
@@ -105,6 +115,9 @@ namespace CoFlows.Server
             var cloudKey = addWorkflow ? "" : config["Cloud"]["SecretKey"].ToString();
             var cloudSSL = addWorkflow ? "" : config["Cloud"]["SSL"].ToString();
 
+            if(config["Logging"] != null)
+                QuantApp.Kernel.Logger.SetConfig(JsonConvert.DeserializeObject<QuantApp.Kernel.Logger.Config>(config["Logging"].ToString()));
+            
             //Jupyter Lab
             if(args != null && args.Length > 0 && args[0] == "lab")
             {
@@ -291,12 +304,15 @@ namespace CoFlows.Server
                 else
                     DatabasesSqlite(connectionString);
 
-                Console.WriteLine("QuantApp Server " + DateTime.Now);
-                Console.WriteLine("DB Connected");
+                logger.Info("DB Connected");
+                QuantApp.Kernel.Logger.AddEventFunction = (string ID, LogEventInfo logEvent) =>
+                {
+                    LoggerRepository.AddEvent(ID, logEvent);
+                };
 
                 if(string.IsNullOrEmpty(config_env))
                 {
-                    Console.WriteLine("config from file ");
+                    logger.Info("config from file ");
 
                     var pkg = Code.ProcessPackageFile(workflow_name, true);
                     Code.ProcessPackageJSON(pkg, false);
@@ -314,8 +330,7 @@ namespace CoFlows.Server
                         }
                         catch(Exception e)
                         {
-                            Console.WriteLine("ERROR FILE: " + fileName);
-                            Console.WriteLine(e);
+                            logger.Error(e, "ERROR FILE: " + fileName);
                         }
                     }
 
@@ -330,7 +345,7 @@ namespace CoFlows.Server
                     }
 
                     SetDefaultWorkflows(new string[]{ pkg.ID }, false, config["Jupyter"] != null && config["Jupyter"].ToString().ToLower() == "true");
-                    Console.WriteLine(pkg.Name + " started");
+                    logger.Info(pkg.Name + " started");
 
                     var _g = Group.FindGroup(pkg.ID);
                     if(_g == null)
@@ -346,7 +361,7 @@ namespace CoFlows.Server
                 }
                 else if(string.IsNullOrEmpty(empty_flag))
                 {
-                    Console.WriteLine("config from environment");
+                    logger.Info("config from environment");
                     var workspace_ids = QuantApp.Kernel.M.Base("--CoFlows--Workflows")[xe => true];
                     foreach(var wsp in workspace_ids)
                     {
@@ -364,9 +379,7 @@ namespace CoFlows.Server
                             }
                             catch(Exception e)
                             {
-                                Console.WriteLine("ERROR FILE: " + fileName);
-                                Console.WriteLine(e);
-                                Console.WriteLine(fileContent.Substring(Math.Min(250, fileContent.Length)));
+                                logger.Error(e, "ERROR FILE: " + fileName);
                             }
                         }
 
@@ -382,11 +395,11 @@ namespace CoFlows.Server
                         }
 
                         SetDefaultWorkflows(new string[]{ wsp.ToString() }, true, config["Jupyter"] != null && config["Jupyter"].ToString().ToLower() == "true");
-                        Console.WriteLine(wsp + " started");
+                        logger.Info(wsp + " started");
                     }
                 }
                 else
-                    Console.WriteLine("Empty Server");
+                    logger.Warn("Empty Server");
 
                 Group.FindPermissibleFunction = (Type type, string id) =>
                 {
@@ -431,16 +444,16 @@ namespace CoFlows.Server
                 else
                     DatabasesSqlite(connectionString);
 
-                Console.WriteLine("DB Connected");
+                logger.Info("DB Connected");
 
-                Console.WriteLine("Local build");
+                logger.Info("Local build");
 
                 var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                 var res = Code.BuildRegisterPackage(pkg);
                 if(string.IsNullOrEmpty(res))
-                    Console.WriteLine("Success!!!");
+                    logger.Info("Success!!!");
                 else
-                    Console.WriteLine(res);
+                    logger.Warn(res);
             }
             else if(args != null && args.Length > 2 && args[0] == "local" && args[1] == "query")
             {
@@ -454,19 +467,14 @@ namespace CoFlows.Server
                 else
                     DatabasesSqlite(connectionString);
 
-                Console.WriteLine("Local Query " + DateTime.Now);
-                Console.WriteLine("DB Connected");
-
-                Console.WriteLine("CoFlows Local query... ");
+                logger.Info("DB Connected");
+                logger.Info("Local Query");
 
                 var queryID = args[2];
                 var funcName = args.Length > 3 ? args[3] : null;
                 var parameters = args.Length > 4 ? args.Skip(4).ToArray() : null;
 
-                Console.WriteLine("QueryID: " + queryID);
-                Console.WriteLine("FuncName: " + funcName);
-                Console.WriteLine("Parameters: " + parameters);
-
+                logger.Info("QueryID: " + queryID + "\nFuncName: " + funcName + "\nParameters: " + parameters + "\n");
 
                 var pkg = Code.ProcessPackageFile(Code.UpdatePackageFile(workflow_name, new QuantApp.Engine.NuGetPackage(null, null), new QuantApp.Engine.PipPackage(null), new QuantApp.Engine.JarPackage(null)), true);
                 Code.ProcessPackageJSON(pkg, false);
@@ -482,17 +490,18 @@ namespace CoFlows.Server
                     if(_quser != null)
                         _g.Add(_quser, typeof(QuantApp.Kernel.User), _p.Permission);
                 }
-
                 
-
                 if(parameters != null)
+                {
+                    var mess = "";
                     for(int i = 0; i < parameters.Length; i++)
-                        Console.WriteLine("Parameter[" + i + "]: " + parameters[i]);
-
+                        mess += "Parameter[" + i + "]: " + parameters[i] + "\n";
+                    logger.Info(mess);
+                }
                 
                 var (code_name, code) = pkg.Queries.Where(entry => entry.ID == queryID).Select(entry => (entry.Name as string, entry.Content as string)).FirstOrDefault();
                 var t0 = DateTime.Now;
-                Console.WriteLine("Started: " + t0);
+                logger.Debug("Started");
 
                 // var wb = wb_res.FirstOrDefault() as CodeData;
                 var codes = new List<Tuple<string,string>>();
@@ -501,14 +510,13 @@ namespace CoFlows.Server
                 var result = QuantApp.Engine.Utils.ExecuteCodeFunction(false, codes, funcName, parameters);
                 //var result = Connection.Client.Execute(code, code_name, pkg.ID, queryID, funcName, parameters);
                 var t1 = DateTime.Now;
-                Console.WriteLine("Ended: " + t1 + " taking " + (t1 - t0));
+                logger.Debug("Ended taking " + (t1 - t0));
 
-                Console.WriteLine("Result: ");
                 if(funcName == "?")                    
-                    Console.WriteLine(OpenAPI(result, ""));
+                    logger.Info(OpenAPI(result, ""));
                 
                 else
-                    Console.WriteLine(result);
+                    logger.Info(result);
             }
             //Azure Container Instance
             else if(args != null && args.Length > 1 && args[0] == "aci" && args[1] == "deploy")
@@ -1390,35 +1398,8 @@ namespace CoFlows.Server
             var wsp = QuantApp.Kernel.M.Base(id)[x => true].FirstOrDefault() as Workflow;
             if(wsp != null)
             {
-            
                 _wspServicedList.RemoveAll(x => x == id);
-                // foreach(var fid in wsp.Agents)
-                // {
-                //     var cfid = fid.Replace("$WID$",id);
-
-                //     var f = F.Find(cfid).Value;
-                //     f.Stop();
-                // }
-
                 _wspServicedList.Add(id);
-
-                // #if MONO_LINUX || MONO_OSX
-                // if(useJupyter)
-                // {
-                //     var code = "import subprocess; subprocess.check_call(['jupyter', 'lab', '--NotebookApp.notebook_dir=/app/mnt', '--ip=*', '--NotebookApp.allow_remote_access=True', '--allow-root', '--no-browser', '--NotebookApp.token=\'\'', '--NotebookApp.password=\'\'', '--NotebookApp.disable_check_xsrf=True', '--NotebookApp.base_url=/lab/" + id + "'])";
-                //     var th = new System.Threading.Thread(() => {
-                //         using (Py.GIL())
-                //         {
-                //             Console.WriteLine("Starting Jupyter...");
-                //             Console.WriteLine(code);
-                //             PythonEngine.Exec(code);
-                //         }
-                //     });
-                //     th.Start();
-                // }
-                // #endif
-
-                
             }
             else
                 Console.WriteLine("Add serviced workflow is null: " + id);
@@ -1441,33 +1422,60 @@ namespace CoFlows.Server
             return _wspServicedList;
         }
 
+        public static void RegisterLogger()
+        {
+            var _config = new LoggingConfiguration();
+            Target.Register<QuantApp.Kernel.Logger>("CoFlowsLog");            
+
+            var logTarget = new QuantApp.Kernel.Logger();
+            logTarget.Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}|${callsite:className=True:fileName=true:includeSourcePath=true:methodName=true:lineNumber=True}";
+            
+            _config.AddTarget("CoFlowsLog", logTarget);
+            _config.LoggingRules.Add(new LoggingRule("*", NLog.LogLevel.Trace, logTarget));
+            LogManager.Configuration = _config;
+        }
+
         public static void Init(string[] args, QuantApp.Kernel.Factories.IRTDEngineFactory socketFactory, Type startup)
         {
             QuantApp.Kernel.RTDEngine.Factory = socketFactory;
+            var logger = LogManager.GetCurrentClassLogger();
 
             if (args == null || args.Length == 0 || args[0] == "server")
             {
-                Console.WriteLine("Only accepts secure SSL connections...");
+                logger.Info("Only accepts secure SSL connections...");
                 Host.CreateDefaultBuilder(args)
                     .ConfigureWebHostDefaults(webBuilder =>
-                    {
-                        webBuilder.UseUrls(new string[] { "http://*", "https://*" });
                         webBuilder
+                        .UseUrls(new string[] { "http://*", "https://*" })
                         .UseStartup(startup)
                         .UseKestrel(options =>
                         {
                             options.Limits.MaxRequestBodySize = null;
-                        });
-                        
-                    })
+                        })
+                    )
+                    .ConfigureLogging(logging =>  
+                    {  
+                        logging.ClearProviders();  
+                        logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);  
+                    })  
+                    .UseNLog()
                     .Build()
                     .Run();
             }
             else
             {
-                Console.WriteLine("SSL encryption is not used....");
+                logger.Warn("SSL encryption is not used....");
                 Host.CreateDefaultBuilder(args)
-                    .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(startup).UseKestrel(options => { options.Limits.MaxRequestBodySize = null; }))
+                    .ConfigureWebHostDefaults(webBuilder => 
+                        webBuilder
+                        .UseStartup(startup)
+                        .UseKestrel(options => { options.Limits.MaxRequestBodySize = null; }))
+                    .ConfigureLogging(logging =>  
+                    {  
+                        logging.ClearProviders();  
+                        logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);  
+                    })  
+                    .UseNLog()
                     .Build()
                     .Run();
             }

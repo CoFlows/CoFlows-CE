@@ -24,7 +24,7 @@
 </div>
 
 <div class="col-sm-12 col-md-12" *ngIf="coflows.quser != null">
-    <a target="blank" href="{{coflows.coflows_server}}flow/openapi/{{selectedWB.WorkflowID}}/{{selectedWB.ID}}?_cokey={{coflows.quser.User.Secret}}">OpenAPI Specification</a>
+    <a target="blank" href="{{coflows.coflows_server}}flow/openapi/{{selectedWB.WorkflowID}}/{{selectedWB.ID}}?_cokey={{coflows.quser.Secret}}">OpenAPI Specification</a>
 </div>
 <br/>
 
@@ -54,7 +54,7 @@
 
 <div class="col-sm-12 col-md-12">
     <!-- {{coflows.coflows_server}}flow/getquery?wid={{selectedWB.WorkflowID}}&qid={{selectedWB.ID}}&name= -->
-    {{coflows.coflows_server}}flow/query/{{selectedWB.WorkflowID}}/{{selectedWB.ID}}/"name"?_cokey={{coflows.quser.User.Secret}}&p[0]=1&p[1]=2&p[2]3...
+    {{coflows.coflows_server}}flow/query/{{selectedWB.WorkflowID}}/{{selectedWB.ID}}/"name"?_cokey={{coflows.quser.Secret}}&p[0]=1&p[1]=2&p[2]3...
 </div>
 <coflows-query  #cfquery></coflows-query>
 

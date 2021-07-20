@@ -30,7 +30,7 @@ namespace QuantApp.Kernel
 
         int NextAvailableID(DataRowCollection Rows, string idName);
 
-        DataTable ExecuteDataTable(string table, string command);
+        DataTable ExecuteDataTable(string table, string command, params Tuple<string, object>[] args);
 
         DataTable GetDataTable(string table);
 
@@ -44,7 +44,7 @@ namespace QuantApp.Kernel
 
         void DeleteDataTable(DataTable datatable);
 
-        void ExecuteCommand(string command);
+        void ExecuteCommand(string command, params Tuple<string, object>[] args);
 
         DbDataReader ExecuteReader(string command);
 

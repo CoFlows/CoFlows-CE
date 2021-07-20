@@ -193,7 +193,7 @@ namespace QuantApp.Kernel.Adapters.SQL
             }
         }
 
-        public DataTable ExecuteDataTable(string table, string command)
+        public DataTable ExecuteDataTable(string table, string command, params Tuple<string, object>[] args)
         {
             using (SqlConnection _connectionInternal = new SqlConnection(ConnectString))
             {
@@ -558,7 +558,7 @@ namespace QuantApp.Kernel.Adapters.SQL
         //     }
         // }
 
-        public void ExecuteCommand(string command)
+        public void ExecuteCommand(string command, params Tuple<string, object>[] args)
         {
             lock (objLock)
             {

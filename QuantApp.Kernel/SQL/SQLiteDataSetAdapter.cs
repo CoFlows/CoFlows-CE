@@ -197,7 +197,7 @@ namespace QuantApp.Kernel.Adapters.SQL
             }
         }
 
-        public DataTable ExecuteDataTable(string table, string command)
+        public DataTable ExecuteDataTable(string table, string command, params Tuple<string, object>[] args)
         {
             lock (objLock)
             {
@@ -631,7 +631,41 @@ namespace QuantApp.Kernel.Adapters.SQL
             }
         }
 
-        public void ExecuteCommand(string command)
+        // public void ExecuteCommand(string command)
+        // {
+        //     lock (objLock)
+        //     {
+        //         if (string.IsNullOrWhiteSpace(command))
+        //             return;
+
+        //         using (SQLiteConnection _connectionInternal = new SQLiteConnection(ConnectString))
+        //         {
+        //             _connectionInternal.Open();
+        //             var transaction = _connectionInternal.BeginTransaction();
+        //             var commands = command.Split(';');
+        //             foreach(var _com in commands)
+        //             {
+        //                 try
+        //                 {
+        //                     SQLiteCommand com = new SQLiteCommand(_com, _connectionInternal, transaction);
+        //                     // SQLiteCommand com = new SQLiteCommand(_com);
+        //                     // com.CommandTimeout = 0 * 60 * 15;
+        //                     // com.Connection = _connectionInternal;
+        //                     com.ExecuteNonQuery();
+        //                 }
+        //                 catch(Exception e)
+        //                 {
+        //                     Console.WriteLine("ERROR: " + _com);
+        //                     Console.WriteLine(e);
+        //                 }
+        //             }
+        //             transaction.Commit();
+        //             _connectionInternal.Close();
+        //         }
+        //     }
+        // }
+
+        public void ExecuteCommand(string command, params Tuple<string, object>[] args)
         {
             lock (objLock)
             {
@@ -648,9 +682,10 @@ namespace QuantApp.Kernel.Adapters.SQL
                         try
                         {
                             SQLiteCommand com = new SQLiteCommand(_com, _connectionInternal, transaction);
-                            // SQLiteCommand com = new SQLiteCommand(_com);
-                            // com.CommandTimeout = 0 * 60 * 15;
-                            // com.Connection = _connectionInternal;
+                            if(args != null)
+                                foreach(var arg in args)
+                                    com.Parameters.AddWithValue(arg.Item1, arg.Item2);
+                            
                             com.ExecuteNonQuery();
                         }
                         catch(Exception e)

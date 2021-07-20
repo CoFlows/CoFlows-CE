@@ -22,6 +22,8 @@ open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.VisualBasic
 
+open NLog
+
 open Jint.Native
 
 open QuantApp.Kernel
@@ -70,7 +72,8 @@ type JsWrapper =
                     res.ToObject() :> obj
             with
             | ex -> 
-                "JS Wrapper Error: " + ex.ToString() |> Console.WriteLine
+                let logger = LogManager.GetCurrentClassLogger()
+                "JS Wrapper Error: " + ex.ToString() |> logger.Error
                 null
             )
 
@@ -153,9 +156,11 @@ module Code =
             File.WriteAllBytes(fileName, wc.DownloadData(url)) |> ignore
 
         CompiledJVMBaseClasses.TryAdd(file.FullName, file.FullName)
-        "Jar Installed: " + url |> Console.WriteLine
+        let logger = LogManager.GetCurrentClassLogger()            
+        "Jar Installed: " + url |> logger.Info
 
     let InstallNuGetAssembly (packageName : string) (packageVersion : string) : unit =
+        let logger = LogManager.GetCurrentClassLogger()
 
         let downloadPackage (masterName : string) version =
             let dict = System.Collections.Generic.Dictionary<string, string>()
@@ -170,12 +175,10 @@ module Code =
                     
                     let archive = 
                                 "https://www.nuget.org/api/v2/package/" + name + "/" + System.Text.RegularExpressions.Regex.Replace(version, @"[^\d(\.\d)*$]", "")
-                                // "https://globalcdn.nuget.org/packages/" + name.ToLower() + "." + System.Text.RegularExpressions.Regex.Replace(version, @"[^\d(\.\d)*$]", "") + ".nupkg"
                                 |> wc.DownloadData
                                 |> MemoryStream
                                 |> ZipArchive
                                 
-                    //let files = Collections.Generic.Dictionary<string, string>()
                     let files =
                         [|
                             for entry in archive.Entries do
@@ -221,7 +224,7 @@ module Code =
                                     let _, netcoreapp = ".NETCoreApp" |> frameworks
                                     let _, netstandard = ".NETStandard" |> frameworks
 
-                                    "Nuget Loading dependencies for: " + name + " " + version.ToString() |> Console.WriteLine
+                                    "Nuget Loading dependencies for: " + name + " " + version.ToString() |> logger.Info
                                     
                                     if netcoreapp |> Array.isEmpty |> not then
                                         netcoreapp
@@ -308,7 +311,7 @@ module Code =
             assembly
         
         let assembly = downloadPackage packageName packageVersion
-        "NuGet Loaded: " + packageName + " " + packageVersion.ToString() + " " + assembly.ToString() |> Console.WriteLine
+        "NuGet Loaded: " + packageName + " " + packageVersion.ToString() + " " + assembly.ToString() |> logger.Info
         if M._compiledAssemblies.ContainsKey(packageName + packageVersion.ToString()) then
             M._compiledAssemblies.[packageName + packageVersion.ToString()] <- assembly
             M._compiledAssemblyNames.[packageName + packageVersion.ToString()] <- packageName + packageVersion.ToString()
@@ -317,6 +320,7 @@ module Code =
             M._compiledAssemblyNames.TryAdd(packageName + packageVersion.ToString(), packageName + packageVersion.ToString()) |> ignore
 
     let installedPip = System.Collections.Concurrent.ConcurrentDictionary<string, string>()
+    
     let InstallPip (packageName : string) : unit =
         if packageName |> installedPip.ContainsKey |> not then
             using (Py.GIL()) (fun _ -> 
@@ -344,6 +348,8 @@ module Code =
             installedPip.TryAdd(packageName, packageName) |> ignore
 
     let InitializeCodeTypes(types : Type[]) =
+
+        let logger = LogManager.GetCurrentClassLogger()
 
         using (Py.GIL()) (fun _ -> "/app/mnt/pip/" |> setPythonImportPath |> PythonEngine.RunSimpleString)
         using (Py.GIL()) (fun _ -> "/app/mnt/Base/" |> setPythonImportPath |> PythonEngine.RunSimpleString)
@@ -421,6 +427,7 @@ module Code =
         with _ -> ()
 
         let compileExecute (saveDisk, execute) (codes_all : (string * string) list, functionName: string, parameters: obj []) =
+
             let codes = codes_all |> List.map(fun (name, code) -> name, code.Replace("open AQI.AQILabs.SecureWebClient",""))
 
             if saveDisk then
@@ -437,7 +444,6 @@ module Code =
 
             let sbuilder = StringBuilder()
             let resdb = Collections.Generic.List<string * obj * obj>()
-            // let expdb = Collections.Generic.List<string * obj>()
             
             try
                 let csFlag = "//cs"
@@ -604,6 +610,8 @@ module Code =
                                     typeof<Jint.Native.Array.ArrayConstructor>
                                     
                                     typeof<FSharp.Core.MeasureAttribute>
+
+                                    typeof<NLog.LogManager>
                                 ]
                                 |> List.map(Assembly.GetAssembly)
                             )
@@ -684,7 +692,7 @@ module Code =
                                                                         )
                                                                 )
                                                             let pair = (name, res, null)
-                                                            // "Executed: " + m.Name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
+
                                                             pair |> resdb.Add
                                                     elif functionName = "?" then
                                                         // List all functions
@@ -714,7 +722,7 @@ module Code =
 
                             with
                                 | :? TargetInvocationException as tex -> "Execution failed with: " + (tex.InnerException.ToString()) |> sbuilder.AppendLine |> ignore
-                                | ex -> "Execution cannot start, reason: " + ex.ToString() |> Console.WriteLine
+                                | ex -> "Execution cannot start, reason: " + ex.ToString() |> logger.Error
 
                         resdb |> Seq.toList
                     
@@ -757,7 +765,7 @@ module Code =
                                                                         
                                     errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
                                     #if MONO_LINUX || MONO_OSX
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(logger.Error)
                                     #endif
                                     let assembly = System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile)
 
@@ -834,7 +842,7 @@ module Code =
                                     assembly
                                 else
                                     #if MONO_LINUX || MONO_OSX
-                                    errors |> Seq.iter(Console.WriteLine)
+                                    errors |> Seq.iter(logger.Error)
                                     #endif
                                     errors |> Seq.map(fun err -> err.ToString()) |> Seq.iter(sbuilder.AppendLine >> ignore)
                                     null
@@ -890,7 +898,7 @@ module Code =
                                     assembly
                                 else
                                     #if MONO_LINUX || MONO_OSX
-                                    errors |> Seq.iter(Console.WriteLine)
+                                    errors |> Seq.iter(logger.Error)
                                     #endif
                                     errors |> Seq.iter(fun err -> sbuilder.AppendLine(err.ToString()) |> ignore)
                                     null
@@ -945,7 +953,7 @@ module Code =
                                                                 delCommand |> PythonEngine.Exec
                                                                 CompiledPythonModules.TryRemove(lastHash) |> ignore
                                                     with 
-                                                    | e -> e |> Console.WriteLine
+                                                    | e -> e |> logger.Error
 
                                                     let modFlag = "Base/" |> name.StartsWith |> not
                                                     CompiledPythonModulesNameHash.[name] <- hash
@@ -979,7 +987,7 @@ module Code =
                                                     
                                                         let pyMod = PythonEngine.CompileToModule(name, code, pyFile)
                                                         if pyMod |> isNull then 
-                                                            "Error loading: " + name |> Console.WriteLine
+                                                            "Error loading: " + name |> logger.Error
                                                             _name, null 
                                                         else
                                                             (hash, pyMod) |> CompiledPythonModules.TryAdd
@@ -987,7 +995,7 @@ module Code =
                                                             _name, pyMod
                                             with
                                             | ex -> 
-                                                ex |> Console.WriteLine
+                                                ex |> logger.Error
                                                 if "required positional argument" |> ex.Message.Contains |> not then
                                                     ex.Message |> sbuilder.AppendLine |> ignore
                                                 "", null
@@ -1040,7 +1048,7 @@ module Code =
 
                                                                 e.StackTrace :> obj
                                                         | e -> 
-                                                            "Error: " + e.ToString() |> Console.WriteLine
+                                                            "Error: " + e.ToString() |> logger.Error
                                                             
                                                             if "required positional argument" |> e.Message.Contains |> not then
                                                                 e.Message |> sbuilder.AppendLine |> ignore
@@ -1083,7 +1091,7 @@ module Code =
                                                             
                                                         with
                                                         | ex -> 
-                                                            ex |> Console.WriteLine
+                                                            ex |> logger.Error
                                                             if "required positional argument" |> ex.Message.Contains |> not then
                                                                 ex.Message |> sbuilder.AppendLine |> ignore
                                                             inner_call
@@ -1145,7 +1153,6 @@ module Code =
                                                 let cls = result.GetPythonType().ToString().Replace("<class '","").Replace("'>","")
                                                 
                                                 let obje = cls |> obje_func(result, functionName)
-                                                // obje |> Console.WriteLine
 
                                                 if obje |> isNull |> not then
                                                     let pair = (functionName, obje, null)
@@ -1156,10 +1163,6 @@ module Code =
                                                 (e.ToString().Contains("RuntimeError") |> not) &&
                                                 (e.ToString().Contains("NameError") |> not) -> 
 
-                                                // "--- ERR 2" |> Console.WriteLine
-                                                // e |> Console.WriteLine
-
-                                                // e.Message |> sbuilder.AppendLine |> ignore
                                                 let pair = (functionName, null, e.Message :> obj)
                                                 pair |> resdb.Add
                                             | ex ->
@@ -1244,7 +1247,7 @@ module Code =
                                                 if functionName |> String.IsNullOrWhiteSpace |> not && functionName = "?" |> not then
                                                     if functionName = name then
                                                         let t0 = DateTime.Now
-                                                        // "Executing: " + name + " " + t0.ToString() |> Console.WriteLine
+                                                        
                                                         let valu_s = valu.ToString()
                                                         if valu_s.StartsWith("function()") then
                                                             let func = valu.ToObject() :?> Func<Jint.Native.JsValue,Jint.Native.JsValue[],Jint.Native.JsValue>
@@ -1279,11 +1282,9 @@ module Code =
                                                                     res.ToObject() :> obj
                                                             let pair = (name, res, null)
 
-                                                            // "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                             pair |> resdb.Add
                                                         else
                                                             let pair = (name, valu.ToObject() :> obj, null)
-                                                            // "Executed: " + name + " " + (DateTime.Now - t0).ToString() |> Console.WriteLine
                                                             pair |> resdb.Add
                                                 elif name.StartsWith("__") |> not then
                                                     let valu_s = valu.ToString()
@@ -1372,9 +1373,9 @@ module Code =
 
                                 CompiledJVMBaseClasses.Values |> Seq.toArray |> Runtime.SetClassPath
                                 
-                                "JVM Engine not started: " + JVM.Runtime.Loaded.ToString() |> Console.WriteLine
+                                "JVM Engine not started: " + JVM.Runtime.Loaded.ToString() |> logger.Error
                             else
-                                "JVM Engine started" |> Console.WriteLine
+                                "JVM Engine started" |> logger.Info
 
                     let compileJava (codes : (string * string) list) =                    
                         initJVM()
@@ -1419,7 +1420,7 @@ module Code =
 
                                     errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
                                     #if MONO_LINUX || MONO_OSX
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(logger.Error)
                                     #endif
                                     if exitCode = 0 then
                                         (hash, path) |> CompiledJVMClasses.TryAdd |> ignore
@@ -1444,7 +1445,7 @@ module Code =
 
                                     errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
                                     #if MONO_LINUX || MONO_OSX
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(logger.Error)
                                     #endif
 
                                     if exitCode = 0 then
@@ -1535,11 +1536,10 @@ module Code =
                                                                 pair |> resdb.Add
                                                         else
 
-                                                            // "------ JAVA: " + className |> Console.WriteLine
                                                             let fname = className.ToLower()
                                                             let doc = if documentation.ContainsKey(fname) then documentation.[fname] elif documentation.ContainsKey(fname + ".java") then documentation.[fname + ".java"] else (Seq.empty |> Map.ofSeq)
                                                             let name = funcName
-                                                            // let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else {| Name = ""; Summary = ""; Remarks = ""; Returns = ""; Parameters = Seq.empty |}) :> obj)
+
                                                             let pair = (funcName, (if doc.ContainsKey(name) then doc.[name] else null) :> obj, null)
                                                             pair |> resdb.Add
                                                     with
@@ -1556,8 +1556,6 @@ module Code =
                                                 if "Runtime Method not found" |> message.Contains |> not then
                                                     let pair = (funcName, null, message :> obj)
                                                     pair |> resdb.Add
-                                                    // message |> sbuilder.AppendLine |> ignore
-                                                    // "--------------------------" |> sbuilder.AppendLine |> ignore
                                             )
 
 
@@ -1626,7 +1624,7 @@ module Code =
 
                                     errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
                                     #if MONO_LINUX || MONO_OSX
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(logger.Error)
                                     #endif
                                     if exitCode = 0 then
                                         CompiledJVMClasses.TryAdd(hash, path) |> ignore
@@ -1651,7 +1649,7 @@ module Code =
 
                                     errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(sbuilder.AppendLine >> ignore)
                                     #if MONO_LINUX || MONO_OSX
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(Console.WriteLine)
+                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(logger.Error)
                                     #endif
 
                                     if exitCode = 0 then
@@ -1887,17 +1885,16 @@ module Code =
                     if js_code |> List.isEmpty |> not then js_code |> runJS 
 
             with
-            | ex -> "QuantApp Compile ERROR: ---------------------------------------------------------------------" + Environment.NewLine + ex.ToString() |> Console.WriteLine
+            | ex -> ex.ToString() |> logger.Error
 
             codes |> Seq.toList 
             |> List.iter(fun (name, code) -> 
                 let md5 = code |> GetMd5Hash
                 if md5 |> CompiledBase.ContainsKey |> not then
-                    // "Compiling: " + name |> Console.WriteLine 
+                    
                     
                     CompiledBase.TryAdd(md5, name) |> ignore)
 
-            // { Result = (resdb |> Seq.toList); Exceptions = (expdb |> Seq.toList); Compilation = (sbuilder.ToString()) }
             { Result = (resdb |> Seq.toList); Compilation = (sbuilder.ToString()) }
 
         Utils.SetBuildCode(BuildCode(fun codes_all -> 
@@ -1908,10 +1905,12 @@ module Code =
             (codes_all, null, null) |> compileExecute(true, true)))
         Utils.SetExecuteCodeFunction(ExecuteCodeFunction(fun saveDisk codes name parameters -> 
             (codes, name, parameters) |> compileExecute(saveDisk, true)))
+    
     let InitializeCode() = InitializeCodeTypes([||])
     
     let InstallNuGets (nugets : seq<NuGetPackage>) : unit =
-        
+        let logger = LogManager.GetCurrentClassLogger()
+
         if nugets |> isNull |> not && nugets |> Seq.isEmpty |> not then
             nugets
             |> Seq.iter(fun nuget -> 
@@ -1921,10 +1920,11 @@ module Code =
                         InstallNuGetAssembly nuget.ID nuget.Version
                         LoadedNuGets.TryAdd(key, key) |> ignore
                 with
-                | e -> e |> Console.WriteLine |> ignore
+                | e -> e |> logger.Error |> ignore
                 )
 
     let InstallPips (pips : seq<PipPackage>) : unit =
+        let logger = LogManager.GetCurrentClassLogger()
         if pips |> isNull |> not && pips |> Seq.isEmpty |> not then
             pips
             |> Seq.iter(fun pip -> 
@@ -1934,11 +1934,11 @@ module Code =
                         pip.ID |> InstallPip
                         LoadedPips.TryAdd(key, key) |> ignore
                 with
-                | e -> e.ToString() |> Console.WriteLine
+                | e -> e |> logger.Error
                 )
 
     let InstallJars (jars : seq<JarPackage>) : unit =
-        
+        let logger = LogManager.GetCurrentClassLogger()
         if jars |> isNull |> not && jars |> Seq.isEmpty |> not then
             jars
             |> Seq.iter(fun jar -> 
@@ -1948,10 +1948,11 @@ module Code =
                         jar.Url |> InstallJar
                         LoadedJars.TryAdd(key, key) |> ignore
                 with
-                | e -> e.ToString() |> Console.WriteLine
+                | e -> e |> logger.Error
                 )
     
     let ProcessPackageFile (pkg_file : string, registerBuild : bool) : PKG =
+        let logger = LogManager.GetCurrentClassLogger()
         let setListener (pkgID, file : string) = 
             let path = file |> Path.GetDirectoryName
             if path |> listeningPaths.ContainsKey |> not then
@@ -1976,18 +1977,14 @@ module Code =
 
                         if registerBuild then
                             let t0 = DateTime.Now
-                            "--------------------Build started: " + name + " @ " + t0.ToString() |> Console.WriteLine
+                            "Build started: " + name |> logger.Info
                             let buildResult = Utils.RegisterCode (false, false) [name, code]
 
-                            if buildResult |> String.IsNullOrEmpty then
-                                "       building successful!!!" |> Console.WriteLine
-
                             let t1 = DateTime.Now
-                            "--------------------Build done: " + name + " @ " + t0.ToString() + " ... " + (t1 - t0).ToString() |> Console.WriteLine
-                            ""|>Console.WriteLine
-                            ""|>Console.WriteLine
-                        
-                        "Saving changes to: " + name + " @ " + DateTime.Now.ToString() |> Console.WriteLine
+                            if buildResult |> String.IsNullOrEmpty then
+                                "Build successful: " + name + " in " + (t1 - t0).ToString() |> logger.Info
+                            else
+                                "Build result: " + name + " in " + (t1 - t0).ToString() + "\n" + buildResult |> logger.Error
                         
                         let work_books = pkgID + "--Queries" |> M.Base
                         let wb_res = work_books.[fun x -> M.V<string>(x, "Name") = name]
@@ -2122,7 +2119,7 @@ module Code =
                             name, content
                         with
                         | e ->
-                            // e |> Console.WriteLine 
+                            
                             try
                                 (if entry.Name |> String.IsNullOrEmpty then Path.GetFileName(entry.Content) else entry.Name), System.Convert.ToBase64String(File.ReadAllBytes(entry.Content))
                             with
@@ -2191,7 +2188,6 @@ module Code =
                 pkg.Bins 
                 |> Seq.map(fun entry -> 
                     let content = pkg_dict.["Bins/" + entry.Name]
-                    // content |> Console.WriteLine
                         
                     { entry with Content = content }
                 )
@@ -2218,8 +2214,9 @@ module Code =
         pkg_content
     
     let BuildRegisterPackage (pkg_content : PKG) =
+        let logger = LogManager.GetCurrentClassLogger()
 
-        CompiledPackages.Keys |> Seq.iter(fun key -> "Compiled Packages: " + CompiledPackages.[key] + " " + key |> Console.WriteLine)
+        CompiledPackages.Keys |> Seq.iter(fun key -> "Compiled Packages: " + CompiledPackages.[key] + " " + key |> logger.Info)
 
         let not_compiled_hashes = 
             pkg_content.Base 
@@ -2235,9 +2232,9 @@ module Code =
 
             && CompiledPackages.ContainsKey(pkg_content.ID)
         then
-            "New base library compiled..." |> Console.WriteLine
+            "New base library compiled..." |> logger.Warn
             #if MONO_LINUX || MONO_OSX
-            "Trying to restart runtime..." |> Console.WriteLine
+            "Trying to restart runtime..." |> logger.Warn
             raise (System.SystemException("New base library compiled"))
             #endif
 
@@ -2280,7 +2277,7 @@ module Code =
         |> (fun x -> x.ToString())
 
     let BuildCompileOnlyPackage (pkg_content : PKG) =
-
+        let logger = LogManager.GetCurrentClassLogger()
         if 
             pkg_content.Base 
             |> Seq.toList 
@@ -2291,7 +2288,7 @@ module Code =
             |> List.filter(M._compiledAssemblies.ContainsKey)
             |> List.isEmpty
         then
-            "New base library compiled..." |> Console.WriteLine
+            "New base library compiled..." |> logger.Warn
 
         pkg_content.NuGets |> InstallNuGets
         pkg_content.Pips |> InstallPips
@@ -2323,6 +2320,7 @@ module Code =
         |> (fun x -> x.ToString())
 
     let ProcessPackageJSON (pkg_content : PKG, manageFiles : bool) =
+        let logger = LogManager.GetCurrentClassLogger()
         let build = pkg_content |> BuildRegisterPackage
         if build |> String.IsNullOrEmpty then
             let ws =
@@ -2505,8 +2503,8 @@ module Code =
             wsp.Save()
 
         else
-            "Build result: " |> Console.WriteLine
-            build |> Console.WriteLine
+            
+            "Build result: \n" + build |> logger.Info
 
         build
 
@@ -2801,8 +2799,6 @@ module Code =
     let ProcessPackageToZIP (pkg : PKG) : byte[] =
         let memoryStream = MemoryStream()
         
-        // using (ZipArchive(memoryStream, ZipArchiveMode.Create, true))
-        //     (fun archive -> 
         pkg.Base
         |> Seq.toList
         |> List.iter(fun entry -> 

@@ -37,13 +37,6 @@ using CoFlows.Server.Utils;
 
 namespace CoFlows.Server.Realtime
 {    
-    public class HttpProxyRequest
-    {
-        public string Url { get; set; }
-        public string Content { get; set;}
-        public List<KeyValuePair<string, string>> Headers { get; set; }
-    }
-
     public class RTDSocketMiddleware
     {
         private readonly RequestDelegate _next;

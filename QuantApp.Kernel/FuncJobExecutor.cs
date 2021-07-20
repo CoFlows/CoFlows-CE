@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using Quartz;
 using Quartz.Impl;
 
+using NLog;
+
 namespace QuantApp.Kernel
 {
     /// <summary>
@@ -46,12 +48,13 @@ namespace QuantApp.Kernel
         /// <param name="schedule">Quartz formatted schedule</param>
         public void StartJob(string schedule)
         {
+            var logger = LogManager.GetCurrentClassLogger();
             // type | cron @ Timezone
             string jobID = "Job: " + _name + " " + schedule;
 
             string tz = "UTC";
 
-            Console.WriteLine("Starting " + jobID);
+            logger.Info("Starting " + jobID);
 
             IJobDetail job = JobBuilder.Create<FuncJob>()
                 .WithIdentity(jobID, "Func Group " + _name)
@@ -95,8 +98,10 @@ namespace QuantApp.Kernel
         /// </summary>
         public void StopJob()
         {
+            
             if (_sched != null)
             {
+                var logger = LogManager.GetCurrentClassLogger();
                 IReadOnlyCollection<string> jobGroups = (_sched.GetJobGroupNames()).Result;
                 IReadOnlyCollection<string> triggerGroups = (_sched.GetTriggerGroupNames()).Result;
 
@@ -113,7 +118,7 @@ namespace QuantApp.Kernel
                             if (group == ("Func Group " + _name))
                             {
                                 _sched.DeleteJob(jobKey);
-                                Console.WriteLine("STOPING: " + jobKey);
+                                logger.Info("Stopping: " + jobKey);
                             }
                         }
                     }

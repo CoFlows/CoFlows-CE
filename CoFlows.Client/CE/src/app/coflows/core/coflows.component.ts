@@ -9,7 +9,6 @@ import { takeWhile } from "rxjs/operators"
 
 import { MessagingService } from './messaging.service';
 
-
 @Component({
   selector: 'coflows',
   template: '',  
@@ -24,24 +23,21 @@ export class CoFlowsComponent implements  CanActivate  {
     
     public quser: any = null
 
+    private forceLogout = true
+
     public static UpdateInstruments = false
      // Inject HttpClient into your component or service.
     constructor(private http: HttpClient, private router: Router, private msService: MessagingService) {
                 
         this.coflows_server = (msService.secure ? 'https' : 'http') + '://' + msService.server + '/'
 
-        // this.msService.subscribe(msg => this.ProcessMessage(msg))
-
         let storedToken = localStorage.getItem('CoFlows-CoFlowsJWT')
-        // console.log('TOKEN LOAD: ' + storedToken)
         
         if(storedToken == null || storedToken == "" || storedToken == "null")
             this.header = null
         else
             this.header = new HttpHeaders().set('Authorization', `Bearer ` + storedToken)
 
-        // console.log('Header Load:', this.header, storedToken)
-        
         // this.msService.onClose(event => {
         //     console.log('connection closed', event, this.msService)
         //     // this.checkLogin(this.router.url)
@@ -49,20 +45,17 @@ export class CoFlowsComponent implements  CanActivate  {
         // });
         
         interval(10000)
-        .pipe(takeWhile(i => (this.quser != null && this.quser.User.Loggedin)))
+        // .pipe(takeWhile(i => (this.quser != null && this.quser.User.Loggedin)))
+        .pipe(takeWhile(i => (this.quser != null && this.quser.Loggedin)))
         .subscribe(i => { 
-            //if(this.quser != null && this.quser.User.Loggedin){
-                this.Ping()
-            //}
+            this.Ping()
         })
 
         interval(10000)
-        .pipe(takeWhile(i => !this.checking && !(this.quser != null && this.quser.User.Loggedin)))
+        // .pipe(takeWhile(i => !this.checking && !(this.quser != null && this.quser.User.Loggedin)))
+        .pipe(takeWhile(i => !this.checking && !(this.quser != null && this.quser.Loggedin)))
         .subscribe(i => { 
-            //if(this.quser == null || !this.quser.User.Loggedin){                
-                // console.log('check login', this.quser, this.header)
-                this.checkLogin(this.router.url)
-            //}            
+            this.checkLogin(this.router.url)
         })  
         
         interval(500)
@@ -77,38 +70,41 @@ export class CoFlowsComponent implements  CanActivate  {
 
     }
 
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {                
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
         CoFlowsComponent.UpdateInstruments = false
         if(state.url == "/authentication/signin"){
             return true
         }
         else{
-            if(this.quser != null && this.quser.User.Loggedin){
+            // if(this.quser != null && this.quser.User.Loggedin){
+            if(this.quser != null && this.quser.Loggedin){
                 return true
             }
             else{            
-                
                 this.checkLogin(state.url)
                 return false
             }
         }
     }
 
-    private CheckUser(func : any) {
+    CheckUser(func : any) {
         let waiting = false
         let iid = setInterval(x => {
             try{
-                if(!(this.quser != null && this.quser.User.Loggedin) && this.header != null && !waiting){
+                // if(!(this.quser != null && this.quser.User.Loggedin) && this.header != null && !waiting){
+                    if(!(this.quser != null && this.quser.Loggedin) && this.header != null && !waiting){
                     waiting = true
                     this.http.get(this.coflows_server + 'account/whoami', { headers: this.header })
                     .toPromise().then(response => {  
                         this.quser = response
                         waiting = false
 
-                        this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, func)
+                        // this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, func)
+                        this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.Session, func)
                         this.msService.onClose(event => {
                             console.log('connection closed', event, this.msService)
-                            this.logout(true)
+                            if(this.forceLogout)
+                                this.logout(true)
                         })
 
                         clearInterval(iid)
@@ -117,7 +113,8 @@ export class CoFlowsComponent implements  CanActivate  {
                         })
                     }
 
-                if(!waiting && this.quser != null && this.quser.User.Loggedin){
+                // if(!waiting && this.quser != null && this.quser.User.Loggedin){
+                    if(!waiting && this.quser != null && this.quser.Loggedin){
                     func()
                     clearInterval(iid)
                 }
@@ -135,7 +132,12 @@ export class CoFlowsComponent implements  CanActivate  {
     checkLogin(url : string): void {
         // console.log('check user', this.header)
         this.checking = true
-        if(this.router.url == '/authentication/signup' || this.router.url == '/authentication/forgot'){
+        if(
+            this.router.url == '/authentication/signup' || 
+            this.router.url == '/authentication/forgot' || 
+            this.router.url == '/client/signin' ||
+            this.router.url == '/client/signup'
+            ){
             // console.log(this.quser)
             this.checking = false
             return
@@ -159,21 +161,24 @@ export class CoFlowsComponent implements  CanActivate  {
                     this.quser = response
                     // console.log('login user', this.quser, this.header)
                     
-                    if(this.quser != null && this.quser.User.Loggedin){
+                    // if(this.quser != null && this.quser.User.Loggedin){
+                        if(this.quser != null && this.quser.Loggedin){
                         // if(this.msService.reOpen()){                
                             // location.rseload();
                             // this.msService.subscribe(msg => {this.ProcessMessage(msg);});
-                            this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, x => {})
+                            // this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, x => {})
+                            this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.Session, x => {})
                             this.msService.onClose(event => {
                                 console.log('connection closed', event, this.msService)
-                                // this.checkLogin(this.router.url)
-                                this.logout(true)
+                                
+                                if(this.forceLogout)
+                                    this.logout(true)
                             })
                         // }
 
                         if(url == '/authentication/signin' || url == null)
                             url = '/'
-
+ 
                         this.router.navigate ( [ url ] );
                         this.checking = false
                         return true
@@ -221,6 +226,7 @@ export class CoFlowsComponent implements  CanActivate  {
         }, 2000)
       }
 
+    
     oauth(token: string, url: string){
         if(!(token == null || token == "null" || token == "")){
 
@@ -242,11 +248,12 @@ export class CoFlowsComponent implements  CanActivate  {
 
                     localStorage.setItem('CoFlowsURL', null);
 
-                    this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, x => {})
+                    // this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, x => {})
+                    this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.Session, x => {})
                     this.msService.onClose(event => {
                         console.log('connection closed', event, this.msService)
-                        // this.checkLogin(this.router.url)
-                        this.logout(true)
+                        if(this.forceLogout)
+                            this.logout(true)
                     })
 
                     this.router.navigate ( [ url ] );
@@ -266,10 +273,23 @@ export class CoFlowsComponent implements  CanActivate  {
     }
 
     login(name: string, pass: string, url : string, callback): void {
-        this.http.post(this.coflows_server + 'account/login', {Username : name, Password: pass})
+        const headers = new HttpHeaders()
+                .set('Accept', 'application/json')
+                .set('Content-Type', 'application/x-www-form-urlencoded')
+                .set( 'No-Auth', 'True')
+
+        const body = new URLSearchParams()
+        body.set('client_id', 'jwt_token')
+        body.set('username', name)
+        body.set('password', pass)
+        body.set('grant_type', 'password')
+
+        // this.http.post(this.coflows_server + 'account/login', {Username : name, Password: pass})
+        this.http.post(this.coflows_server + 'connect/token', body.toString(), { headers: headers })
         .subscribe(
             (data : any) => {
-                let token = data.token                
+                // console.log(data)
+                let token = data.access_token                
                 if(!(token == null || token == "null" || token == "")){
                     // Read the result field from the JSON response.
                     this.header = new HttpHeaders().set('Authorization', `Bearer ` + token)
@@ -286,11 +306,12 @@ export class CoFlowsComponent implements  CanActivate  {
 
                             localStorage.setItem('CoFlowsURL', null);
 
-                            this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, x => {})
+                            // this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.User.Session, x => {})
+                            this.msService.subscribe(msg => this.ProcessMessage(msg), this.quser.Session, x => {})
                             this.msService.onClose(event => {
                                 console.log('connection closed', event, this.msService)
-                                // this.checkLogin(this.router.url)
-                                this.logout(true)
+                                if(this.forceLogout)
+                                    this.logout(true)
                             })
 
                             this.router.navigate ( [ url ] );
@@ -651,7 +672,7 @@ export class CoFlowsComponent implements  CanActivate  {
                 break;
 
             case 15: // PING
-                console.log('pong')//, message)
+                // console.log('pong')//, message)
                 break;
         }
     }
@@ -749,11 +770,42 @@ export class CoFlowsComponent implements  CanActivate  {
 
     Get(url : string, func : any, err?: any): void {        
         this.CheckUser(() => {
-            this.http.get(this.coflows_server + url, { headers: this.header })
+            this.http.get(this.coflows_server + url, { headers: this.header, responseType: 'text' })
             .toPromise().then(response => {  
-                func(response);
+                try {
+                    func(JSON.parse(response))
+                } catch (e) {
+                    func(response)
+                }
+                // func(response);
             })
-            .catch(error =>  {if(err != undefined) err(error) } )
+            .catch(error =>  {
+                if(err != undefined) 
+                    try {
+                        err(JSON.parse(error))
+                    } catch (e) {
+                        err(error)
+                    } 
+                } 
+            )
+        })
+    }
+
+    GetRaw(url : string, func : any, err?: any): void {        
+        this.CheckUser(() => {
+            this.http.get(this.coflows_server + url, { headers: this.header, responseType: 'text' })
+            .toPromise().then(response => {  
+                func(response)
+            })
+            .catch(error =>  {
+                if(err != undefined) 
+                    try {
+                        err(JSON.parse(error))
+                    } catch (e) {
+                        err(error)
+                    } 
+                } 
+            )
         })
     }
 

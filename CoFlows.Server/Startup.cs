@@ -7,12 +7,14 @@
  */
 
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 using Microsoft.AspNetCore.Authentication;
@@ -25,10 +27,24 @@ using Microsoft.OpenApi.Models;
 
 // Lets Encrypt
 using Certes;
-using FluffySpoon.AspNet.LetsEncrypt.Certes;
 using FluffySpoon.AspNet.LetsEncrypt;
+using FluffySpoon.AspNet.LetsEncrypt.Certes;
+using FluffySpoon.AspNet.LetsEncrypt.Persistence;
+using System.Security.Cryptography.X509Certificates;
 
+
+// Identity Server 4
+using IdentityModel;
+using IdentityServer4;
+using IdentityServer4.Models;
+using IdentityServer4.Stores;
+using IdentityServer4.AccessTokenValidation;
+using IdentityServer4.Services;
+
+using CoFlows.Server.IdentityServer;
 using CoFlows.Server.Realtime;
+
+using NLog;
 
 namespace CoFlows.Server
 {
@@ -56,6 +72,7 @@ namespace CoFlows.Server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var logger = LogManager.GetCurrentClassLogger();
             services.AddCors(options =>
                 {
                     options.AddPolicy("AllowAllOrigins",
@@ -140,29 +157,25 @@ namespace CoFlows.Server
                     options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
                 });
             }
-            else
-            {
-                services
-                    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-                    {
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuer = true,
-                            ValidateAudience = true,
-                            ValidateLifetime = true,
-                            ValidateIssuerSigningKey = true,
-                            ValidIssuer = "coflows-ce",
-                            ValidAudience = "coflows-ce",
-                            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Program.jwtKey))
-                        };
-                    });
-            }
+            // else
+            // {
+            //     services
+            //         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //         .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            //         {
+            //             options.TokenValidationParameters = new TokenValidationParameters
+            //             {
+            //                 ValidateIssuer = true,
+            //                 ValidateAudience = true,
+            //                 ValidateLifetime = true,
+            //                 ValidateIssuerSigningKey = true,
+            //                 ValidIssuer = "coflows-ce",
+            //                 ValidAudience = "coflows-ce",
+            //                 IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Program.jwtKey))
+            //             };
+            //         });
+            // }
 
-
-            
-
-            
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<RTDSocketManager>();
 
@@ -195,13 +208,13 @@ namespace CoFlows.Server
                             var strData = System.Convert.ToBase64String(bytes);
                             m.Exchange(resList[0], new Certificate(){ Key = key.ToString(), Data = strData });
 
-                            Console.WriteLine("LetsEncrypt certificate UPDATED...");
+                            logger.Info("LetsEncrypt certificate UPDATED...");
                         }
                         else
                         {
                             var strData = System.Convert.ToBase64String(bytes);
                             m += new Certificate(){ Key = key.ToString(), Data = strData };
-                            Console.WriteLine("LetsEncrypt certificate CREATED...");
+                            logger.Info("LetsEncrypt certificate CREATED...");
                         }
                         m.Save();
                     },
@@ -216,11 +229,11 @@ namespace CoFlows.Server
                             {
                                 var data = QuantApp.Kernel.M.V<string>(resList[0], "Data");
                                 var bytes = System.Convert.FromBase64String(data);
-                                Console.WriteLine("LetsEncrypt found certificate...");
+                                logger.Info("LetsEncrypt found certificate...");
                                 return bytes;
                             }
 
-                            Console.WriteLine("LetsEncrypt didn't find a certificate, attempting to create one...");
+                            logger.Info("LetsEncrypt didn't find a certificate, attempting to create one...");
 
                             return null;
                         }
@@ -232,6 +245,136 @@ namespace CoFlows.Server
                     });
                 services.AddFluffySpoonLetsEncryptFileChallengePersistence();
             }
+
+            SetIdentityServer4(services, GetCertificate());
+        }
+
+        private ECDsaSecurityKey GetCertificate(int count = 0)
+        {
+            var logger = LogManager.GetCurrentClassLogger();
+
+            var sslFlag = CoFlows.Server.Program.hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(CoFlows.Server.Program.letsEncryptEmail);
+            
+            if(!sslFlag && Program.hostName.ToLower() != "localhost")
+                return null;
+
+            var throwExction = false;
+            try
+            {
+                var mKey = "---LetsEncrypt--" + Program.hostName + "." + Program.letsEncryptEmail + "." + (Program.letsEncryptStaging ? "Staging" : "Production") + ".certificate_" + CertificateType.Site;
+                
+                var m = QuantApp.Kernel.M.Base(mKey);
+
+                var resList = m[x => QuantApp.Kernel.M.V<string>(x, "Key") == CertificateType.Site.ToString()];
+                if(resList != null && resList.Count > 0)
+                {
+                    var data = QuantApp.Kernel.M.V<string>(resList[0], "Data");
+                    var bytes = System.Convert.FromBase64String(data);
+                    X509Certificate2 x509 = new X509Certificate2(bytes, nameof(FluffySpoon));
+
+                    var mess = "\n------------------------------------\n";
+                    mess += "Subject: " + x509.Subject + "\n";
+                    mess += "Issuer: " + x509.Issuer + "\n";
+                    mess += "Version: " + x509.Version + "\n";
+                    mess += "Valid Date: " + x509.NotBefore + "\n";
+                    mess += "Expiry Date: " + x509.NotAfter + "\n";
+                    mess += "Thumbprint: " + x509.Thumbprint + "\n";
+                    mess += "Serial Number: " + x509.SerialNumber + "\n";
+                    mess += "Friendly Name: " + x509.PublicKey.Oid.FriendlyName + "\n";
+                    mess += "Public Key Format: " + x509.PublicKey.EncodedKeyValue.Format(true) + "\n";
+                    mess += "Raw Data Length: " + x509.RawData.Length + "\n";
+                    mess += "Certificate to string: " + x509.ToString(true) + "\n";
+                    mess += "------------------------------------";
+                    logger.Debug(mess);
+                    
+                    var ecdsa = x509.GetECDsaPrivateKey();
+                    var securityKey = new ECDsaSecurityKey(ecdsa) { KeyId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex) };
+
+                    return securityKey;
+                }
+                else
+                {
+                    throwExction = true;
+                }
+
+                return null;
+            }
+            catch(Exception e)
+            {
+                logger.Error(e);
+                
+                if(throwExction)
+                {
+                    // Wait 30sec before throwing an exception to restart the server.
+                    // This should leave enough time for LetsEncrypt to issue a new certificate and save.
+                    System.Threading.Thread.Sleep(1000 * 30);
+                    
+                    if(count < 2)
+                        return GetCertificate(count++);
+                    
+                }
+                return null;
+            }
+        }
+
+        private void SetIdentityServer4(IServiceCollection services, ECDsaSecurityKey certificate)
+        {
+            IEnumerable<ApiResource> Apis =
+                new List<ApiResource>
+                {
+                    new ApiResource("resourceapi", "Resource API")
+                    {
+                        Scopes = {new Scope("api.read")}
+                    }
+                };
+
+            IEnumerable<Client> Clients =
+                new List<Client>
+                {
+                    new Client {
+                        ClientId = "jwt_token",
+                        ClientName = "JWT Token",
+                        AccessTokenLifetime = 60 * 60 * 24,
+                        AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
+                        RequireClientSecret = false,
+                        AllowAccessTokensViaBrowser = true,
+                        AllowedScopes = new List<string> { "resourceapi" }
+                    }
+                };
+
+            if(certificate == null)
+                services.AddIdentityServer()
+                    .AddDeveloperSigningCredential()
+                    .AddInMemoryApiResources(Apis)
+                    .AddInMemoryClients(Clients)
+                    .AddCustomUserStore();
+            else
+            {
+                services.AddIdentityServer()
+                    .AddSigningCredential(certificate, "ES256")
+                    .AddInMemoryApiResources(Apis)
+                    .AddInMemoryClients(Clients)
+                    .AddCustomUserStore();
+            }
+
+            var sslFlag = CoFlows.Server.Program.hostName.ToLower() != "localhost" && !string.IsNullOrWhiteSpace(CoFlows.Server.Program.letsEncryptEmail);
+            var hostName = (sslFlag ? "https://" : "http://") + CoFlows.Server.Program.hostName.ToLower();
+
+            services.AddAuthorization();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddIdentityServerAuthentication(
+                options =>
+                {
+                    options.Authority = hostName;
+                    options.ApiName = "resourceapi";
+                    options.RequireHttpsMetadata = false;
+                });
+            services.AddSingleton<ICorsPolicyService>((container) => {
+                var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
+                return new DefaultCorsPolicyService(logger) {
+                    AllowAll = true
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -276,6 +419,9 @@ namespace CoFlows.Server
 
             app.UseWebSockets();
             app.UseMiddleware<T>();
+
+            // Identity Server 4
+            app.UseIdentityServer();
             
             app.UseAuthentication();
             app.UseMvc();

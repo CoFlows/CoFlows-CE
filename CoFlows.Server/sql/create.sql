@@ -85,3 +85,17 @@ CREATE TABLE FileRepository (
     Data Text Not Null,
     PRIMARY KEY (ID)
     );
+
+CREATE TABLE Logger (
+        RuntimeID Varchar(150) Not Null,
+        ID Varchar(150) Not Null,
+        Timestamp DateTime Not Null,
+        Level Varchar(50) Not Null,
+        ClassName Text Not Null,
+        MemberName Text Not Null,
+        LineNumber int Not Null,
+        SequencyID int Not Null,
+
+        Message Text Not Null,
+        PRIMARY KEY (RuntimeID, ID, Timestamp, Level, ClassName, MemberName)
+    );

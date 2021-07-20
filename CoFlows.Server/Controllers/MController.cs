@@ -44,15 +44,20 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
 
-            if (userId != null)
-            {
-                if(quser == null)
-                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-                else
-                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
-            }
-            else
-                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+            if(quser == null)
+                return Unauthorized();
+
+            QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+
+            // if (userId != null)
+            // {
+            //     if(quser == null)
+            //         QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+            //     else
+            //         QuantApp.Kernel.User.ContextUser = quser.ToUserData();
+            // }
+            // else
+            //     QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
 
             M m = M.Base(type);
             var res = m.KeyValues();
@@ -87,15 +92,10 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
 
-            if (userId != null)
-            {
-                if(quser == null)
-                    QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-                else
-                    QuantApp.Kernel.User.ContextUser = quser.ToUserData();
-            }
-            else
-                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+            if(quser == null)
+                return Unauthorized();
+
+            QuantApp.Kernel.User.ContextUser = quser.ToUserData();
 
             M m = M.Base(type);
             var res = m.RawEntries();
@@ -120,9 +120,15 @@ namespace CoFlows.Server.Controllers
                 return Unauthorized();
 
             QuantApp.Kernel.User quser = QuantApp.Kernel.User.FindUser(userId);
+            if(quser == null)
+                return Unauthorized();
+
+            QuantApp.Kernel.User.ContextUser = quser.ToUserData();
 
             M m = M.Base(type);
             m.Save();
+
+            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
 
             return Ok(new { Result = "saved"});
         }
