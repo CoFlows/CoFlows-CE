@@ -708,6 +708,40 @@ namespace QuantApp.Kernel.Adapters.SQL
             }
         }
 
+        public void ExecuteCommand(List<Tuple<string,Tuple<string, object>[]>> pkgs)
+        {
+            lock (objLock)
+            {
+                using (SQLiteConnection _connectionInternal = new SQLiteConnection(ConnectString))
+                {
+                    _connectionInternal.Open();
+                    var transaction = _connectionInternal.BeginTransaction();
+                    foreach(var _pkg in pkgs)
+                    {
+                        string _com = _pkg.Item1;
+                        Tuple<string, object>[] args = _pkg.Item2;
+                            
+                        try
+                        {
+                            SQLiteCommand com = new SQLiteCommand(_com, _connectionInternal, transaction);
+                            if(args != null)
+                                foreach(var arg in args)
+                                    com.Parameters.AddWithValue(arg.Item1, arg.Item2);
+                            
+                            com.ExecuteNonQuery();
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine("ERROR: " + _com);
+                            Console.WriteLine(e);
+                        }
+                    }
+                    transaction.Commit();
+                    _connectionInternal.Close();
+                }
+            }
+        }
+
         public DbDataReader ExecuteReader(string command)
         {
             lock (objLock)

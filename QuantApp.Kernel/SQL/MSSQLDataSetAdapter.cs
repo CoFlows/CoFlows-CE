@@ -584,16 +584,44 @@ namespace QuantApp.Kernel.Adapters.SQL
                         {
                             try
                             {
-                                // SqlConnection com = new SqlConnection(_com, _connectionInternal, transaction);
-                                // NpgsqlCommand com = new NpgsqlCommand(_com);
-                                // com.CommandTimeout = 0 * 60 * 15;
-                                // com.Connection = _connectionInternal;
-                                // com.ExecuteNonQuery();
-                                
-                                // SqlCommand _command = _connectionInternal.CreateCommand();
-                                // _command.Transaction = transaction;
-                                // _command.CommandText = _com;
+                                SqlCommand _command = new SqlCommand(_com, _connectionInternal, transaction);
+                                if(args != null)
+                                    foreach(var arg in args)
+                                        _command.Parameters.AddWithValue(arg.Item1, arg.Item2);
+                                _command.ExecuteNonQuery();
+                            }
+                            catch(Exception e)
+                            {
+                                Console.WriteLine("ERROR: " + _com);
+                                Console.WriteLine(e);
+                                // throw e;
+                            }
+                        }
+                    }
+                    transaction.Commit();
+                    _connectionInternal.Close();
+                }
+            }
+        }
 
+        public void ExecuteCommand(List<Tuple<string,Tuple<string, object>[]>> pkgs)
+        {
+            lock (objLock)
+            {
+                using (SqlConnection _connectionInternal = new SqlConnection(ConnectString))
+                {
+                    _connectionInternal.Open();
+                    var transaction = _connectionInternal.BeginTransaction();
+                    
+                    foreach(var _pkg in pkgs)
+                    {
+                        string _com = _pkg.Item1;
+                        Tuple<string, object>[] args = _pkg.Item2;
+                        
+                        if(!string.IsNullOrEmpty(_com))
+                        {
+                            try
+                            {
                                 SqlCommand _command = new SqlCommand(_com, _connectionInternal, transaction);
                                 if(args != null)
                                     foreach(var arg in args)

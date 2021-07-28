@@ -665,6 +665,40 @@ namespace QuantApp.Kernel.Adapters.SQL
             }
         }
 
+        public void ExecuteCommand(List<Tuple<string,Tuple<string, object>[]>> pkgs)
+        {
+            lock (objLock)
+            {
+                using (NpgsqlConnection _connectionInternal = new NpgsqlConnection(ConnectString))
+                {
+                    _connectionInternal.Open();
+                    var transaction = _connectionInternal.BeginTransaction();
+                    foreach(var _pkg in pkgs)
+                    {
+                        string _com = _pkg.Item1;
+                        Tuple<string, object>[] args = _pkg.Item2;
+                        if(!string.IsNullOrEmpty(_com))
+                        {
+                            try
+                            {
+                                NpgsqlCommand com = new NpgsqlCommand(_com, _connectionInternal, transaction);
+                                if(args != null)
+                                    foreach(var arg in args)
+                                        com.Parameters.AddWithValue(arg.Item1, arg.Item2);
+                                com.ExecuteNonQuery();
+                            }
+                            catch(Exception e)
+                            {
+                                Console.WriteLine(e);
+                            }
+                        }
+                    }
+                    transaction.Commit();
+                    _connectionInternal.Close();
+                }
+            }
+        }
+
         public void CreateDB(string connectionString, List<Tuple<string, string>> schemas)
         {
             var logger = LogManager.GetCurrentClassLogger();
