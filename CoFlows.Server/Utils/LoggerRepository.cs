@@ -33,6 +33,7 @@ namespace CoFlows.Server.Utils
             public int LineNumber { get; set; }
             public int SequenceID { get; set; }
             public string Message { get; set; }
+            public string Exception { get; set; }
         }
 
         private static T GetValue<T>(DataRow row, string columnname)
@@ -66,13 +67,13 @@ namespace CoFlows.Server.Utils
                 string cm;
 
                 if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
+                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
 
                 else if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message) ON CONFLICT DO NOTHING;";
+                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT DO NOTHING;";
 
                 else
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message);";
+                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception);";
             
                 Database.DB["CloudApp"].ExecuteCommand(
                     cm, 
@@ -86,7 +87,8 @@ namespace CoFlows.Server.Utils
                         new Tuple<string,object>("MemberName", logEvent.CallerMemberName.ToString()),
                         new Tuple<string,object>("LineNumber", logEvent.CallerLineNumber),
                         new Tuple<string,object>("SequenceID", logEvent.SequenceID),
-                        new Tuple<string,object>("Message", logEvent.Message.ToString())
+                        new Tuple<string,object>("Message", logEvent.Message.ToString()),
+                        new Tuple<string,object>("Exception", logEvent.Exception != null ? logEvent.Exception.ToString() : null)
                     });
             }
             catch(Exception e)
@@ -102,13 +104,13 @@ namespace CoFlows.Server.Utils
                 string cm;
 
                 if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
+                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
                 
                 else if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message) ON CONFLICT DO NOTHING;";
+                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT DO NOTHING;";
 
                 else
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message);";
+                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception);";
             
 
                 Database.DB["CloudApp"].ExecuteCommand(
@@ -123,7 +125,8 @@ namespace CoFlows.Server.Utils
                         new Tuple<string,object>("MemberName", logEvent.MemberName.ToString()),
                         new Tuple<string,object>("LineNumber", logEvent.LineNumber),
                         new Tuple<string,object>("SequenceID", logEvent.SequenceID),
-                        new Tuple<string,object>("Message", logEvent.Message.ToString())
+                        new Tuple<string,object>("Message", logEvent.Message.ToString()),
+                        new Tuple<string,object>("Exception", logEvent.Exception != null ? logEvent.Exception.ToString() : null)
                     });
             }
             catch(Exception e)
@@ -137,7 +140,7 @@ namespace CoFlows.Server.Utils
             string str =  
             @"
             SELECT 
-                ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message
+                ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception
             FROM Logger
             WHERE ID = '" + id + @"'
             ";
@@ -162,6 +165,7 @@ namespace CoFlows.Server.Utils
                         LineNumber = GetValue<int>(row, "LineNumber"),
                         SequenceID = GetValue<int>(row, "SequenceID"),
                         Message = GetValue<string>(row, "Message"),
+                        Exception = GetValue<string>(row, "Exception"),
                         });
             }
 

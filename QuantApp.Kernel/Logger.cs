@@ -111,8 +111,10 @@ namespace QuantApp.Kernel
                 
                     Console.ForegroundColor = ConsoleColor.DarkBlue;
                     Console.Write($" {logEvent.CallerClassName}.{logEvent.CallerMemberName}");
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.WriteLine($" - {logEvent.Message}");
+                    Console.ForegroundColor = ConsoleColor.Gray; 
+                    Console.WriteLine($" - {logEvent.Message} ");
+                    if(logEvent.Exception != null)
+                        Console.WriteLine($"        {logEvent.Exception} ");
 
                     Console.ForegroundColor = originalColor;
                     Console.ResetColor();
