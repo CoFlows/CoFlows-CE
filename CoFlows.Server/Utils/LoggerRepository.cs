@@ -66,30 +66,60 @@ namespace CoFlows.Server.Utils
             {
                 string cm;
 
-                if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
+                if(logEvent.Exception != null)
+                {
+                    if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
 
-                else if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT DO NOTHING;";
+                    else if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT DO NOTHING;";
 
+                    else
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception);";
+                
+                    Database.DB["CloudApp"].ExecuteCommand(
+                        cm, 
+                        new Tuple<string,object>[] { 
+                            new Tuple<string,object>("RuntimeID", RuntimeID),
+                            new Tuple<string,object>("ID", ID),
+                            // new Tuple<string,object>("Timestamp", logEvent.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss.fff")),
+                            new Tuple<string,object>("Timestamp", logEvent.TimeStamp),
+                            new Tuple<string,object>("Level", logEvent.Level.ToString()),
+                            new Tuple<string,object>("ClassName", logEvent.CallerClassName.ToString()),
+                            new Tuple<string,object>("MemberName", logEvent.CallerMemberName.ToString()),
+                            new Tuple<string,object>("LineNumber", logEvent.CallerLineNumber),
+                            new Tuple<string,object>("SequenceID", logEvent.SequenceID),
+                            new Tuple<string,object>("Message", logEvent.Message.ToString()),
+                            new Tuple<string,object>("Exception", logEvent.Exception != null ? logEvent.Exception.ToString() : null)
+                        });
+                }
                 else
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception);";
-            
-                Database.DB["CloudApp"].ExecuteCommand(
-                    cm, 
-                    new Tuple<string,object>[] { 
-                        new Tuple<string,object>("RuntimeID", RuntimeID),
-                        new Tuple<string,object>("ID", ID),
-                        // new Tuple<string,object>("Timestamp", logEvent.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss.fff")),
-                        new Tuple<string,object>("Timestamp", logEvent.TimeStamp),
-                        new Tuple<string,object>("Level", logEvent.Level.ToString()),
-                        new Tuple<string,object>("ClassName", logEvent.CallerClassName.ToString()),
-                        new Tuple<string,object>("MemberName", logEvent.CallerMemberName.ToString()),
-                        new Tuple<string,object>("LineNumber", logEvent.CallerLineNumber),
-                        new Tuple<string,object>("SequenceID", logEvent.SequenceID),
-                        new Tuple<string,object>("Message", logEvent.Message.ToString()),
-                        new Tuple<string,object>("Exception", logEvent.Exception != null ? logEvent.Exception.ToString() : null)
-                    });
+                {
+                    if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
+
+                    else if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message) ON CONFLICT DO NOTHING;";
+
+                    else
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message);";
+                
+                    Database.DB["CloudApp"].ExecuteCommand(
+                        cm, 
+                        new Tuple<string,object>[] { 
+                            new Tuple<string,object>("RuntimeID", RuntimeID),
+                            new Tuple<string,object>("ID", ID),
+                            // new Tuple<string,object>("Timestamp", logEvent.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss.fff")),
+                            new Tuple<string,object>("Timestamp", logEvent.TimeStamp),
+                            new Tuple<string,object>("Level", logEvent.Level.ToString()),
+                            new Tuple<string,object>("ClassName", logEvent.CallerClassName.ToString()),
+                            new Tuple<string,object>("MemberName", logEvent.CallerMemberName.ToString()),
+                            new Tuple<string,object>("LineNumber", logEvent.CallerLineNumber),
+                            new Tuple<string,object>("SequenceID", logEvent.SequenceID),
+                            new Tuple<string,object>("Message", logEvent.Message.ToString())
+                        });
+
+                }
             }
             catch(Exception e)
             {
@@ -103,31 +133,59 @@ namespace CoFlows.Server.Utils
             {
                 string cm;
 
-                if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
+                if(logEvent.Exception != null)
+                {
+                    if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
+                    
+                    else if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT DO NOTHING;";
+
+                    else
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception);";
                 
-                else if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT DO NOTHING;";
 
+                    Database.DB["CloudApp"].ExecuteCommand(
+                        cm, 
+                        new Tuple<string,object>[] { 
+                            new Tuple<string,object>("RuntimeID", logEvent.RuntimeID),
+                            new Tuple<string,object>("ID", logEvent.ID),
+                            new Tuple<string,object>("Timestamp", logEvent.Timestamp),
+                            new Tuple<string,object>("Level", logEvent.Level),
+                            new Tuple<string,object>("ClassName", logEvent.ClassName.ToString()),
+                            new Tuple<string,object>("MemberName", logEvent.MemberName.ToString()),
+                            new Tuple<string,object>("LineNumber", logEvent.LineNumber),
+                            new Tuple<string,object>("SequenceID", logEvent.SequenceID),
+                            new Tuple<string,object>("Message", logEvent.Message.ToString()),
+                            new Tuple<string,object>("Exception", logEvent.Exception.ToString())
+                        });
+                }
                 else
-                    cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception);";
-            
+                {
+                    if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
+                    
+                    else if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.SQLiteDataSetAdapter)
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message) ON CONFLICT DO NOTHING;";
 
-                Database.DB["CloudApp"].ExecuteCommand(
-                    cm, 
-                    new Tuple<string,object>[] { 
-                        new Tuple<string,object>("RuntimeID", logEvent.RuntimeID),
-                        new Tuple<string,object>("ID", logEvent.ID),
-                        // new Tuple<string,object>("Timestamp", logEvent.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff")),
-                        new Tuple<string,object>("Timestamp", logEvent.Timestamp),
-                        new Tuple<string,object>("Level", logEvent.Level),
-                        new Tuple<string,object>("ClassName", logEvent.ClassName.ToString()),
-                        new Tuple<string,object>("MemberName", logEvent.MemberName.ToString()),
-                        new Tuple<string,object>("LineNumber", logEvent.LineNumber),
-                        new Tuple<string,object>("SequenceID", logEvent.SequenceID),
-                        new Tuple<string,object>("Message", logEvent.Message.ToString()),
-                        new Tuple<string,object>("Exception", logEvent.Exception != null ? logEvent.Exception.ToString() : null)
-                    });
+                    else
+                        cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message);";
+                
+
+                    Database.DB["CloudApp"].ExecuteCommand(
+                        cm, 
+                        new Tuple<string,object>[] { 
+                            new Tuple<string,object>("RuntimeID", logEvent.RuntimeID),
+                            new Tuple<string,object>("ID", logEvent.ID),
+                            new Tuple<string,object>("Timestamp", logEvent.Timestamp),
+                            new Tuple<string,object>("Level", logEvent.Level),
+                            new Tuple<string,object>("ClassName", logEvent.ClassName.ToString()),
+                            new Tuple<string,object>("MemberName", logEvent.MemberName.ToString()),
+                            new Tuple<string,object>("LineNumber", logEvent.LineNumber),
+                            new Tuple<string,object>("SequenceID", logEvent.SequenceID),
+                            new Tuple<string,object>("Message", logEvent.Message.ToString())
+                        });
+                }
             }
             catch(Exception e)
             {
