@@ -149,7 +149,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public DataTable GetDataTable(string table, string target, string search)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 try
                 {
@@ -203,7 +203,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public DataTable ExecuteDataTable(string table, string command, params Tuple<string, object>[] args)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 using (NpgsqlConnection _connectionInternal = new NpgsqlConnection(ConnectString))
                 {
@@ -280,7 +280,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public void AddDataTable(DataTable table)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 NpgsqlConnection _connectionInternal;
 
@@ -385,7 +385,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public void UpdateDataTable(DataTable table)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 using (NpgsqlConnection _connectionInternal = new NpgsqlConnection(ConnectString))
                 {
@@ -611,7 +611,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public void DeleteDataTable(DataTable table)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 Initialize();
 
@@ -628,7 +628,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public void ExecuteCommand(string command, params Tuple<string, object>[] args)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 if (string.IsNullOrWhiteSpace(command))
                     return;
@@ -667,7 +667,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public void ExecuteCommand(List<Tuple<string,Tuple<string, object>[]>> pkgs)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 using (NpgsqlConnection _connectionInternal = new NpgsqlConnection(ConnectString))
                 {
@@ -784,7 +784,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public DbDataReader ExecuteReader(string command)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 if (string.IsNullOrWhiteSpace(command))
                     return null;
@@ -801,7 +801,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public StreamReader ExecuteStreamReader(string command)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 if (string.IsNullOrWhiteSpace(command))
                     return null;

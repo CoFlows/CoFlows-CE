@@ -32,8 +32,6 @@ using QuantApp.Engine;
 
 using QuantApp.Kernel.Adapters.SQL;
 
-using System.Data;
-
 namespace CoFlows.Core
 {
     public class Initialize

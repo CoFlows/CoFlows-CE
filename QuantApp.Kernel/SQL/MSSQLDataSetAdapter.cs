@@ -568,7 +568,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public void ExecuteCommand(string command, params Tuple<string, object>[] args)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 if (string.IsNullOrWhiteSpace(command))
                     return;
@@ -606,7 +606,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public void ExecuteCommand(List<Tuple<string,Tuple<string, object>[]>> pkgs)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 using (SqlConnection _connectionInternal = new SqlConnection(ConnectString))
                 {
@@ -690,7 +690,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public DbDataReader ExecuteReader(string command)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 if (string.IsNullOrWhiteSpace(command))
                     return null;
@@ -706,7 +706,7 @@ namespace QuantApp.Kernel.Adapters.SQL
 
         public StreamReader ExecuteStreamReader(string command)
         {
-            lock (objLock)
+            // lock (objLock)
             {
                 if (string.IsNullOrWhiteSpace(command))
                     return null;

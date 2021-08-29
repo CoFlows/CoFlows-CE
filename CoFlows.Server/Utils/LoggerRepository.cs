@@ -68,6 +68,7 @@ namespace CoFlows.Server.Utils
 
                 if(logEvent.Exception != null)
                 {
+                    
                     if(Database.DB["CloudApp"] is QuantApp.Kernel.Adapters.SQL.PostgresDataSetAdapter)
                         cm = $"INSERT INTO Logger (RuntimeID, ID, Timestamp, Level, ClassName, MemberName, LineNumber, SequenceID, Message, Exception) values (@RuntimeID, @ID, @Timestamp, @Level, @ClassName, @MemberName, @LineNumber, @SequenceID, @Message, @Exception) ON CONFLICT ON CONSTRAINT Logger_pkey DO NOTHING;";
 
@@ -82,7 +83,6 @@ namespace CoFlows.Server.Utils
                         new Tuple<string,object>[] { 
                             new Tuple<string,object>("RuntimeID", RuntimeID),
                             new Tuple<string,object>("ID", ID),
-                            // new Tuple<string,object>("Timestamp", logEvent.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss.fff")),
                             new Tuple<string,object>("Timestamp", logEvent.TimeStamp),
                             new Tuple<string,object>("Level", logEvent.Level.ToString()),
                             new Tuple<string,object>("ClassName", logEvent.CallerClassName.ToString()),
@@ -90,7 +90,7 @@ namespace CoFlows.Server.Utils
                             new Tuple<string,object>("LineNumber", logEvent.CallerLineNumber),
                             new Tuple<string,object>("SequenceID", logEvent.SequenceID),
                             new Tuple<string,object>("Message", logEvent.Message.ToString()),
-                            new Tuple<string,object>("Exception", logEvent.Exception != null ? logEvent.Exception.ToString() : null)
+                            new Tuple<string,object>("Exception", logEvent.Exception.ToString())
                         });
                 }
                 else
@@ -109,7 +109,6 @@ namespace CoFlows.Server.Utils
                         new Tuple<string,object>[] { 
                             new Tuple<string,object>("RuntimeID", RuntimeID),
                             new Tuple<string,object>("ID", ID),
-                            // new Tuple<string,object>("Timestamp", logEvent.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss.fff")),
                             new Tuple<string,object>("Timestamp", logEvent.TimeStamp),
                             new Tuple<string,object>("Level", logEvent.Level.ToString()),
                             new Tuple<string,object>("ClassName", logEvent.CallerClassName.ToString()),

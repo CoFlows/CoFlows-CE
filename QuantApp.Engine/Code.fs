@@ -764,9 +764,9 @@ module Code =
 
                                                                         
                                     errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
-                                    #if MONO_LINUX || MONO_OSX
-                                    errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(logger.Error)
-                                    #endif
+                                    // #if MONO_LINUX || MONO_OSX
+                                    // errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(logger.Error)
+                                    // #endif
                                     let assembly = System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile)
 
                                     if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("namespace") then
@@ -1885,7 +1885,7 @@ module Code =
                     if js_code |> List.isEmpty |> not then js_code |> runJS 
 
             with
-            | ex -> ex.ToString() |> logger.Error
+            | ex -> ()//ex.ToString() |> logger.Error
 
             codes |> Seq.toList 
             |> List.iter(fun (name, code) -> 
@@ -2504,7 +2504,8 @@ module Code =
 
         else
             
-            "Build result: \n" + build |> logger.Info
+            // "Build result: \n" + build |> logger.Info
+            "Build result: \n" + build |> logger.Error
 
         build
 
