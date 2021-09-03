@@ -165,6 +165,7 @@ namespace CoFlows.Server.Controllers
             };
 
             HttpClient _httpClient = new HttpClient(handler);
+            _httpClient.Timeout = TimeSpan.FromMinutes(10);
             _httpClient.DefaultRequestHeaders.AcceptEncoding.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("gzip"));
             if(_headers != null)
             {
@@ -409,6 +410,7 @@ namespace CoFlows.Server.Controllers
             };
 
             HttpClient _httpClient = new HttpClient(handler);
+            _httpClient.Timeout = TimeSpan.FromMinutes(10);
             _httpClient.DefaultRequestHeaders.AcceptEncoding.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("gzip"));
             
             if(_headers != null)

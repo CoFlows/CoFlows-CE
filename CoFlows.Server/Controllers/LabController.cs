@@ -130,6 +130,7 @@ namespace CoFlows.Server.Controllers
 
             QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
             HttpClient _httpClient = new HttpClient();
+            _httpClient.Timeout = TimeSpan.FromMinutes(10);
             if(_headers != null)
             {
                 foreach(var head in _headers)
@@ -303,6 +304,7 @@ namespace CoFlows.Server.Controllers
 
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                 HttpClient _httpClient = new HttpClient();
+                _httpClient.Timeout = TimeSpan.FromMinutes(10);
                 if(_headers != null)
                 {
                     foreach(var head in _headers)
@@ -504,6 +506,7 @@ namespace CoFlows.Server.Controllers
 
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                 HttpClient _httpClient = new HttpClient();
+                _httpClient.Timeout = TimeSpan.FromMinutes(10);
                 if(_headers != null)
                 {
                     foreach(var head in _headers)
@@ -705,6 +708,7 @@ namespace CoFlows.Server.Controllers
 
                 QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
                 HttpClient _httpClient = new HttpClient();
+                _httpClient.Timeout = TimeSpan.FromMinutes(10);
                 if(_headers != null)
                 {
                     foreach(var head in _headers)
