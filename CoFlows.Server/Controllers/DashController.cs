@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
+using NLog;
 using QuantApp.Engine;
 
 namespace CoFlows.Server.Controllers
@@ -164,103 +165,111 @@ namespace CoFlows.Server.Controllers
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             };
 
-            HttpClient _httpClient = new HttpClient(handler);
-            _httpClient.Timeout = TimeSpan.FromMinutes(10);
-            _httpClient.DefaultRequestHeaders.AcceptEncoding.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("gzip"));
-            if(_headers != null)
-            {
-                foreach(var head in _headers)
-                {
-                    try
-                    {
-                        _httpClient.DefaultRequestHeaders.Add(head.Key, head.Value);
-                    }
-                    catch(Exception e){}
-                }
-            }
-
-            string _message = "";
-            System.Net.Http.HttpResponseMessage response = null;
-            for(int i = 0; i < 4; i++)
-            {
-                try
-                {
-                    response = await _httpClient.GetAsync("http://localhost:" + port + url);
-                    var content = await response.Content.ReadAsByteArrayAsync();
-                    _message = System.Convert.ToBase64String(content);
-                    break;
-                }
-                catch(Exception e){}
-                System.Threading.Thread.Sleep(2 * 1000);
-            }
-
-            var rheaders = new List<KeyValuePair<string, string>>();
-
             try
             {
-                foreach(var head in response.Headers)
+                HttpClient _httpClient = new HttpClient(handler);
+                _httpClient.Timeout = TimeSpan.FromMinutes(10);
+                _httpClient.DefaultRequestHeaders.AcceptEncoding.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("gzip"));
+                if(_headers != null)
                 {
-                    foreach(var val in head.Value)
+                    foreach(var head in _headers)
                     {
                         try
                         {
-                            rheaders.Add(new KeyValuePair<string, string>(head.Key, val));
+                            _httpClient.DefaultRequestHeaders.Add(head.Key, head.Value);
                         }
                         catch(Exception e){}
                     }
                 }
-            }
-            catch(Exception e){}
 
-            foreach(var head in rheaders)
-            {
+                string _message = "";
+                System.Net.Http.HttpResponseMessage response = null;
+                for(int i = 0; i < 4; i++)
+                {
+                    try
+                    {
+                        response = await _httpClient.GetAsync("http://localhost:" + port + url);
+                        var content = await response.Content.ReadAsByteArrayAsync();
+                        _message = System.Convert.ToBase64String(content);
+                        break;
+                    }
+                    catch(Exception e){}
+                    System.Threading.Thread.Sleep(2 * 1000);
+                }
+
+                var rheaders = new List<KeyValuePair<string, string>>();
+
                 try
                 {
-                    string key = head.Key.ToString();
-                    string val = head.Value.ToString();
-
-                    if(key == "Set-Cookie")
+                    foreach(var head in response.Headers)
                     {
-                        string[] vals = val.Split(';');
-                        string[] keyValPair = vals[0].Split('=');
-                        string cname = keyValPair[0];
-
-                        string cval = keyValPair[1].Replace("\"", "");
-
-                        var option = new CookieOptions(); 
-                        if(vals.Length > 1)
+                        foreach(var val in head.Value)
                         {
-                            string[] expiryPair = vals[1].Split('=');
-                            string date_str = expiryPair[1];
-                            option.Expires = DateTime.Parse(date_str);
+                            try
+                            {
+                                rheaders.Add(new KeyValuePair<string, string>(head.Key, val));
+                            }
+                            catch(Exception e){}
                         }
-
-                        if(vals.Length > 2)
-                        {
-                            string[] pathPair = vals[2].Split('=');
-                            option.Path = pathPair[1];
-                        }
-
-                        Response.Cookies.Append(cname, cval, option);
                     }
-                    else
-                        Response.Headers.Add(key, val);
-
-                    
                 }
-                catch(Exception e)
+                catch(Exception e){}
+
+                foreach(var head in rheaders)
                 {
-                    // Console.WriteLine(e);
+                    try
+                    {
+                        string key = head.Key.ToString();
+                        string val = head.Value.ToString();
+
+                        if(key == "Set-Cookie")
+                        {
+                            string[] vals = val.Split(';');
+                            string[] keyValPair = vals[0].Split('=');
+                            string cname = keyValPair[0];
+
+                            string cval = keyValPair[1].Replace("\"", "");
+
+                            var option = new CookieOptions(); 
+                            if(vals.Length > 1)
+                            {
+                                string[] expiryPair = vals[1].Split('=');
+                                string date_str = expiryPair[1];
+                                option.Expires = DateTime.Parse(date_str);
+                            }
+
+                            if(vals.Length > 2)
+                            {
+                                string[] pathPair = vals[2].Split('=');
+                                option.Path = pathPair[1];
+                            }
+
+                            Response.Cookies.Append(cname, cval, option);
+                        }
+                        else
+                            Response.Headers.Add(key, val);
+
+                        
+                    }
+                    catch(Exception e)
+                    {
+                        // Console.WriteLine(e);
+                    }
+                }
+
+                Response.StatusCode = (int)response.StatusCode;
+                Response.ContentType = string.IsNullOrEmpty(_message) || response.Content.Headers.ContentType == null ? "" : response.Content.Headers.ContentType.ToString();
+                if(Response.StatusCode != 204)
+                {
+                    var content = System.Convert.FromBase64String(_message.ToString());
+                    Response.ContentLength = content.Length;
+                    await Response.Body.WriteAsync(content, 0, content.Length);
                 }
             }
-
-            Response.StatusCode = (int)response.StatusCode;
-            Response.ContentType = string.IsNullOrEmpty(_message) || response.Content.Headers.ContentType == null ? "" : response.Content.Headers.ContentType.ToString();
-            if(Response.StatusCode != 204)
+            catch(Exception e)
             {
-                var content = System.Convert.FromBase64String(_message.ToString());
-                Response.ContentLength = content.Length;
-                await Response.Body.WriteAsync(content, 0, content.Length);
+                var logger = LogManager.GetCurrentClassLogger();
+                logger.Error(e, "Dash Get Error");
             }
         }
 
@@ -370,135 +379,144 @@ namespace CoFlows.Server.Controllers
                     }
                 }
             }
-                    
-            if(url == null) url = "";
-            var queryString = Request.QueryString;
-            if(queryString != null && queryString.HasValue)
-                url = "/dash/" + wid + "/" + qid + "/" + url + queryString.Value;
-            else
-                url = "/dash/" + wid + "/" + qid + "/" + url;
-
-            var headers = new List<KeyValuePair<string, string>>();
-
-            foreach(var head in Request.Headers)
-            {
-                foreach(var val in head.Value)
-                {
-                    try
-                    {
-                        headers.Add(new KeyValuePair<string, string>(head.Key, val.Replace("\"", "")));
-                    }
-                    catch{}
-                }
-            }
-
-            var mem = new MemoryStream();
-            try
-            {
-                await Request.Body.CopyToAsync(mem);
-            }
-            catch(Exception e){ Console.WriteLine(e);}
-            mem.Position = 0;
-        
-            var _headers = headers;
-            var jsonContent = new StringContent(Encoding.UTF8.GetString(mem.ToArray()), Encoding.UTF8, "application/json");
-
-            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-            var handler = new HttpClientHandler()
-            {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-            };
-
-            HttpClient _httpClient = new HttpClient(handler);
-            _httpClient.Timeout = TimeSpan.FromMinutes(10);
-            _httpClient.DefaultRequestHeaders.AcceptEncoding.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("gzip"));
-            
-            if(_headers != null)
-            {
-                foreach(var head in _headers)
-                {
-                    try
-                    {
-                        _httpClient.DefaultRequestHeaders.Add(head.Key, head.Value);
-                    }
-                    catch(Exception e)
-                    {
-                    }
-                }
-            }
-            QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
-            var response = await _httpClient.PostAsync("http://localhost:" + port + url, jsonContent);
-
-            var content = await response.Content.ReadAsByteArrayAsync();
-            
-            var rheaders = new List<KeyValuePair<string, string>>();
 
             try
-            {
-                foreach(var head in response.Headers)
+            {            
+                if(url == null) url = "";
+                var queryString = Request.QueryString;
+                if(queryString != null && queryString.HasValue)
+                    url = "/dash/" + wid + "/" + qid + "/" + url + queryString.Value;
+                else
+                    url = "/dash/" + wid + "/" + qid + "/" + url;
+
+                var headers = new List<KeyValuePair<string, string>>();
+
+                foreach(var head in Request.Headers)
                 {
                     foreach(var val in head.Value)
                     {
                         try
                         {
-                            rheaders.Add(new KeyValuePair<string, string>(head.Key, val));
+                            headers.Add(new KeyValuePair<string, string>(head.Key, val.Replace("\"", "")));
+                        }
+                        catch{}
+                    }
+                }
+
+                var mem = new MemoryStream();
+                try
+                {
+                    await Request.Body.CopyToAsync(mem);
+                }
+                catch(Exception e){ Console.WriteLine(e);}
+                mem.Position = 0;
+            
+                var _headers = headers;
+                var jsonContent = new StringContent(Encoding.UTF8.GetString(mem.ToArray()), Encoding.UTF8, "application/json");
+
+                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                var handler = new HttpClientHandler()
+                {
+                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                };
+
+                HttpClient _httpClient = new HttpClient(handler);
+                _httpClient.Timeout = TimeSpan.FromMinutes(10);
+                _httpClient.DefaultRequestHeaders.AcceptEncoding.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("gzip"));
+                
+                if(_headers != null)
+                {
+                    foreach(var head in _headers)
+                    {
+                        try
+                        {
+                            _httpClient.DefaultRequestHeaders.Add(head.Key, head.Value);
                         }
                         catch(Exception e)
                         {
-                            Console.WriteLine(e);
                         }
                     }
                 }
-            }
-            catch(Exception e){}
+                QuantApp.Kernel.User.ContextUser = new QuantApp.Kernel.UserData();
+                var response = await _httpClient.PostAsync("http://localhost:" + port + url, jsonContent);
 
+                var content = await response.Content.ReadAsByteArrayAsync();
+                
+                var rheaders = new List<KeyValuePair<string, string>>();
 
-            foreach(var head in rheaders)
-            {
                 try
                 {
-                    string key = head.Key.ToString();
-                    string val = head.Value.ToString();
-
-                    if(key == "Set-Cookie")
+                    foreach(var head in response.Headers)
                     {
-                        string[] vals = val.Split(';');
-                        string[] keyValPair = vals[0].Split('=');
-                        string cname = keyValPair[0];
-
-                        string cval = keyValPair[1].Replace("\"", "");
-                        var option = new CookieOptions(); 
-                        if(vals.Length > 1)
+                        foreach(var val in head.Value)
                         {
-                            string[] expiryPair = vals[1].Split('=');
-                            string date_str = expiryPair[1];
-                            option.Expires = DateTime.Parse(date_str);
+                            try
+                            {
+                                rheaders.Add(new KeyValuePair<string, string>(head.Key, val));
+                            }
+                            catch(Exception e)
+                            {
+                                Console.WriteLine(e);
+                            }
                         }
-
-                        if(vals.Length > 2)
-                        {
-                            string[] pathPair = vals[2].Split('=');
-                            option.Path = pathPair[1];
-                        }
-
-                        Response.Cookies.Append(cname, cval, option);
                     }
-                    else
-                        Response.Headers.Add(key, val);
-                    
                 }
-                catch(Exception e)
+                catch(Exception e){}
+
+
+                foreach(var head in rheaders)
                 {
+                    try
+                    {
+                        string key = head.Key.ToString();
+                        string val = head.Value.ToString();
+
+                        if(key == "Set-Cookie")
+                        {
+                            string[] vals = val.Split(';');
+                            string[] keyValPair = vals[0].Split('=');
+                            string cname = keyValPair[0];
+
+                            string cval = keyValPair[1].Replace("\"", "");
+                            var option = new CookieOptions(); 
+                            if(vals.Length > 1)
+                            {
+                                string[] expiryPair = vals[1].Split('=');
+                                string date_str = expiryPair[1];
+                                option.Expires = DateTime.Parse(date_str);
+                            }
+
+                            if(vals.Length > 2)
+                            {
+                                string[] pathPair = vals[2].Split('=');
+                                option.Path = pathPair[1];
+                            }
+
+                            Response.Cookies.Append(cname, cval, option);
+                        }
+                        else
+                            Response.Headers.Add(key, val);
+                        
+                    }
+                    catch(Exception e)
+                    {
+                    }
                 }
+
+                Response.StatusCode = (int)response.StatusCode;
+                if(response.Content.Headers.ContentType != null)
+                    Response.ContentType = response.Content.Headers.ContentType.ToString();
+                Response.ContentLength = content.Length;
+
+                if(content.Length > 0 && Response.StatusCode != 204)
+                    await Response.Body.WriteAsync(content, 0, content.Length);
+
             }
-
-            Response.StatusCode = (int)response.StatusCode;
-            if(response.Content.Headers.ContentType != null)
-                Response.ContentType = response.Content.Headers.ContentType.ToString();
-            Response.ContentLength = content.Length;
-
-            if(content.Length > 0 && Response.StatusCode != 204)
-                await Response.Body.WriteAsync(content, 0, content.Length);
+            catch(Exception e)
+            {
+                var logger = LogManager.GetCurrentClassLogger();
+                logger.Error(e, "Dash Post Error");
+            }
         }
     }
 }
