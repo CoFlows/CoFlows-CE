@@ -313,6 +313,7 @@ namespace Python.Runtime
 
         private static IntPtr TzInfo(DateTimeKind kind)
         {
+            return Runtime.PyNone; // FIX Due to custom_tzinfo bug // Arturo
             if (kind == DateTimeKind.Unspecified) return Runtime.PyNone;
             var offset = kind == DateTimeKind.Local ? DateTimeOffset.Now.Offset : TimeSpan.Zero;
             IntPtr tzInfoArgs = Runtime.PyTuple_New(2);
