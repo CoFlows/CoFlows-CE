@@ -329,11 +329,17 @@ module Code =
                 let _name = 
                     if packageName.IndexOf("=") > -1 then 
                         packageName.Substring(0, packageName.IndexOf("=")) 
+
                     elif packageName.IndexOf("[") > -1 then 
                         let _packageName = packageName.Replace("[",".") 
                         _packageName.Substring(0, _packageName.IndexOf("]")) 
+
+                    elif packageName.IndexOf("(") > -1 then 
+                        packageName.Substring(packageName.IndexOf("(") + 1, packageName.IndexOf(")") - packageName.IndexOf("(") - 1)
+
                     else 
-                        packageName.Replace("-",".")
+                        // packageName.Replace("-",".")
+                        packageName.Replace("-","_")
 
                 let code = 
                     "import subprocess \n" +
