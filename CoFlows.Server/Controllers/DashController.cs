@@ -257,13 +257,16 @@ namespace CoFlows.Server.Controllers
                     }
                 }
 
-                Response.StatusCode = (int)response.StatusCode;
-                Response.ContentType = string.IsNullOrEmpty(_message) || response.Content.Headers.ContentType == null ? "" : response.Content.Headers.ContentType.ToString();
-                if(Response.StatusCode != 204)
+                if(response != null)
                 {
-                    var content = System.Convert.FromBase64String(_message.ToString());
-                    Response.ContentLength = content.Length;
-                    await Response.Body.WriteAsync(content, 0, content.Length);
+                    Response.StatusCode = (int)response.StatusCode;
+                    Response.ContentType = string.IsNullOrEmpty(_message) || response.Content.Headers.ContentType == null ? "" : response.Content.Headers.ContentType.ToString();
+                    if(Response.StatusCode != 204)
+                    {
+                        var content = System.Convert.FromBase64String(_message.ToString());
+                        Response.ContentLength = content.Length;
+                        await Response.Body.WriteAsync(content, 0, content.Length);
+                    }
                 }
             }
             catch(Exception e)
@@ -503,14 +506,16 @@ namespace CoFlows.Server.Controllers
                     }
                 }
 
-                Response.StatusCode = (int)response.StatusCode;
-                if(response.Content.Headers.ContentType != null)
-                    Response.ContentType = response.Content.Headers.ContentType.ToString();
-                Response.ContentLength = content.Length;
+                if(response != null)
+                {
+                    Response.StatusCode = (int)response.StatusCode;
+                    if(response.Content.Headers.ContentType != null)
+                        Response.ContentType = response.Content.Headers.ContentType.ToString();
+                    Response.ContentLength = content.Length;
 
-                if(content.Length > 0 && Response.StatusCode != 204)
-                    await Response.Body.WriteAsync(content, 0, content.Length);
-
+                    if(content.Length > 0 && Response.StatusCode != 204)
+                        await Response.Body.WriteAsync(content, 0, content.Length);
+                }
             }
             catch(Exception e)
             {
