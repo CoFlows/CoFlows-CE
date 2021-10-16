@@ -48,14 +48,9 @@ namespace QuantApp.Kernel.JVM
         private const string InvokerDll = "JNIWrapper.dll";
         #endif
 
-        
         internal static ConcurrentDictionary<int,object> __DB = new ConcurrentDictionary<int, object>();
         internal static ConcurrentDictionary<int,WeakReference> DB = new ConcurrentDictionary<int, WeakReference>();
         
-        
-        // internal static ConditionalWeakTable<int,object> DB = new ConditionalWeakTable<int, object>();
-        
-
         [DllImport(JVMDll)] private unsafe static extern int  JNI_CreateJavaVM(void** ppVm, void** ppEnv, void* pArgs);
         [DllImport(InvokerDll)] private unsafe static extern void SetfnGetProperty(void* func);
         [DllImport(InvokerDll)] private unsafe static extern void SetfnRemoveObject(void* func);
@@ -240,7 +235,6 @@ namespace QuantApp.Kernel.JVM
         
         public unsafe static int InitJVM(string classpath = ".:app.quant.clr.jar", string libpath = ".")
         {
-
             delCreateInstance = new SetCreateInstance(Java_app_quant_clr_CLRRuntime_nativeCreateInstance);
             gchCallFunc = GCHandle.Alloc(delCreateInstance);
             SetfnCreateInstance(Marshal.GetFunctionPointerForDelegate<SetCreateInstance>(delCreateInstance).ToPointer());
@@ -248,11 +242,11 @@ namespace QuantApp.Kernel.JVM
             delInvoke = new SetInvoke(Java_app_quant_clr_CLRRuntime_nativeInvoke);
             gchInvoke = GCHandle.Alloc(delInvoke);
             SetfnInvoke(Marshal.GetFunctionPointerForDelegate<SetInvoke>(delInvoke).ToPointer());
-            
+
             delRegisterFunc = new SetRegisterFunc(Java_app_quant_clr_CLRRuntime_nativeRegisterFunc);
             gchRegisterFunc = GCHandle.Alloc(delRegisterFunc);
             SetfnRegisterFunc(Marshal.GetFunctionPointerForDelegate<SetRegisterFunc>(delRegisterFunc).ToPointer());
-            
+
             delInvokeFunc = new SetInvokeFunc(Java_app_quant_clr_CLRRuntime_nativeInvokeFunc);
             gchInvokeFunc = GCHandle.Alloc(delInvokeFunc);
             SetfnInvokeFunc(Marshal.GetFunctionPointerForDelegate<SetInvokeFunc>(delInvokeFunc).ToPointer());
@@ -260,7 +254,7 @@ namespace QuantApp.Kernel.JVM
             delSetProperty = new SetSetProperty(Java_app_quant_clr_CLRRuntime_nativeSetProperty);
             gchSetProperty = GCHandle.Alloc(delSetProperty);
             SetfnSetProperty(Marshal.GetFunctionPointerForDelegate<SetSetProperty>(delSetProperty).ToPointer());
-            
+
             delGetProperty = new SetGetProperty(Java_app_quant_clr_CLRRuntime_nativeGetProperty);
             gchGetProperty = GCHandle.Alloc(delGetProperty);
             SetfnGetProperty(Marshal.GetFunctionPointerForDelegate<SetGetProperty>(delGetProperty).ToPointer());
@@ -268,8 +262,7 @@ namespace QuantApp.Kernel.JVM
             delRemoveObject = new SetRemoveObject(Java_app_quant_clr_CLRRuntime_nativeRemoveObject);
             gchRemoveObject = GCHandle.Alloc(delRemoveObject);
             SetfnRemoveObject(Marshal.GetFunctionPointerForDelegate<SetRemoveObject>(delRemoveObject).ToPointer());
-            
-            
+
             void*  pJVM;    // JVM struct
             void*  pEnv;    // JVM environment
             void*  pVMArgs; // VM args
@@ -287,8 +280,8 @@ namespace QuantApp.Kernel.JVM
             }
 
             var classpathList = classpath.Substring(1).Split(':');
-            SetClassPath(classpathList);
 
+            SetClassPath(classpathList);
 
             // Background thread to clean null entries in the caches.
 
@@ -6450,7 +6443,7 @@ namespace QuantApp.Kernel.JVM
         {
             // // lock(objLock_InvokeFunc)
             {
-                if (Ptr != null && obj != null) 
+                if (obj != null) 
                 {
                     var size = Unsafe.SizeOf<object[]>() * obj.Length;
                     Ptr = Marshal.AllocHGlobal(size);

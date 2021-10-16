@@ -16,7 +16,7 @@ open System.Security.Cryptography
 open System.Text
 open System.Reflection
 
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.CodeAnalysis
 
 open Microsoft.CodeAnalysis
 open Microsoft.CodeAnalysis.CSharp
@@ -573,25 +573,25 @@ module Code =
 
                 if functionName = "??" |> not then    
                     let libs() =
-                        #if NETCOREAPP3_1
-                        let sysDir_base = Path.GetDirectoryName(@"ref/netcoreapp3.1/")
+                        #if NET5_0
+                        let sysDir_base = Path.GetDirectoryName(@"ref/net5.0/")
                         #endif
-
+                        
                         #if NET461
                         let sysDir_base = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory()
                         #endif
 
                         let dir_sys = DirectoryInfo(sysDir_base)
                         let files_sys =  dir_sys.GetFiles()
-                        
-                        let fsDir_base = Path.GetDirectoryName(Uri.UnescapeDataString((UriBuilder(Assembly.GetAssembly(typeof<List<int>>).CodeBase)).Path))// + "/publish"
-                        
-                        let libDir_base = Path.GetDirectoryName(Uri.UnescapeDataString((UriBuilder(Assembly.GetAssembly(typeof<QuantApp.Kernel.M>).CodeBase)).Path))// + "/publish"
+
+                        let fsDir_base = Path.GetDirectoryName(Assembly.GetAssembly(typeof<List<int>>).Location)                        
+                        let libDir_base = Path.GetDirectoryName(Assembly.GetAssembly(typeof<QuantApp.Kernel.M>).Location)
+
                         let dir_lib = DirectoryInfo(libDir_base)
                         let files_lib =  dir_lib.GetFiles()
 
                         let listFiles assemblies =
-                            let listFiles (assembly : Assembly) = try [Uri.UnescapeDataString((UriBuilder(assembly.CodeBase)).Path)] with | _ -> []
+                            let listFiles (assembly : Assembly) = try [assembly.Location] with | _ -> []
                             assemblies
                             |> List.map(fun assembly -> assembly |> listFiles)
                             |> List.fold(fun acc lst -> acc |> List.append(lst)) []
@@ -655,6 +655,7 @@ module Code =
                         |> Array.toSeq |> Seq.distinct |> Seq.toArray
 
                     let executeAssembly (a: Assembly) =
+                        
                         if execute then
                             try 
                                 try
@@ -735,12 +736,13 @@ module Code =
                     let compileFS (codes : (string * string) list) =
                         let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
                         let hash = str |> GetMd5Hash
+                        
                         if hash |> CompiledAssemblies.ContainsKey |> not then
 
                             let _compileFS (codes : (string * string) list) =
-                                // let checker = FSharpChecker.Create()
                                 let fn = Path.GetTempFileName()
                                 let dllFile = Path.ChangeExtension(fn, ".dll")
+                                
                                 let fsFiles =
                                     codes
                                     |> List.map(fun (name, code) ->
@@ -749,7 +751,7 @@ module Code =
                                         let fsFile = Path.ChangeExtension(fn, ".fs")
                                         File.WriteAllText(fsFile, code)
                                         fsFile)
-
+                                
                                 let args =
                                         [|  
                                             yield "";//fsc.exe";
@@ -762,17 +764,12 @@ module Code =
                                             for r in libs() do yield "-r:" + r
                                         |]
                                         |> Array.toSeq |> Seq.distinct |> Seq.toArray
-
+                                
                                 let errors, exitCode, assembly = 
                                     let errors, exitCode = args |> FSharpChecker.Create().Compile |> Async.RunSynchronously
-
                                     let errors = errors |> Array.filter(fun x -> x.ToString().Contains("You must add a reference to assembly 'System.Private.CoreLib, Version=4.0.0.0") |> not)
-
-                                                                        
+                                    
                                     errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(fun x -> sbuilder.AppendLine(x.ToString().Substring(x.ToString().LastIndexOf(".tmp-") + 5)) |> ignore)
-                                    // #if MONO_LINUX || MONO_OSX
-                                    // errors |> Array.filter(fun x -> x.ToString().ToLower().Contains("error")) |> Array.iter(logger.Error)
-                                    // #endif
                                     let assembly = System.Reflection.Emit.AssemblyBuilder.LoadFrom(dllFile)
 
                                     if codes |> List.isEmpty |> not && (snd codes.[0]).ToLower().Contains("namespace") then
@@ -804,6 +801,7 @@ module Code =
                     let compileCS (codes : (string * string) list) =
                         let str = codes |> List.fold(fun acc (name, code) -> acc + code) ""
                         let hash = str |> GetMd5Hash
+
                         if hash |> CompiledAssemblies.ContainsKey |> not then
 
                             let _compileCS (codes : (string * string) list) =
@@ -1360,10 +1358,9 @@ module Code =
 
                     let initJVM() =
                         if JVM.Runtime.Loaded |> not then
-
                             let jarsMntPath = DirectoryInfo("mnt/jars")
                             let jarsMnt =  jarsMntPath.GetFiles()
-                            
+    
                             jarsMnt |> Seq.map(fun jar -> jar.ToString()) |> Seq.iter(fun jar -> CompiledJVMBaseClasses.TryAdd(jar, jar) |> ignore)
 
                             let jarsPath = DirectoryInfo("jars")
@@ -1372,11 +1369,9 @@ module Code =
                             jars |> Seq.map(fun jar -> jar.ToString()) |> Seq.iter(fun jar -> CompiledJVMBaseClasses.TryAdd(jar, jar) |> ignore)
 
                             let jars = jars |> Seq.append(jarsMnt)
-
                             let path = jars |> Seq.map(fun jar -> jar.ToString()) |> Seq.fold(fun acc x -> acc + ":" + x) ""
 
                             if Runtime.InitJVM(classpath=path) <> 0 then
-
                                 CompiledJVMBaseClasses.Values |> Seq.toArray |> Runtime.SetClassPath
                                 
                                 "JVM Engine not started: " + JVM.Runtime.Loaded.ToString() |> logger.Error
@@ -1897,7 +1892,6 @@ module Code =
             |> List.iter(fun (name, code) -> 
                 let md5 = code |> GetMd5Hash
                 if md5 |> CompiledBase.ContainsKey |> not then
-                    
                     
                     CompiledBase.TryAdd(md5, name) |> ignore)
 

@@ -138,7 +138,7 @@ namespace CoFlows.Server.Controllers
 
             if(url == null) url = "";
             var queryString = Request.QueryString;
-            if(queryString != null && queryString.HasValue)
+            if(queryString.HasValue)
                 url = "/dash/" + wid + "/" + qid + "/" + url + queryString.Value;
             else
                 url = "/dash/" + wid + "/" + qid + "/" + url;
@@ -387,7 +387,7 @@ namespace CoFlows.Server.Controllers
             {            
                 if(url == null) url = "";
                 var queryString = Request.QueryString;
-                if(queryString != null && queryString.HasValue)
+                if(queryString.HasValue)
                     url = "/dash/" + wid + "/" + qid + "/" + url + queryString.Value;
                 else
                     url = "/dash/" + wid + "/" + qid + "/" + url;

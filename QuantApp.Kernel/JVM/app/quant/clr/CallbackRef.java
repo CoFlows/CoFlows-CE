@@ -23,28 +23,16 @@
 
 public class CallbackRef implements AutoCloseable
 {
-    // private Object _obj;
     private int _id;
-
-    // public event Action<object, int> Collected;
-
     public CallbackRef(Object obj, int id)
     {
-        // if(!CLRRuntime.DB.containsKey(id))
-            // System.out.println("JAVA CallbackRef: " + obj);
-        // _obj = obj;
         _id = id;
     }
 
     @Override
-    // protected void finalize() throws Throwable 
     public void close()
     {
-        // System.out.println("JAVA GC Close CALLBACK: " + _id);
         CLRRuntime.nativeRemoveObject(_id);
-        // Action<object, int> handle = Collected;
-        // if (handle != null)
-        //     handle(_obj, _id);
     }
 
     @Override

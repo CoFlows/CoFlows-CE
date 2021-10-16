@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <UserSecretsId>aspnet-CoFlows.Server-2AA057A6-1CB4-4720-BB1F-099CC90AA338</UserSecretsId>    
+    <TargetFrameworks>net5.0</TargetFrameworks>
     <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <DefaultItemExcludes>Client\**;ref\**;mnt\**</DefaultItemExcludes>
@@ -21,13 +20,7 @@
     <Content Include="ref\**\*.dll" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="wwwroot\**\*.*" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="jupyter\**\*.*" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <!-- <Folder Include="wwwroot\" CopyToPublishDirectory="Always"  CopyToOutputDirectory="Always"  /> -->
-    <!-- <Content Include="jupyter/ipykernel_launcher.py" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="jupyter/lab" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="jupyter/coflows" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
-    <Content Include="jupyter/kernel.jupyter" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  /> -->
-    <!-- <Content Include="sql/create.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  /> -->
-
+    
     <Content Include="appsettings.json" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
     <Content Include="sql\**\*.*" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"  />
 
@@ -41,23 +34,19 @@
   </ItemGroup>
 
   <ItemGroup>    
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.2"/>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.AzureADB2C.UI" Version="3.1.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2"/>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1"/>
-    <PackageReference Include="Microsoft.Azure.Management.ContainerInstance.Fluent" Version="1.31.1"/>
-    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.31.1"/>
-    <PackageReference Include="FluffySpoon.AspNet.LetsEncrypt" Version="1.145.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.10"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.AzureADB2C.UI" Version="5.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.10"/>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2"/>
+    <PackageReference Include="Microsoft.Azure.Management.ContainerInstance.Fluent" Version="1.37.1"/>
+    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.37.1"/>
+    <PackageReference Include="FluffySpoon.AspNet.LetsEncrypt" Version="1.163.0" />
 
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-    
+    <PackageReference Include="YamlDotNet" Version="11.2.1" />
     <PackageReference Include="Sendgrid" Version="9.22.0" />
-    
-    <PackageReference Include="YamlDotNet" Version="8.1.2" />
-
-    <PackageReference Include="NLog.Web.AspNetCore" Version="4.8.0" />
-
-    <PackageReference Include="IdentityServer4" Version="3.1.1" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.14.0" />
+    <PackageReference Include="IdentityServer4" Version="3.1.4" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 
   </ItemGroup>

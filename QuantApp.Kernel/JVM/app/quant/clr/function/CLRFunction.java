@@ -17,12 +17,10 @@ public class CLRFunction extends CLRObject implements Function<Object, Object>
     public CLRFunction(String classname, int ptr)
     {
         super(classname, ptr);
-        System.out.println("------CLRFUNCTION JAVA CREATE: " + classname);
     }
 
     public Object apply(Object arg)
     {
-        System.out.println("------CLRFUNCTION JAVA APPLY: " + arg);
         return (Object)this.Invoke("Invoke", arg);
     }
 

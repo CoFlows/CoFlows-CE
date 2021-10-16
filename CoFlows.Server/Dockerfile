@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+FROM mcr.microsoft.com/dotnet/aspnet:5.0
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN apt-get install -y build-essential
 RUN apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev liblzma-dev
 RUN ln -s /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so
 
-RUN apt-get install -y libomp-dev
+RUN apt-get install -y libomp-dev curl
 
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
@@ -24,13 +24,27 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
 
 # Python 3.7 Install
 RUN cd /usr/src && \
-    wget https://www.python.org/ftp/python/3.7.4/Python-3.7.4.tgz && \
-    tar xzf Python-3.7.4.tgz && \
-    cd Python-3.7.4 && \
+    wget https://www.python.org/ftp/python/3.7.9/Python-3.7.9.tgz && \
+    tar xzf Python-3.7.9.tgz && \
+    cd Python-3.7.9 && \
     ./configure --enable-optimizations --enable-shared && \
     make install
 
 RUN ln -s /usr/local/bin/python3.7 python
+
+# Java Install 11
+ENV JAVA_HOME /usr/java/openjdk-11
+ENV PATH $JAVA_HOME/bin:$PATH
+
+ENV JAVA_URL https://github.com/AdoptOpenJDK/openjdk11-upstream-binaries/releases/download/jdk-11.0.13%2B7/OpenJDK11U-jdk_x64_linux_11.0.13_7_ea.tar.gz
+
+RUN set -eux; \
+	\
+	curl -fL -o /openjdk.tgz "$JAVA_URL"; \
+	mkdir -p "$JAVA_HOME"; \
+	tar --extract --file /openjdk.tgz --directory "$JAVA_HOME" --strip-components 1; \
+	rm /openjdk.tgz; \
+    ln -s "${JAVA_HOME}/lib/server/"*.so /usr/local/lib/
 
 # # Java Install 12
 # ENV JAVA_HOME /usr/java/openjdk-12
@@ -50,21 +64,21 @@ RUN ln -s /usr/local/bin/python3.7 python
 #     ln -s "${JAVA_HOME}/lib/server/"*.so /usr/local/lib/
 
 # Java Install 8
-ENV JAVA_HOME /usr/java/openjdk-8
-ENV PATH $JAVA_HOME/bin:$PATH
+# ENV JAVA_HOME /usr/java/openjdk-8
+# ENV PATH $JAVA_HOME/bin:$PATH
 
-ENV JAVA_URL https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/download/jdk8u212-b04/OpenJDK8U-x64_linux_8u212b04.tar.gz
+# ENV JAVA_URL https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/download/jdk8u212-b04/OpenJDK8U-x64_linux_8u212b04.tar.gz
 
-RUN set -eux; \
-	\
-	curl -fL -o /openjdk.tgz "$JAVA_URL"; \
-	mkdir -p "$JAVA_HOME"; \
-	tar --extract --file /openjdk.tgz --directory "$JAVA_HOME" --strip-components 1; \
-	rm /openjdk.tgz; \
-    ln -s "${JAVA_HOME}/jre/lib/amd64/server/"*.so /usr/local/lib/
+# RUN set -eux; \
+# 	\
+# 	curl -fL -o /openjdk.tgz "$JAVA_URL"; \
+# 	mkdir -p "$JAVA_HOME"; \
+# 	tar --extract --file /openjdk.tgz --directory "$JAVA_HOME" --strip-components 1; \
+# 	rm /openjdk.tgz; \
+#     ln -s "${JAVA_HOME}/jre/lib/amd64/server/"*.so /usr/local/lib/
 
 # Install Scala
-ENV SCALA_VERSION 2.12.8
+ENV SCALA_VERSION 2.12.10
 ENV SCALA_HOME /usr/share/scala
 
 RUN \
@@ -82,16 +96,16 @@ ENV SPARK_HOME /usr/share/spark
 
 RUN \
     cd "/tmp" && \
-    wget "https://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz" && \
-    tar xzf "spark-2.4.4-bin-hadoop2.7.tgz" && \
+    wget "https://archive.apache.org/dist/spark/spark-3.1.2/spark-3.1.2-bin-hadoop3.2.tgz" && \
+    tar xzf "spark-3.1.2-bin-hadoop3.2.tgz" && \
     mkdir "${SPARK_HOME}" && \
-    mv "/tmp/spark-2.4.4-bin-hadoop2.7"/* "${SPARK_HOME}" && \
+    mv "/tmp/spark-3.1.2-bin-hadoop3.2"/* "${SPARK_HOME}" && \
     ln -s "${SPARK_HOME}/bin/"* "/usr/bin/" && \
     rm -rf "/tmp/"*
 
 
 # set up network
-ENV ASPNETCORE_PKG_VERSION 3.0
+ENV ASPNETCORE_PKG_VERSION 5.0
 
 # SSL
 # ENV ASPNETCORE_URLS https://+:443
@@ -111,7 +125,9 @@ RUN chmod +x /app/lab
 RUN chmod +x /app/coflows
 
 # RUN g++ -shared -o libJNIWrapper.so -L/usr/java/openjdk-12/lib/server  -I/usr/java/openjdk-12/include -I/usr/java/openjdk-12/include/linux JNIWrapper.cpp -ljvm -fPIC  -ldl -lpthread
-RUN g++ -shared -o libJNIWrapper.so  -I/usr/java/openjdk-8/include -I/usr/java/openjdk-8/include/linux JNIWrapper.cpp -fPIC -lpthread
+# RUN g++ -shared -o libJNIWrapper.so  -I/usr/java/openjdk-8/include -I/usr/java/openjdk-8/include/linux JNIWrapper.cpp -fPIC -lpthread
+RUN g++ -shared -o libJNIWrapper.so  -I/usr/java/openjdk-11/include -I/usr/java/openjdk-11/include/linux JNIWrapper.cpp -fPIC -lpthread
+
 
 RUN \
     mkdir /app/jars && \

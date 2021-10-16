@@ -51,19 +51,19 @@ namespace Python.Runtime
             typeType = typeof(Type);
 
             IntPtr decimalMod = Runtime.PyImport_ImportModule("decimal");
-            if (decimalMod == null) throw new PythonException();
+            if (decimalMod == IntPtr.Zero) throw new PythonException();
 
             IntPtr dateTimeMod = Runtime.PyImport_ImportModule("datetime");
-            if (dateTimeMod == null) throw new PythonException();
+            if (dateTimeMod == IntPtr.Zero) throw new PythonException();
             
             decimalCtor = Runtime.PyObject_GetAttrString(decimalMod, "Decimal");
-            if (decimalCtor == null) throw new PythonException();
+            if (decimalCtor == IntPtr.Zero) throw new PythonException();
             
             dateTimeCtor = Runtime.PyObject_GetAttrString(dateTimeMod, "datetime");
-            if (dateTimeCtor == null) throw new PythonException();
+            if (dateTimeCtor == IntPtr.Zero) throw new PythonException();
             
             timeSpanCtor = Runtime.PyObject_GetAttrString(dateTimeMod, "timedelta");
-            if (timeSpanCtor == null) throw new PythonException();
+            if (timeSpanCtor == IntPtr.Zero) throw new PythonException();
 
             IntPtr tzInfoMod = PythonEngine.ModuleFromString("custom_tzinfo",
                 "from datetime import timedelta, tzinfo\n" +
@@ -79,7 +79,7 @@ namespace Python.Runtime
                 "        return timedelta(0)\n").Handle;
 
             tzInfoCtor = Runtime.PyObject_GetAttrString(tzInfoMod, "GMT");
-            if (tzInfoCtor == null) throw new PythonException();
+            if (tzInfoCtor == IntPtr.Zero) throw new PythonException();
         }
 
 

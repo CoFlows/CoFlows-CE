@@ -23,31 +23,14 @@
 public class GCInterceptor
 {
     private static WeakHashMap<Object, CallbackRef> _table = new WeakHashMap<Object, CallbackRef>();
-
     
-    // public static void RegisterGCEvent(Object obj, int id, Action<object, int> action)
     public static void RegisterGCEvent(Object obj, int id)
     {
-        
-        
         if(!_table.containsKey(obj))
         {
-            // System.out.println("JAVA RegisterGCEvent: " + obj);
             CallbackRef callbackRef = new CallbackRef(obj, id);
             _table.put(obj, callbackRef);
         }
-        // else
-        //     System.out.println("JAVA RegisterGCEvent already exists: " + obj + " " + id);
-        // bool found = _table.TryGetValue(obj, out callbackRef);
-        // if (found)
-        // {
-        //     callbackRef.Collected += action;
-        //     return;
-        // }
-
-        // callbackRef = new CallbackRef(obj, id);
-        // callbackRef.Collected += action;
-        // _table.Add(obj, callbackRef);
     }
 
     // public static void DeregisterGCEvent(this object obj, int id, Action<object, int> action)

@@ -25,20 +25,15 @@ public class CLRObject
     {
         this.Pointer = ptr;
         this.ClassName = classname;
-        // if(cache)
-            // __DB.put(ptr, this);
         DB.put(ptr, new WeakReference(this));
-        //GCInterceptor.RegisterGCEvent(this, ptr); //TESTING
     }
 
     public CLRObject(String classname, int ptr)
     {
         this.Pointer = ptr;
         this.ClassName = classname;
-        // if(cache)
         __DB.put(ptr, this);
         __cache = true;
-        // System.out.println("CLR OBJECT: " + classname + "  --> " + ptr);
         DB.put(ptr, new WeakReference(this));
     }
 
@@ -71,7 +66,7 @@ public class CLRObject
     @Override
     public String toString() 
     {
-		return "CLRObject: " + ClassName;// + " ( Ptr = " + Pointer + " | jhash = " + this.hashCode() + ")";
+		return "CLRObject: " + ClassName;
     }
     
     @Override
@@ -80,18 +75,15 @@ public class CLRObject
         if(__DB.containsKey(Pointer))
             __DB.remove(Pointer);
 
-        // NEW TEST
         if(DB.containsKey(Pointer))
             DB.remove(Pointer);
 
         if(CLRRuntime._DBID.containsKey(Pointer))
         {
             CLRRuntime._DBID.remove(Pointer);
-            // System.out.println("JAVA FINALISE 1(" + Pointer + "): " + this + " " + CLRRuntime._DBID.size());
         }
         if(CLRRuntime._SDBID.containsKey(Pointer))
         {
-            // System.out.println("JAVA FINALISE 2(" + Pointer + "): " + this + " " + CLRRuntime._SDBID.size());
             CLRRuntime._SDBID.remove(Pointer); 
         }
 

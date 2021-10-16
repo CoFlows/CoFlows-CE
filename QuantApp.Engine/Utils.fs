@@ -262,7 +262,9 @@ module Utils =
             { Result = [("", null, null)]; Compilation = null }
 
     let CreatePKG(code : (string * string) seq, name: string, parameters : obj[]) : FPKG * ((string * string) seq) = 
-        let text, res, exp = ExecuteCodeFunction(false, code, name, parameters).Result.[0]
+        let result = ExecuteCodeFunction(false, code, name, parameters)
+        
+        let text, res, exp = result.Result.[0]
         if res :? string then
             res |> Console.WriteLine
             raise(Exception(res.ToString()))

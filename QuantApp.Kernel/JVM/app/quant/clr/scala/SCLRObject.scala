@@ -23,12 +23,10 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
     lazy val fields = mutable.Map.empty[String, Any]
 
     if(clrObject != null){
+        
         CLRRuntime.SetID(this, clrObject.Pointer)
         val runtime = CLRRuntime.GetClass("QuantApp.Kernel.JVM.Runtime")
         var _sig = runtime.Invoke("Signature", clrObject)
-        
-        // println("SCALA(" + clrObject.hashCode()  + "): " + clrObject + " <--> " + _sig)
-        // val sig = runtime.Invoke("Signature", clrObject).asInstanceOf[Array[String]]
         
         if(_sig != null) {
             val sig = _sig.asInstanceOf[Array[String]]
@@ -41,8 +39,6 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
                         name = name.substring(0, name.indexOf("-"))
                         val argsSignature = signature.substring(signature.indexOf("(") + 1, signature.lastIndexOf(")"))
                         val returnSignature = signature.substring(signature.indexOf(")") + 1)
-
-                        // println("SCALA: " + name + argsSignature)
 
                         updateDynamic(name + argsSignature)((x:Array[Any]) => { 
                             val args = 
@@ -68,29 +64,24 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
   
     def CLRObject : CLRObject = clrObject
 
-    // override def hashCode() : Int = clrObject.hashCode()
     override def hashCode() : Int = {
-        // println("SCALA HASHCODE: " + clrObject.Pointer )//+ " " + CLRRuntime.GetID(clrObject) + " " + CLRRuntime.GetID(this))
-        // CLRRuntime.GetID(clrObject)
         clrObject.Pointer
     }
-    // override def hashCode() : Int = clrObject.Pointer
-
-    def -=(k: String): this.type = { fields -= k; this }
-
-    def +=(f: (String, Any)): this.type = { fields += f; this }
-
+    
     def iterator = fields.iterator
 
     def get(k: String): Option[Any] = fields get k 
 
+    // def addOne(elem: (String, Any)): this.type = { fields addOne elem; this }
+    // def subtractOne(elem: String): this.type = { fields subtractOne elem; this }
+    def -=(k: String): this.type = { fields -= k; this }
+    def +=(f: (String, Any)): this.type = { fields += f; this }
+
     val lockApply = 0
-    // def applyDynamic[R >: Null <: Any](namep: String)(args: Any*): R = {    
+    
     def applyDynamic[R <: Any](namep: String)(args: Any*): R = this.lockApply.synchronized {
         val argSig = args.map(x => if(x == null) null else x.getClass).map(CLRRuntime.TransformType(_)).map(x => x.replaceAll("app/quant/clr/CLRObject", "java/lang/Object").replaceAll("app/quant/clr/scala/SCLRObject", "java/lang/Object")).mkString
 
-        // println("SCALA APPLYDYNAMIC: " + namep)
-        
         val name = namep + argSig
         val func = this.getOrElse(name, null)
 
@@ -141,7 +132,6 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
     }
 
     def selectDynamic[R <: Any](name: String): R = {
-    // def selectDynamic[R >: Null <: Any](name: String): R = {
         try {
             val res = clrObject.GetProperty(name)
  
@@ -169,30 +159,24 @@ class SCLRObject(val clrObject : CLRObject) extends Dynamic with mutable.Map[Str
         }
     }
 
-    def updateDynamic(name: String)(value: Any) { fields += name -> value }
-
-        class Assigner(ob: SCLRObject, message: String) {
-        def :=(value: Any): Unit = ob += (message -> value)
-    }
-
-    implicit def anyToassigner(a: Any): Assigner = a match {
-        case x: Assigner => x
-        case _ => sys.error("Not an assigner.")
-    }
+    def updateDynamic(name: String)(value: Any) = { fields += name -> value }
 }
 
 object SCLRObject {
-    def apply(name : String, args : Any*) = { 
-        // println("SCALA APPLY: " + name + " " + this.hashCode())
-        val vargs = 
-            args.map(_ match { 
-              case null => null
-              case o: CLRObject => o.asInstanceOf[CLRObject]
-              case o: AnyRef => o.asInstanceOf[Object]
-            }).toArray
-      new SCLRObject(CLRRuntime.CreateInstanceArr(name, vargs))
+    def apply(obj : AnyRef, args : Any*) = { 
+        if(obj.isInstanceOf[String]){
+            val vargs = 
+                args.map(_ match { 
+                case null => null
+                case o: CLRObject => o.asInstanceOf[CLRObject]
+                case o: AnyRef => o.asInstanceOf[Object]
+                }).toArray
+            new SCLRObject(CLRRuntime.CreateInstanceArr(obj.asInstanceOf[String], vargs))
+        }
+        else{
+            new SCLRObject(obj.asInstanceOf[CLRObject])
+        }
     }
-    def apply(obj: AnyRef) = new SCLRObject(obj.asInstanceOf[CLRObject])
 
     def PyImport(name : String) : SCLRObject = new SCLRObject(CLRRuntime.GetClass("Python.Runtime.Py").Invoke("Import",name).asInstanceOf[CLRObject])
     
