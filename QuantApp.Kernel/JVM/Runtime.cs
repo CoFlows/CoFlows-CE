@@ -6,9 +6,6 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // NEED TO IMPLEMENT https://docs.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.conditionalweaktable-2?view=netframework-4.8
- // https://docs.microsoft.com/en-us/dotnet/api/system.weakreference?view=netframework-4.8
- 
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
@@ -336,9 +333,7 @@ namespace QuantApp.Kernel.JVM
             return nRes;        
         }
 
-        // internal static ConcurrentDictionary<object, int> DBID = new ConcurrentDictionary<object, int>();
         internal static ConditionalWeakTable<object, object> DBID = new ConditionalWeakTable<object, object>();
-        // internal static ConcurrentDictionary<int, int> _DBID = new ConcurrentDictionary<int, int>();
         private readonly static object objLock_GetID = new object();
         public static unsafe int GetID(object obj, bool cache)
         {
@@ -349,32 +344,6 @@ namespace QuantApp.Kernel.JVM
 
                 var _type = obj.GetType();
                 
-
-                // if(obj is JVMObject)
-                // {
-                //     int id = (obj as JVMObject).JavaHashCode;
-                //     if(!__DB.ContainsKey(id))
-                //         __DB.TryAdd(id, obj);
-                //         // __DB[id] = obj;
-                //     obj.RegisterGCEvent(id, delegate(object _obj, int _id)
-                //     {
-                //         RemoveID(_id);
-                //     });
-                //     return (obj as JVMObject).JavaHashCode;
-                // }
-                // else if(obj is IJVMTuple)
-                // {
-                //     int id = (obj as IJVMTuple).JVMObject.JavaHashCode;
-                //     // if(!__DB.ContainsKey(id))
-                //     //     __DB.TryAdd(id, obj);
-                //     __DB[id] = obj;
-                //     obj.RegisterGCEvent(id, delegate(object _obj, int _id)
-                //     {
-                //         RemoveID(_id);
-                //     });
-                //     return (obj as IJVMTuple).JVMObject.JavaHashCode;
-                // }
-
                 object _id;
 
                 if(!DBID.TryGetValue(obj, out _id))
@@ -386,91 +355,12 @@ namespace QuantApp.Kernel.JVM
                         RemoveID(_id);
                     });
                     if(cache)
-                    {
-                        // switch(Type.GetTypeCode(_type))
-                        // { 
-                        //     case TypeCode.Boolean:
-                        //         break;
-
-                        //     case TypeCode.Byte:
-                        //         break;
-
-                        //     case TypeCode.Char:
-                        //         break;
-
-                        //     case TypeCode.Int16:
-                        //         break;
-
-                        //     case TypeCode.Int32: 
-                        //         break;
-                                
-                        //     case TypeCode.Int64:
-                        //         break;
-
-                        //     case TypeCode.Single:
-                        //         break;
-
-                        //     case TypeCode.Double:
-                        //         break;
-
-                        //     case TypeCode.String:
-                        //         break;
-
-                        //     case TypeCode.DateTime:
-                        //         break;
-
-                        //     default:
-                        //         // Console.WriteLine("------ GETID: " + obj);
-                        //         void*  pEnv;// = (void*)EnvPtr;
-                        //         if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
-                        //         // void* ptr = getObjectPointer(pEnv, obj);
-                        //         // RegisterJVMObject(pEnv, id, ptr);
-
-                                
-                                
-                        //         // __DB.TryAdd(id, obj);
-                        //         break;
-                        // }
-                        
-                        
+                    {                        
                         __DB.TryAdd(id, obj);
                     }
                     DBID.AddOrUpdate(obj, id);
                     return id;
-
-                    // for(int i = 0; i < 100; i++)
-                    // {
-                    //     var id = System.Guid.NewGuid().ToString().GetHashCode();
-                    //     if(!_DBID.ContainsKey(id))
-                    //     {
-                    //         _DBID.TryAdd(id, id);
-                            
-                    //         // THIS IS NECESSARY
-                    //         // if(cache) //NO
-                    //         __DB.TryAdd(id, obj);
-
-                    //         obj.RegisterGCEvent(id, delegate(object _obj, int _id)
-                    //         {
-                    //             // int __id;
-                    //             // _DBID.TryRemove(_id, out __id);
-                    //             // Console.WriteLine("Object(" + _obj + ") with hash code " + _id + " recently collected: ");
-                    //             RemoveID(_id);
-                    //         });
-                            
-                    //         DBID.AddOrUpdate(obj, id);
-                    //         return id;
-                    //     }
-                    //     // Console.WriteLine("++++ GETID RETRY: " + i + " " + obj + " == " + obj.GetType());
-                    // }
-
-                    // Console.WriteLine("------------- GETID ERROR: " + obj);
                 }
-
-                // if(cache)
-                // {
-                //     // Console.WriteLine(obj.GetType() + " --> "  + obj);
-                //     __DB.TryAdd((int)_id, obj);
-                // }
 
                 return (int)_id;
             }
@@ -489,19 +379,12 @@ namespace QuantApp.Kernel.JVM
                 if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
                 {
                     if( GetStaticMethodID( pEnv, pNetBridgeClass, "CreateID", "()I", &pSetPathMethod ) == 0 )
-                    // if( GetStaticMethodID( pEnv, pNetBridgeClass, "RegisterObject", "(Ljava/lang/Object;)V", &pSetPathMethod ) == 0 )
                     {
                         void** pArg_lcs = stackalloc void*[0];
-                        // pArg_lcs[0] = *(void**)&hashCode;
-                        // pArg_lcs[0] = *(void**)&id;
-                        // void** pArg_lcs = stackalloc void*[1];
-                        // pArg_lcs[0] = pObj;
                         
                         int _res = 0;
                         if(CallStaticIntMethod( pEnv, pNetBridgeClass, pSetPathMethod, 0, pArg_lcs,  &_res) != 0)
                             Console.WriteLine("CLR JAVA CreateID Object error");
-
-                        // Console.WriteLine("CS getHashCode: " + _res);
 
                         return _res;
                     }
@@ -517,41 +400,10 @@ namespace QuantApp.Kernel.JVM
 
         private static unsafe int Java_app_quant_clr_CLRRuntime_nativeRemoveObject(void* pEnv, int ptr)
         {
-            // return 0;
-            // if(DB.ContainsKey(ptr) && DB[ptr].IsAlive)
-            //     DB[ptr].Target.Dispose();
-
-            // if(JVMObject.__DB.ContainsKey(ptr)) //DEF NO
-            // {
-            //     JVMObject oo;
-            //     JVMObject.__DB.TryRemove(ptr, out oo);
-            //     Console.WriteLine("RUNTIME DELETE JVMObject: " + ptr + " " + oo);
-            // }
-            
-            // if(_DBID.ContainsKey(ptr))
-            // {
-            //     int _i;
-            //     _DBID.TryRemove(ptr, out _i);
-            // }
-
-            // if(!JVMDelegate.DB.ContainsKey(ptr) && DB.ContainsKey(ptr))
-            // {
-            //     WeakReference _o;
-            //     DB.TryRemove(ptr, out _o);
-            // }
-            
-            // if(MethodDB.ContainsKey(ptr)) //DEF NO
-            // {
-            //     ConcurrentDictionary<string,MethodInfo> _o;
-            //     MethodDB.TryRemove(ptr, out _o);
-            // }
-
             if(__DB.ContainsKey(ptr))
             {
                 object oo;
                 __DB.TryRemove(ptr, out oo);
-
-                // Console.WriteLine("RUNTIME DELETE Object: " + ptr + " " + oo);
             }
             return 0;
         }
@@ -651,7 +503,6 @@ namespace QuantApp.Kernel.JVM
                     int hashCode = GetID(obj, true); // IMPORTANT TRUE
                 
                     if(!(obj is JVMObject) && !(obj is IJVMTuple))
-                        // DB[hashCode] = obj;
                         DB[hashCode] = new WeakReference(obj);
 
                     return hashCode;
@@ -665,7 +516,6 @@ namespace QuantApp.Kernel.JVM
         }
         private unsafe delegate int SetCreateInstance(void* pEnv, string classname, int len, void** args);
         
-        // internal static ConcurrentDictionary<string,MethodInfo> MethodDB = new ConcurrentDictionary<string, MethodInfo>();
         internal static ConcurrentDictionary<int,ConcurrentDictionary<string,MethodInfo>> MethodDB = new ConcurrentDictionary<int,ConcurrentDictionary<string,MethodInfo>>();
         private readonly static object objLock_Java_app_quant_clr_CLRRuntime_nativeInvoke = new object();
         private static unsafe void* Java_app_quant_clr_CLRRuntime_nativeInvoke(void* pEnv, int hashCode, string funcname, int len, void** args)
@@ -685,7 +535,6 @@ namespace QuantApp.Kernel.JVM
 
                         if(obj is Type)
                         {
-                            // Console.WriteLine("CLR NATIVE INVOKE Type(" + hashCode + "): " + obj + " " + funcname);
                             var key = hashCode + funcname + len;
                             if(!MethodDB.ContainsKey(hashCode))
                                 MethodDB.TryAdd(hashCode, new ConcurrentDictionary<string,MethodInfo>());
@@ -712,7 +561,6 @@ namespace QuantApp.Kernel.JVM
                         }
                         else if(obj is DynamicObject)
                         {
-                            // Console.WriteLine("CLR NATIVE INVOKE dynamic(" + hashCode + "): " + obj + " " + funcname + " --> " + classes_obj  + " --> " + (classes_obj == null));
                             var res = classes_obj == null ? Dynamic.InvokeMember(obj,funcname) : Dynamic.InvokeMember(obj,funcname,classes_obj);
                             if(res == null)
                                 return IntPtr.Zero.ToPointer();
@@ -723,7 +571,6 @@ namespace QuantApp.Kernel.JVM
                         }
                         else
                         {
-                            // Console.WriteLine("CLR NATIVE INVOKE else(" + hashCode + "): " + obj + " " + funcname);
                             var key = hashCode + funcname + len;
 
                             if(!MethodDB.ContainsKey(hashCode))
@@ -762,81 +609,72 @@ namespace QuantApp.Kernel.JVM
         private readonly static object objLock_getSuperMethod = new object();
         private static MethodInfo getSuperMethod(Type type, string funcname)
         {
-            // // lock(objLock_getSuperMethod)
+            if(type == null)
+                return null;
+            MethodInfo method = type.GetMethod(funcname);
+            if(method == null)
             {
-                if(type == null)
-                    return null;
-                MethodInfo method = type.GetMethod(funcname);
-                if(method == null)
-                {
-                    Type[] interfaces = type.GetInterfaces();
-                    if(interfaces != null)
-                        foreach(var t in interfaces)
-                        {
-                            var m = getSuperMethod(t, funcname);
-                            if(m != null)
-                                return m;
-                        }
-                    Type tbase = type.BaseType;
-                    return getSuperMethod(tbase, funcname);
-                }
-
-                return method;
+                Type[] interfaces = type.GetInterfaces();
+                if(interfaces != null)
+                    foreach(var t in interfaces)
+                    {
+                        var m = getSuperMethod(t, funcname);
+                        if(m != null)
+                            return m;
+                    }
+                Type tbase = type.BaseType;
+                return getSuperMethod(tbase, funcname);
             }
+
+            return method;
         }
 
         private readonly static object objLock_getSuperField = new object();
         private static FieldInfo getSuperField(Type type, string funcname)
         {
-            // // lock(objLock_getSuperField)
+            if(type == null)
+                return null;
+            
+            FieldInfo field = type.GetField(funcname);
+            if(field == null)
             {
-                if(type == null)
-                    return null;
-                
-                FieldInfo field = type.GetField(funcname);
-                if(field == null)
-                {
-                    Type[] interfaces = type.GetInterfaces();
-                    if(interfaces != null)
-                        foreach(var t in interfaces)
-                        {
-                            var m = getSuperField(t, funcname);
-                            if(m != null)
-                                return m;
-                        }
-                    Type tbase = type.BaseType;
-                    return getSuperField(tbase, funcname);
-                }
-
-                return field;
+                Type[] interfaces = type.GetInterfaces();
+                if(interfaces != null)
+                    foreach(var t in interfaces)
+                    {
+                        var m = getSuperField(t, funcname);
+                        if(m != null)
+                            return m;
+                    }
+                Type tbase = type.BaseType;
+                return getSuperField(tbase, funcname);
             }
+
+            return field;
         }
 
         private readonly static object objLock_getSuperProperty = new object();
         private static PropertyInfo getSuperProperty(Type type, string funcname)
         {
-            // // lock(objLock_getSuperProperty)
+            if(type == null)
+                return null;
+            
+            PropertyInfo property = type.GetProperty(funcname);
+            if(property == null)
             {
-                if(type == null)
-                    return null;
-                
-                PropertyInfo property = type.GetProperty(funcname);
-                if(property == null)
-                {
-                    Type[] interfaces = type.GetInterfaces();
-                    if(interfaces != null)
-                        foreach(var t in interfaces)
-                        {
-                            var m = getSuperProperty(t, funcname);
-                            if(m != null)
-                                return m;
-                        }
-                    Type tbase = type.BaseType;
-                    return getSuperProperty(tbase, funcname);
-                }
-
-                return property;
+                Type[] interfaces = type.GetInterfaces();
+                if(interfaces != null)
+                    foreach(var t in interfaces)
+                    {
+                        var m = getSuperProperty(t, funcname);
+                        if(m != null)
+                            return m;
+                    }
+                Type tbase = type.BaseType;
+                return getSuperProperty(tbase, funcname);
             }
+
+            return property;
         }
         private unsafe delegate void* SetInvoke(void* pEnv, int ptr, string funcname, int len, void** args);
 
@@ -848,16 +686,9 @@ namespace QuantApp.Kernel.JVM
                 try
                 {
                     JVMDelegate del = new JVMDelegate(funcname, hashCode);
-                    
-                    // if(!__DB.ContainsKey(hashCode))
-                    //     __DB[hashCode] = del; //important
-                    // else
-                    //     Console.WriteLine("CLR 758 ERROR HASHCODE EXISTS");
                     int hsh = GetID(del, false);
-                    // DB[hashCode] = new WeakReference(del);
                     if(DB.ContainsKey(hsh))
                         Console.WriteLine("----- CLR 762 HASH Conflict");
-                    // DB[hsh] = new WeakReference(del);
                     return IntPtr.Zero.ToPointer();
                 }
                 catch(Exception e)
@@ -874,11 +705,9 @@ namespace QuantApp.Kernel.JVM
         public static unsafe object InvokeFunc(int hashCode, object[] args)
         {
             lock(objLock_InvokeFunc)
-            // // lock(objLock_getJavaParameters)
             {
                 try
                 {
-                    // Console.WriteLine("----------INVOKEFUNC");
                     void*  pEnv;
                     if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
 
@@ -890,12 +719,6 @@ namespace QuantApp.Kernel.JVM
                         void*  pInvokeMethod;
                         if(GetStaticMethodID( pEnv, pNetBridgeClass, "InvokeDelegate", "(I[Ljava/lang/Object;)Ljava/lang/Object;", &pInvokeMethod ) == 0)
                         {
-                            // Console.WriteLine("InvokeFunc(" + hashCode + "): " + args);
-                            // if(args != null)
-                            //     foreach (var item in args)
-                            //     {
-                            //         Console.WriteLine("-------(" + GetID(item) + "): " + item);
-                            //     }
                             object[] pAr_len_data = args == null ? new object[]{ hashCode } : new object[]{ hashCode, args };
                             void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
@@ -1057,7 +880,6 @@ namespace QuantApp.Kernel.JVM
                                                     else if(JVMObject.DB.ContainsKey(hashID_res) && JVMObject.DB[hashID_res].IsAlive) //check if it is a JVMObject
                                                     {
                                                         DetacheThread((void*)JVMPtr);
-                                                        // return JVMObject.DB[hashID_res];
                                                         return JVMObject.DB[hashID_res].Target;
                                                     }
 
@@ -1067,7 +889,6 @@ namespace QuantApp.Kernel.JVM
 
 
                                                         var _ret = CreateInstancePtr(pEnv, cls, null, new IntPtr(pGetCLRObject), null );
-                                                        // GetID(_ret, true); //NOT SURE
                                                         DetacheThread((void*)JVMPtr);
                                                         return _ret;
                                                     }
@@ -1085,17 +906,11 @@ namespace QuantApp.Kernel.JVM
                             else
                             {
                                 Console.WriteLine("---InvokeFunc(" + hashCode + "): " + args);
-                                // if(args != null)
-                                //     foreach (var item in args)
-                                //     {
-                                //         Console.WriteLine("-------(" + GetID(item) + "): " + item);
-                                //     }
                             }
 
                         }
                     }
                     return null;
-                    // throw new Exception(GetException(pEnv));
                 }
                 catch(Exception e)
                 {
@@ -1227,42 +1042,32 @@ namespace QuantApp.Kernel.JVM
                             void*  pNetBridgeClass;
                             if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0) throw new Exception("Class not found");
 
-                            var id = GetID(res, true); // IMPORTANT TRUE
-                            // var id = GetID(res, false);
-
+                            var id = GetID(res, true);
+                            
                             if(res != null)
                                 res.RegisterGCEvent(id, delegate(object _obj, int _id)
                                 {
-                                    // Console.WriteLine("------______++____---Object(" + _obj + ") with hash code " + _id + " recently collected: ");
                                     Runtime.RemoveID(_id);
                                 });
 
                             if(res != null && JVMDelegate.DB.ContainsKey(id))
                             {
                                 JVMDelegate jobj = res as JVMDelegate; 
-                                // RegisterJVMObject(pEnv, id, (void *)(jobj.Pointer));
                                 return (void *)(jobj.Pointer);
                             }
 
                             else if(res != null && DB.ContainsKey(id))
                             {
-                                // Console.WriteLine("---- RETURN CACHE CLRObject: " + id + " " + res);
-                                if(true)//FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0)
+                                void*  pGetCLRObjectMethod;
+                                if(GetStaticMethodID( pEnv, pNetBridgeClass, "GetCLRObject", "(I)Lapp/quant/clr/CLRObject;", &pGetCLRObjectMethod ) == 0)
                                 {
-                                    void*  pGetCLRObjectMethod;
-                                    if(GetStaticMethodID( pEnv, pNetBridgeClass, "GetCLRObject", "(I)Lapp/quant/clr/CLRObject;", &pGetCLRObjectMethod ) == 0)
-                                    {
-                                        object[] pAr_len_data = new object[]{ id };
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+                                    object[] pAr_len_data = new object[]{ id };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
-                                        void*  pGetCLRObject;
-                                        if(CallStaticObjectMethod( pEnv, pNetBridgeClass, pGetCLRObjectMethod, &pGetCLRObject, 1, pAr_len) == 0)
-                                        {
-                                            // RegisterJVMObject(pEnv, id, pGetCLRObject);
-                                            return pGetCLRObject;
-                                        }
-                                        else
-                                            throw new Exception(GetException(pEnv));
+                                    void*  pGetCLRObject;
+                                    if(CallStaticObjectMethod( pEnv, pNetBridgeClass, pGetCLRObjectMethod, &pGetCLRObject, 1, pAr_len) == 0)
+                                    {
+                                        return pGetCLRObject;
                                     }
                                     else
                                         throw new Exception(GetException(pEnv));
@@ -1275,26 +1080,20 @@ namespace QuantApp.Kernel.JVM
                             {
                                 IJVMTuple jobj = res as IJVMTuple; 
                                 void* ptr = GetJVMObject(pEnv, pNetBridgeClass, jobj.JVMObject.JavaHashCode);
-                                // RegisterJVMObject(pEnv, id, ptr);
                                 return ptr;
                             }
                             else if(res is JVMTuple)
                             {
                                 JVMTuple jobj = res as JVMTuple; 
                                 void* ptr = GetJVMObject(pEnv, pNetBridgeClass, jobj.JavaHashCode);
-                                // RegisterJVMObject(pEnv, id, ptr);
                                 return ptr;
                             }
                             
                             else if(res is JVMObject)
                             {
-                                
-
                                 JVMObject jobj = res as JVMObject; 
 
-                                // Console.WriteLine("---- RETURN JVMObject: " + id + " " + jobj.JavaHashCode + " " + res);
                                 void* ptr = GetJVMObject(pEnv, pNetBridgeClass, jobj.JavaHashCode);
-                                // RegisterJVMObject(pEnv, id, ptr);
                                 return ptr;
                             }
 
@@ -1303,7 +1102,6 @@ namespace QuantApp.Kernel.JVM
                                 Array sub = res as Array;
                                 
                                 JVMObject javaArray = getJavaArray(pEnv, pNetBridgeClass, sub);
-                                // Console.WriteLine("---- RETURN JVMObject: " + sub + " " + javaArray.JavaHashCode + " " + res);
                                 
                                 void* ptr = GetJVMObject(pEnv, pNetBridgeClass, javaArray.JavaHashCode);
                                 return ptr;
@@ -1329,10 +1127,7 @@ namespace QuantApp.Kernel.JVM
                                             Console.WriteLine("CLR 1238 Hash Conflict");
 
                                         if(!(res is JVMObject) && !(res is IJVMTuple))
-                                            // DB[id] = res;
                                             DB[id] = new WeakReference(res);
-
-                                        // RegisterJVMObject(pEnv, id, pObj);
                                         return pObj;
                                     }
                                     else
@@ -1361,10 +1156,8 @@ namespace QuantApp.Kernel.JVM
                                             Console.WriteLine("CLR 1268 Hash Conflict");
 
                                         if(!(res is JVMObject) && !(res is IJVMTuple))
-                                            // DB[id] = res;
                                             DB[id] = new WeakReference(res);
 
-                                        // RegisterJVMObject(pEnv, id, pObj);
                                         return pObj;
                                     }
                                     else
@@ -1393,10 +1186,8 @@ namespace QuantApp.Kernel.JVM
 
                                         if(!(res is JVMObject) && !(res is IJVMTuple))
                                         {
-                                            // DB[id] = res;
                                             DB[id] = new WeakReference(res);
                                         }
-                                        // RegisterJVMObject(pEnv, id, pObj);
                                         return pObj;
                                     }
                                     else
@@ -1422,11 +1213,9 @@ namespace QuantApp.Kernel.JVM
         }
 
         private readonly static object objLock_Java_app_quant_clr_CLRRuntime_nativeInvokeFunc = new object();
-        // private static unsafe void* Java_app_quant_clr_CLRRuntime_nativeInvokeFunc(void* pEnv, int hashCode, int len, void** args)
         private static unsafe void* Java_app_quant_clr_CLRRuntime_nativeInvokeFunc(void* pEnv, int hashCode, int len, void** args)
         {
             lock(objLock_Java_app_quant_clr_CLRRuntime_nativeInvokeFunc)
-            // lock(objLock_getJavaParameters)
             {
                 try
                 {
@@ -1442,7 +1231,6 @@ namespace QuantApp.Kernel.JVM
                             {
                                 object res = ((JVMDelegate)JVMDelegate.DB[hashCode].Target).Invoke(classes_obj);
                                 var ret =  getObjectPointer(pEnv, res);
-                                // RegisterJVMObject(pEnv, hashCode, ret); //Wrong HashCode
                                 return ret;
                             }
                             throw new Exception("JVMDelegate not found");
@@ -1454,17 +1242,6 @@ namespace QuantApp.Kernel.JVM
                 catch(Exception e)
                 {
                     Console.WriteLine("Java_app_quant_clr_CLRRuntime_nativeInvokeFunc: " + hashCode + " " + e);
-                    // Console.WriteLine("==" + DB[hashCode]);
-                    
-                    // if(classes_obj != null)
-                    // {
-                    //     Console.WriteLine(len + " " + classes_obj.Length);
-                    //     foreach (var item in classes_obj)
-                    //     {
-                    //         Console.WriteLine("---- " + item);
-                    //     }
-                    // }
-                    // throw e;
                 }
                 return null;
             }
@@ -1484,9 +1261,6 @@ namespace QuantApp.Kernel.JVM
                         void*  pArrayClassesMethod;
                         if(GetStaticMethodID( pEnv, pNetBridgeClass, "ArrayClasses", "([Ljava/lang/Object;)[Ljava/lang/String;", &pArrayClassesMethod ) == 0)
                         {
-                            // int hashID = GetID(pEnv, args);
-                            // int _arr_len = getArrayLength(pEnv, new JVMObject(hashID, "[Ljava/lang/Object;", true));
-                            
                             if(DB.ContainsKey(hashCode))
                             {
                                 object obj = DB[hashCode].Target;
@@ -1508,7 +1282,7 @@ namespace QuantApp.Kernel.JVM
                                 else
                                 {
                                     Console.WriteLine("Java_app_quant_clr_CLRRuntime_nativeSetProperty");
-                                    int _arr_len = getArrayLength(pEnv, args); //TESTING
+                                    int _arr_len = getArrayLength(pEnv, args);
                                     object[] classes_obj = getJavaArray(pEnv, pNetBridgeClass, _arr_len, args, "[Ljava/lang/Object;");
 
                                     FieldInfo field = getSuperField(obj.GetType(), name);
@@ -1549,10 +1323,6 @@ namespace QuantApp.Kernel.JVM
                         object obj = DB[hashCode].Target;
                         if(obj == null)
                             return null;
-
-                        // Console.WriteLine("Java_app_quant_clr_CLRRuntime_nativeGetProperty: " + obj);
-                                    
-
                         
                         if(obj is DynamicObject)
                         {
@@ -1565,8 +1335,6 @@ namespace QuantApp.Kernel.JVM
                                 {
                                     return IntPtr.Zero.ToPointer();
                                 }
-
-                                // Console.WriteLine("Java_app_quant_clr_CLRRuntime_nativeGetProperty 1: " + res);
 
                                 var ret = getObjectPointer(pEnv, (object)res);
                                 return ret;
@@ -1581,7 +1349,6 @@ namespace QuantApp.Kernel.JVM
                             try
                             {
                                 var exp = obj as IDictionary<string, object>;
-                                // Console.WriteLine("Java_app_quant_clr_CLRRuntime_nativeGetProperty 2: " + exp[name]);
                                 var ret = getObjectPointer(pEnv, exp[name]);
                                 return ret;
                             }
@@ -1612,7 +1379,6 @@ namespace QuantApp.Kernel.JVM
                                     }
                                 }
 
-                                // Console.WriteLine("Java_app_quant_clr_CLRRuntime_nativeGetProperty 3: " + res);
                                 var ret = getObjectPointer(pEnv, res);
 
 
@@ -1697,9 +1463,7 @@ namespace QuantApp.Kernel.JVM
             {
                 try
                 {
-                    // void** pAr_len = stackalloc void*[7];
                     object[] pAr_len_data = new object[]{ date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second, date.Millisecond * 1000000 };
-                    // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
                     void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
                     void*  pDateClass;
@@ -1734,7 +1498,6 @@ namespace QuantApp.Kernel.JVM
         private readonly static object objLock_getJavaArray_1 = new object();
         private unsafe static JVMObject getJavaArray(void* pEnv, void* pNetBridgeClass, object[] array)
         {
-            // cache = true;
             lock(objLock_getJavaArray_1)
             {
                 try
@@ -1747,7 +1510,6 @@ namespace QuantApp.Kernel.JVM
                             return null;
                         }
                         Array sub = array as Array;
-                        // GetID(sub, false);
 
                         object lastObject = null;
 
@@ -1896,15 +1658,6 @@ namespace QuantApp.Kernel.JVM
                                 }
 
                                 sub_element = res;
-                                // var subID = GetID(sub_element, true);
-                                // var subID = GetID(sub_element, false); //TESTING
-                                // var subID = GetID(sub_element, cache);
-
-                                // sub_element.RegisterGCEvent(subID, delegate(object _obj, int _id)
-                                // {
-                                //     // Console.WriteLine("++++++++Object(" + _obj + ") with hash code " + _id + " recently collected: " + cache);
-                                //     RemoveID(_id);
-                                // });
                                 
                                 var sub_type = sub_element.GetType();
                                 switch(Type.GetTypeCode(sub_type))
@@ -2018,9 +1771,7 @@ namespace QuantApp.Kernel.JVM
 
                                     default:
 
-                                        // var subID = GetID(sub_element, true);
-                                        Console.WriteLine("CLR Runtime cs 1972 CALLING CHECK");
-                                        var subID = GetID(sub_element, false); //not getting called
+                                        var subID = GetID(sub_element, false);
 
                                         if(JVMDelegate.DB.ContainsKey(subID))
                                         {
@@ -2042,7 +1793,6 @@ namespace QuantApp.Kernel.JVM
                                                     throw new Exception(GetException(pEnv));
 
                                                 SetObjectArrayElement(pEnv, pJArray, ii, pGetCLRObject);
-                                                // RemoveID(subID);
                                             }
                                             else
                                             {
@@ -2054,18 +1804,14 @@ namespace QuantApp.Kernel.JVM
                                         else if(sub_element is JVMTuple)
                                         {
                                             JVMTuple jobj = sub_element as JVMTuple; 
-                                            // void* ptr = (void *)(jobj.jVMObject.Pointer);
                                             void* ptr = GetJVMObject(pEnv, pNetBridgeClass, jobj.jVMObject.JavaHashCode);
                                             SetObjectArrayElement(pEnv, pJArray, ii, ptr);
-                                            // RemoveID(jobj.jVMObject.JavaHashCode);
                                         }
                                         else if(sub_element is IJVMTuple)
                                         {
                                             IJVMTuple jobj = sub_element as IJVMTuple; 
-                                            // void* ptr = (void *)(jobj.JVMObject.Pointer);
                                             void* ptr = GetJVMObject(pEnv, pNetBridgeClass, jobj.JVMObject.JavaHashCode);
                                             SetObjectArrayElement(pEnv, pJArray, ii, ptr);
-                                            // RemoveID(jobj.JVMObject.JavaHashCode);
                                         }
 
                                         else if(sub_element is JVMObject)
@@ -2073,7 +1819,6 @@ namespace QuantApp.Kernel.JVM
                                             JVMObject jobj = sub_element as JVMObject; 
                                             void* ptr = GetJVMObject(pEnv, pNetBridgeClass, jobj.JavaHashCode);
                                             SetObjectArrayElement(pEnv, pJArray, ii, ptr);
-                                            // RemoveID(jobj.JavaHashCode);
                                         }
 
                                         else if(sub_element is Array)
@@ -2083,7 +1828,6 @@ namespace QuantApp.Kernel.JVM
 
                                             void* ptr = GetJVMObject(pEnv, pNetBridgeClass, javaArray.JavaHashCode);
                                             SetObjectArrayElement(pEnv, pJArray, ii, ptr);
-                                            // RemoveID(javaArray.JavaHashCode);
                                         }
 
                                         else if(sub_element is IEnumerable<object>)
@@ -2102,16 +1846,10 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 1983 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
-
                                                     
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // Console.WriteLine("RUNTIME CLRITERABLE:  " + subID);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2136,16 +1874,11 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2015 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                 
                                                     
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // Console.WriteLine("RUNTIME CLRIterator:  " + subID);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2170,15 +1903,10 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2047 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
-
                                                     
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2202,15 +1930,10 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2077 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
 
-                                                    
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2234,15 +1957,10 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2114 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
 
-                                                    
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2266,13 +1984,9 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2146 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2296,13 +2010,9 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2173 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2326,13 +2036,9 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2200 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2356,13 +2062,9 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2227 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2386,13 +2088,9 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2254 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2415,14 +2113,9 @@ namespace QuantApp.Kernel.JVM
                                                 {
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2281 Hash Conflict");
-
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2446,13 +2139,9 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2308 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2476,13 +2165,9 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2335 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2506,13 +2191,9 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2361 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2536,13 +2217,9 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2389 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);                                                // DB.TryAdd(res.GetHashCode(), res);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2566,13 +2243,9 @@ namespace QuantApp.Kernel.JVM
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2416 Hash Conflict");
 
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2595,13 +2268,9 @@ namespace QuantApp.Kernel.JVM
                                                 {
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2443 Hash Conflict");
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                        // DB[subID] = res;
                                                         DB[subID] = new WeakReference(res);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2625,14 +2294,9 @@ namespace QuantApp.Kernel.JVM
                                                 {
                                                     if(DB.ContainsKey(subID))
                                                         Console.WriteLine("CLR 2470 Hash Conflict");
-                                                    // int _id = GetID(pEnv, pObj);
-                                                    // RegisterJVMObject(pEnv, GetID(pEnv, pObj) ,pObj);
                                                     SetObjectArrayElement(pEnv, pJArray, ii, pObj);
                                                     if(!(sub_element is JVMObject) && !(sub_element is IJVMTuple))
-                                                        // DB[subID] = sub_element;
                                                         DB[subID] = new WeakReference(sub_element);
-
-                                                    // RemoveID(subID);
                                                 }
                                                 else
                                                     throw new Exception(GetException(pEnv));
@@ -2642,47 +2306,17 @@ namespace QuantApp.Kernel.JVM
                                         }
                                         break;
                                 }
-
-                                // sub_element.RegisterGCEvent(subID, delegate(object _obj, int _id)
-                                // {
-                                //     // Console.WriteLine("=========++++-~~~-++++Object(" + _obj + ") with hash code " + _id + " recently collected: ");
-                                //     RemoveID(_id);
-                                // });
-
-                                // if(__DB.ContainsKey(subID))
-                                // {
-                                //     object _out;
-                                //     __DB.TryRemove(subID, out _out);
-                                // }
-                                
                             }
                         }
 
                         int hashID = GetJVMID(pEnv, pJArray, true);
-                        // int hashID = GetJVMID(pEnv, pJArray,false);
-                        // RegisterJVMObject(pEnv, hashID, pJArray);
-
+                        
                         sub.RegisterGCEvent(hashID, delegate(object _obj, int _id)
                         {
-                            // Console.WriteLine("=========++++++++Object(" + _obj + ") with hash code " + _id + " recently collected: ");
                             RemoveID(_id);
                         });
 
-                        // if(__DB.ContainsKey(hashID))
-                        // {
-                        //     object _out;
-                        //     __DB.TryRemove(hashID, out _out);
-                        // }
-
-                        
-
-                        // RegisterJVMObject(pEnv, hashID, pJArray);
-                        // if(cache)
-                        //     Console.WriteLine("------------: " + cls + " " + cache);
-                        // return new JVMObject(hashID, cls, cache); // IMPORTANT TRUE
                         var jo = new JVMObject(hashID, cls, true, "javaArray 2475"); // IMPORTANT TRUE
-                        // GetID(jo, false);
-                        // __DB[hashID] = jo;
                         return jo;
                     }
                     else
@@ -2700,7 +2334,6 @@ namespace QuantApp.Kernel.JVM
         private unsafe static object[] getJavaArray(void* pEnv, void* pNetBridgeClass, int len, void* pObjResult, string returnSignature)//, IntPtr pNetBridgeClassPtr, IntPtr ArrayClassesMethodPtr)
         {
             lock(objLock_getJavaArray_2)
-            // // lock(objLock_getJavaParameters)
             {
                 try
                 {
@@ -2710,9 +2343,8 @@ namespace QuantApp.Kernel.JVM
                     }
                     int HashCode = GetJVMID(pEnv, pObjResult, true);
 
-                    // 
-                    void* _pNetBridgeClass = pNetBridgeClass;//(void*)pNetBridgeClassPtr;
-                    int ret_arr_len = len;//getArrayLength(pEnv, ret_arr);
+                    void* _pNetBridgeClass = pNetBridgeClass;
+                    int ret_arr_len = len;
 
                     object[] resultArray = new object[ret_arr_len];
 
@@ -2762,18 +2394,12 @@ namespace QuantApp.Kernel.JVM
                         if(GetStaticMethodID( pEnv, pNetBridgeClass, "ArrayClasses", "([Ljava/lang/Object;)[Ljava/lang/String;", &pArrayClassesMethod ) != 0)
                             throw new Exception(GetException(pEnv));
 
-                        // JVMObject ret_arr = new JVMObject(HashCode, returnSignature, true);
-                        
-                        // object[] ar_data_pArrClasses = new object[]{ ret_arr };
-                        // void** pArg_ArrClassesMethod = (void**)(new StructWrapper(pEnv, ar_data_pArrClasses)).Ptr;
-
                         var size = Unsafe.SizeOf<object[]>();
                         void** _ptr = (void**)Marshal.AllocHGlobal(size);
                         _ptr[0] = pObjResult;
 
                         
                         void* pArrClasses = IntPtr.Zero.ToPointer();
-                        // if(CallStaticObjectMethod( pEnv, pNetBridgeClass, pArrayClassesMethod, &pArrClasses, 1, pArg_ArrClassesMethod) != 0) throw new Exception("Exception: getJavaArray CallStaticObjectMethod");
                         if(CallStaticObjectMethod( pEnv, pNetBridgeClass, pArrayClassesMethod, &pArrClasses, 1, _ptr) != 0) throw new Exception(GetException(pEnv));
                         
                         for(int i = 0; i < ret_arr_len; i++)
@@ -2868,7 +2494,6 @@ namespace QuantApp.Kernel.JVM
                                                 resultArray[i] = ((JVMDelegate)JVMDelegate.DB[hashID_res].Target).func;
 
                                             else if(JVMObject.DB.ContainsKey(hashID_res) && JVMObject.DB[hashID_res].IsAlive) //check if it is a JVMObject
-                                                // resultArray[i] = JVMObject.DB[hashID_res];
                                                 resultArray[i] = JVMObject.DB[hashID_res].Target;
                                             
                                             else if(Runtime.DB.ContainsKey(hashID_res) && Runtime.DB[hashID_res].IsAlive) //check if it is a CLRObject
@@ -2885,31 +2510,14 @@ namespace QuantApp.Kernel.JVM
                                         }
                                         else
                                         {
-                                            // int _hashID = GetID(pEnv, pElement_object);
-                                            // JVMObject _ret_arr = new JVMObject(_hashID, retElementClass, true);
-                                            // int _ret_arr_len = getArrayLength(pEnv, _ret_arr);
                                             int _ret_arr_len = getArrayLength(pEnv, pElement_object); //TESTING
                                             resultArray[i] =  getJavaArray(pEnv, _pNetBridgeClass, _ret_arr_len, pElement_object, retElementClass);
-                                            // TESTING no diff
-                                            // if(JVMObject.__DB.ContainsKey(_hashID))
-                                            // {
-                                            //     JVMObject oo;
-                                            //     JVMObject.__DB.TryRemove(_hashID, out oo);
-                                            // }
                                         }
                                     }
                                 }
                                 
                             }
                         }
-
-                        
-                        // if(JVMObject.__DB.ContainsKey(HashCode))
-                        // {
-                        //     JVMObject _out;
-                        //     JVMObject.__DB.TryRemove(HashCode, out _out);
-                        // }
-
                         
                     }
 
@@ -2965,246 +2573,230 @@ namespace QuantApp.Kernel.JVM
         private readonly static object objLock_TransformType_1 = new object();
         internal static String TransformType(Type type)
         {
-            // // lock(objLock_TransformType_1)
-            {
-                switch(Type.GetTypeCode(type))
-                { 
-                    case TypeCode.Boolean:
-                        return "Z";
+            switch(Type.GetTypeCode(type))
+            { 
+                case TypeCode.Boolean:
+                    return "Z";
 
-                    case TypeCode.Byte:
-                        return "B";
+                case TypeCode.Byte:
+                    return "B";
 
-                    case TypeCode.Char:
-                        return "C";
+                case TypeCode.Char:
+                    return "C";
 
-                    case TypeCode.Int16:
-                        return "S";
+                case TypeCode.Int16:
+                    return "S";
 
-                    case TypeCode.Int32: 
-                        return "I";
-                        
-                    case TypeCode.Int64:
-                        return "J";
-
-                    case TypeCode.Single:
-                        return "F";
-
-                    case TypeCode.Double:
-                        return "D";
-
-                    case TypeCode.Empty:
-                        return "V";
-
-                    case TypeCode.String:
-                        return "Ljava/lang/String;";
-
-                    case TypeCode.DateTime:
-                        return "Ljava/time/LocalDateTime;";
+                case TypeCode.Int32: 
+                    return "I";
                     
-                    default:
-                        if(type == typeof(ObjectWrapper))
-                            return "Ljava/lang/Object;";
+                case TypeCode.Int64:
+                    return "J";
 
-                        if(type == typeof(void))
-                            return "V";
-                        
-                        else if(type.IsArrayOf<Boolean>())
-                            return "[Z";
+                case TypeCode.Single:
+                    return "F";
 
-                        else if(type.IsArrayOf<Byte>())
-                            return "[B";
+                case TypeCode.Double:
+                    return "D";
 
-                        else if(type.IsArrayOf<Char>())
-                            return "[C";
+                case TypeCode.Empty:
+                    return "V";
 
-                        else if(type.IsArrayOf<Int16>())
-                            return "[S";
+                case TypeCode.String:
+                    return "Ljava/lang/String;";
 
-                        else if(type.IsArrayOf<Int32>())
-                            return "[I";
+                case TypeCode.DateTime:
+                    return "Ljava/time/LocalDateTime;";
+                
+                default:
+                    if(type == typeof(ObjectWrapper))
+                        return "Ljava/lang/Object;";
 
-                        else if(type.IsArrayOf<Int64>())
-                            return "[J";
+                    if(type == typeof(void))
+                        return "V";
+                    
+                    else if(type.IsArrayOf<Boolean>())
+                        return "[Z";
 
-                        else if(type.IsArrayOf<Single>())
-                            return "[F";
+                    else if(type.IsArrayOf<Byte>())
+                        return "[B";
 
-                        else if(type.IsArrayOf<Double>())
-                            return "[D";
+                    else if(type.IsArrayOf<Char>())
+                        return "[C";
 
-                        else if(type.IsArrayOf<string>())
-                            return "[Ljava/lang/String;";
+                    else if(type.IsArrayOf<Int16>())
+                        return "[S";
 
-                        else if(type.IsArrayOf<DateTime>())
-                            return "[java/time/LocalDateTime;";
+                    else if(type.IsArrayOf<Int32>())
+                        return "[I";
 
-                        else if(type.IsArrayOf<object>())
-                            return "[Ljava/lang/Object;";
+                    else if(type.IsArrayOf<Int64>())
+                        return "[J";
 
-                        // else if(type == typeof(System.Func<Object, Object>))
-                        // {
-                        //     Console.WriteLine("JAVA FUNCTION");
-                        //     return "Ljava/util/function/Function;";
-                        // }
-                        else if(type == typeof(System.Func<Object, Object>))
-                            return "Lscala/Function1;";
-                        else if(type == typeof(System.Func<Object, Object, Object>))
-                            return "Lscala/Function2;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object>))
-                            return "Lscala/Function3;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object>))
-                            return "Lscala/Function4;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function5;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function6;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function7;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function8;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function9;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function10;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function11;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function12;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function13;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function14;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function15;";
+                    else if(type.IsArrayOf<Single>())
+                        return "[F";
 
-                        else if(type == typeof(IEnumerable<object>))
-                            return "Ljava/lang/Iterable;";
-                        else
-                            return "Ljava/lang/Object;";
+                    else if(type.IsArrayOf<Double>())
+                        return "[D";
 
-                } 
-            }
+                    else if(type.IsArrayOf<string>())
+                        return "[Ljava/lang/String;";
+
+                    else if(type.IsArrayOf<DateTime>())
+                        return "[java/time/LocalDateTime;";
+
+                    else if(type.IsArrayOf<object>())
+                        return "[Ljava/lang/Object;";
+
+                    else if(type == typeof(System.Func<Object, Object>))
+                        return "Lscala/Function1;";
+                    else if(type == typeof(System.Func<Object, Object, Object>))
+                        return "Lscala/Function2;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object>))
+                        return "Lscala/Function3;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object>))
+                        return "Lscala/Function4;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function5;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function6;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function7;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function8;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function9;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function10;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function11;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function12;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function13;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function14;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function15;";
+
+                    else if(type == typeof(IEnumerable<object>))
+                        return "Ljava/lang/Iterable;";
+                    else
+                        return "Ljava/lang/Object;";
+
+            } 
         }
 
         private readonly static object objLock_TransformType_2 = new object();
         internal static String TransformType(Object obj)
         {
-            // // lock(objLock_TransformType_2)
-            {
-                if(obj == null)
-                    return "Ljava/lang/Object;";
+            if(obj == null)
+                return "Ljava/lang/Object;";
 
-                Type type = obj.GetType();
-                switch(Type.GetTypeCode(type))
-                { 
-                    case TypeCode.Boolean:
-                        return "Z";
+            Type type = obj.GetType();
+            switch(Type.GetTypeCode(type))
+            { 
+                case TypeCode.Boolean:
+                    return "Z";
 
-                    case TypeCode.Byte:
-                        return "B";
+                case TypeCode.Byte:
+                    return "B";
 
-                    case TypeCode.Char:
-                        return "C";
+                case TypeCode.Char:
+                    return "C";
 
-                    case TypeCode.Int16:
-                        return "S";
+                case TypeCode.Int16:
+                    return "S";
 
-                    case TypeCode.Int32: 
-                        return "I";
-                        
-                    case TypeCode.Int64:
-                        return "J";
-
-                    case TypeCode.Single:
-                        return "F";
-
-                    case TypeCode.Double:
-                        return "D";
-
-                    case TypeCode.Empty:
-                        return "V";
-
-                    case TypeCode.String:
-                        return "Ljava/lang/String;";
-
-                    case TypeCode.DateTime:
-                        return "Ljava/time/LocalDateTime;";
+                case TypeCode.Int32: 
+                    return "I";
                     
-                    default:
-                        if(obj is ObjectWrapper)
-                            return "Ljava/lang/Object;";
-                        else if(obj is Array)
+                case TypeCode.Int64:
+                    return "J";
+
+                case TypeCode.Single:
+                    return "F";
+
+                case TypeCode.Double:
+                    return "D";
+
+                case TypeCode.Empty:
+                    return "V";
+
+                case TypeCode.String:
+                    return "Ljava/lang/String;";
+
+                case TypeCode.DateTime:
+                    return "Ljava/time/LocalDateTime;";
+                
+                default:
+                    if(obj is ObjectWrapper)
+                        return "Ljava/lang/Object;";
+                    else if(obj is Array)
+                    {
+                        var arr = obj as Array;
+                        string cls = "";
+                        foreach(var o in arr)
                         {
-                            var arr = obj as Array;
-                            string cls = "";
-                            foreach(var o in arr)
+                            string ocls = o is JVMObject ? "L" + ((JVMObject)o).JavaClass + ";" : TransformType(o);
+                            if(String.IsNullOrEmpty(cls))
+                                cls = ocls;
+                            else if(cls != ocls)
                             {
-                                string ocls = o is JVMObject ? "L" + ((JVMObject)o).JavaClass + ";" : TransformType(o);
-                                if(String.IsNullOrEmpty(cls))
-                                    cls = ocls;
-                                else if(cls != ocls)
-                                {
-                                    cls = "Ljava/lang/Object;";
-                                    break;
-                                }
+                                cls = "Ljava/lang/Object;";
+                                break;
                             }
-                            return "[" + cls;
                         }
-                        else if(obj is JVMObject)
-                        {
-                            string cls = ((JVMObject)obj).JavaClass.Replace(".","/");
-                            if(cls.Length > 1)
-                                cls = "L" + cls + ";";
-                            return cls;
-                        }
-                        // else if(obj is System.Func<Object, Object>)
-                        // {
-                        //     Console.WriteLine("JAVA FUNCTION");
-                        //     return "Ljava/util/function/Function;";
-                        // }
-                        else if(type == typeof(System.Func<Object, Object>))
-                            return "Lscala/Function1;";
-                        else if(type == typeof(System.Func<Object, Object, Object>))
-                            return "Lscala/Function2;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object>))
-                            return "Lscala/Function3;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object>))
-                            return "Lscala/Function4;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function5;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function6;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function7;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function8;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function9;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function10;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function11;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function12;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function13;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function14;";
-                        else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
-                            return "Lscala/Function15;";
-                        else if(obj is IEnumerable<object>)
-                            return "Ljava/lang/Iterable;";
+                        return "[" + cls;
+                    }
+                    else if(obj is JVMObject)
+                    {
+                        string cls = ((JVMObject)obj).JavaClass.Replace(".","/");
+                        if(cls.Length > 1)
+                            cls = "L" + cls + ";";
+                        return cls;
+                    }
+                    
+                    else if(type == typeof(System.Func<Object, Object>))
+                        return "Lscala/Function1;";
+                    else if(type == typeof(System.Func<Object, Object, Object>))
+                        return "Lscala/Function2;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object>))
+                        return "Lscala/Function3;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object>))
+                        return "Lscala/Function4;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function5;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function6;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function7;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function8;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function9;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function10;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function11;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function12;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function13;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function14;";
+                    else if(type == typeof(System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>))
+                        return "Lscala/Function15;";
+                    else if(obj is IEnumerable<object>)
+                        return "Ljava/lang/Iterable;";
 
-                        else
-                            return "Ljava/lang/Object;";
+                    else
+                        return "Ljava/lang/Object;";
 
-                } 
-            }
+            } 
         }
 
         private readonly static object objLock_getHashCode = new object();
-        // internal unsafe static int GetID(void* pEnv, void* pObj)
         internal unsafe static int GetJVMID(void* pEnv, void* pObj, bool cache)
         {
             lock(objLock_getHashCode)
@@ -3243,70 +2835,42 @@ namespace QuantApp.Kernel.JVM
 
         internal unsafe static int RemoveID(int id)
         {
-            // return 0;
-            // Console.WriteLine("RUNTIME REMOVEID: " + id);
-            // lock(objLock_RegisterJVMObject)
+            if(DB.ContainsKey(id))
             {
-
-                if(DB.ContainsKey(id)) //TEST
-                {
-                    WeakReference _o;
-                    DB.TryRemove(id, out _o);
-                }
-
-                // if(__DB.ContainsKey(id)) //NO
-                // {
-                //     object _o;
-                //     __DB.TryRemove(id, out _o);
-                // }
-
-                if(MethodDB.ContainsKey(id)) //NO
-                {
-                    ConcurrentDictionary<string,MethodInfo> _o;
-                    MethodDB.TryRemove(id, out _o);
-                }
-
-                
-
-
-                // if(_DBID.ContainsKey(id)) //TEST
-                // {
-                //     int _i;
-                //     _DBID.TryRemove(id, out _i);
-                // }
-                
-                void*  pEnv;
-                if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
-                void* pNetBridgeClass;
-                void* pSetPathMethod;
-
-                if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
-                {
-                    if( GetStaticMethodID( pEnv, pNetBridgeClass, "RemoveID", "(I)V", &pSetPathMethod ) == 0 )
-                    // if( GetStaticMethodID( pEnv, pNetBridgeClass, "RegisterObject", "(Ljava/lang/Object;)V", &pSetPathMethod ) == 0 )
-                    {
-                        void** pArg_lcs = stackalloc void*[1];
-                        // pArg_lcs[0] = *(void**)&hashCode;
-                        pArg_lcs[0] = *(void**)&id;
-                        // void** pArg_lcs = stackalloc void*[1];
-                        // pArg_lcs[0] = pObj;
-                        
-                        int _res = 0;
-                        if(CallStaticVoidMethod( pEnv, pNetBridgeClass, pSetPathMethod, 1, pArg_lcs) != 0)
-                            Console.WriteLine("JAVA RemoveID Object not registered...");
-
-                        // Console.WriteLine("CS getHashCode: " + _res);
-
-                        return _res;
-                    }
-                    else
-                        Console.WriteLine("RemoveID method not found");
-
-                    
-                }
-
-                return 0;
+                WeakReference _o;
+                DB.TryRemove(id, out _o);
             }
+
+            if(MethodDB.ContainsKey(id))
+            {
+                ConcurrentDictionary<string,MethodInfo> _o;
+                MethodDB.TryRemove(id, out _o);
+            }
+            
+            void*  pEnv;
+            if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
+            void* pNetBridgeClass;
+            void* pSetPathMethod;
+
+            if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
+            {
+                if( GetStaticMethodID( pEnv, pNetBridgeClass, "RemoveID", "(I)V", &pSetPathMethod ) == 0 )
+                {
+                    void** pArg_lcs = stackalloc void*[1];
+                    pArg_lcs[0] = *(void**)&id;
+                    int _res = 0;
+                    if(CallStaticVoidMethod( pEnv, pNetBridgeClass, pSetPathMethod, 1, pArg_lcs) != 0)
+                        Console.WriteLine("JAVA RemoveID Object not registered...");
+
+                    return _res;
+                }
+                else
+                    Console.WriteLine("RemoveID method not found");
+
+                
+            }
+
+            return 0;
         }
 
         private readonly static object objLock_isIterable = new object();
@@ -3319,30 +2883,17 @@ namespace QuantApp.Kernel.JVM
                     if(pObj == IntPtr.Zero.ToPointer())
                         return false;
 
-                    // void*  pEnv;
-                    if(true)//AttacheThread((void*)JVMPtr,&pEnv) == 0)
+                    void** pArg_lcs = stackalloc void*[1];
+                    pArg_lcs[0] = *(void**)&pObj;
+                    
+                    void*  pMethodSigHashCode;
+                    if(GetStaticMethodID( pEnv, pNetBridgeClass, "isIterable", "(Ljava/lang/Object;)Z", &pMethodSigHashCode ) == 0)
                     {
-                        // void* pNetBridgeClass;
-                        if(true)//FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
-                        {
-                            void** pArg_lcs = stackalloc void*[1];
-                            pArg_lcs[0] = *(void**)&pObj;
-                            
-                            void*  pMethodSigHashCode;
-                            if(GetStaticMethodID( pEnv, pNetBridgeClass, "isIterable", "(Ljava/lang/Object;)Z", &pMethodSigHashCode ) == 0)
-                            {
-                                bool _res;
-                                if(CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs, &_res) != 0)
-                                    throw new Exception(GetException(pEnv));
-
-                                return _res;
-                            }
-                            else
-                                throw new Exception(GetException(pEnv));
-                        }
-                        else
+                        bool _res;
+                        if(CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs, &_res) != 0)
                             throw new Exception(GetException(pEnv));
-                        
+
+                        return _res;
                     }
                     else
                         throw new Exception(GetException(pEnv));
@@ -3365,29 +2916,16 @@ namespace QuantApp.Kernel.JVM
                     if(pObj == IntPtr.Zero.ToPointer())
                         return false;
 
-                    // void*  pEnv;
-                    if(true)//AttacheThread((void*)JVMPtr,&pEnv) == 0)
+                    void** pArg_lcs = stackalloc void*[1];
+                    pArg_lcs[0] = *(void**)&pObj;
+                    
+                    void*  pMethodSigHashCode;
+                    if(GetStaticMethodID( pEnv, pNetBridgeClass, "isMap", "(Ljava/lang/Object;)Z", &pMethodSigHashCode ) == 0)
                     {
-                        // void* pNetBridgeClass;
-                        if(true)//FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
-                        {
-                            void** pArg_lcs = stackalloc void*[1];
-                            pArg_lcs[0] = *(void**)&pObj;
-                            
-                            void*  pMethodSigHashCode;
-                            if(GetStaticMethodID( pEnv, pNetBridgeClass, "isMap", "(Ljava/lang/Object;)Z", &pMethodSigHashCode ) == 0)
-                            {
-                                bool _res;
-                                if(CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs, &_res) != 0)
-                                    throw new Exception(GetException(pEnv));
-                                return _res;
-                            }
-                            else
-                                throw new Exception(GetException(pEnv));
-                        }
-                        else
+                        bool _res;
+                        if(CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs, &_res) != 0)
                             throw new Exception(GetException(pEnv));
-                        
+                        return _res;
                     }
                     else
                         throw new Exception(GetException(pEnv));
@@ -3410,32 +2948,20 @@ namespace QuantApp.Kernel.JVM
                     if(pObj == IntPtr.Zero.ToPointer())
                         return false;
 
-                    // void*  pEnv;
-                    if(true)//AttacheThread((void*)JVMPtr,&pEnv) == 0)
+                    void** pArg_lcs = stackalloc void*[1];
+                    pArg_lcs[0] = *(void**)&pObj;
+                    
+                    void*  pMethodSigHashCode;
+                    if(GetStaticMethodID( pEnv, pNetBridgeClass, "isCollection", "(Ljava/lang/Object;)Z", &pMethodSigHashCode ) == 0)
                     {
-                        // void* pNetBridgeClass;
-                        if(true)//FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
-                        {
-                            void** pArg_lcs = stackalloc void*[1];
-                            pArg_lcs[0] = *(void**)&pObj;
-                            
-                            void*  pMethodSigHashCode;
-                            if(GetStaticMethodID( pEnv, pNetBridgeClass, "isCollection", "(Ljava/lang/Object;)Z", &pMethodSigHashCode ) == 0)
-                            {
-                                bool _res;
-                                if(CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs, &_res) != 0)
-                                    throw new Exception(GetException(pEnv));
-                                return _res;
-                            }
-                            else
-                                throw new Exception(GetException(pEnv));
-                        }
-                        else
+                        bool _res;
+                        if(CallStaticBooleanMethod( pEnv, pNetBridgeClass, pMethodSigHashCode, 1, pArg_lcs, &_res) != 0)
                             throw new Exception(GetException(pEnv));
-                        
+                        return _res;
                     }
                     else
                         throw new Exception(GetException(pEnv));
+                        
                 }
                 catch(Exception e)
                 {
@@ -3457,27 +2983,18 @@ namespace QuantApp.Kernel.JVM
                     return -2;
                 }
 
-                // void*  pEnv;
-                if(true)//AttacheThread((void*)JVMPtr,&pEnv) == 0)
+                void* pNameClass;
+                void* _pClass;
+
+                if(GetObjectClass(pEnv, pObj, &_pClass, &pNameClass) == 0)
                 {
 
-                    void* pNameClass;
-                    void* _pClass;
-
-                    if(GetObjectClass(pEnv, pObj, &_pClass, &pNameClass) == 0)
-                    {
-
-                        pClass = _pClass;
-                        return 0;
-                    }
-
-                    Console.WriteLine("CLR getClass null pointer 2");
-                    return -1;
-                    
+                    pClass = _pClass;
+                    return 0;
                 }
 
-                Console.WriteLine("CLR getClass null pointer 3");
-                return -2;
+                Console.WriteLine("CLR getClass null pointer 2");
+                return -1;
             }
         }
 
@@ -3492,55 +3009,36 @@ namespace QuantApp.Kernel.JVM
                     cName =  null;
                     return -2;
                 }
-                // void*  pEnv;// = (void*)EnvPtr;
-                if(true)//AttacheThread((void*)JVMPtr,&pEnv) == 0)
+                void* pNameClass;
+                void* _pClass;
+                if(GetObjectClass(pEnv, pObj, &_pClass, &pNameClass) == 0)
                 {
 
-                    void* pNameClass;
-                    void* _pClass;
-                    if(GetObjectClass(pEnv, pObj, &_pClass, &pNameClass) == 0)
-                    {
-
-                        cName = GetNetString(pEnv, pNameClass);
-                        return 0;
-                    }
-                    Console.WriteLine("CLR getClassName null pointer 2");
-                    return -1;
-                    
+                    cName = GetNetString(pEnv, pNameClass);
+                    return 0;
                 }
-                Console.WriteLine("CLR getClassName null pointer 3");
-                return -2;
+                return -1;
             }
         }
 
         private readonly static object objLock_getArrayLength = new object();
-        // private unsafe static int getArrayLength(void* pEnv, JVMObject sig_arr)
         private unsafe static int getArrayLength(void* pEnv, void* arr)
         {
             lock(objLock_getArrayLength)
             { 
                 try
                 {
-                    // void*  pEnv;// = (void*)EnvPtr;
-                    // if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
-
                     void* pArrayClass;
                     if(FindClass( pEnv, "java/lang/reflect/Array", &pArrayClass) == 0)
                     {
                         void* pArrayLengthMethod;
                         if(GetStaticMethodID( pEnv, pArrayClass, "getLength", "(Ljava/lang/Object;)I", &pArrayLengthMethod) == 0)
                         {
-                            // void**  = stackalloc void*[1];
-                            // object[] pAr_len_data = new object[]{ sig_arr };
-                            // void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-
                             var size = Unsafe.SizeOf<object[]>();
                             void** _ptr = (void**)Marshal.AllocHGlobal(size);
                             _ptr[0] = arr;
 
                             int _res;
-                            // if(CallStaticIntMethod( pEnv, pArrayClass, pArrayLengthMethod, 1, pAr_len, &_res) != 0)
                             if(CallStaticIntMethod( pEnv, pArrayClass, pArrayLengthMethod, 1, _ptr, &_res) != 0)
                                 throw new Exception(GetException(pEnv));
                             return _res;
@@ -3561,8 +3059,7 @@ namespace QuantApp.Kernel.JVM
         
         public unsafe static void SetClassPath(string[] paths)
         {
-            // Console.WriteLine("SET CLASSPATH: " + path);
-            void*  pEnv;// = (void*)EnvPtr;
+            void*  pEnv;
             if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
             void* pNetBridgeClass;
             void* pSetPathMethod;
@@ -3571,10 +3068,7 @@ namespace QuantApp.Kernel.JVM
             {
                 if( GetStaticMethodID( pEnv, pNetBridgeClass, "SetBaseClassPath", "([Ljava/lang/String;)V", &pSetPathMethod ) == 0 )
                 {
-                    // void** pArg_lcs = stackalloc void*[1];
-                    // object[] ar_data = new object[]{ new string[]{ path } };
                     object[] ar_data = new object[]{ paths };
-                    // getJavaParameters(pEnv, ref pArg_lcs, ar_data);
                     void** pArg_lcs = (void**)(new StructWrapper(pEnv, ar_data)).Ptr;
                     if(CallStaticVoidMethod( pEnv, pNetBridgeClass, pSetPathMethod, 1, pArg_lcs) != 0)
                         Console.WriteLine("JAVA path not set..." + paths);
@@ -3587,65 +3081,50 @@ namespace QuantApp.Kernel.JVM
         private readonly static object objLock_Signature = new object();
         public static string[] Signature(object obj)
         {
-            // // lock(objLock_Signature)
+            if(obj == null) return new string[]{};
+
+            MethodInfo[] methodInfos = (obj is Type ? obj as Type : obj.GetType()).GetMethods();
+
+            var arr = new List<string>();
+
+            for(int i = 0; i < methodInfos.Length; i++)
             {
-                // Console.WriteLine("RUNTIME Signature: " + obj);
-                if(obj == null) return new string[]{};
+                var m = methodInfos[i];
 
-                MethodInfo[] methodInfos = (obj is Type ? obj as Type : obj.GetType()).GetMethods();
-
-                var arr = new List<string>();
-
-                for(int i = 0; i < methodInfos.Length; i++)
+                if(m.IsPublic)
                 {
-                    var m = methodInfos[i];
-
-                    if(m.IsPublic)
-                    {
-                        string sig = (m.IsStatic ? "S-" : "") + "M/" + m.Name + "-(";
-                        foreach(var p in m.GetParameters())
-                            sig += TransformType(p.ParameterType);
-                        sig += ")" + TransformType(m.ReturnType);
+                    string sig = (m.IsStatic ? "S-" : "") + "M/" + m.Name + "-(";
+                    foreach(var p in m.GetParameters())
+                        sig += TransformType(p.ParameterType);
+                    sig += ")" + TransformType(m.ReturnType);
 
 
-                        arr.Add(sig);
-
-                        // Console.WriteLine("---- SIG: " + sig);
-                    }
-
+                    arr.Add(sig);
                 }
 
-                return arr.ToArray();
             }
+
+            return arr.ToArray();
         }
 
         private readonly static object objLock_RegisterJVMObject = new object();
         public unsafe static void RegisterJVMObject(void* pEnv, int hashCode, void* pObj)
         {
-            // lock(objLock_RegisterJVMObject)
-            {
-                // void*  pEnv;
-                // if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
-                void* pNetBridgeClass;
-                void* pSetPathMethod;
+            void* pNetBridgeClass;
+            void* pSetPathMethod;
 
-                if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
+            if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
+            {
+                if( GetStaticMethodID( pEnv, pNetBridgeClass, "RegisterObject", "(ILjava/lang/Object;)V", &pSetPathMethod ) == 0 )
                 {
-                    if( GetStaticMethodID( pEnv, pNetBridgeClass, "RegisterObject", "(ILjava/lang/Object;)V", &pSetPathMethod ) == 0 )
-                    // if( GetStaticMethodID( pEnv, pNetBridgeClass, "RegisterObject", "(Ljava/lang/Object;)V", &pSetPathMethod ) == 0 )
-                    {
-                        void** pArg_lcs = stackalloc void*[2];
-                        pArg_lcs[0] = *(void**)&hashCode;
-                        pArg_lcs[1] = pObj;
-                        // void** pArg_lcs = stackalloc void*[1];
-                        // pArg_lcs[0] = pObj;
-                        
-                        if(CallStaticVoidMethod( pEnv, pNetBridgeClass, pSetPathMethod, 2, pArg_lcs) != 0)
-                            Console.WriteLine("JAVA Object not registered...");
-                    }
-                    else
-                        Console.WriteLine("RegisterObject method not found");
+                    void** pArg_lcs = stackalloc void*[2];
+                    pArg_lcs[0] = *(void**)&hashCode;
+                    pArg_lcs[1] = pObj;
+                    if(CallStaticVoidMethod( pEnv, pNetBridgeClass, pSetPathMethod, 2, pArg_lcs) != 0)
+                        Console.WriteLine("JAVA Object not registered...");
                 }
+                else
+                    Console.WriteLine("RegisterObject method not found");
             }
         }
         
@@ -3655,19 +3134,13 @@ namespace QuantApp.Kernel.JVM
         {
             lock(objLock_GetJVMObject_2)
             {
-                // void*  pEnv;
-                // if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
-                // void* pNetBridgeClass;
                 void* pGetJVMObjectMethod;
-
-                // if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
+                
                 if(true)
                 {
                     if( GetStaticMethodID( pEnv, pNetBridgeClass, "GetObject", "(I)Ljava/lang/Object;", &pGetJVMObjectMethod ) == 0 )
                     {
-                        // void** pAr_len = stackalloc void*[1];
                         object[] pAr_len_data = new object[]{ hashCode };
-                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
                         void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
                         void*  pGetJVMObject;
@@ -3806,7 +3279,6 @@ namespace QuantApp.Kernel.JVM
                                 if(GetMethodID( _pEnv, pObjResult, "doubleValue", "()D", &pInvokeMethod_double ) == 0)
                                 {
                                     void** pAr_double = stackalloc void*[1];
-                                    // return CallDoubleMethod( _pEnv, pObjResult, pInvokeMethod_double, 1, pAr_double);
                                     double res;
                                     if(CallDoubleMethod( _pEnv, pObjResult, pInvokeMethod_double, 1, pAr_double, &res) != 0)
                                         throw new Exception(GetException(_pEnv));
@@ -3825,44 +3297,21 @@ namespace QuantApp.Kernel.JVM
                             {
                                 dynamic _tuple = CreateInstancePtr(_pEnv, cName, null, returnPtr, null );
                                 JVMTuple1 tuple = new JVMTuple1(_tuple, _tuple._1());
-                                // JVMObject.DB[_tuple.JavaHashCode] = new JVMTuple(_tuple, tuple);
                                 var tp = new JVMTuple(_tuple, tuple);
-                                // GetID(tp, false);
-                                // JVMObject.DB[_tuple.JavaHashCode] = new WeakReference(tp);
-
-                                // tuple.RegisterGCEvent(_tuple.JavaHashCode, delegate(object _obj, int _id)
-                                // {
-                                //     Runtime.RemoveID(_id);
-                                // });
-                                
                                 return tuple;
                             }
                             case "scala.Tuple2":
                             {
                                 dynamic _tuple = CreateInstancePtr(_pEnv, cName, null, returnPtr, null );
                                 JVMTuple2 tuple = new JVMTuple2(_tuple, _tuple._1(), _tuple._2());
-                                // JVMObject.DB[_tuple.JavaHashCode] = new JVMTuple(_tuple, tuple);
                                 var tp = new JVMTuple(_tuple, tuple);
-                                
-                                // tuple.RegisterGCEvent(_tuple.JavaHashCode, delegate(object _obj, int _id)
-                                // {
-                                //     Runtime.RemoveID(_id);
-                                // });
                                 return tuple;
                             }
                             case "scala.Tuple3":
                             {
                                 dynamic _tuple = CreateInstancePtr(_pEnv, cName, null, returnPtr, null );
                                 JVMTuple3 tuple = new JVMTuple3(_tuple, _tuple._1(), _tuple._2(), _tuple._3());
-                                // JVMObject.DB[_tuple.JavaHashCode] = new JVMTuple(_tuple, tuple);
-                                
                                 var tp = new JVMTuple(_tuple, tuple);
-                                
-                                // tuple.RegisterGCEvent(_tuple.JavaHashCode, delegate(object _obj, int _id)
-                                // {
-                                //     Runtime.RemoveID(_id);
-                                // });
-
                                 return tuple;
                             }
                             case "scala.Tuple4":
@@ -3871,8 +3320,6 @@ namespace QuantApp.Kernel.JVM
                                 JVMTuple4 tuple = new JVMTuple4(_tuple, _tuple._1(), _tuple._2(), _tuple._3(), _tuple._4());
                                 
                                 var tp = new JVMTuple(_tuple, tuple);
-                                // GetID(tp, false);
-                                // JVMObject.DB[_tuple.JavaHashCode] = new WeakReference(tp);
                                 return tuple;
                             }
                             case "scala.Tuple5":
@@ -3881,8 +3328,6 @@ namespace QuantApp.Kernel.JVM
                                 JVMTuple5 tuple = new JVMTuple5(_tuple, _tuple._1(), _tuple._2(), _tuple._3(), _tuple._4(), _tuple._5());
                                 
                                 var tp = new JVMTuple(_tuple, tuple);
-                                // GetID(tp, false);
-                                // JVMObject.DB[_tuple.JavaHashCode] = new WeakReference(tp);
                                 return tuple;
                             }
                             case "scala.Tuple6":
@@ -3891,8 +3336,6 @@ namespace QuantApp.Kernel.JVM
                                 JVMTuple6 tuple = new JVMTuple6(_tuple, _tuple._1(), _tuple._2(), _tuple._3(), _tuple._4(), _tuple._5(), _tuple._6());
                                 
                                 var tp = new JVMTuple(_tuple, tuple);
-                                // GetID(tp, false);
-                                // JVMObject.DB[_tuple.JavaHashCode] = new WeakReference(tp);
                                 return tuple;
                             }
                             case "scala.Tuple7":
@@ -3901,8 +3344,6 @@ namespace QuantApp.Kernel.JVM
                                 JVMTuple7 tuple = new JVMTuple7(_tuple, _tuple._1(), _tuple._2(), _tuple._3(), _tuple._4(), _tuple._5(), _tuple._6(), _tuple._7());
                                 
                                 var tp = new JVMTuple(_tuple, tuple);
-                                // GetID(tp, false);
-                                // JVMObject.DB[_tuple.JavaHashCode] = new WeakReference(tp);
                                 return tuple;
                             }
                             case "scala.Tuple8":
@@ -3911,16 +3352,11 @@ namespace QuantApp.Kernel.JVM
                                 JVMTuple8 tuple = new JVMTuple8(_tuple, _tuple._1(), _tuple._2(), _tuple._3(), _tuple._4(), _tuple._5(), _tuple._6(), _tuple._7(), _tuple._8());
                                 
                                 var tp = new JVMTuple(_tuple, tuple);
-                                // GetID(tp, false);
-                                // JVMObject.DB[_tuple.JavaHashCode] = new WeakReference(tp);
                                 return tuple;
                             }
 
                             default:
                                 var __res = CreateInstancePtr(_pEnv, cName, null, returnPtr, null );
-
-                                
-                                // GetID(__res, false);
                                 return __res;
                         }
                     }
@@ -3938,57 +3374,49 @@ namespace QuantApp.Kernel.JVM
         private readonly static object objLock_CreateInstance = new object();
         public unsafe static JVMObject CreateInstance( string sClass, params object[] args )
         {
-            // // lock(objLock_CreateInstance)
-            {
-                void*  _pEnv;
-                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+            void*  _pEnv;
+            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
 
-                var ret = CreateInstancePtr(_pEnv, sClass, null, IntPtr.Zero, args );
-                DetacheThread((void*)JVMPtr);
-                return ret;
-            }
+            var ret = CreateInstancePtr(_pEnv, sClass, null, IntPtr.Zero, args );
+            DetacheThread((void*)JVMPtr);
+            return ret;            
         }
 
         private readonly static object objLock_CreateInstancePath = new object();
         public unsafe static JVMObject CreateInstancePath( string sClass, string path, params object[] args )
         {
-            // // lock(objLock_CreateInstancePath)
-            {
-                void*  _pEnv;
-                if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
+            void*  _pEnv;
+            if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
 
-                void*  _pNetBridgeClass;
-                if(FindClass( _pEnv, "app/quant/clr/CLRRuntime", &_pNetBridgeClass) == 0)
+            void*  _pNetBridgeClass;
+            if(FindClass( _pEnv, "app/quant/clr/CLRRuntime", &_pNetBridgeClass) == 0)
+            {
+                void* _pClass;
+                void*  pLoadClassMethod; // The executed method struct
+                if(GetStaticMethodID( _pEnv, _pNetBridgeClass, "LoadClass", "(Z[Ljava/lang/String;)Ljava/lang/Class;", &pLoadClassMethod ) == 0)
                 {
-                    void* _pClass;
-                    void*  pLoadClassMethod; // The executed method struct
-                    if(GetStaticMethodID( _pEnv, _pNetBridgeClass, "LoadClass", "(Z[Ljava/lang/String;)Ljava/lang/Class;", &pLoadClassMethod ) == 0)
+                    
+                    object[] _ar_data = new object[]{ true, new string[]{ sClass, path } };
+                    void** pArg_lcs = (void**)(new StructWrapper(_pEnv, _ar_data)).Ptr;
+                    if(CallStaticObjectMethod( _pEnv, _pNetBridgeClass, pLoadClassMethod, &_pClass, 2, pArg_lcs) == 0)
                     {
-                        
-                        // void** pArg_lcs = stackalloc void*[2];
-                        object[] _ar_data = new object[]{ true, new string[]{ sClass, path } };
-                        // getJavaParameters(_pEnv, ref pArg_lcs, _ar_data);
-                        void** pArg_lcs = (void**)(new StructWrapper(_pEnv, _ar_data)).Ptr;
-                        if(CallStaticObjectMethod( _pEnv, _pNetBridgeClass, pLoadClassMethod, &_pClass, 2, pArg_lcs) == 0)
-                        {
-                            var ret = CreateInstancePtr(_pEnv, sClass, path, IntPtr.Zero, args );
-                            DetacheThread((void*)JVMPtr);
-                            return ret;
-                        }
-                        else
-                        {
-                            throw new Exception("CreateInstancePath call: CallStaticObjectMethod error");
-                        }
+                        var ret = CreateInstancePtr(_pEnv, sClass, path, IntPtr.Zero, args );
+                        DetacheThread((void*)JVMPtr);
+                        return ret;
                     }
                     else
                     {
-                        throw new Exception("CreateInstancePath Get method: CallStaticObjectMethod error");
+                        throw new Exception("CreateInstancePath call: CallStaticObjectMethod error");
                     }
                 }
                 else
                 {
-                    throw new Exception("CreateInstancePath get CLRRuntime class error");
+                    throw new Exception("CreateInstancePath Get method: CallStaticObjectMethod error");
                 }
+            }
+            else
+            {
+                throw new Exception("CreateInstancePath get CLRRuntime class error");
             }
         }
 
@@ -4005,8 +3433,6 @@ namespace QuantApp.Kernel.JVM
                 {
                     if(Loaded)
                     {
-                        // void*  pEnv;
-                        // if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
                         
                         if(FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) == 0 )
                         {
@@ -4025,9 +3451,7 @@ namespace QuantApp.Kernel.JVM
                                         
                                         if( GetStaticMethodID( pEnv, pNetBridgeClass, "LoadClass", "([Ljava/lang/String;)Ljava/lang/Class;", &pLoadClassMethod ) == 0 )
                                         {
-                                            // void** pArg_lcs = stackalloc void*[1];
                                             object[] ar_data = new object[]{ path == null ? new string[]{ sClass } : new string[]{ sClass, path } };
-                                            // getJavaParameters(pEnv, ref pArg_lcs, ar_data);
                                             void** pArg_lcs = (void**)(new StructWrapper(pEnv, ar_data)).Ptr;
                                             
                                             classFound = CallStaticObjectMethod( pEnv, pNetBridgeClass, pLoadClassMethod, &pClass, 1, pArg_lcs);
@@ -4044,18 +3468,13 @@ namespace QuantApp.Kernel.JVM
                                     //LoadClass
                                     if(classFound == 0 )
                                     {
-                                        // void** pArg_sig = stackalloc void*[1];
                                         object[] ar_data = new object[]{ sClass };
-                                        // getJavaParameters(pEnv, ref pArg_sig, ar_data);
                                         void** pArg_sig = (void**)(new StructWrapper(pEnv, ar_data)).Ptr;
                                         void* rArr;
 
                                         if(CallStaticObjectMethod( pEnv, pNetBridgeClass, pSignaturesMethod, &rArr, 1, pArg_sig) == 0)
                                         {
-                                            // int sig_hashID = GetID(pEnv, rArr);
-                                            // JVMObject sig_arr = new JVMObject(sig_hashID, "[Ljava/lang/String;", true); //IMPORTANT TRUE
-                                            // int rArrLen = getArrayLength(pEnv, sig_arr);
-                                            int rArrLen = getArrayLength(pEnv, rArr); //TESTING
+                                            int rArrLen = getArrayLength(pEnv, rArr);
 
                                             var signatures = new List<string>();
                                             for(int i = 0; i < rArrLen; i++)
@@ -4084,7 +3503,6 @@ namespace QuantApp.Kernel.JVM
                                                 }
                                                 else
                                                 {
-                                                    // void** ar_newInstance = stackalloc void*[args.Length];
                                                     object[] args_object = new object[args.Length];
                                                     string argSig = "";
                                                     for(int i = 0; i < args.Length; i++)
@@ -4093,7 +3511,6 @@ namespace QuantApp.Kernel.JVM
                                                         args_object[i] = args[i];
                                                     }
 
-                                                    // getJavaParameters(pEnv, ref ar_newInstance, args_object);
                                                     void** ar_newInstance = (void**)(new StructWrapper(pEnv, args_object)).Ptr;
                                                     
                                                     if(NewObjectP( pEnv, pClass, "(" + argSig + ")V", args.Length, ar_newInstance, &pObj ) != 0)
@@ -4117,14 +3534,6 @@ namespace QuantApp.Kernel.JVM
 
                                             else if(isIterable(pEnv, pNetBridgeClass, ObjectPtr.ToPointer()))
                                                 expandoObject = new JVMIEnumerable(expandoObject);
-
-                                            // JVMObject.DB[expandoObject.JavaHashCode] = expandoObject;
-                                            // JVMObject.DB[expandoObject.JavaHashCode] = new WeakReference(expandoObject);
-
-                                            // GetID(expandoObject, false); // TESTING SHOULD NOT BE NEEDED
-
-                                            // Console.WriteLine("------ EXPANDO CREATED");
-
 
                                             foreach(var signature in signatures)
                                             {
@@ -4949,8 +4358,6 @@ namespace QuantApp.Kernel.JVM
                                                                                                 void*  pNetBridgeClass;
                                                                                                 if(FindClass(_pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0) throw new Exception ("getJavaArray Find class error");
 
-                                                                                                // int _hashID = GetID(_pEnv, pObjResult);
-                                                                                                // int _arr_len = getArrayLength(_pEnv, new JVMObject(_hashID, returnSignature, true)); //IMPORTANT TRUE
                                                                                                 int _arr_len = getArrayLength(_pEnv, pObjResult); //TESTING
                                                                                                 
                                                                                                 var _ret = getJavaArray(_pEnv, pNetBridgeClass, _arr_len, pObjResult, returnSignature);
@@ -4973,8 +4380,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             void*  pNetBridgeClass;
                                                                                             if(FindClass(_pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0) throw new Exception ("getJavaArray Find class error");
 
-                                                                                            // int hashID = GetID(_pEnv, pObjResult);
-                                                                                            // int _arr_len = getArrayLength(_pEnv, new JVMObject(hashID, returnSignature, true)); //IMPORTANT TRUE
                                                                                             int _arr_len = getArrayLength(_pEnv, pObjResult); //IMPORTANT TRUE
                                                                                             var _ret = getJavaArray(_pEnv, pNetBridgeClass, _arr_len, pObjResult, returnSignature);
                                                                                             
@@ -5004,9 +4409,6 @@ namespace QuantApp.Kernel.JVM
                                                                             if(_pObj != IntPtr.Zero.ToPointer())
                                                                             {
                                                                                 void*  pField;
-                                                                                // void*  _pNetBridgeClass;
-                                                                                // if(FindClass(_pEnv, "app/quant/clr/CLRRuntime", &_pNetBridgeClass) != 0) throw new Exception ("getJavaArray Find class error");
-
                                                                                 switch(typename)
                                                                                 {
                                                                                     case "System.Boolean[]":
@@ -5017,7 +4419,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             void* _pClass = IntPtr.Zero.ToPointer();
                                                                                             if(getClass(_pEnv, _pObj,  ref _pClass) == 0)
                                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                                    // SetStaticObjectField( _pEnv, _pClass, pField, vobj_bool.Pointer.ToPointer());
                                                                                                     SetStaticObjectField( _pEnv, _pClass, pField, _vobj_bool);
                                                                                                 else
                                                                                                     throw new Exception("Runtime Static Field not found: " + name);
@@ -5027,16 +4428,10 @@ namespace QuantApp.Kernel.JVM
                                                                                         else  
                                                                                         { 
                                                                                             if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                                // SetObjectField( _pEnv, _pObj, pField, vobj_bool.Pointer.ToPointer());
                                                                                                 SetObjectField( _pEnv, _pObj, pField, _vobj_bool);
                                                                                             else
                                                                                                 throw new Exception("Runtime Field not found: " + name);
                                                                                         }
-                                                                                        // if(__DB.ContainsKey(vobj_bool.JavaHashCode))
-                                                                                        // {
-                                                                                        //     object _out;
-                                                                                        //     __DB.TryRemove(vobj_bool.JavaHashCode, out _out);
-                                                                                        // }
                                                                                         DetacheThread((void*)JVMPtr);
                                                                                         break;
 
@@ -5048,7 +4443,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             void* _pClass = IntPtr.Zero.ToPointer();
                                                                                             if(getClass(_pEnv, _pObj,  ref _pClass) == 0)
                                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                                    // SetStaticObjectField( _pEnv, _pClass, pField, vobj_byte.Pointer.ToPointer());
                                                                                                     SetStaticObjectField( _pEnv, _pClass, pField, _vobj_byte);
                                                                                                 else
                                                                                                     throw new Exception("Runtime Static Field not found: " + name);
@@ -5058,16 +4452,10 @@ namespace QuantApp.Kernel.JVM
                                                                                         else  
                                                                                         { 
                                                                                             if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                                // SetObjectField( _pEnv, _pObj, pField, vobj_byte.Pointer.ToPointer());
                                                                                                 SetObjectField( _pEnv, _pObj, pField, _vobj_byte);
                                                                                             else
                                                                                                 throw new Exception("Runtime Field not found: " + name);
                                                                                         }
-                                                                                        // if(__DB.ContainsKey(vobj_byte.JavaHashCode))
-                                                                                        // {
-                                                                                        //     object _out;
-                                                                                        //     __DB.TryRemove(vobj_byte.JavaHashCode, out _out);
-                                                                                        // }
                                                                                         DetacheThread((void*)JVMPtr);
                                                                                         break;
                                                                                         
@@ -5079,7 +4467,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             void* _pClass = IntPtr.Zero.ToPointer();
                                                                                             if(getClass(_pEnv, _pObj,  ref _pClass) == 0)
                                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                                    // SetStaticObjectField( _pEnv, _pClass, pField, vobj_char.Pointer.ToPointer());
                                                                                                     SetStaticObjectField( _pEnv, _pClass, pField, _vobj_char);
                                                                                                 else
                                                                                                     throw new Exception("Runtime Static Field not found: " + name);
@@ -5089,16 +4476,10 @@ namespace QuantApp.Kernel.JVM
                                                                                         else  
                                                                                         { 
                                                                                             if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                                // SetObjectField( _pEnv, _pObj, pField, vobj_char.Pointer.ToPointer());
                                                                                                 SetObjectField( _pEnv, _pObj, pField, _vobj_char);
                                                                                             else
                                                                                                 throw new Exception("Runtime Field not found: " + name);
                                                                                         }
-                                                                                        // if(__DB.ContainsKey(vobj_char.JavaHashCode))
-                                                                                        // {
-                                                                                        //     object _out;
-                                                                                        //     __DB.TryRemove(vobj_char.JavaHashCode, out _out);
-                                                                                        // }
                                                                                         DetacheThread((void*)JVMPtr);
 
                                                                                         break;
@@ -5112,7 +4493,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             void* _pClass = IntPtr.Zero.ToPointer();
                                                                                             if(getClass(_pEnv, _pObj,  ref _pClass) == 0)
                                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                                    // SetStaticObjectField( _pEnv, _pClass, pField, vobj_short.Pointer.ToPointer());
                                                                                                     SetStaticObjectField( _pEnv, _pClass, pField, _vobj_short);
                                                                                                 else
                                                                                                     throw new Exception("Runtime Static Field not found: " + name);
@@ -5122,16 +4502,10 @@ namespace QuantApp.Kernel.JVM
                                                                                         else  
                                                                                         { 
                                                                                             if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                                // SetObjectField( _pEnv, _pObj, pField, vobj_short.Pointer.ToPointer());
                                                                                                 SetObjectField( _pEnv, _pObj, pField, _vobj_short);
                                                                                             else
                                                                                                 throw new Exception("Runtime Field not found: " + name);
                                                                                         }
-                                                                                        // if(__DB.ContainsKey(vobj_short.JavaHashCode))
-                                                                                        // {
-                                                                                        //     object _out;
-                                                                                        //     __DB.TryRemove(vobj_short.JavaHashCode, out _out);
-                                                                                        // }
                                                                                         DetacheThread((void*)JVMPtr);
                                                                                         break;
 
@@ -5144,7 +4518,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             void* _pClass = IntPtr.Zero.ToPointer();
                                                                                             if(getClass(_pEnv, _pObj,  ref _pClass) == 0)
                                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                                    // SetStaticObjectField( _pEnv, _pClass, pField, vobj_int.Pointer.ToPointer());
                                                                                                     SetStaticObjectField( _pEnv, _pClass, pField, _vobj_int);
                                                                                                 else
                                                                                                     throw new Exception("Runtime Static Field not found: " + name);
@@ -5154,16 +4527,10 @@ namespace QuantApp.Kernel.JVM
                                                                                         else  
                                                                                         { 
                                                                                             if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                                // SetObjectField( _pEnv, _pObj, pField, vobj_int.Pointer.ToPointer());
                                                                                                 SetObjectField( _pEnv, _pObj, pField, _vobj_int);
                                                                                             else
                                                                                                 throw new Exception("Runtime Field not found: " + name);
                                                                                         }
-                                                                                        // if(__DB.ContainsKey(vobj_int.JavaHashCode))
-                                                                                        // {
-                                                                                        //     object _out;
-                                                                                        //     __DB.TryRemove(vobj_int.JavaHashCode, out _out);
-                                                                                        // }
                                                                                         DetacheThread((void*)JVMPtr);
                                                                                         break;
 
@@ -5176,7 +4543,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             void* _pClass = IntPtr.Zero.ToPointer();
                                                                                             if(getClass(_pEnv, _pObj,  ref _pClass) == 0)
                                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                                    // SetStaticObjectField( _pEnv, _pClass, pField, vobj_long.Pointer.ToPointer());
                                                                                                     SetStaticObjectField( _pEnv, _pClass, pField, _vobj_long);
                                                                                                 else
                                                                                                     throw new Exception("Runtime Static Field not found: " + name);
@@ -5190,11 +4556,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             else
                                                                                                 throw new Exception("Runtime Field not found: " + name);
                                                                                         }
-                                                                                        // if(__DB.ContainsKey(vobj_long.JavaHashCode))
-                                                                                        // {
-                                                                                        //     object _out;
-                                                                                        //     __DB.TryRemove(vobj_long.JavaHashCode, out _out);
-                                                                                        // }
                                                                                         DetacheThread((void*)JVMPtr);
                                                                                         break;
 
@@ -5207,7 +4568,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             void* _pClass = IntPtr.Zero.ToPointer();
                                                                                             if(getClass(_pEnv, _pObj,  ref _pClass) == 0)
                                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                                    // SetStaticObjectField( _pEnv, _pClass, pField, vobj_float.Pointer.ToPointer());
                                                                                                     SetStaticObjectField( _pEnv, _pClass, pField, _vobj_float);
                                                                                                 else
                                                                                                     throw new Exception("Runtime Static Field not found: " + name);
@@ -5217,16 +4577,10 @@ namespace QuantApp.Kernel.JVM
                                                                                         else  
                                                                                         { 
                                                                                             if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                                // SetObjectField( _pEnv, _pObj, pField, vobj_float.Pointer.ToPointer());
                                                                                                 SetObjectField( _pEnv, _pObj, pField, _vobj_float);
                                                                                             else
                                                                                                 throw new Exception("Runtime Field not found: " + name);
                                                                                         }
-                                                                                        // if(__DB.ContainsKey(vobj_float.JavaHashCode))
-                                                                                        // {
-                                                                                        //     object _out;
-                                                                                        //     __DB.TryRemove(vobj_float.JavaHashCode, out _out);
-                                                                                        // }
                                                                                         DetacheThread((void*)JVMPtr);
                                                                                         break;
 
@@ -5240,7 +4594,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             void* _pClass = IntPtr.Zero.ToPointer();
                                                                                             if(getClass(_pEnv, _pObj,  ref _pClass) == 0)
                                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                                    // SetStaticObjectField( _pEnv, _pClass, pField, vobj_double.Pointer.ToPointer());
                                                                                                     SetStaticObjectField( _pEnv, _pClass, pField, _vobj_double);
                                                                                                 else
                                                                                                     throw new Exception("Runtime Static Field not found: " + name);
@@ -5250,16 +4603,10 @@ namespace QuantApp.Kernel.JVM
                                                                                         else  
                                                                                         { 
                                                                                             if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                                // SetObjectField( _pEnv, _pObj, pField, vobj_double.Pointer.ToPointer());
                                                                                                 SetObjectField( _pEnv, _pObj, pField, _vobj_double);
                                                                                             else
                                                                                                 throw new Exception("Runtime Field not found: " + name);
                                                                                         }
-                                                                                        // if(__DB.ContainsKey(vobj_double.JavaHashCode))
-                                                                                        // {
-                                                                                        //     object _out;
-                                                                                        //     __DB.TryRemove(vobj_double.JavaHashCode, out _out);
-                                                                                        // }
                                                                                         DetacheThread((void*)JVMPtr);
                                                                                         break;
 
@@ -5271,7 +4618,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             void* _pClass = IntPtr.Zero.ToPointer();
                                                                                             if(getClass(_pEnv, _pObj,  ref _pClass) == 0)
                                                                                                 if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                                    // SetStaticObjectField( _pEnv, _pClass, pField, vobj_obj.Pointer.ToPointer());
                                                                                                     SetStaticObjectField( _pEnv, _pClass, pField, _vobj_obj);
                                                                                                 else
                                                                                                     throw new Exception("Runtime Static Field not found: " + name);
@@ -5282,16 +4628,10 @@ namespace QuantApp.Kernel.JVM
                                                                                         else  
                                                                                         { 
                                                                                             if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                                // SetObjectField( _pEnv, _pObj, pField, vobj_obj.Pointer.ToPointer());
                                                                                                 SetObjectField( _pEnv, _pObj, pField, _vobj_obj);
                                                                                             else
                                                                                                 throw new Exception("Runtime Field not found: " + name);
                                                                                         }
-                                                                                        // if(__DB.ContainsKey(vobj_obj.JavaHashCode))
-                                                                                        // {
-                                                                                        //     object _out;
-                                                                                        //     __DB.TryRemove(vobj_obj.JavaHashCode, out _out);
-                                                                                        // }
                                                                                         DetacheThread((void*)JVMPtr);
                                                                                         break;
                                                                                 }
@@ -5332,7 +4672,6 @@ namespace QuantApp.Kernel.JVM
                                                                                                 if(JVMObject.DB.ContainsKey(hashID_res))
                                                                                                 {
                                                                                                     DetacheThread((void*)JVMPtr);
-                                                                                                    // return JVMObject.DB[hashID_res];
                                                                                                     return JVMObject.DB[hashID_res].Target;
                                                                                                 }
 
@@ -5371,7 +4710,6 @@ namespace QuantApp.Kernel.JVM
 
                                                                                             if(JVMObject.DB.ContainsKey(hashID_res))
                                                                                             {
-                                                                                                // var _ret = JVMObject.DB[hashID_res];
                                                                                                 var _ret = JVMObject.DB[hashID_res].Target;
                                                                                                 DetacheThread((void*)JVMPtr);
                                                                                                 return _ret;
@@ -5387,7 +4725,6 @@ namespace QuantApp.Kernel.JVM
                                                                                             {
                                                                                                 string cls = returnSignature.StartsWith("L") && returnSignature.EndsWith(";")? returnSignature.Substring(1).Replace(";","") : returnSignature;
                                                                                                 var _ret = CreateInstancePtr(_pEnv, cls, null, returnPtr, null );
-                                                                                                // GetID(_ret, true); NOT SURE
                                                                                                 DetacheThread((void*)JVMPtr);
                                                                                                 return _ret;
                                                                                             }
@@ -5419,7 +4756,6 @@ namespace QuantApp.Kernel.JVM
                                                                                     void* _pClass = IntPtr.Zero.ToPointer();
                                                                                     if(getClass(_pEnv, _pObj,  ref _pClass) == 0)
                                                                                         if(GetStaticFieldID( _pEnv, _pClass, name, returnSignature, &pField ) == 0)
-                                                                                            // SetStaticObjectField( _pEnv, _pClass, pField, vobj.Pointer.ToPointer());
                                                                                             SetStaticObjectField( _pEnv, _pClass, pField, _vobj);
                                                                                         else
                                                                                             throw new Exception("Runtime Static Field not found: " + name);
@@ -5429,7 +4765,6 @@ namespace QuantApp.Kernel.JVM
                                                                                 else  
                                                                                 { 
                                                                                     if(GetFieldID( _pEnv, _pObj, name, returnSignature, &pField ) == 0)
-                                                                                        // SetObjectField( _pEnv, _pObj, pField, vobj.Pointer.ToPointer());
                                                                                         SetObjectField( _pEnv, _pObj, pField, _vobj);
                                                                                     else
                                                                                         throw new Exception("Runtime Field not found: " + name);
@@ -5470,8 +4805,6 @@ namespace QuantApp.Kernel.JVM
                                                                 if(FindClass( _pEnv, "app/quant/clr/CLRRuntime", &_pNetBridgeClass) != 0 ) throw new Exception ("Find Class");
                                                                 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
 
                                                                 void* _pObj = GetJVMObject(_pEnv, _pNetBridgeClass, hashID);
@@ -5525,8 +4858,6 @@ namespace QuantApp.Kernel.JVM
                                                                 
 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
                                                                 
                                                                 void* _pObj = GetJVMObject(_pEnv, _pNetBridgeClass, hashID);
@@ -5581,8 +4912,6 @@ namespace QuantApp.Kernel.JVM
                                                                 if(FindClass( _pEnv, "app/quant/clr/CLRRuntime", &_pNetBridgeClass) != 0 ) throw new Exception ("Find Class");
 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
                                                                 
                                                                 void* _pObj = GetJVMObject(_pEnv, _pNetBridgeClass, hashID);
@@ -5638,8 +4967,6 @@ namespace QuantApp.Kernel.JVM
                                                                 
 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
                                                                 
                                                                 void* _pObj = GetJVMObject(_pEnv, _pNetBridgeClass, hashID);
@@ -5692,8 +5019,6 @@ namespace QuantApp.Kernel.JVM
                                                                 if(FindClass( _pEnv, "app/quant/clr/CLRRuntime", &_pNetBridgeClass) != 0 ) throw new Exception ("Find Class");
                                                                 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
                                                                 
                                                                 void* _pObj = GetJVMObject(_pEnv, _pNetBridgeClass, hashID);
@@ -5748,8 +5073,6 @@ namespace QuantApp.Kernel.JVM
                                                                 
 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
 
                                                                 void* _pObj = GetJVMObject(_pEnv, _pNetBridgeClass, hashID);
@@ -5797,15 +5120,13 @@ namespace QuantApp.Kernel.JVM
                                                         case "F": //Float
                                                             expandoObject.TrySetMember(name + argsSignature, (wrapFunction<float>)((call_args) => {
                                                                 
-                                                                void*  _pEnv;// = (void*)EnvPtr;
+                                                                void*  _pEnv;
                                                                 if(AttacheThread((void*)JVMPtr,&_pEnv) != 0) throw new Exception ("Attach to thread error");
                                                                 void* _pNetBridgeClass;
                                                                 if(FindClass( _pEnv, "app/quant/clr/CLRRuntime", &_pNetBridgeClass) != 0 ) throw new Exception ("Find Class");
                                                                 
 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
 
                                                                 void* _pObj = GetJVMObject(_pEnv, _pNetBridgeClass, hashID);
@@ -5860,8 +5181,6 @@ namespace QuantApp.Kernel.JVM
                                                                 if(FindClass( _pEnv, "app/quant/clr/CLRRuntime", &_pNetBridgeClass) != 0 ) throw new Exception ("Find Class");
 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
                                                                 
                                                                 void* _pObj = GetJVMObject(_pEnv, _pNetBridgeClass, hashID);
@@ -5915,8 +5234,6 @@ namespace QuantApp.Kernel.JVM
                                                                 if(FindClass( _pEnv, "app/quant/clr/CLRRuntime", &_pNetBridgeClass) != 0 ) throw new Exception ("Find Class");
                                                                 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
                                                                 
                                                                 void* _pObj = GetJVMObject(_pEnv, _pNetBridgeClass, hashID);
@@ -5967,8 +5284,6 @@ namespace QuantApp.Kernel.JVM
                                                                 if(FindClass( _pEnv, "app/quant/clr/CLRRuntime", &_pNetBridgeClass) != 0 ) throw new Exception ("Find Class");
                                                                 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
                                                                 
                                                                 void* pObjResult = IntPtr.Zero.ToPointer();
@@ -6027,8 +5342,6 @@ namespace QuantApp.Kernel.JVM
                                                                 
 
                                                                 int call_len = call_args == null ? 0 : call_args.Length;
-                                                                // void** ar_call = stackalloc void*[call_len];
-                                                                // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                 void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
                                                                 
                                                                 void* pObjResult = IntPtr.Zero.ToPointer();
@@ -6093,8 +5406,6 @@ namespace QuantApp.Kernel.JVM
                                                                     
 
                                                                         int call_len = call_args == null ? 0 : call_args.Length;
-                                                                        // void** ar_call = stackalloc void*[call_len];
-                                                                        // getJavaParameters(_pEnv, ref ar_call, call_args);
                                                                         void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
 
 
@@ -6138,23 +5449,13 @@ namespace QuantApp.Kernel.JVM
                                                                                 return null;
                                                                             }
                                                                         
-                                                                            // return getJavaArray(ptr, returnSignature);
                                                                             void*  pNetBridgeClass;
                                                                             if(FindClass( _pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0) throw new Exception ("getJavaArray Find class error");
 
-                                                                            // int hashID = GetID(_pEnv, pObjResult);
-                                                                            // int _arr_len = getArrayLength(_pEnv, new JVMObject(hashID, returnSignature, true)); 
-                                                                            int _arr_len = getArrayLength(_pEnv, pObjResult); //TESTING
+                                                                            int _arr_len = getArrayLength(_pEnv, pObjResult);
 
                                                                             var _ret = getJavaArray(_pEnv, pNetBridgeClass, _arr_len, pObjResult, returnSignature);
                                                                             DetacheThread((void*)JVMPtr);
-
-                                                                            // if(JVMObject.__DB.ContainsKey(hashID))
-                                                                            // {
-
-                                                                            //     JVMObject oo;
-                                                                            //     JVMObject.__DB.TryRemove(hashID, out oo);
-                                                                            // }
 
                                                                             return _ret;
                                                                         }
@@ -6183,8 +5484,7 @@ namespace QuantApp.Kernel.JVM
                                                                     
 
                                                                         int call_len = call_args == null ? 0 : call_args.Length;
-                                                                        // void** ar_call = stackalloc void*[call_len];
-                                                                        // getJavaParameters(_pEnv, ref ar_call, call_args);
+                                                                        
                                                                         void** ar_call = (void**)(new StructWrapper(_pEnv, call_args)).Ptr;
 
                                                                         void* pObjResult = IntPtr.Zero.ToPointer();
@@ -6237,7 +5537,6 @@ namespace QuantApp.Kernel.JVM
 
                                                                             else if(Runtime.DB.ContainsKey(hashID_res) && Runtime.DB[hashID_res].IsAlive)
                                                                             {
-                                                                                // Console.WriteLine("Runtime Exists: " + hashID_res);
                                                                                 var _ret = Runtime.DB[hashID_res].Target;
                                                                                 DetacheThread((void*)JVMPtr);
                                                                                 return _ret;
@@ -6246,18 +5545,13 @@ namespace QuantApp.Kernel.JVM
                                                                             
                                                                             else if(JVMObject.DB.ContainsKey(hashID_res) && JVMObject.DB[hashID_res].IsAlive)
                                                                             {
-                                                                                // Console.WriteLine("JVMObject Exists: " + hashID_res);
-
-                                                                                // if(JVMObject.DB[hashID_res] is JVMTuple)
                                                                                 if(JVMObject.DB[hashID_res].Target is JVMTuple)
                                                                                 {
-                                                                                    // JVMTuple jobj = JVMObject.DB[hashID_res] as JVMTuple;
                                                                                     JVMTuple jobj = JVMObject.DB[hashID_res].Target as JVMTuple;
                                                                                     DetacheThread((void*)JVMPtr);
                                                                                     return jobj.jVMTuple;
                                                                                 }
                                                                                 DetacheThread((void*)JVMPtr);
-                                                                                // return JVMObject.DB[hashID_res];
                                                                                 return JVMObject.DB[hashID_res].Target;
                                                                             }
 
@@ -6266,7 +5560,6 @@ namespace QuantApp.Kernel.JVM
                                                                                 string cls = returnSignature.StartsWith("L") && returnSignature.EndsWith(";") ? returnSignature.Substring(1).Replace(";","").Replace("/",".") : returnSignature;
 
                                                                                 var _ret = getObject(_pEnv, cls, pObjResult);
-                                                                                // GetID(_ret, false); //NEW
                                                                                 DetacheThread((void*)JVMPtr);
                                                                                 return _ret;
                                                                             }
@@ -6290,20 +5583,6 @@ namespace QuantApp.Kernel.JVM
                                                 
                                                 }
                                             }
-
-                                            // if(JVMObject.__DB.ContainsKey(hashID))
-                                            // {
-
-                                            //     JVMObject oo;
-                                            //     JVMObject.__DB.TryRemove(hashID, out oo);
-                                            // }
-
-                                            // if(JVMObject.__DB.ContainsKey(sig_hashID))
-                                            // {
-
-                                            //     JVMObject oo;
-                                            //     JVMObject.__DB.TryRemove(sig_hashID, out oo);
-                                            // }
 
                                             ((object)expandoObject).RegisterGCEvent(hashID, delegate(object _obj, int _id)
                                             {
@@ -6437,23 +5716,18 @@ namespace QuantApp.Kernel.JVM
         public IntPtr Ptr { get; private set; }
         private readonly static object objLock_InvokeFunc = new object();
 
-        // public ConcurrentDictionary<int, object> __DB = new ConcurrentDictionary<int, object>();
-
         public unsafe StructWrapper(void* pEnv, object[] obj) 
         {
-            // // lock(objLock_InvokeFunc)
+            if (obj != null) 
             {
-                if (obj != null) 
-                {
-                    var size = Unsafe.SizeOf<object[]>() * obj.Length;
-                    Ptr = Marshal.AllocHGlobal(size);
-                    void** _ptr = (void**)Ptr;
-                    getJavaParameters(pEnv, ref _ptr, obj);
-                }
-                else 
-                {
-                    Ptr = IntPtr.Zero;
-                }
+                var size = Unsafe.SizeOf<object[]>() * obj.Length;
+                Ptr = Marshal.AllocHGlobal(size);
+                void** _ptr = (void**)Ptr;
+                getJavaParameters(pEnv, ref _ptr, obj);
+            }
+            else 
+            {
+                Ptr = IntPtr.Zero;
             }
         }
 
@@ -6470,7 +5744,6 @@ namespace QuantApp.Kernel.JVM
         {
             Marshal.FreeHGlobal(Ptr);
             Ptr = IntPtr.Zero;
-            // GC.SuppressFinalize(this);
         }
 
         public static implicit operator IntPtr(StructWrapper w) 
@@ -6480,719 +5753,544 @@ namespace QuantApp.Kernel.JVM
 
 
         private unsafe void getJavaParameters(void* pEnv, ref void** ar_call, object[] call_args)
-        {
-            // // lock(objLock_getJavaParameters)
+        {     
+            int call_len = call_args == null ? 0 : call_args.Length;
+
+            for(int i = 0; i < call_len; i++)
             {
+                var arg = call_args[i];
+                
+                if(arg is ObjectWrapper)
+                    arg = (arg as ObjectWrapper).Object;
+
+                var argID = Runtime.GetID(arg, false);
+
+                var type = arg.GetType();
+
+                switch(Type.GetTypeCode(type))
+                { 
+                    case TypeCode.Boolean:
+                        bool bool_arg = (bool)arg;
+                        ar_call[i] = *(void**)&bool_arg;
                         
-                // void*  pEnv;
-                // if(AttacheThread((void*)JVMPtr,&pEnv) != 0) throw new Exception ("Attach to thread error");
-                int call_len = call_args == null ? 0 : call_args.Length;
+                        break;
 
-                for(int i = 0; i < call_len; i++)
-                {
-                    var arg = call_args[i];
-                    
+                    case TypeCode.Byte:
+                        byte byte_arg = (byte)arg;
+                        ar_call[i] = *(void**)&byte_arg;
+                        
+                        break;
 
-                    // Runtime.__DB[argID] = arg;
+                    case TypeCode.Char:
+                        char char_arg = (char)arg;
+                        ar_call[i] = *(void**)&char_arg;
 
-                    if(arg is ObjectWrapper)
-                        arg = (arg as ObjectWrapper).Object;
+                        break;
 
-                    var argID = Runtime.GetID(arg, false);
+                    case TypeCode.Int16:
+                        short short_arg = (short)arg;
+                        ar_call[i] = *(void**)&short_arg;
+                        
+                        break;
 
-                    var type = arg.GetType();
+                    case TypeCode.Int32: 
+                        int int_arg = (int)arg;
+                        ar_call[i] = *(void**)&int_arg;
 
-                    // arg.RegisterGCEvent(argID, delegate(object _obj, int _id)
-                    // {
-                    //     // Console.WriteLine("------__________---Object(" + _obj + ") with hash code " + _id + " recently collected: ");
-                    //     Runtime.RemoveID(_id);
-                    // });
+                        break;
+                        
+                    case TypeCode.Int64:
+                        long long_arg = (long)arg;
+                        ar_call[i] = *(void**)&long_arg;
+                        
+                        break;
 
+                    case TypeCode.Single:
+                        float float_arg = (float)arg;
+                        ar_call[i] = *(void**)&float_arg;
+                        
+                        break;
 
+                    case TypeCode.Double:
+                        double double_arg = (double)arg;
+                        ar_call[i] = *(void**)&double_arg;
+                        
+                        break;
 
-                    switch(Type.GetTypeCode(type))
-                    { 
-                        case TypeCode.Boolean:
-                            bool bool_arg = (bool)arg;
-                            ar_call[i] = *(void**)&bool_arg;
+                    case TypeCode.String:
+                        void* string_arg = Runtime.GetJavaString(pEnv, (string)arg);
+                        
+                        ar_call[i] = string_arg;
+                        break;
+
+                    case TypeCode.DateTime:
+                        void* date_arg = Runtime.GetJavaDateTime(pEnv, (DateTime)arg);
+                        
+                        ar_call[i] = date_arg;
+                        break;
+
+                    default:
+                        
+                        if(arg is JVMTuple)
+                        {
+                            JVMTuple jobj = arg as JVMTuple; 
+                            void* pNetBridgeClass;
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0 ) throw new Exception("getJavaParameters pNetBridgeClass not found");
                             
-                            break;
+                            void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.jVMObject.JavaHashCode);
+                            Runtime.RegisterJVMObject(pEnv, jobj.jVMObject.JavaHashCode, ptr);
+                            ar_call[i] = ptr;
+                        }
 
-                        case TypeCode.Byte:
-                            byte byte_arg = (byte)arg;
-                            ar_call[i] = *(void**)&byte_arg;
+                        else if(arg is IJVMTuple)
+                        {
+                            IJVMTuple jobj = arg as IJVMTuple; 
+                            void* pNetBridgeClass;
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0 ) throw new Exception("getJavaParameters pNetBridgeClass not found");
                             
-                            break;
+                            void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.JVMObject.JavaHashCode);
+                            Runtime.RegisterJVMObject(pEnv, jobj.JVMObject.JavaHashCode, ptr);
+                            ar_call[i] = ptr;
+                        }
 
-                        case TypeCode.Char:
-                            char char_arg = (char)arg;
-                            ar_call[i] = *(void**)&char_arg;
-
-                            break;
-
-                        case TypeCode.Int16:
-                            short short_arg = (short)arg;
-                            ar_call[i] = *(void**)&short_arg;
+                        else if(arg is JVMObject)
+                        {
+                            JVMObject jobj = arg as JVMObject; 
+                            void* pNetBridgeClass;
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0 ) throw new Exception("getJavaParameters pNetBridgeClass not found");
                             
-                            break;
+                            void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.JavaHashCode);
+                            Runtime.RegisterJVMObject(pEnv, jobj.JavaHashCode, ptr);
+                            ar_call[i] = ptr;
+                        }
 
-                        case TypeCode.Int32: 
-                            int int_arg = (int)arg;
-                            ar_call[i] = *(void**)&int_arg;
-
-                            break;
+                        else if(arg is Array)
+                        {
+                            Array sub = arg as Array;
+                            void* pNetBridgeClass;
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0 ) throw new Exception("getJavaParameters pNetBridgeClass not found");
                             
-                        case TypeCode.Int64:
-                            long long_arg = (long)arg;
-                            ar_call[i] = *(void**)&long_arg;
-                            
-                            break;
+                            JVMObject javaArray = getJavaArray(pEnv, pNetBridgeClass, sub);
+                            void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, javaArray.JavaHashCode);
+                            Runtime.RegisterJVMObject(pEnv, javaArray.JavaHashCode, ptr);
 
-                        case TypeCode.Single:
-                            float float_arg = (float)arg;
-                            ar_call[i] = *(void**)&float_arg;
-                            
-                            break;
+                            ar_call[i] = ptr;
+                        }
 
-                        case TypeCode.Double:
-                            double double_arg = (double)arg;
-                            ar_call[i] = *(void**)&double_arg;
-                            
-                            break;
+                        else if(arg is IEnumerable<object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
-                        case TypeCode.String:
-                            void* string_arg = Runtime.GetJavaString(pEnv, (string)arg);
-                            
-                            ar_call[i] = string_arg;
-                            break;
-
-                        case TypeCode.DateTime:
-                            void* date_arg = Runtime.GetJavaDateTime(pEnv, (DateTime)arg);
-                            
-                            ar_call[i] = date_arg;
-                            break;
-
-                        default:
-                            
-                            if(arg is JVMTuple)
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/CLRIterable", &CLRObjClass) == 0)
                             {
-                                JVMTuple jobj = arg as JVMTuple; 
-                                // void* ptr = (void *)(jobj.jVMObject.Pointer);
-                                void* pNetBridgeClass;
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0 ) throw new Exception("getJavaParameters pNetBridgeClass not found");
-                                
-                                void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.jVMObject.JavaHashCode);
-                                Runtime.RegisterJVMObject(pEnv, jobj.jVMObject.JavaHashCode, ptr);
-                                ar_call[i] = ptr;
-                            }
-
-                            else if(arg is IJVMTuple)
-                            {
-                                IJVMTuple jobj = arg as IJVMTuple; 
-                                // void* ptr = (void *)(JVMObject.DB[jobj.JVMObject.JavaHashCode].Pointer);
-                                void* pNetBridgeClass;
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0 ) throw new Exception("getJavaParameters pNetBridgeClass not found");
-                                
-                                void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.JVMObject.JavaHashCode);
-                                Runtime.RegisterJVMObject(pEnv, jobj.JVMObject.JavaHashCode, ptr);
-                                ar_call[i] = ptr;
-                            }
-
-                            else if(arg is JVMObject)
-                            {
-                                JVMObject jobj = arg as JVMObject; 
-                                // void* ptr = (void *)(jobj.Pointer);
-                                void* pNetBridgeClass;
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0 ) throw new Exception("getJavaParameters pNetBridgeClass not found");
-                                
-                                void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.JavaHashCode);
-                                Runtime.RegisterJVMObject(pEnv, jobj.JavaHashCode, ptr);
-                                ar_call[i] = ptr;
-                            }
-
-                            else if(arg is Array)
-                            {
-                                Array sub = arg as Array;
-                                // Console.WriteLine("-------1: " + _sub.Length);
-
-                                // var sub = _sub.Cast<object>().ToArray();
-                                // Console.WriteLine("-------2: " + sub.Length);
-                                // JVMObject javaArray = getJavaArray(sub);
-
-                                void* pNetBridgeClass;
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/CLRRuntime", &pNetBridgeClass) != 0 ) throw new Exception("getJavaParameters pNetBridgeClass not found");
-                                
-                                JVMObject javaArray = getJavaArray(pEnv, pNetBridgeClass, sub);
-                                void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, javaArray.JavaHashCode);
-                                Runtime.RegisterJVMObject(pEnv, javaArray.JavaHashCode, ptr);
-
-                                // void* ptr = (void*)(new StructWrapper(pEnv, sub)).Ptr;
-                                ar_call[i] = ptr;//javaArray.Pointer.ToPointer();
-
-                                // if(Runtime.__DB.ContainsKey(javaArray.JavaHashCode))
-                                // {
-                                //     object _out;
-                                //     Runtime.__DB.TryRemove(javaArray.JavaHashCode, out _out);
-                                // }
-                            }
-
-                            else if(arg is IEnumerable<object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/CLRIterable", &CLRObjClass) == 0)
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
                                 {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        // Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-
-                                        // Runtime.RemoveID(argID);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
                                 }
                                 else
                                     throw new Exception(Runtime.GetException(pEnv));
                             }
-
-                            else if(arg is System.Func<Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction1", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        // Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction2", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        // Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction3", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction4", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction5", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction6", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction7", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction8", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction9", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction10", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction11", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction12", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction13", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                            {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction14", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-                            else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                            {
-                                void* ptr_res = (void *)(argID);
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction15", &CLRObjClass) == 0)
-                                {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception(Runtime.GetException(pEnv));
-                                }
-                                else
-                                    throw new Exception(Runtime.GetException(pEnv));
-                            }
-
                             else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+
+                        else if(arg is System.Func<Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction1", &CLRObjClass) == 0)
                             {
-                                // void* ptr_res = (void *)(arg.GetHashCode());
-
-                                // void** pAr_len = stackalloc void*[2];
-                                object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID, false };
-                                // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                void* pObj;
-                                void* CLRObjClass;
-                                void*  pLoadClassMethod; // The executed method struct
-                                if(Runtime.FindClass( pEnv, "app/quant/clr/CLRObject", &CLRObjClass) == 0)
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
                                 {
-                                    void* pClass;
-                                    if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;IZ)V", 3, pAr_len, &pObj ) == 0)
-                                    {
-                                        ar_call[i] = pObj;
-                                        Runtime.RegisterJVMObject(pEnv, argID, pObj);
-
-                                        //Runtime.GetID(pEnv, pObj);
-                                        // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-
-                                        // Runtime.DB.TryAdd(arg.GetHashCode(), arg);
-                                        if(!(arg is JVMObject) && !(arg is IJVMTuple))
-                                            // Runtime.DB[argID] = arg;
-                                            Runtime.DB[argID] = new WeakReference(arg);
-                                    }
-                                    else
-                                        throw new Exception("Create CLRObject instance error");        
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
                                 }
                                 else
-                                    throw new Exception("Get CLRObject class error");        
+                                    throw new Exception(Runtime.GetException(pEnv));
                             }
-                            break;
-                    }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
-                    // if(Runtime.__DB.ContainsKey(argID))
-                    // {
-                    //     object _out;
-                    //     Runtime.__DB.TryRemove(argID, out _out);
-                    // }
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction2", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction3", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction4", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction5", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction6", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction7", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction8", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction9", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction10", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction11", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction12", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction13", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction14", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+                        else if(arg is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                        {
+                            void* ptr_res = (void *)(argID);
+
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction15", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception(Runtime.GetException(pEnv));
+                            }
+                            else
+                                throw new Exception(Runtime.GetException(pEnv));
+                        }
+
+                        else
+                        {
+                            object[] pAr_len_data = new object[]{ arg.GetType().ToString(), argID, false };
+                            void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                            void* pObj;
+                            void* CLRObjClass;
+                            void*  pLoadClassMethod; // The executed method struct
+                            if(Runtime.FindClass( pEnv, "app/quant/clr/CLRObject", &CLRObjClass) == 0)
+                            {
+                                void* pClass;
+                                if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;IZ)V", 3, pAr_len, &pObj ) == 0)
+                                {
+                                    ar_call[i] = pObj;
+                                    Runtime.RegisterJVMObject(pEnv, argID, pObj);
+
+                                    if(!(arg is JVMObject) && !(arg is IJVMTuple))
+                                        Runtime.DB[argID] = new WeakReference(arg);
+                                }
+                                else
+                                    throw new Exception("Create CLRObject instance error");        
+                            }
+                            else
+                                throw new Exception("Get CLRObject class error");        
+                        }
+                        break;
                 }
             }
         }
@@ -7200,21 +6298,128 @@ namespace QuantApp.Kernel.JVM
         private readonly object objLock_getJavaArray_1 = new object();
         private unsafe JVMObject getJavaArray(void* pEnv, void* pNetBridgeClass, object[] array)
         {
-            // NEED TO REGISTED GC EVENT IN JVM FOR ARGUMENTS
-            // lock(objLock_getJavaArray_1)
-            // // lock(objLock_getJavaParameters)
+            if(true)
             {
-                if(true)
+                Array sub = array as Array;
+
+                object lastObject = null;
+
+                string cls = "";
+                foreach(var o_s in sub)
                 {
-                    Array sub = array as Array;
-                    // Runtime.GetID(sub, false);
-
-                    object lastObject = null;
-
-                    string cls = "";
-                    foreach(var o_s in sub)
+                    object res = o_s;
+                    if(res is PyObject)
                     {
-                        object res = o_s;
+                        var pres = res as PyObject;
+                        if(PyString.IsStringType(pres))
+                            res = pres.AsManagedObject(typeof(string));
+
+                        else if(PyFloat.IsFloatType(pres))
+                            res = pres.AsManagedObject(typeof(float));
+
+                        else if(PyInt.IsIntType(pres))
+                            res = pres.AsManagedObject(typeof(int));
+
+                        else if(PyDict.IsDictType(pres))
+                            res = pres.AsManagedObject(typeof(Dictionary<object, object>));
+
+                        else if(PyList.IsListType(pres))
+                            res = pres.AsManagedObject(typeof(List<object>));
+
+                        else if(PyLong.IsLongType(pres))
+                            res = pres.AsManagedObject(typeof(long));
+
+                        else if(PySequence.IsSequenceType(pres))
+                            res = pres.AsManagedObject(typeof(IEnumerable<object>));
+
+                        else if(PyTuple.IsTupleType(pres))
+                            res = pres.AsManagedObject(typeof(System.Tuple));
+                    }
+
+                    object o = res;
+
+                    string ocls = o is JVMObject ? ((JVMObject)o).JavaClass : Runtime.TransformType(o);
+
+                    if(String.IsNullOrEmpty(cls))
+                        cls = ocls;
+                    else if(cls != ocls)
+                    {
+                        cls = "java/lang/Object";
+                        break;
+                    }
+                    lastObject = o;
+                }
+
+                bool isObject = false;
+                void*  pJArray;
+                int arrLength = sub.Length;
+                switch(cls)
+                {
+                    case "Z":
+                        if(Runtime.NewBooleanArray( pEnv, arrLength, &pJArray ) != 0)
+                            throw new Exception(Runtime.GetException(pEnv));
+                        break;
+
+                    case "B":
+                        if(Runtime.NewByteArray( pEnv, arrLength, &pJArray ) != 0)
+                            throw new Exception(Runtime.GetException(pEnv));
+                        break;
+
+                    case "C":
+                        if(Runtime.NewCharArray( pEnv, arrLength, &pJArray ) != 0)
+                            throw new Exception(Runtime.GetException(pEnv));
+                        break;
+
+                    case "S":
+                        if(Runtime.NewShortArray( pEnv, arrLength, &pJArray ) != 0)
+                            throw new Exception(Runtime.GetException(pEnv));
+                        break;
+
+                    case "I":
+                        if(Runtime.NewIntArray( pEnv, arrLength, &pJArray ) != 0)
+                            throw new Exception(Runtime.GetException(pEnv));
+                        break;
+
+                    case "J":
+                        if(Runtime.NewLongArray( pEnv, arrLength, &pJArray ) != 0)
+                            throw new Exception(Runtime.GetException(pEnv));
+                        break;
+
+                    case "F":
+                        if(Runtime.NewFloatArray( pEnv, arrLength, &pJArray ) != 0)
+                            throw new Exception(Runtime.GetException(pEnv));
+                        break;
+
+                    case "D":
+                        if(Runtime.NewDoubleArray( pEnv, arrLength, &pJArray ) != 0)
+                            throw new Exception(Runtime.GetException(pEnv));
+                        break;
+
+                    default:
+                        isObject = true;
+
+                        if(arrLength == 0)
+                            return null;
+
+                        if(!cls.Contains("java/lang/String"))
+                            cls = "java/lang/Object";
+
+
+                        if(Runtime.NewObjectArray( pEnv, arrLength, cls, &pJArray ) != 0)
+                            throw new Exception(Runtime.GetException(pEnv));
+                        break;
+                }
+
+                
+                for(int ii = 0; ii < arrLength; ii++)
+                {
+                    var sub_element = sub.GetValue(ii);
+                    if(sub_element == null)
+                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, IntPtr.Zero.ToPointer());
+
+                    else
+                    {
+                        object res = sub_element;
                         if(res is PyObject)
                         {
                             var pres = res as PyObject;
@@ -7243,958 +6448,657 @@ namespace QuantApp.Kernel.JVM
                                 res = pres.AsManagedObject(typeof(System.Tuple));
                         }
 
-                        object o = res;
+                        sub_element = res;
+                        
+                        var sub_type = sub_element.GetType();
+                        switch(Type.GetTypeCode(sub_type))
+                        { 
+                            case TypeCode.Boolean:
+                                if(!isObject)
+                                    Runtime.SetBooleanArrayElement(pEnv, pJArray, ii, (bool)sub_element);
+                                else
+                                {
+                                    void* pObjBool;
+                                    if(Runtime.NewBooleanObject(pEnv, (bool)sub_element, &pObjBool) != 0)
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjBool);
+                                }
 
-                        string ocls = o is JVMObject ? ((JVMObject)o).JavaClass : Runtime.TransformType(o);
+                                break;
 
-                        if(String.IsNullOrEmpty(cls))
-                            cls = ocls;
-                        else if(cls != ocls)
-                        {
-                            cls = "java/lang/Object";
-                            break;
-                        }
-                        lastObject = o;
-                    }
+                            case TypeCode.Byte:
+                                if(!isObject)
+                                    Runtime.SetByteArrayElement(pEnv, pJArray, ii, (byte)sub_element);
+                                else
+                                {
+                                    void* pObjB;
+                                    if(Runtime.NewByteObject(pEnv, (byte)sub_element, &pObjB) != 0)
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjB);
+                                }
+                                break;
 
-                    bool isObject = false;
-                    void*  pJArray;
-                    int arrLength = sub.Length;
-                    switch(cls)
-                    {
-                        case "Z":
-                            if(Runtime.NewBooleanArray( pEnv, arrLength, &pJArray ) != 0)
-                                throw new Exception(Runtime.GetException(pEnv));
-                            break;
+                            case TypeCode.Char:
+                                if(!isObject)
+                                    Runtime.SetCharArrayElement(pEnv, pJArray, ii, (char)sub_element);
+                                else
+                                {
+                                    void* pObjC;
+                                    if(Runtime.NewCharacterObject(pEnv, (char)sub_element, &pObjC) != 0)
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjC);
+                                }
+                                break;
 
-                        case "B":
-                            if(Runtime.NewByteArray( pEnv, arrLength, &pJArray ) != 0)
-                                throw new Exception(Runtime.GetException(pEnv));
-                            break;
+                            case TypeCode.Int16:
+                                if(!isObject)
+                                    Runtime.SetShortArrayElement(pEnv, pJArray, ii, (short)sub_element);
+                                else
+                                {
+                                    void* pObjS;
+                                    if(Runtime.NewShortObject(pEnv, (short)sub_element, &pObjS) != 0)
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjS);
+                                }
+                                break;
 
-                        case "C":
-                            if(Runtime.NewCharArray( pEnv, arrLength, &pJArray ) != 0)
-                                throw new Exception(Runtime.GetException(pEnv));
-                            break;
+                            case TypeCode.Int32: 
+                                if(!isObject)
+                                    Runtime.SetIntArrayElement(pEnv, pJArray, ii, (int)sub_element);
+                                else
+                                {
+                                    void* pObjI;
+                                    if(Runtime.NewIntegerObject(pEnv, (int)sub_element, &pObjI) != 0)
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjI);
+                                }
+                                break;
+                                
+                            case TypeCode.Int64:
+                                if(!isObject)
+                                    Runtime.SetLongArrayElement(pEnv, pJArray, ii, (long)sub_element);
+                                else
+                                {
+                                    void* pObjL;
+                                    if(Runtime.NewLongObject(pEnv, (long)sub_element, &pObjL) != 0)
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjL);
+                                }
+                                break;
 
-                        case "S":
-                            if(Runtime.NewShortArray( pEnv, arrLength, &pJArray ) != 0)
-                                throw new Exception(Runtime.GetException(pEnv));
-                            break;
+                            case TypeCode.Single:
+                                if(!isObject)
+                                    Runtime.SetFloatArrayElement(pEnv, pJArray, ii, (float)sub_element);
+                                else
+                                {
+                                    void* pObjF;
+                                    if(Runtime.NewFloatObject(pEnv, (float)sub_element, &pObjF) != 0)
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjF);
+                                }
+                                break;
 
-                        case "I":
-                            if(Runtime.NewIntArray( pEnv, arrLength, &pJArray ) != 0)
-                                throw new Exception(Runtime.GetException(pEnv));
-                            break;
+                            case TypeCode.Double:
+                                if(!isObject)
+                                    Runtime.SetDoubleArrayElement(pEnv, pJArray, ii, (double)sub_element);
+                                else
+                                {
+                                    void* pObjD;
+                                    if(Runtime.NewDoubleObject(pEnv, (double)sub_element, &pObjD) != 0)
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjD);
+                                }
+                                break;
 
-                        case "J":
-                            if(Runtime.NewLongArray( pEnv, arrLength, &pJArray ) != 0)
-                                throw new Exception(Runtime.GetException(pEnv));
-                            break;
+                            case TypeCode.String:
+                                void* string_arg_s = Runtime.GetJavaString(pEnv, (string)sub_element);
+                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, string_arg_s);
+                                break;
 
-                        case "F":
-                            if(Runtime.NewFloatArray( pEnv, arrLength, &pJArray ) != 0)
-                                throw new Exception(Runtime.GetException(pEnv));
-                            break;
+                            case TypeCode.DateTime:
+                                void* pDate = Runtime.GetJavaDateTime(pEnv, (DateTime)sub_element);
+                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pDate);
+                                break;
 
-                        case "D":
-                            if(Runtime.NewDoubleArray( pEnv, arrLength, &pJArray ) != 0)
-                                throw new Exception(Runtime.GetException(pEnv));
-                            break;
+                            default:
 
-                        default:
-                            isObject = true;
+                                var subID = Runtime.GetID(sub_element, true); //IMPORTANT
+                                if(JVMDelegate.DB.ContainsKey(subID))
+                                {
+                                    JVMDelegate jobj = sub_element as JVMDelegate; 
+                                    void* ptr = (void *)(jobj.Pointer);
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, ptr);
+                                    Runtime.RegisterJVMObject(pEnv, subID, ptr);
+                                }
 
-                            if(arrLength == 0)
-                                return null;
+                                else if(Runtime.DB.ContainsKey(subID))
+                                {
+                                    void*  pGetCLRObjectMethod;
+                                    if(Runtime.GetStaticMethodID( pEnv, pNetBridgeClass, "GetCLRObject", "(I)Lapp/quant/clr/CLRObject;", &pGetCLRObjectMethod ) != 0)
+                                        throw new Exception(Runtime.GetException(pEnv));
 
-                            if(!cls.Contains("java/lang/String"))
-                                cls = "java/lang/Object";
+                                    object[] pAr_len_data = new object[]{ subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void*  pGetCLRObject;
+                                    if(Runtime.CallStaticObjectMethod( pEnv, pNetBridgeClass, pGetCLRObjectMethod, &pGetCLRObject, 1, pAr_len) != 0)
+                                        throw new Exception(Runtime.GetException(pEnv));
+
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pGetCLRObject);
+                                    Runtime.RegisterJVMObject(pEnv, subID, pGetCLRObject);
+                                }
+
+                                else if(sub_element is JVMTuple)
+                                {
+                                    JVMTuple jobj = sub_element as JVMTuple; 
+                                    void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.jVMObject.JavaHashCode);
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, ptr);
+                                    Runtime.RegisterJVMObject(pEnv, jobj.jVMObject.JavaHashCode, ptr);
+                                }
+                                else if(sub_element is IJVMTuple)
+                                {
+                                    IJVMTuple jobj = sub_element as IJVMTuple; 
+                                    void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.JVMObject.JavaHashCode);
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, ptr);
+                                    Runtime.RegisterJVMObject(pEnv, jobj.JVMObject.JavaHashCode, ptr);
+                                }
+
+                                else if(sub_element is JVMObject)
+                                {
+                                    JVMObject jobj = sub_element as JVMObject; 
+                                    void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.JavaHashCode);
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, ptr);
+                                    Runtime.RegisterJVMObject(pEnv, jobj.JavaHashCode, ptr);
+                                }
+
+                                else if(sub_element is Array)
+                                {
+                                    Array _sub_array = sub_element as Array;
+
+                                    object[] sub_array = _sub_array.Cast<object>().ToArray();
+                                    JVMObject javaArray = getJavaArray(pEnv, pNetBridgeClass, sub_array);
+
+                                    void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, javaArray.JavaHashCode);
+                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, ptr);
+                                    Runtime.RegisterJVMObject(pEnv, javaArray.JavaHashCode, ptr);
+                                }
 
 
-                            if(Runtime.NewObjectArray( pEnv, arrLength, cls, &pJArray ) != 0)
-                                throw new Exception(Runtime.GetException(pEnv));
-                            break;
-                    }
+                                else if(sub_element is IEnumerable<object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ sub_element.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
-                    
-                    for(int ii = 0; ii < arrLength; ii++)
-                    {
-                        var sub_element = sub.GetValue(ii);
-                        if(sub_element == null)
-                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, IntPtr.Zero.ToPointer());
-
-                        else
-                        {
-                            object res = sub_element;
-                            if(res is PyObject)
-                            {
-                                var pres = res as PyObject;
-                                if(PyString.IsStringType(pres))
-                                    res = pres.AsManagedObject(typeof(string));
-
-                                else if(PyFloat.IsFloatType(pres))
-                                    res = pres.AsManagedObject(typeof(float));
-
-                                else if(PyInt.IsIntType(pres))
-                                    res = pres.AsManagedObject(typeof(int));
-
-                                else if(PyDict.IsDictType(pres))
-                                    res = pres.AsManagedObject(typeof(Dictionary<object, object>));
-
-                                else if(PyList.IsListType(pres))
-                                    res = pres.AsManagedObject(typeof(List<object>));
-
-                                else if(PyLong.IsLongType(pres))
-                                    res = pres.AsManagedObject(typeof(long));
-
-                                else if(PySequence.IsSequenceType(pres))
-                                    res = pres.AsManagedObject(typeof(IEnumerable<object>));
-
-                                else if(PyTuple.IsTupleType(pres))
-                                    res = pres.AsManagedObject(typeof(System.Tuple));
-                            }
-
-                            sub_element = res;
-                            
-
-                            // Runtime.__DB[subID] = sub_element;
-
-                            var sub_type = sub_element.GetType();
-                            switch(Type.GetTypeCode(sub_type))
-                            { 
-                                case TypeCode.Boolean:
-                                    if(!isObject)
-                                        Runtime.SetBooleanArrayElement(pEnv, pJArray, ii, (bool)sub_element);
-                                    else
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/CLRIterable", &CLRObjClass) == 0)
                                     {
-                                        void* pObjBool;
-                                        if(Runtime.NewBooleanObject(pEnv, (bool)sub_element, &pObjBool) != 0)
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
                                             throw new Exception(Runtime.GetException(pEnv));
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjBool);
                                     }
-
-                                    break;
-
-                                case TypeCode.Byte:
-                                    if(!isObject)
-                                        Runtime.SetByteArrayElement(pEnv, pJArray, ii, (byte)sub_element);
                                     else
-                                    {
-                                        void* pObjB;
-                                        if(Runtime.NewByteObject(pEnv, (byte)sub_element, &pObjB) != 0)
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjB);
-                                    }
-                                    break;
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
 
-                                case TypeCode.Char:
-                                    if(!isObject)
-                                        Runtime.SetCharArrayElement(pEnv, pJArray, ii, (char)sub_element);
-                                    else
-                                    {
-                                        void* pObjC;
-                                        if(Runtime.NewCharacterObject(pEnv, (char)sub_element, &pObjC) != 0)
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjC);
-                                    }
-                                    break;
+                                
 
-                                case TypeCode.Int16:
-                                    if(!isObject)
-                                        Runtime.SetShortArrayElement(pEnv, pJArray, ii, (short)sub_element);
-                                    else
-                                    {
-                                        void* pObjS;
-                                        if(Runtime.NewShortObject(pEnv, (short)sub_element, &pObjS) != 0)
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjS);
-                                    }
-                                    break;
+                                else if(res is IEnumerator<object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
-                                case TypeCode.Int32: 
-                                    if(!isObject)
-                                        Runtime.SetIntArrayElement(pEnv, pJArray, ii, (int)sub_element);
-                                    else
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/CLRIterator", &CLRObjClass) == 0)
                                     {
-                                        void* pObjI;
-                                        if(Runtime.NewIntegerObject(pEnv, (int)sub_element, &pObjI) != 0)
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
                                             throw new Exception(Runtime.GetException(pEnv));
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjI);
                                     }
-                                    break;
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+
+                                else if(res is System.Func<Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction1", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction2", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction3", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction4", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction5", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction6", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
                                     
-                                case TypeCode.Int64:
-                                    if(!isObject)
-                                        Runtime.SetLongArrayElement(pEnv, pJArray, ii, (long)sub_element);
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction7", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
                                     else
-                                    {
-                                        void* pObjL;
-                                        if(Runtime.NewLongObject(pEnv, (long)sub_element, &pObjL) != 0)
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjL);
-                                    }
-                                    break;
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
-                                case TypeCode.Single:
-                                    if(!isObject)
-                                        Runtime.SetFloatArrayElement(pEnv, pJArray, ii, (float)sub_element);
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction8", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
                                     else
-                                    {
-                                        void* pObjF;
-                                        if(Runtime.NewFloatObject(pEnv, (float)sub_element, &pObjF) != 0)
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjF);
-                                    }
-                                    break;
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
-                                case TypeCode.Double:
-                                    if(!isObject)
-                                        Runtime.SetDoubleArrayElement(pEnv, pJArray, ii, (double)sub_element);
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction9", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
                                     else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction10", &CLRObjClass) == 0)
                                     {
-                                        void* pObjD;
-                                        if(Runtime.NewDoubleObject(pEnv, (double)sub_element, &pObjD) != 0)
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObjD);
-                                    }
-                                    break;
-
-                                case TypeCode.String:
-                                    void* string_arg_s = Runtime.GetJavaString(pEnv, (string)sub_element);
-                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, string_arg_s);
-                                    break;
-
-                                case TypeCode.DateTime:
-                                    void* pDate = Runtime.GetJavaDateTime(pEnv, (DateTime)sub_element);
-                                    Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pDate);
-                                    break;
-
-                                default:
-
-                                    var subID = Runtime.GetID(sub_element, true); //IMPORTANT
-                                    if(JVMDelegate.DB.ContainsKey(subID))
-                                    {
-                                        JVMDelegate jobj = sub_element as JVMDelegate; 
-                                        void* ptr = (void *)(jobj.Pointer);
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, ptr);
-                                        Runtime.RegisterJVMObject(pEnv, subID, ptr);
-                                    }
-
-                                    else if(Runtime.DB.ContainsKey(subID))
-                                    {
-                                        // void* ptr_res = (void *)(sub_element.GetHashCode());
-
-                                        void*  pGetCLRObjectMethod;
-                                        if(Runtime.GetStaticMethodID( pEnv, pNetBridgeClass, "GetCLRObject", "(I)Lapp/quant/clr/CLRObject;", &pGetCLRObjectMethod ) != 0)
-                                            throw new Exception(Runtime.GetException(pEnv));
-
-                                        // void** pAr_len = stackalloc void*[1];
-                                        object[] pAr_len_data = new object[]{ subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void*  pGetCLRObject;
-                                        if(Runtime.CallStaticObjectMethod( pEnv, pNetBridgeClass, pGetCLRObjectMethod, &pGetCLRObject, 1, pAr_len) != 0)
-                                            throw new Exception(Runtime.GetException(pEnv));
-
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pGetCLRObject);
-                                        Runtime.RegisterJVMObject(pEnv, subID, pGetCLRObject);
-                                    }
-
-                                    else if(sub_element is JVMTuple)
-                                    {
-                                        JVMTuple jobj = sub_element as JVMTuple; 
-                                        // void* ptr = (void *)(jobj.jVMObject.Pointer);
-                                        void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.jVMObject.JavaHashCode);
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, ptr);
-                                        Runtime.RegisterJVMObject(pEnv, jobj.jVMObject.JavaHashCode, ptr);
-                                    }
-                                    else if(sub_element is IJVMTuple)
-                                    {
-                                        IJVMTuple jobj = sub_element as IJVMTuple; 
-                                        // void* ptr = (void *)(jobj.JVMObject.Pointer);
-                                        void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.JVMObject.JavaHashCode);
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, ptr);
-                                        Runtime.RegisterJVMObject(pEnv, jobj.JVMObject.JavaHashCode, ptr);
-                                    }
-
-                                    else if(sub_element is JVMObject)
-                                    {
-                                        JVMObject jobj = sub_element as JVMObject; 
-                                        // void* ptr = (void *)(jobj.Pointer);
-                                        void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, jobj.JavaHashCode);
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, ptr);
-                                        Runtime.RegisterJVMObject(pEnv, jobj.JavaHashCode, ptr);
-                                    }
-
-                                    else if(sub_element is Array)
-                                    {
-                                        Console.WriteLine(" ARRAY( " + ii + "): " + sub_element);
-                                        Array _sub_array = sub_element as Array;
-
-                                        object[] sub_array = _sub_array.Cast<object>().ToArray();
-                                        // JVMObject javaArray = getJavaArray(sub_array);
-                                        JVMObject javaArray = getJavaArray(pEnv, pNetBridgeClass, sub_array);
-
-                                        void* ptr = Runtime.GetJVMObject(pEnv, pNetBridgeClass, javaArray.JavaHashCode);
-                                        Runtime.SetObjectArrayElement(pEnv, pJArray, ii, ptr);//javaArray.Pointer.ToPointer());
-                                        Runtime.RegisterJVMObject(pEnv, javaArray.JavaHashCode, ptr);
-                                    }
-
-
-                                    else if(sub_element is IEnumerable<object>)
-                                    {
-                                        // void* ptr_res = (void *)(sub_element.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ sub_element.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/CLRIterable", &CLRObjClass) == 0)
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
                                         {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj), pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-
-                                                // Runtime.RemoveID(subID);
-                                                //return pObj;
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
                                         }
                                         else
                                             throw new Exception(Runtime.GetException(pEnv));
                                     }
-
-                                    
-
-                                    else if(res is IEnumerator<object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/CLRIterator", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-
-                                    else if(res is System.Func<Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction1", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction2", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction3", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction4", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction5", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction6", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-                                        
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction7", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction8", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction9", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction10", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction11", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction12", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction13", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID};
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction14", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-                                    else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
-                                    {
-                                        // void* ptr_res = (void *)(res.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction15", &CLRObjClass) == 0)
-                                        {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                // Runtime.DB.TryAdd(res.GetHashCode(), res);
-                                                if(!(res is JVMObject) && !(res is IJVMTuple))
-                                                    // Runtime.DB[subID] = res;
-                                                    Runtime.DB[subID] = new WeakReference(res);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
-                                        }
-                                        else
-                                            throw new Exception(Runtime.GetException(pEnv));
-                                    }
-
                                     else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction11", &CLRObjClass) == 0)
                                     {
-                                        // void* ptr_res = (void *)(sub_element.GetHashCode());
-
-                                        // void** pAr_len = stackalloc void*[2];
-                                        object[] pAr_len_data = new object[]{ sub_element.GetType().ToString(), subID, false };
-                                        // getJavaParameters(pEnv, ref pAr_len, pAr_len_data);
-                                        void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
-
-                                        void* pObj;
-                                        void* CLRObjClass;
-                                        // void*  pLoadClassMethod; // The executed method struct
-                                        if(Runtime.FindClass( pEnv, "app/quant/clr/CLRObject", &CLRObjClass) == 0)
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
                                         {
-                                            void* pClass;
-                                            if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;IZ)V", 3, pAr_len, &pObj ) == 0)
-                                            {
-                                                //Runtime.GetID(pEnv, pObj);
-                                                // Runtime.RegisterJVMObject(pEnv, Runtime.GetID(pEnv, pObj) ,pObj);
-                                                Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
-                                                Runtime.RegisterJVMObject(pEnv, subID, pObj);
-                                                // Runtime.DB.TryAdd(sub_element.GetHashCode(), sub_element);
-                                                if(!(sub_element is JVMObject) && !(sub_element is IJVMTuple))
-                                                    Runtime.DB[subID] = new WeakReference(sub_element);
-                                            }
-                                            else
-                                                throw new Exception(Runtime.GetException(pEnv));
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
                                         }
                                         else
                                             throw new Exception(Runtime.GetException(pEnv));
                                     }
-                                    break;
-                            }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
-                            // sub_element.RegisterGCEvent(subID, delegate(object _obj, int _id)
-                            // {
-                            //     // Console.WriteLine("----========-----Object(" + _obj + ") with hash code " + _id + " recently collected: ");
-                            //     Runtime.RemoveID(_id);
-                            // });
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction12", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
 
-                            // if(Runtime.__DB.ContainsKey(subID))
-                            // {
-                            //     object _out;
-                            //     Runtime.__DB.TryRemove(subID, out _out);
-                            // }
-                            
-                        }
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction13", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID};
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction14", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                else if(res is System.Func<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)
+                                {
+                                    object[] pAr_len_data = new object[]{ res.GetType().ToString(), subID };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    void*  pLoadClassMethod; // The executed method struct
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/function/CLRFunction15", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;I)V", 2, pAr_len, &pObj ) == 0)
+                                        {
+                                            if(!(res is JVMObject) && !(res is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(res);
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+
+                                else
+                                {
+                                    object[] pAr_len_data = new object[]{ sub_element.GetType().ToString(), subID, false };
+                                    void** pAr_len = (void**)(new StructWrapper(pEnv, pAr_len_data)).Ptr;
+
+                                    void* pObj;
+                                    void* CLRObjClass;
+                                    if(Runtime.FindClass( pEnv, "app/quant/clr/CLRObject", &CLRObjClass) == 0)
+                                    {
+                                        void* pClass;
+                                        if(Runtime.NewObjectP( pEnv, CLRObjClass, "(Ljava/lang/String;IZ)V", 3, pAr_len, &pObj ) == 0)
+                                        {
+                                            Runtime.SetObjectArrayElement(pEnv, pJArray, ii, pObj);
+                                            Runtime.RegisterJVMObject(pEnv, subID, pObj);
+                                            if(!(sub_element is JVMObject) && !(sub_element is IJVMTuple))
+                                                Runtime.DB[subID] = new WeakReference(sub_element);
+                                        }
+                                        else
+                                            throw new Exception(Runtime.GetException(pEnv));
+                                    }
+                                    else
+                                        throw new Exception(Runtime.GetException(pEnv));
+                                }
+                                break;
+                        }                            
                     }
-
-                    int hashID = Runtime.GetJVMID(pEnv, pJArray, false);
-                    Runtime.RegisterJVMObject(pEnv, hashID, pJArray);
-
-                    // sub.RegisterGCEvent(hashID, delegate(object _obj, int _id)
-                    // {
-                    //     // Console.WriteLine("-----++++++----Object(" + _obj + ") with hash code " + _id + " recently collected: ");
-                    //     Runtime.RemoveID(_id);
-                    // });
-
-
-                    var jo = new JVMObject(hashID, cls, false, "getJavaArray 7898"); // IMPORTANT FALSE
-
-                    // Runtime.__DB[hashID] = jo;
-                    // Runtime.GetID(jo, false);
-
-                    return jo;
-                
                 }
-                else
-                    throw new Exception(Runtime.GetException(pEnv));
+
+                int hashID = Runtime.GetJVMID(pEnv, pJArray, false);
+                Runtime.RegisterJVMObject(pEnv, hashID, pJArray);
+
+                var jo = new JVMObject(hashID, cls, false, "getJavaArray 7898"); // IMPORTANT FALSE
+
+                return jo;
+            
             }
+            else
+                throw new Exception(Runtime.GetException(pEnv));
         }
 
         private unsafe JVMObject getJavaArray(void* pEnv, void* pNetBridgeClass, IEnumerable<object> array)
         {
-            // // lock(objLock_getJavaArray_3)
-            {
-                int arrLength = array.Count();
-                object[] res = new object[arrLength];
+            int arrLength = array.Count();
+            object[] res = new object[arrLength];
 
-                for(int i = 0; i < arrLength; i++)
-                    res[i] = array.ElementAt(i);
-                
+            for(int i = 0; i < arrLength; i++)
+                res[i] = array.ElementAt(i);
+            
 
-                return getJavaArray(pEnv, pNetBridgeClass, res);
-            }
+            return getJavaArray(pEnv, pNetBridgeClass, res);
         }
 
         private unsafe JVMObject getJavaArray(void* pEnv, void* pNetBridgeClass, Array array)
         {
-            // // lock(objLock_getJavaArray_4)
-            {
-                int arrLength = array.Length;
-                object[] res = new object[arrLength];
+            int arrLength = array.Length;
+            object[] res = new object[arrLength];
 
-                for(int i = 0; i < arrLength; i++)
-                    res[i] = array.GetValue(i);
+            for(int i = 0; i < arrLength; i++)
+                res[i] = array.GetValue(i);
 
-                return getJavaArray(pEnv, pNetBridgeClass, res);
-            }
+            return getJavaArray(pEnv, pNetBridgeClass, res);   
         }
     }
 }

@@ -33,27 +33,13 @@ namespace QuantApp.Kernel.JVM
         public string JavaClass;
 
         private string mess;
-        // public unsafe IntPtr Pointer1
-        // {
-        //     get
-        //     {
-        //         IntPtr ptr = new IntPtr(Runtime.GetJVMObject(this.JavaHashCode));
-        //         if(ptr == IntPtr.Zero)
-        //             throw new Exception("NO OBJECT");
-        //         return ptr;
-        //     }
-        // }
-
-
-
-
+        
         /// <summary>
         /// String Dictionary that contains the extra dynamic values
         /// stored on this object/instance
         /// </summary>        
         /// <remarks>Using PropertyBag to support XML Serialization of the dictionary</remarks>
-        // public PropertyBag Properties = new PropertyBag();
-
+        
         public ConcurrentDictionary<string,object> Properties = new ConcurrentDictionary<string, object>();
         public ConcurrentDictionary<string,Delegate> Members = new ConcurrentDictionary<string, Delegate>();
 
@@ -68,36 +54,18 @@ namespace QuantApp.Kernel.JVM
         /// 
         /// Note you can subclass Expando.
         /// </summary>
-        // public unsafe JVMObject(IntPtr _pointer, int jHashCode, string jClass) 
         public JVMObject(int jHashCode, string jClass, bool cache, string mess) 
         {
-            // lock(objLock_ctor)
-            {
-                // Console.WriteLine("JVMOBject: " + jHashCode + " " + jClass);
-                this.JavaClass = jClass;
-                this.JavaHashCode = jHashCode;
-                
-                Initialize(this);            
+            this.JavaClass = jClass;
+            this.JavaHashCode = jHashCode;
+            
+            Initialize(this);            
 
-                int hsh = this.JavaHashCode;
+            int hsh = this.JavaHashCode;
 
-                this.mess = mess;
+            this.mess = mess;
 
-                //if(cache) // NEED TO CACHE ALL **** MUST RUN THIS NOW... No BATTERY
-                {   
-                    // Console.WriteLine("JVMOBject ADDING : " + jHashCode + " " + jClass);
-                    // __DB[hsh] = this;
-                }
-                // else
-                //     Console.WriteLine("JVMOBject NOT ADDING : " + jHashCode + " " + jClass);
-                DB[hsh] = new WeakReference(this);
-
-                // this.RegisterGCEvent(hsh, delegate(object _obj, int _id)
-                // {
-                //     dynamic dyn = _obj;
-                //     Console.WriteLine("KILL: " + dyn.toString());
-                // });
-            }
+            DB[hsh] = new WeakReference(this);
         }
 
         public override int GetHashCode()
@@ -110,12 +78,10 @@ namespace QuantApp.Kernel.JVM
             try
             {
                 dynamic obj = this;
-                // return "JVMObject(" + this.JavaClass + " - Ptr = " + Pointer + " : nhash = " + this.GetHashCode() + ": jhash = " + this.JavaHashCode + "): " + obj.toString();
                 return "JVMObject(" + this.JavaClass + " - nhash = " + this.GetHashCode() + ": jhash = " + this.JavaHashCode + "): " + obj.toString();
             }
             catch
             {
-                // return "JVMObject(" + this.JavaClass + " - Ptr = " + Pointer + " : nhash = " + this.GetHashCode() + ": jhash = " + this.JavaHashCode + ")";
                 return "JVMObject(" + this.JavaClass + " - : nhash = " + this.GetHashCode() + ": jhash = " + this.JavaHashCode + ")";
             }
         }
@@ -151,98 +117,92 @@ namespace QuantApp.Kernel.JVM
         /// <returns></returns>
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
-            // lock(objLock_TryGetMember_1)
+            try
             {
-                try
-                {
-                    result = TryGetMember(binder.Name);
-                    return true;
-                }
-                catch
-                {
-                    result = null;
-                    return false;
-                }
+                result = TryGetMember(binder.Name);
+                return true;
+            }
+            catch
+            {
+                result = null;
+                return false;
             }
         }
 
         private readonly object objLock_TryGetMember_2 = new object();
         public object TryGetMember(string name)
         {
-            // lock(objLock_TryGetMember_2)
+            if (Properties.ContainsKey(name))
             {
-                if (Properties.ContainsKey(name))
+                Tuple<string, object, Runtime.wrapSetProperty> funcs = (Tuple<string, object, Runtime.wrapSetProperty>)Properties[name];
+                string ttype = funcs.Item1;
+                object result;
+                switch (ttype)
                 {
-                    Tuple<string, object, Runtime.wrapSetProperty> funcs = (Tuple<string, object, Runtime.wrapSetProperty>)Properties[name];
-                    string ttype = funcs.Item1;
-                    object result;
-                    switch (ttype)
-                    {
-                        case "bool":
-                            result = ((Runtime.wrapGetProperty<bool>)funcs.Item2)();
-                            break;
+                    case "bool":
+                        result = ((Runtime.wrapGetProperty<bool>)funcs.Item2)();
+                        break;
 
-                        case "byte":
-                            result = ((Runtime.wrapGetProperty<byte>)funcs.Item2)();
-                            break;
-                        
-                        case "char":
-                            result = ((Runtime.wrapGetProperty<char>)funcs.Item2)();
-                            break;
-
-                        case "short":
-                            result = ((Runtime.wrapGetProperty<short>)funcs.Item2)();
-                            break;
-                        
-                        case "int":
-                            result = ((Runtime.wrapGetProperty<int>)funcs.Item2)();
-                            break;
-
-                        case "long":
-                            result = ((Runtime.wrapGetProperty<long>)funcs.Item2)();
-                            break;
-                        
-                        case "float":
-                            result = ((Runtime.wrapGetProperty<float>)funcs.Item2)();
-                            break;
-
-                        case "double":
-                            result = ((Runtime.wrapGetProperty<double>)funcs.Item2)();
-                            break;
-
-                        case "string":
-                            result = ((Runtime.wrapGetProperty<string>)funcs.Item2)();
-                            break;
-
-                        case "object":
-                            result = ((Runtime.wrapGetProperty<JVMObject>)funcs.Item2)();
-                            break;
-
-                        case "array":
-                            result = ((Runtime.wrapGetProperty<object[]>)funcs.Item2)();
-                            break;
-
-                        default:
-                            result = null;
-                            break;
-                    }
-                    return result;
+                    case "byte":
+                        result = ((Runtime.wrapGetProperty<byte>)funcs.Item2)();
+                        break;
                     
-                }
+                    case "char":
+                        result = ((Runtime.wrapGetProperty<char>)funcs.Item2)();
+                        break;
 
-                if (Instance != null)
-                {
-                    try
-                    {
-                        object result;
-                        GetProperty(Instance, name, out result);
-                        return result;
-                    }
-                    catch { }
-                }
+                    case "short":
+                        result = ((Runtime.wrapGetProperty<short>)funcs.Item2)();
+                        break;
+                    
+                    case "int":
+                        result = ((Runtime.wrapGetProperty<int>)funcs.Item2)();
+                        break;
 
-                return null;
+                    case "long":
+                        result = ((Runtime.wrapGetProperty<long>)funcs.Item2)();
+                        break;
+                    
+                    case "float":
+                        result = ((Runtime.wrapGetProperty<float>)funcs.Item2)();
+                        break;
+
+                    case "double":
+                        result = ((Runtime.wrapGetProperty<double>)funcs.Item2)();
+                        break;
+
+                    case "string":
+                        result = ((Runtime.wrapGetProperty<string>)funcs.Item2)();
+                        break;
+
+                    case "object":
+                        result = ((Runtime.wrapGetProperty<JVMObject>)funcs.Item2)();
+                        break;
+
+                    case "array":
+                        result = ((Runtime.wrapGetProperty<object[]>)funcs.Item2)();
+                        break;
+
+                    default:
+                        result = null;
+                        break;
+                }
+                return result;
+                
             }
+
+            if (Instance != null)
+            {
+                try
+                {
+                    object result;
+                    GetProperty(Instance, name, out result);
+                    return result;
+                }
+                catch { }
+            }
+
+            return null;
         }
 
 
@@ -257,125 +217,116 @@ namespace QuantApp.Kernel.JVM
         /// <returns></returns>
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
-            // lock(objLock_TrySetMember_1)
+            string signature = binder.Name;
+            if (Instance != null)
             {
-                string signature = binder.Name;
-                if (Instance != null)
+                try
                 {
-                    try
-                    {
-                        Tuple<string, object, Runtime.wrapSetProperty> funcs = (Tuple<string, object, Runtime.wrapSetProperty>)Properties[binder.Name];
-                        funcs.Item3(value);
-                        return true;
-                    }
-                    catch(Exception e) 
-                    { 
-                        Console.WriteLine("JVM Object TrySetMember: " + e); 
-                    }
+                    Tuple<string, object, Runtime.wrapSetProperty> funcs = (Tuple<string, object, Runtime.wrapSetProperty>)Properties[binder.Name];
+                    funcs.Item3(value);
+                    return true;
                 }
-                Properties[binder.Name] = value;
-                return true;
+                catch(Exception e) 
+                { 
+                    Console.WriteLine("JVM Object TrySetMember: " + e); 
+                }
             }
+            Properties[binder.Name] = value;
+            return true;
         }
 
         private readonly object objLock_TrySetMember_2 = new object();
         public bool TrySetMember(string name, object value)
         {
-            // lock(objLock_TryGetMember_2)
+            if(value is Delegate)
             {
-                if(value is Delegate)
-                {
-                    string signature = name;
-                    Delegate fun = value as Delegate;
-                    Members[signature] = fun;
-                    return true;
-                }
-                else
-                {
-                    if (Properties.ContainsKey(name))
-                    {
-                        Tuple<string, object, Runtime.wrapSetProperty> funcs = (Tuple<string, object, Runtime.wrapSetProperty>)Properties[name];
-                        string ttype = funcs.Item1;
-
-                        switch (ttype)
-                        {
-                            case "bool":
-                                ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToBoolean(value));
-                                break;
-
-                            case "byte":
-                                ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToByte(value));
-                                break;
-                            
-                            case "char":
-                                ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToChar(value));
-                                break;
-
-                            case "short":
-                                ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToInt16(value));
-                                break;
-                            
-                            case "int":
-                                ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToInt32(value));
-                                break;
-
-                            case "long":
-                                ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToInt64(value));
-                                break;
-                            
-                            case "float":
-                                ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToDecimal(value));
-                                break;
-
-                            case "double":
-                                ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToDouble(value));
-                                break;
-
-                            case "string":
-                                ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToString(value));
-                                break;
-
-                            case "object":
-                                ((Runtime.wrapSetProperty)funcs.Item3)(value);
-                                break;
-
-                            case "array":
-                                ((Runtime.wrapSetProperty)funcs.Item3)((object[])value);
-                                break;
-
-                            default:
-                                ((Runtime.wrapSetProperty)funcs.Item3)(value);
-                                break;
-                        
-                        }
-                        return true;
-                
-                    }
-                }
-                return false;
+                string signature = name;
+                Delegate fun = value as Delegate;
+                Members[signature] = fun;
+                return true;
             }
+            else
+            {
+                if (Properties.ContainsKey(name))
+                {
+                    Tuple<string, object, Runtime.wrapSetProperty> funcs = (Tuple<string, object, Runtime.wrapSetProperty>)Properties[name];
+                    string ttype = funcs.Item1;
+
+                    switch (ttype)
+                    {
+                        case "bool":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToBoolean(value));
+                            break;
+
+                        case "byte":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToByte(value));
+                            break;
+                        
+                        case "char":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToChar(value));
+                            break;
+
+                        case "short":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToInt16(value));
+                            break;
+                        
+                        case "int":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToInt32(value));
+                            break;
+
+                        case "long":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToInt64(value));
+                            break;
+                        
+                        case "float":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToDecimal(value));
+                            break;
+
+                        case "double":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToDouble(value));
+                            break;
+
+                        case "string":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(Convert.ToString(value));
+                            break;
+
+                        case "object":
+                            ((Runtime.wrapSetProperty)funcs.Item3)(value);
+                            break;
+
+                        case "array":
+                            ((Runtime.wrapSetProperty)funcs.Item3)((object[])value);
+                            break;
+
+                        default:
+                            ((Runtime.wrapSetProperty)funcs.Item3)(value);
+                            break;
+                    
+                    }
+                    return true;
+            
+                }
+            }
+            return false;   
         }
 
 
         private readonly object objLock_TrySetField = new object();
         public bool TrySetField(string name, object value)
         {
-            // lock(objLock_TrySetField)
+            string signature = name;
+            if (Instance != null)
             {
-                string signature = name;
-                if (Instance != null)
+                try
                 {
-                    try
-                    {
-                        bool result = SetProperty(Instance, name, value);
-                        if (result)
-                            return true;
-                    }
-                    catch { }
+                    bool result = SetProperty(Instance, name, value);
+                    if (result)
+                        return true;
                 }
-                Properties[name] = value;
-                return true;
+                catch { }
             }
+            Properties[name] = value;
+            return true;
         }
 
         private readonly object objLock_TryInvokeMember = new object();
@@ -389,7 +340,6 @@ namespace QuantApp.Kernel.JVM
         /// <returns></returns>
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
-            // lock(objLock_TryInvokeMember)
             try
             {
                 string signature = binder.Name + "-";            
@@ -422,7 +372,6 @@ namespace QuantApp.Kernel.JVM
         private readonly object objLock_InvokeMember = new object();
         public object InvokeMember(string name, object[] args)
         {
-            // lock(objLock_InvokeMember)
             try
             {
                 string signature = name + "-";
@@ -461,66 +410,63 @@ namespace QuantApp.Kernel.JVM
         /// <returns></returns>
         protected bool GetProperty(object instance, string name, out object result)
         {
-            // lock(objLock_GetProperty)
+            if (instance == null)
+                instance = this;
+
+            var miArray = InstanceType.GetMember(name, BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance);
+            if (miArray != null && miArray.Length > 0)
             {
-                if (instance == null)
-                    instance = this;
-
-                var miArray = InstanceType.GetMember(name, BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance);
-                if (miArray != null && miArray.Length > 0)
+                var mi = miArray[0];
+                if (mi.MemberType == MemberTypes.Property)
                 {
-                    var mi = miArray[0];
-                    if (mi.MemberType == MemberTypes.Property)
+
+                    Tuple<string, object, Runtime.wrapSetProperty> funcs = (Tuple<string, object, Runtime.wrapSetProperty>)((PropertyInfo)mi).GetValue(instance,null);
+                    string ttype = funcs.Item1;
+                    switch (ttype)
                     {
+                        case "bool":
+                            result = ((Runtime.wrapGetProperty<bool>)funcs.Item2)();
+                            break;
 
-                        Tuple<string, object, Runtime.wrapSetProperty> funcs = (Tuple<string, object, Runtime.wrapSetProperty>)((PropertyInfo)mi).GetValue(instance,null);
-                        string ttype = funcs.Item1;
-                        switch (ttype)
-                        {
-                            case "bool":
-                                result = ((Runtime.wrapGetProperty<bool>)funcs.Item2)();
-                                break;
+                        case "byte":
+                            result = ((Runtime.wrapGetProperty<byte>)funcs.Item2)();
+                            break;
+                        
+                        case "char":
+                            result = ((Runtime.wrapGetProperty<char>)funcs.Item2)();
+                            break;
 
-                            case "byte":
-                                result = ((Runtime.wrapGetProperty<byte>)funcs.Item2)();
-                                break;
-                            
-                            case "char":
-                                result = ((Runtime.wrapGetProperty<char>)funcs.Item2)();
-                                break;
+                        case "short":
+                            result = ((Runtime.wrapGetProperty<short>)funcs.Item2)();
+                            break;
+                        
+                        case "int":
+                            result = ((Runtime.wrapGetProperty<int>)funcs.Item2)();
+                            break;
 
-                            case "short":
-                                result = ((Runtime.wrapGetProperty<short>)funcs.Item2)();
-                                break;
-                            
-                            case "int":
-                                result = ((Runtime.wrapGetProperty<int>)funcs.Item2)();
-                                break;
+                        case "long":
+                            result = ((Runtime.wrapGetProperty<long>)funcs.Item2)();
+                            break;
+                        
+                        case "float":
+                            result = ((Runtime.wrapGetProperty<float>)funcs.Item2)();
+                            break;
 
-                            case "long":
-                                result = ((Runtime.wrapGetProperty<long>)funcs.Item2)();
-                                break;
-                            
-                            case "float":
-                                result = ((Runtime.wrapGetProperty<float>)funcs.Item2)();
-                                break;
+                        case "double":
+                            result = ((Runtime.wrapGetProperty<double>)funcs.Item2)();
+                            break;
 
-                            case "double":
-                                result = ((Runtime.wrapGetProperty<double>)funcs.Item2)();
-                                break;
-
-                            default:
-                                result = null;
-                                break;
-                        }
-
-                        return true;
+                        default:
+                            result = null;
+                            break;
                     }
-                }
 
-                result = null;
-                return false;                
+                    return true;
+                }
             }
+
+            result = null;
+            return false;                
         }
 
         private readonly object objLock_SetProperty = new object();
@@ -533,24 +479,21 @@ namespace QuantApp.Kernel.JVM
         /// <returns></returns>
         protected bool SetProperty(object instance, string name, object value)
         {
-            // lock(objLock_SetProperty)
+            if (instance == null)
+                instance = this;
+
+            var miArray = InstanceType.GetMember(name, BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.Instance);
+
+            if (miArray != null && miArray.Length > 0)
             {
-                if (instance == null)
-                    instance = this;
-
-                var miArray = InstanceType.GetMember(name, BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.Instance);
-
-                if (miArray != null && miArray.Length > 0)
+                var mi = miArray[0];
+                if (mi.MemberType == MemberTypes.Property)
                 {
-                    var mi = miArray[0];
-                    if (mi.MemberType == MemberTypes.Property)
-                    {
-                        ((PropertyInfo)mi).SetValue(Instance, value, null);
-                        return true;
-                    }
+                    ((PropertyInfo)mi).SetValue(Instance, value, null);
+                    return true;
                 }
-                return false;                
             }
+            return false;                
         }
 
         private readonly object objLock_InvokeMethod = new object();
@@ -564,7 +507,6 @@ namespace QuantApp.Kernel.JVM
         /// <returns></returns>
         protected bool InvokeMethod(object instance, string name, object[] args, out object result)
         {
-            // lock(objLock_InvokeMethod)
             try
             {
                 if (instance == null)
@@ -618,29 +560,11 @@ namespace QuantApp.Kernel.JVM
             get
             {
                 object result = null;
-                // if (GetProperty(Instance, key, out result))
-                //     return result;
-                // else
-                //     return null;
-                // Console.WriteLine("--------------JVMObject TRY GET MEMBER: " + key);
                 return TryGetMember(key);
             }
             set
             {
-                // Console.WriteLine("--------------JVMObject TRY SET MEMBER: " + key);
                 TrySetMember(key, value);
-                // if (Properties.ContainsKey(key))
-                // {
-                //     Properties[key] = value;
-                //     return;
-                // }
-
-                // // check instance for existance of type first
-                // var miArray = InstanceType.GetMember(key, BindingFlags.Public | BindingFlags.GetProperty);
-                // if (miArray != null && miArray.Length > 0)
-                //     SetProperty(Instance, key, value);
-                // else
-                //     Properties[key] = value;
             }
         }
 
@@ -667,10 +591,6 @@ namespace QuantApp.Kernel.JVM
             JVMObject ou;
             if(__DB.ContainsKey(hsh))
                 __DB.TryRemove(hsh, out ou);
-
-            // int _i;
-            // if(Runtime._DBID.ContainsKey(hsh))
-            //     Runtime._DBID.TryRemove(hsh, out _i);
 
             WeakReference _wo;
             if(Runtime.DB.ContainsKey(hsh))
