@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>    
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <NoWarn>FS3390;FS0020;FS0025;FS0049;FS0058;FS0064;FS0760;FS0066;FS0104;MSB3243;MSB3245;NU1605;CS1591</NoWarn>
   </PropertyGroup>
 
@@ -16,6 +16,7 @@
     <Compile Include="F.fs" />
     <Compile Include="Code.fs" />
     <Compile Include="DM.fs" />
+    <Compile Include="Actor.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,14 +24,19 @@
   </ItemGroup>
 
   <ItemGroup>   
-    <PackageReference Include="FSharp.Compiler.Service" Version="40.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.11.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.11.0" />
+    <PackageReference Include="FSharp.Compiler.Service" Version="41.0.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
     <PackageReference Include="Jint" Version="3.0.0-beta-1525" />
     <PackageReference Include="FSharp.Interop.Dynamic" Version="5.0.1.268" />
 
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="Akka.FSharp " Version="1.4.27" />
+
     <PackageReference Include="Akkling" Version="0.12.0" />
+    <PackageReference Include="Akkling.Hocon" Version="0.12.0" />
+    <PackageReference Include="Akkling.DistributedData" Version="0.12.0" />
+    <PackageReference Include="Akkling.Cluster.Sharding" Version="0.12.0" />
 
   </ItemGroup>
 </Project>

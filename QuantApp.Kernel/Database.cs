@@ -45,7 +45,7 @@ namespace QuantApp.Kernel
         void DeleteDataTable(DataTable datatable);
 
         void ExecuteCommand(string command, params Tuple<string, object>[] args);
-        void ExecuteCommand(List<Tuple<string,Tuple<string, object>[]>> pkgs);
+        void ExecuteCommand(IEnumerable<Tuple<string,Tuple<string, object>[]>> pkgs);
 
         DbDataReader ExecuteReader(string command);
 

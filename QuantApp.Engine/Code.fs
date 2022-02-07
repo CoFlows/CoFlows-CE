@@ -354,7 +354,7 @@ module Code =
             installedPip.TryAdd(packageName, packageName) |> ignore
 
     let InitializeCodeTypes(types : Type[]) =
-
+        // QuantApp.Engine.Utils.testAkka()
         let logger = LogManager.GetCurrentClassLogger()
 
         using (Py.GIL()) (fun _ -> "/app/mnt/pip/" |> setPythonImportPath |> PythonEngine.RunSimpleString)
@@ -573,8 +573,8 @@ module Code =
 
                 if functionName = "??" |> not then    
                     let libs() =
-                        #if NET5_0
-                        let sysDir_base = Path.GetDirectoryName(@"ref/net5.0/")
+                        #if NET6_0
+                        let sysDir_base = Path.GetDirectoryName(@"ref/net6.0/")
                         #endif
                         
                         #if NET461
@@ -1358,6 +1358,8 @@ module Code =
 
                     let initJVM() =
                         if JVM.Runtime.Loaded |> not then
+                            "/app/mnt/jars" |> Directory.CreateDirectory
+
                             let jarsMntPath = DirectoryInfo("mnt/jars")
                             let jarsMnt =  jarsMntPath.GetFiles()
     

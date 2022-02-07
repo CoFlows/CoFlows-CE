@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>  
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <NoWarn>CS0109;CS0168;CS0162;CS0219;CS3021;CS1591</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -23,7 +23,7 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="DynamicInterop" Version="0.9.1" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
 
     <PackageReference Include="Dynamitey" Version="2.0.10.189" />
 
@@ -39,6 +39,10 @@
     <PackageReference Include="NLog.Extensions.Logging" Version="1.7.4" />
 
     <PackageReference Include="Akka" Version="1.4.27" />
+    <PackageReference Include="Akka.DistributedData " Version="1.4.27" />
+    <PackageReference Include="Akka.Remote" Version="1.4.27" />
+    <PackageReference Include="Akka.Cluster" Version="1.4.27" />
+    <PackageReference Include="Akka.Cluster.Sharding" Version="1.4.27" />
     <PackageReference Include="Akka.Serialization.Hyperion" Version="1.4.27" />
     <PackageReference Include="Akka.Logger.NLog" Version="1.4.10" />
   </ItemGroup>

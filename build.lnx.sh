@@ -6,7 +6,7 @@
 # cd ../../
 
 dotnet clean CoFlows.CE.lnx.sln
-dotnet publish -c Release -f net5.0 -o CoFlows.Server/obj/lnx/publish CoFlows.Server/CoFlows.Server.lnx.csproj
+dotnet publish -c Release -f net6.0 -o CoFlows.Server/obj/lnx/publish CoFlows.Server/CoFlows.Server.lnx.csproj
 
 javac -cp jars/scalap-2.12.10.jar:jars/scala-library.jar:./QuantApp.Kernel/JVM/app/quant/clr/ ./QuantApp.Kernel/JVM/app/quant/clr/*.java ./QuantApp.Kernel/JVM/app/quant/clr/function/*.java
 scalac -d ./QuantApp.Kernel/JVM -cp ./QuantApp.Kernel/JVM/ ./QuantApp.Kernel/JVM/app/quant/clr/scala/*.scala
@@ -22,4 +22,4 @@ cd CoFlows.Server
 
 docker build -t coflows/ce .
 docker tag coflows/ce coflows/ce:latest
-docker push coflows/ce:latest
+# docker push coflows/ce:latest

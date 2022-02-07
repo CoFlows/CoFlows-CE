@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:5.0
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
 WORKDIR /app
 
@@ -10,16 +10,11 @@ RUN apt-get update --fix-missing && \
     apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 libglib2.0-dev libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 shared-mime-info
 
 RUN apt-get install -y build-essential
-RUN apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev liblzma-dev
+RUN apt-get install -y libreadline-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev liblzma-dev
 RUN ln -s /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so
 
 RUN apt-get install -y libomp-dev curl
 
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
-    apt-get update && \
-    ACCEPT_EULA=Y apt-get -y install msodbcsql17 && \
-    apt-get -y install unixodbc-dev
 
 
 # Python 3.7 Install
@@ -151,6 +146,7 @@ RUN pip install dash
 RUN pip install dash-daq
 RUN pip install requests
 
+RUN apt-get install -y unixodbc-dev
 RUN pip install pyodbc
 
 RUN mv /app/jupyter/kernel.jupyter /usr/local/share/jupyter/kernels/python3/kernel.json

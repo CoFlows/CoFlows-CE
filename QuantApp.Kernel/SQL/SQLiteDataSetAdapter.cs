@@ -708,7 +708,7 @@ namespace QuantApp.Kernel.Adapters.SQL
             }
         }
 
-        public void ExecuteCommand(List<Tuple<string,Tuple<string, object>[]>> pkgs)
+        public void ExecuteCommand(IEnumerable<Tuple<string,Tuple<string, object>[]>> pkgs)
         {
             lock (objLock)
             {
