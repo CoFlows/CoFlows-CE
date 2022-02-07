@@ -24,24 +24,28 @@ namespace QuantApp.Kernel.Adapters.SQL.Factories
         private Dictionary<string, Group> roles = null;
         private Dictionary<int, AccessType> instruments = new Dictionary<int, AccessType>();
 
+        public readonly static object objLock_setProperty = new object();
         public void SetProperty(User user, string name, object value)
         {
-            string tableName = userTableName;
-            string searchString = "TenantName = '" + user.ID + "'";
-            string targetString = null;
-            DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
-
-            if (table != null)
+            lock (objLock_setProperty)
             {
-                DataRowCollection rows = table.Rows;
-                if (rows.Count == 0)
-                    return;
+                string tableName = userTableName;
+                string searchString = "TenantName = '" + user.ID + "'";
+                string targetString = null;
+                DataTable table = Database.DB["CloudApp"].GetDataTable(tableName, targetString, searchString);
 
-                DataRow row = rows[0];
-                if (row[name] != value)
+                if (table != null)
                 {
-                    row[name] = value;
-                    Database.DB["CloudApp"].UpdateDataTable(table);
+                    DataRowCollection rows = table.Rows;
+                    if (rows.Count == 0)
+                        return;
+
+                    DataRow row = rows[0];
+                    // if (row[name] != value)
+                    {
+                        row[name] = value;
+                        Database.DB["CloudApp"].UpdateDataTable(table);
+                    }
                 }
             }
         }

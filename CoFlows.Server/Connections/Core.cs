@@ -32,6 +32,8 @@ using QuantApp.Engine;
 
 using QuantApp.Kernel.Adapters.SQL;
 
+using NLog;
+
 namespace CoFlows.Core
 {
     public class Initialize
@@ -110,19 +112,27 @@ namespace CoFlows.Core
 
             string str = GetString(path, arg);
 
-            if (str == "_AQI_SecureClient_Error")
+            try
+            {            
+                return JsonConvert.DeserializeObject<T>(str);
+            }
+            catch (Exception e)
             {
+                var logger = LogManager.GetCurrentClassLogger();
+                logger.Error(e, $"Error getting object: {path} - _lastUpdate: {_lastUpdate} MESSAGE: {str}");
+                
                 _lastUpdate = timeKey;
-                if(_username != null)
-                    Login(_username, _password);
-                else if(_code != null)
+                if(_code != null)
                     Login(_code);
 
+                else if (_username != null)
+                    Login(_username, _password);
+                
                 str = GetString(path, arg);
-            }
 
-            
-            return JsonConvert.DeserializeObject<T>(str);
+                logger.Info($"Second try after login getting object: {path} - MESSAGE: {str}");
+                return JsonConvert.DeserializeObject<T>(str);
+            }
             
         }
 
@@ -133,27 +143,27 @@ namespace CoFlows.Core
 
             string str = GetURL(path);
 
-            // try
+            try
             {
-                if (str == "_AQI_SecureClient_Error")
-                {
-                    _lastUpdate = timeKey;
-                    if(_username != null)
-                        Login(_username, _password);
-                    else if(_code != null)
-                        Login(_code);
-                    str = GetURL(path);
-                }
-
-
                 return JsonConvert.DeserializeObject<T>(str);
             }
-            // catch (Exception e)
-            // {
-            //     Console.WriteLine(str);
-            //     Console.WriteLine(e);
-            //     return default(T);
-            // }
+            catch (Exception e)
+            {
+                var logger = LogManager.GetCurrentClassLogger();
+                logger.Error(e, $"Error getting object: {path} - _lastUpdate: {_lastUpdate} MESSAGE: {str}");
+                
+                _lastUpdate = timeKey;
+                if(_code != null)
+                    Login(_code);
+
+                else if (_username != null)
+                    Login(_username, _password);
+                
+                str = GetURL(path);
+
+                logger.Info($"Second try after login getting object: {path} - MESSAGE: {str}");
+                return JsonConvert.DeserializeObject<T>(str);
+            }
         }
         public class LoginStruct
         {
@@ -360,6 +370,9 @@ namespace CoFlows.Core
 
         public Boolean Login(string username, string password, string file = null)
         {
+            var logger = LogManager.GetCurrentClassLogger();
+            logger.Debug($"Login start username - {username}");
+                
             _username = username;
             _password = password;
 
@@ -413,11 +426,13 @@ namespace CoFlows.Core
 
             QuantApp.Kernel.User.ContextUser = quser;//logonRes.User;
 
+            logger.Debug($"Login end username - {username}");
+
             return true;
         }
 
         public Boolean Login(string key)
-        {
+        {            
             _token = null;
             _session = null; 
 
@@ -444,6 +459,7 @@ namespace CoFlows.Core
 
             var tokenJson = JsonConvert.DeserializeObject<JObject>(result.Result.Content.ReadAsStringAsync().Result);
             var token = tokenJson["access_token"].ToString();
+
             //////////
             var whoamiUrl = QuantAppURL.AbsoluteUri + "account/whoami";
             
@@ -452,8 +468,8 @@ namespace CoFlows.Core
             result = client.GetAsync(new Uri(whoamiUrl));
 
             var sessionData = JsonConvert.DeserializeObject<JObject>(result.Result.Content.ReadAsStringAsync().Result);
-
             var quser = JsonConvert.DeserializeObject<QuantApp.Kernel.UserData>(sessionData["User"].ToString());
+
             //// END
 
             // if(logonRes == null || string.IsNullOrEmpty(logonRes.token))

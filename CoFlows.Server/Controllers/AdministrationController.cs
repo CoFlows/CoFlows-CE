@@ -733,10 +733,10 @@ namespace CoFlows.Server.Controllers
 
             try
             {
-                var users = UserRepository.RetrieveUsersFromTenant(userId);
-                var ienum = users.GetEnumerator();
-                ienum.MoveNext();
-                var user = ienum.Current;
+                // var users = UserRepository.RetrieveUsersFromTenant(userId);
+                // var ienum = users.GetEnumerator();
+                // ienum.MoveNext();
+                // var user = ienum.Current;
                 
                 var quser = QuantApp.Kernel.User.FindUser(userId);
 
