@@ -54,7 +54,6 @@ namespace CoFlows.Server.Utils
     }
     public class Compression
     {
-
         public static string Encode(string text)
         {
             if(string.IsNullOrEmpty(text))
@@ -64,21 +63,43 @@ namespace CoFlows.Server.Utils
 
         public static string Encode(byte[] buffer)
         {
-            var memoryStream = new MemoryStream();
-            using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
+            byte[] compressedBytes;
+        
+            using (var uncompressedStream = new MemoryStream(buffer))
             {
-                gZipStream.Write(buffer, 0, buffer.Length);
+                using (var compressedStream = new MemoryStream())
+                { 
+                    // setting the leaveOpen parameter to true to ensure that compressedStream will not be closed when compressorStream is disposed
+                    // this allows compressorStream to close and flush its buffers to compressedStream and guarantees that compressedStream.ToArray() can be called afterward
+                    // although MSDN documentation states that ToArray() can be called on a closed MemoryStream, I don't want to rely on that very odd behavior should it ever change
+                    using (var compressorStream = new DeflateStream(compressedStream, CompressionLevel.Optimal, true))
+                    {
+                        uncompressedStream.CopyTo(compressorStream);
+                    }
+    
+                    // call compressedStream.ToArray() after the enclosing DeflateStream has closed and flushed its buffer to compressedStream
+                    compressedBytes = compressedStream.ToArray();
+                }
             }
+    
+            return Convert.ToBase64String(compressedBytes);
 
-            memoryStream.Position = 0;
 
-            var compressedData = new byte[memoryStream.Length];
-            memoryStream.Read(compressedData, 0, compressedData.Length);
+            // var memoryStream = new MemoryStream();
+            // using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
+            // {
+            //     gZipStream.Write(buffer, 0, buffer.Length);
+            // }
 
-            var gZipBuffer = new byte[compressedData.Length + 4];
-            Buffer.BlockCopy(compressedData, 0, gZipBuffer, 4, compressedData.Length);
-            Buffer.BlockCopy(BitConverter.GetBytes(buffer.Length), 0, gZipBuffer, 0, 4);
-            return Convert.ToBase64String(gZipBuffer);
+            // memoryStream.Position = 0;
+
+            // var compressedData = new byte[memoryStream.Length];
+            // memoryStream.Read(compressedData, 0, compressedData.Length);
+
+            // var gZipBuffer = new byte[compressedData.Length + 4];
+            // Buffer.BlockCopy(compressedData, 0, gZipBuffer, 4, compressedData.Length);
+            // Buffer.BlockCopy(BitConverter.GetBytes(buffer.Length), 0, gZipBuffer, 0, 4);
+            // return Convert.ToBase64String(gZipBuffer);
         }
         public static string Decode(string compressedText)
         {
@@ -91,21 +112,46 @@ namespace CoFlows.Server.Utils
         {
             if(string.IsNullOrEmpty(compressedText))
                 return Array.Empty<byte>();
-            byte[] gZipBuffer = Convert.FromBase64String(compressedText);
-            using (var memoryStream = new MemoryStream())
+
+            try
             {
-                int dataLength = BitConverter.ToInt32(gZipBuffer, 0);
-                memoryStream.Write(gZipBuffer, 4, gZipBuffer.Length - 4);
 
-                var buffer = new byte[dataLength];
-
-                memoryStream.Position = 0;
-                using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+                byte[] decompressedBytes;
+            
+                var compressedStream = new MemoryStream(Convert.FromBase64String(compressedText));
+        
+                using (var decompressorStream = new DeflateStream(compressedStream, CompressionMode.Decompress))
                 {
-                    gZipStream.Read(buffer, 0, buffer.Length);
+                    using (var decompressedStream = new MemoryStream())
+                    {
+                        decompressorStream.CopyTo(decompressedStream);
+        
+                        decompressedBytes = decompressedStream.ToArray();
+                    }
                 }
+        
+                    return decompressedBytes;
+            }
+            catch(Exception e)
+            {
+            // return Encoding.UTF8.GetString(decompressedBytes);
 
-                return buffer;
+                byte[] gZipBuffer = Convert.FromBase64String(compressedText);
+                using (var memoryStream = new MemoryStream())
+                {
+                    int dataLength = BitConverter.ToInt32(gZipBuffer, 0);
+                    memoryStream.Write(gZipBuffer, 4, gZipBuffer.Length - 4);
+
+                    var buffer = new byte[dataLength];
+
+                    memoryStream.Position = 0;
+                    using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+                    {
+                        gZipStream.Read(buffer, 0, buffer.Length);
+                    }
+
+                    return buffer;
+                }
             }
         }
     }
