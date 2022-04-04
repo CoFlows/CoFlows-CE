@@ -32,7 +32,7 @@ class clrproperty(object):
     """
 
     def __init__(self, type_, fget=None, fset=None):
-        print("----------CLR PYTHON CLRPROPERTY: " + str(return_type) + " " + str(clrname))
+        # print("----------CLR PYTHON CLRPROPERTY: " + str(return_type) + " " + str(clrname))
         self.__name__ = getattr(fget, "__name__", None)
         self._clr_property_type_ = type_
         self.fget = fget

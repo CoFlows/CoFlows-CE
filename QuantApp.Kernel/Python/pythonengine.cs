@@ -183,6 +183,7 @@ namespace Python.Runtime
 
                 // Load the clr.py resource into the clr module
                 IntPtr clr = Python.Runtime.ImportHook.GetCLRModule();
+
                 IntPtr clr_dict = Runtime.PyModule_GetDict(clr);
 
                 var locals = new PyDict();
@@ -194,12 +195,19 @@ namespace Python.Runtime
                     Runtime.PyDict_SetItemString(module_globals, "__builtins__", builtins);
 
                     Assembly assembly = Assembly.GetExecutingAssembly();
-                    using (Stream stream = assembly.GetManifestResourceStream("clr.py"))
+                    using (Stream stream = assembly.GetManifestResourceStream("clr.py"))                    
                     using (var reader = new StreamReader(stream))
                     {
                         // add the contents of clr.py to the module
                         string clr_py = reader.ReadToEnd();
-                        Exec(clr_py, module_globals, locals.Handle);
+                        try
+                        {
+                            Exec(clr_py, module_globals, locals.Handle);
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
                     }
 
                     // add the imported module to the clr module, and copy the API functions
